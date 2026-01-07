@@ -1,0 +1,90 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { token, environment, base_url } = await req.json();
+
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Missing instance token" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    // Use the connection's base_url if provided, otherwise fall back to defaults
+    let BASE_URL = base_url;
+    if (!BASE_URL) {
+      BASE_URL = environment?.toUpperCase() === "PROD"
+        ? "https://app.uazapi.com"
+        : "https://free.uazapi.com";
+    }
+
+    console.log(`Disconnecting instance from ${BASE_URL}/instance/disconnect`);
+    console.log(`Token: ${token.substring(0, 8)}...`);
+
+    const response = await fetch(`${BASE_URL}/instance/disconnect`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        token
+      }
+    });
+
+    // Get response as text first to handle non-JSON responses
+    const responseText = await response.text();
+    console.log(`Response status: ${response.status}`);
+    console.log(`Response text: ${responseText}`);
+
+    let result;
+    try {
+      result = responseText ? JSON.parse(responseText) : {};
+    } catch (parseError) {
+      console.log("Response is not JSON, treating as success if status is OK");
+      // If we can't parse the response but status is OK, consider it successful
+      if (response.ok) {
+        result = { success: true, message: "Instance disconnected" };
+      } else {
+        result = { error: responseText || "Unknown error from UZAPI" };
+      }
+    }
+
+    if (!response.ok) {
+      console.error("UZAPI disconnect error:", result);
+      return new Response(JSON.stringify({
+        error: "Failed to disconnect instance",
+        details: result
+      }), {
+        status: response.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    console.log("Instance disconnected successfully:", result);
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: "Instance disconnected successfully",
+      status: result?.instance?.status || result?.status || "disconnected"
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+
+  } catch (err) {
+    console.error("Error in disconnect:", err);
+    return new Response(JSON.stringify({ 
+      error: err instanceof Error ? err.message : "Unknown error" 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  }
+});

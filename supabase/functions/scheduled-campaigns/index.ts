@@ -1,0 +1,189 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  try {
+    console.log("[scheduled-campaigns] Checking for scheduled campaigns...");
+    
+    // Find campaigns that are scheduled and their time has come
+    const now = new Date().toISOString();
+    
+    const { data: campaigns, error: fetchError } = await supabase
+      .from("campaigns")
+      .select("*, connections(token, base_url)")
+      .eq("status", "scheduled")
+      .lte("scheduled_at", now);
+    
+    if (fetchError) {
+      console.error("[scheduled-campaigns] Error fetching campaigns:", fetchError);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: fetchError.message 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    if (!campaigns || campaigns.length === 0) {
+      console.log("[scheduled-campaigns] No campaigns to process");
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: "No campaigns to process",
+        processed: 0
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    console.log(`[scheduled-campaigns] Found ${campaigns.length} campaigns to process`);
+
+    const results: any[] = [];
+
+    for (const campaign of campaigns) {
+      console.log(`[scheduled-campaigns] Processing campaign: ${campaign.name} (${campaign.id})`);
+      
+      // Mark as processing
+      await supabase
+        .from("campaigns")
+        .update({ status: "processing", started_at: new Date().toISOString() })
+        .eq("id", campaign.id);
+      
+      const connection = campaign.connections;
+      
+      if (!connection?.token || !connection?.base_url) {
+        console.error(`[scheduled-campaigns] Campaign ${campaign.id} has no valid connection`);
+        await supabase
+          .from("campaigns")
+          .update({ status: "failed" })
+          .eq("id", campaign.id);
+        results.push({ id: campaign.id, success: false, error: "No valid connection" });
+        continue;
+      }
+
+      const contacts = campaign.contacts || [];
+      if (!Array.isArray(contacts) || contacts.length === 0) {
+        console.error(`[scheduled-campaigns] Campaign ${campaign.id} has no contacts`);
+        await supabase
+          .from("campaigns")
+          .update({ status: "failed" })
+          .eq("id", campaign.id);
+        results.push({ id: campaign.id, success: false, error: "No contacts" });
+        continue;
+      }
+
+      try {
+        // Determine message type and build messages
+        const messageType = campaign.message_type || "text";
+        const isInteractive = messageType.startsWith("interactive_");
+        const interactiveType = isInteractive ? messageType.replace("interactive_", "") : null;
+        
+        // Build messages array for UZAPI /sender/advanced
+        const messages = contacts.map((contact: string) => {
+          const cleanNumber = contact.replace("@s.whatsapp.net", "").replace(/\D/g, "");
+          
+          if (isInteractive && interactiveType) {
+            return {
+              number: cleanNumber,
+              type: interactiveType, // button, list, carousel
+              text: campaign.message_content || ""
+            };
+          }
+          
+          return {
+            number: cleanNumber,
+            type: messageType === "text" ? "text" : messageType,
+            text: campaign.message_content || "",
+            file: messageType !== "text" ? campaign.media_url : undefined
+          };
+        });
+
+        // Call UZAPI /sender/advanced
+        const body = {
+          delayMin: 10,
+          delayMax: 30,
+          info: campaign.name,
+          messages: messages
+        };
+
+        console.log(`[scheduled-campaigns] Sending ${messages.length} messages for campaign ${campaign.id}`);
+
+        const response = await fetch(`${connection.base_url}/sender/advanced`, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "token": connection.token
+          },
+          body: JSON.stringify(body)
+        });
+
+        const responseData = await response.json();
+        console.log(`[scheduled-campaigns] UZAPI response:`, JSON.stringify(responseData));
+
+        if (!response.ok || responseData.error) {
+          await supabase
+            .from("campaigns")
+            .update({ 
+              status: "failed",
+              results: responseData 
+            })
+            .eq("id", campaign.id);
+          results.push({ id: campaign.id, success: false, error: responseData.error || "UZAPI error" });
+        } else {
+          await supabase
+            .from("campaigns")
+            .update({ 
+              status: "sent",
+              sent_count: messages.length,
+              completed_at: new Date().toISOString(),
+              results: responseData
+            })
+            .eq("id", campaign.id);
+          results.push({ id: campaign.id, success: true, sent: messages.length });
+        }
+
+      } catch (err) {
+        console.error(`[scheduled-campaigns] Error processing campaign ${campaign.id}:`, err);
+        await supabase
+          .from("campaigns")
+          .update({ status: "failed" })
+          .eq("id", campaign.id);
+        results.push({ id: campaign.id, success: false, error: String(err) });
+      }
+    }
+
+    console.log(`[scheduled-campaigns] Processed ${campaigns.length} campaigns`);
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      processed: campaigns.length,
+      results
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+
+  } catch (error) {
+    console.error("[scheduled-campaigns] Error:", error);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: String(error) 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  }
+});
