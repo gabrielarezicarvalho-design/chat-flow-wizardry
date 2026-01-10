@@ -1,56 +1,21 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bot, Search, RefreshCw, Building2, MessageSquare, TrendingUp, Loader2 } from "lucide-react";
 
-interface AdminAgent {
-  id: string;
-  name: string;
-  platform: string;
-  status: string | null;
-  model: string | null;
-  conversations_today: number | null;
-  avg_response_time: string | null;
-  satisfaction: string | null;
-  user_id: string;
-  created_at: string;
-  company_name: string | null;
-}
-
 export function AdminAgentes() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Usar função RPC que bypassa RLS
-  const { data: agents = [], isLoading, refetch } = useQuery({
-    queryKey: ['admin-all-agents'],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('admin_get_all_agents');
-      if (error) {
-        console.error("Error fetching agents:", error);
-        throw error;
-      }
-      return (data || []) as AdminAgent[];
-    },
-    refetchInterval: 30000, // Refresh every 30 seconds
-  });
+  // Placeholder - tabela de agentes será criada posteriormente
+  const agents: any[] = [];
+  const agentsByCompany: Record<string, any[]> = {};
 
-  // Group agents by company
-  const agentsByCompany = agents.reduce((acc, agent) => {
-    const companyName = agent.company_name || "Sem Empresa";
-    if (!acc[companyName]) {
-      acc[companyName] = [];
-    }
-    acc[companyName].push(agent);
-    return acc;
-  }, {} as Record<string, AdminAgent[]>);
-
-  const totalAgents = agents.length;
-  const activeAgents = agents.filter(a => a.status === "active").length;
-  const totalConversationsToday = agents.reduce((sum, a) => sum + (a.conversations_today || 0), 0);
-  const companiesWithAgents = Object.keys(agentsByCompany).length;
+  const totalAgents = 0;
+  const activeAgents = 0;
+  const totalConversationsToday = 0;
+  const companiesWithAgents = 0;
 
   const filteredCompanies = Object.entries(agentsByCompany).filter(([company]) =>
     company.toLowerCase().includes(searchTerm.toLowerCase())
@@ -65,7 +30,6 @@ export function AdminAgentes() {
           <p className="text-slate-400">Visão global de todos os agentes de todas as empresas</p>
         </div>
         <Button
-          onClick={() => refetch()}
           variant="outline"
           className="border-white/10 text-slate-300 hover:text-white"
           disabled={isLoading}
@@ -130,70 +94,12 @@ export function AdminAgentes() {
         />
       </div>
 
-      {/* Agents by Company */}
-      {isLoading ? (
-        <div className="p-8 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-emerald-500" />
-          <p className="text-slate-400 mt-2">Carregando agentes...</p>
-        </div>
-      ) : filteredCompanies.length === 0 ? (
-        <div className="p-8 text-center text-slate-500">
-          {agents.length === 0 ? "Nenhum agente cadastrado no sistema" : "Nenhum agente encontrado para a busca"}
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {filteredCompanies.map(([company, companyAgents]) => (
-            <div key={company} className="rounded-xl border border-white/10 overflow-hidden">
-              <div className="p-4 bg-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Building2 className="h-5 w-5 text-slate-400" />
-                  <h3 className="font-medium text-white">{company}</h3>
-                  <Badge className="bg-slate-500/20 text-slate-300">
-                    {companyAgents.length} agente(s)
-                  </Badge>
-                </div>
-                <div className="text-sm text-slate-400">
-                  {companyAgents.reduce((sum, a) => sum + (a.conversations_today || 0), 0)} conversas hoje
-                </div>
-              </div>
-              <div className="divide-y divide-white/5">
-                {companyAgents.map((agent) => (
-                  <div key={agent.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                        agent.status === "active" ? "bg-emerald-500/20" : "bg-slate-500/20"
-                      }`}>
-                        <Bot className={`h-5 w-5 ${agent.status === "active" ? "text-emerald-400" : "text-slate-400"}`} />
-                      </div>
-                      <div>
-                        <p className="font-medium text-white">{agent.name}</p>
-                        <p className="text-sm text-slate-400">{agent.model || "Sem modelo"}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-center">
-                        <p className="text-lg font-semibold text-white">{agent.conversations_today || 0}</p>
-                        <p className="text-xs text-slate-500">Conversas</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg font-semibold text-white">{agent.avg_response_time || "—"}</p>
-                        <p className="text-xs text-slate-500">Tempo Resp.</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg font-semibold text-white">{agent.satisfaction || "—"}</p>
-                        <p className="text-xs text-slate-500">Satisfação</p>
-                      </div>
-                      <Badge className={agent.status === "active" ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-500/20 text-slate-400"}>
-                        {agent.status === "active" ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Empty State */}
+      <div className="p-8 text-center text-slate-500 bg-white/5 rounded-xl border border-white/10">
+        <Bot className="h-12 w-12 mx-auto mb-4 text-slate-600" />
+        <p className="text-lg font-medium text-slate-400">Nenhum agente cadastrado</p>
+        <p className="text-sm text-slate-500 mt-1">A tabela de agentes será configurada em breve</p>
+      </div>
     </div>
   );
 }

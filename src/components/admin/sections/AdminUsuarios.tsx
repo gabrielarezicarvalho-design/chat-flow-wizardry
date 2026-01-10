@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { 
-  Users, Plus, Pencil, Trash2, Search, Shield, UserCog, Eye, EyeOff, RefreshCw, Clock
+  Users, Plus, Trash2, Search, Shield, UserCog, Eye, EyeOff, RefreshCw, Clock, Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -30,6 +30,7 @@ export function AdminUsuarios() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showDialog, setShowDialog] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -69,12 +70,19 @@ export function AdminUsuarios() {
       setModeratorUsers(usersWithRoles.filter(u => u.role === "moderator"));
     } catch (error) {
       console.error("Error fetching users:", error);
+      toast.error("Erro ao carregar usuários");
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreate = async () => {
+    if (!form.username || !form.password || !form.full_name) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
+
+    setSaving(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-user", {
         body: {
@@ -86,7 +94,7 @@ export function AdminUsuarios() {
       });
       
       if (error) throw error;
-      if (!data.success) throw new Error(data.error);
+      if (data?.error) throw new Error(data.error);
       
       toast.success("Usuário criado com sucesso!");
       setShowDialog(false);
@@ -94,6 +102,8 @@ export function AdminUsuarios() {
       fetchUsers();
     } catch (error: any) {
       toast.error(error.message || "Erro ao criar usuário");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -106,7 +116,7 @@ export function AdminUsuarios() {
       });
       
       if (error) throw error;
-      if (!data.success) throw new Error(data.error);
+      if (data?.error) throw new Error(data.error);
       
       toast.success("Usuário excluído!");
       fetchUsers();
@@ -115,7 +125,7 @@ export function AdminUsuarios() {
     }
   };
 
-  const handleUpdateRole = async (userId: string, newRole: "admin" | "moderator" | "user" | "agent") => {
+  const handleUpdateRole = async (userId: string, newRole: string) => {
     try {
       const { data: existing } = await supabase
         .from("user_roles")
@@ -192,7 +202,7 @@ export function AdminUsuarios() {
 
         <Select 
           value={user.role} 
-          onValueChange={(v: "admin" | "moderator" | "user" | "agent") => handleUpdateRole(user.id, v)}
+          onValueChange={(v) => handleUpdateRole(user.id, v)}
         >
           <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white h-8 text-xs">
             <SelectValue />
@@ -259,7 +269,7 @@ export function AdminUsuarios() {
 
       {loading ? (
         <div className="p-8 text-center">
-          <RefreshCw className="h-6 w-6 animate-spin mx-auto text-emerald-500" />
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-emerald-500" />
         </div>
       ) : (
         <div className="space-y-8">
@@ -362,8 +372,9 @@ export function AdminUsuarios() {
             <Button 
               onClick={handleCreate} 
               className="bg-emerald-500 hover:bg-emerald-600"
-              disabled={!form.username || !form.password || !form.full_name}
+              disabled={saving || !form.username || !form.password || !form.full_name}
             >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Criar Usuário
             </Button>
           </DialogFooter>
