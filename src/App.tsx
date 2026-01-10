@@ -20,7 +20,6 @@ import Auth from "./pages/Auth";
 import MassSending from "./pages/MassSending";
 import PublicForm from "./pages/PublicForm";
 import FlowForm from "./pages/FlowForm";
-import SmartFormView from "./pages/SmartFormView";
 import BetaLanding from "./pages/BetaLanding";
 import Users from "./pages/Users";
 import WhiteLabelLogin from "./pages/WhiteLabelLogin";
@@ -38,12 +37,8 @@ const FlowsList = lazy(() => import("./pages/FlowsList"));
 const FlowBuilder = lazy(() => import("./pages/FlowBuilder"));
 const Connections = lazy(() => import("./pages/Connections"));
 const Contacts = lazy(() => import("./pages/Contacts"));
-const Formularios = lazy(() => import("./pages/Formularios"));
-const FormResponses = lazy(() => import("./pages/FormResponses"));
-const SmartForms = lazy(() => import("./pages/SmartForms"));
 const Settings = lazy(() => import("./pages/Settings"));
 const TestWebhook = lazy(() => import("./pages/TestWebhook"));
-const FeedbackReports = lazy(() => import("./pages/FeedbackReports"));
 
 const AttendancePanel = lazy(() => import("./pages/AttendancePanel"));
 const AgentDashboard = lazy(() => import("./pages/AgentDashboard"));
@@ -91,7 +86,6 @@ function App() {
                     {/* Public form routes - no auth required */}
                     <Route path="/f/:token" element={<PublicForm />} />
                     <Route path="/form/:formId" element={<FlowForm />} />
-                    <Route path="/formulario/:formId" element={<SmartFormView />} />
                     {/* Beta landing page - no auth required */}
                     <Route path="/testar-beta" element={<BetaLanding />} />
                     <Route path="/beta-obrigado" element={<BetaThankYou />} />
@@ -127,9 +121,6 @@ function App() {
                                 <Route path="/flow-builder/:id" element={<FlowBuilder />} />
                                 <Route path="/connections" element={<Connections />} />
                                 <Route path="/contacts" element={<Contacts />} />
-                                <Route path="/formularios" element={<Formularios />} />
-                                <Route path="/form-responses" element={<FormResponses />} />
-                                <Route path="/smart-forms" element={<SmartForms />} />
                                 <Route path="/mass-sending" element={<MassSending />} />
                                 <Route path="/users" element={<Users />} />
                                 <Route path="/attendance" element={<AttendancePanel />} />
@@ -138,7 +129,6 @@ function App() {
                                 <Route path="/ai-tickets" element={<AITickets />} />
                                 <Route path="/internal-chat" element={<InternalChat />} />
                                 <Route path="/auto-prospecting" element={<AutoProspecting />} />
-                                <Route path="/feedback" element={<FeedbackReports />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
                                 <Route path="*" element={<NotFound />} />
