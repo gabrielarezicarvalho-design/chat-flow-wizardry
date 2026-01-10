@@ -14,7 +14,7 @@ export const useDepartments = () => {
           *,
           department_members (
             id,
-            agent_id
+            user_id
           )
         `)
         .order('created_at', { ascending: false });
@@ -29,9 +29,19 @@ export const useDepartments = () => {
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData?.user?.id;
 
+      // Buscar company_id do usuário
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', userId!)
+        .single();
+
       const { data, error } = await supabase
         .from('departments')
-        .insert([{ ...newDepartment, user_id: userId || newDepartment.user_id }])
+        .insert([{ 
+          ...newDepartment, 
+          company_id: profile?.company_id || newDepartment.company_id 
+        }])
         .select()
         .maybeSingle();
       
@@ -87,10 +97,10 @@ export const useDepartments = () => {
   });
 
   const addMember = useMutation({
-    mutationFn: async ({ departmentId, agentId }: { departmentId: string; agentId: string }) => {
+    mutationFn: async ({ departmentId, userId }: { departmentId: string; userId: string }) => {
       const { data, error } = await supabase
         .from('department_members')
-        .insert([{ department_id: departmentId, agent_id: agentId }])
+        .insert([{ department_id: departmentId, user_id: userId }])
         .select()
         .maybeSingle();
       
@@ -99,29 +109,29 @@ export const useDepartments = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['departments'] });
-      toast.success('Agente adicionado ao departamento!');
+      toast.success('Membro adicionado ao departamento!');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Erro ao adicionar agente');
+      toast.error(error.message || 'Erro ao adicionar membro');
     }
   });
 
   const removeMember = useMutation({
-    mutationFn: async ({ departmentId, agentId }: { departmentId: string; agentId: string }) => {
+    mutationFn: async ({ departmentId, userId }: { departmentId: string; userId: string }) => {
       const { error } = await supabase
         .from('department_members')
         .delete()
         .eq('department_id', departmentId)
-        .eq('agent_id', agentId);
+        .eq('user_id', userId);
       
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['departments'] });
-      toast.success('Agente removido do departamento!');
+      toast.success('Membro removido do departamento!');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Erro ao remover agente');
+      toast.error(error.message || 'Erro ao remover membro');
     }
   });
 

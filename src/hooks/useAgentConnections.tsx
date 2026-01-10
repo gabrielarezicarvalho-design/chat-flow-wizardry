@@ -9,88 +9,24 @@ export const useAgentConnections = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // First, fetch connections assigned to this user via user_connections table
-      const { data: assignedConnections, error: assignedError } = await supabase
-        .from('user_connections')
-        .select(`
-          connection_id,
-          connections (
-            id,
-            name,
-            status,
-            platform,
-            instance_id,
-            token,
-            environment,
-            base_url,
-            created_at
-          )
-        `)
-        .eq('user_id', user.id);
-      
-      if (assignedError) throw assignedError;
-      
-      // Also fetch connections owned by this user (they are the owner)
-      const { data: ownedConnections, error: ownedError } = await supabase
+      // Fetch connections from connections table based on company_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.company_id) return [];
+
+      const { data: companyConnections, error } = await supabase
         .from('connections')
-        .select(`
-          id,
-          name,
-          status,
-          platform,
-          instance_id,
-          token,
-          environment,
-          base_url,
-          created_at
-        `)
-        .eq('user_id', user.id);
+        .select('*')
+        .eq('company_id', profile.company_id);
       
-      if (ownedError) throw ownedError;
-      
-      // Combine both lists - assigned connections and owned connections
-      const assignedList = assignedConnections?.map((uc: any) => uc.connections).filter(Boolean) || [];
-      const ownedList = ownedConnections || [];
-      
-      // Merge and deduplicate by id
-      const allConnections = [...ownedList, ...assignedList];
-      const uniqueConnections = allConnections.filter((conn, index, self) => 
-        index === self.findIndex((c) => c.id === conn.id)
-      );
-      
-      // Check real status for each connection that has token
-      const connectionsWithRealStatus = await Promise.all(
-        uniqueConnections.map(async (conn: any) => {
-          if (conn.token && conn.status !== 'connected') {
-            // Try to check real status
-            try {
-              const { data: statusData } = await supabase.functions.invoke('wa-status-instance', {
-                body: { 
-                  token: conn.token, 
-                  environment: conn.environment || 'TESTE'
-                }
-              });
-              
-              if (statusData?.success && statusData?.connected) {
-                // Update connection status in database
-                await supabase
-                  .from('connections')
-                  .update({ status: 'connected' })
-                  .eq('id', conn.id);
-                
-                return { ...conn, status: 'connected' };
-              }
-            } catch (e) {
-              console.error('Error checking connection status:', e);
-            }
-          }
-          return conn;
-        })
-      );
-      
-      return connectionsWithRealStatus;
+      if (error) throw error;
+      return companyConnections || [];
     },
-    refetchInterval: 30000, // Refetch every 30 seconds to keep status updated
+    refetchInterval: 30000,
   });
 
   // Subscribe to real-time updates on connections

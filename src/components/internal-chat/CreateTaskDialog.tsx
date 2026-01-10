@@ -74,11 +74,11 @@ export const CreateTaskDialog = ({
     await createTask.mutateAsync({
       title,
       description: description || undefined,
-      assignedTo,
-      dueDate: dueDate?.toISOString(),
-      reminderAt,
-      roomId,
-      messageId
+      assigned_to: assignedTo,
+      due_date: dueDate?.toISOString(),
+      reminder_at: reminderAt,
+      room_id: roomId,
+      message_id: messageId
     });
 
     resetForm();

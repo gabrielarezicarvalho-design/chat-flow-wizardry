@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useInternalChat } from '@/hooks/useInternalChat';
 import { Users, User } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CreateGroupDialogProps {
   open: boolean;
@@ -28,7 +29,9 @@ interface CreateGroupDialogProps {
 }
 
 export const CreateGroupDialog = ({ open, onOpenChange, allUsers }: CreateGroupDialogProps) => {
-  const { createRoom, currentUserId } = useInternalChat();
+  const { createRoom } = useInternalChat();
+  const { user } = useAuth();
+  const currentUserId = user?.id;
   const [chatType, setChatType] = useState<'private' | 'group'>('private');
   const [groupName, setGroupName] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -62,10 +65,6 @@ export const CreateGroupDialog = ({ open, onOpenChange, allUsers }: CreateGroupD
     }
   };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -78,60 +77,86 @@ export const CreateGroupDialog = ({ open, onOpenChange, allUsers }: CreateGroupD
           setSelectedUsers([]);
         }}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="private">
-              <User className="h-4 w-4 mr-2" />
+            <TabsTrigger value="private" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
               Privado
             </TabsTrigger>
-            <TabsTrigger value="group">
-              <Users className="h-4 w-4 mr-2" />
+            <TabsTrigger value="group" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
               Grupo
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="private" className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Selecione um usuário para conversar
+            </div>
+            <ScrollArea className="h-[300px] border rounded-md p-2">
+              {availableUsers.map(u => (
+                <div
+                  key={u.id}
+                  className={`flex items-center gap-3 p-2 rounded-md cursor-pointer transition-colors ${
+                    selectedUsers.includes(u.id) ? 'bg-primary/10' : 'hover:bg-muted'
+                  }`}
+                  onClick={() => toggleUser(u.id)}
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>
+                      {(u.full_name || u.username || '?')[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">
+                      {u.full_name || u.username || 'Usuário'}
+                    </div>
+                    {u.username && u.full_name && (
+                      <div className="text-xs text-muted-foreground">@{u.username}</div>
+                    )}
+                  </div>
+                  <div className={`h-2 w-2 rounded-full ${u.is_online ? 'bg-green-500' : 'bg-gray-300'}`} />
+                </div>
+              ))}
+            </ScrollArea>
+          </TabsContent>
+
           <TabsContent value="group" className="space-y-4">
-            <div>
-              <Label htmlFor="groupName">Nome do Grupo</Label>
+            <div className="space-y-2">
+              <Label>Nome do Grupo</Label>
               <Input
-                id="groupName"
+                placeholder="Ex: Equipe de Vendas"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
-                placeholder="Ex: Equipe de Vendas"
               />
             </div>
+
+            <div className="text-sm text-muted-foreground">
+              Selecione os participantes
+            </div>
+            <ScrollArea className="h-[250px] border rounded-md p-2">
+              {availableUsers.map(u => (
+                <div
+                  key={u.id}
+                  className="flex items-center gap-3 p-2 rounded-md hover:bg-muted"
+                >
+                  <Checkbox
+                    checked={selectedUsers.includes(u.id)}
+                    onCheckedChange={() => toggleUser(u.id)}
+                  />
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>
+                      {(u.full_name || u.username || '?')[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">
+                      {u.full_name || u.username || 'Usuário'}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </ScrollArea>
           </TabsContent>
         </Tabs>
-
-        <div className="space-y-2">
-          <Label>
-            {chatType === 'private' ? 'Selecione um usuário' : 'Adicionar participantes'}
-          </Label>
-          <ScrollArea className="h-60 rounded-md border p-2">
-            {availableUsers.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent cursor-pointer"
-                onClick={() => toggleUser(user.id)}
-              >
-                <Checkbox
-                  checked={selectedUsers.includes(user.id)}
-                  onCheckedChange={() => toggleUser(user.id)}
-                />
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="text-xs bg-primary/10">
-                    {getInitials(user.full_name || user.username || '?')}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{user.full_name || user.username}</p>
-                  {user.username && user.full_name && (
-                    <p className="text-xs text-muted-foreground">@{user.username}</p>
-                  )}
-                </div>
-                <div className={`w-2 h-2 rounded-full ${user.is_online ? 'bg-green-500' : 'bg-gray-300'}`} />
-              </div>
-            ))}
-          </ScrollArea>
-        </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -140,12 +165,11 @@ export const CreateGroupDialog = ({ open, onOpenChange, allUsers }: CreateGroupD
           <Button 
             onClick={handleCreate}
             disabled={
-              createRoom.isPending ||
               (chatType === 'private' && selectedUsers.length !== 1) ||
               (chatType === 'group' && (!groupName.trim() || selectedUsers.length === 0))
             }
           >
-            {createRoom.isPending ? 'Criando...' : 'Criar'}
+            Criar {chatType === 'group' ? 'Grupo' : 'Conversa'}
           </Button>
         </DialogFooter>
       </DialogContent>

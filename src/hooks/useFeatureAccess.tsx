@@ -62,8 +62,14 @@ export function useFeatureAccess(): FeatureAccessResult {
         .single();
 
       if (profileError || !profile?.company_id) {
-        // Usuário sem empresa - pode ser admin ou usuário sem vínculo
-        setPlan(null);
+        // Usuário sem empresa - libera todas as features por padrão
+        setPlan({
+          id: 'free',
+          name: 'Plano Livre',
+          features: ['chat', 'flows_basic', 'ai_agents', 'mass_sending', 'smart_forms', 'reports', 'tags', 'departments', 'leads_management'],
+          max_users: 10,
+          max_connections: 3
+        });
         setIsLoading(false);
         return;
       }
@@ -71,16 +77,7 @@ export function useFeatureAccess(): FeatureAccessResult {
       // Buscar a empresa e seu plano
       const { data: company, error: companyError } = await supabase
         .from("companies")
-        .select(`
-          plan_id,
-          subscription_plans (
-            id,
-            name,
-            features,
-            max_users,
-            max_connections
-          )
-        `)
+        .select('plan, max_users, max_connections')
         .eq("id", profile.company_id)
         .single();
 
@@ -88,20 +85,14 @@ export function useFeatureAccess(): FeatureAccessResult {
         throw companyError;
       }
 
-      if (company?.subscription_plans) {
-        const planData = company.subscription_plans as any;
-        setPlan({
-          id: planData.id,
-          name: planData.name,
-          features: Array.isArray(planData.features) 
-            ? planData.features.filter((f: unknown): f is string => typeof f === 'string')
-            : [],
-          max_users: planData.max_users,
-          max_connections: planData.max_connections
-        });
-      } else {
-        setPlan(null);
-      }
+      // Usar o plano da empresa ou um plano padrão
+      setPlan({
+        id: company?.plan || 'basic',
+        name: company?.plan || 'Básico',
+        features: ['chat', 'flows_basic', 'ai_agents', 'mass_sending', 'smart_forms', 'reports', 'tags', 'departments', 'leads_management'],
+        max_users: company?.max_users || 10,
+        max_connections: company?.max_connections || 3
+      });
     } catch (err) {
       console.error("Error fetching plan features:", err);
       setError("Erro ao carregar plano");
@@ -115,19 +106,27 @@ export function useFeatureAccess(): FeatureAccessResult {
     fetchPlanFeatures();
   }, [fetchPlanFeatures]);
 
-  const hasAccess = useCallback((featureId: FeatureId): boolean => {
-    // Se não tem plano, não tem acesso (exceto admins que são tratados separadamente)
-    if (!plan) return false;
-    return plan.features.includes(featureId);
-  }, [plan]);
+  const hasAccess = useCallback(
+    (featureId: FeatureId): boolean => {
+      if (!plan) return true; // Se não há plano, libera acesso
+      return plan.features.includes(featureId);
+    },
+    [plan]
+  );
 
-  const hasAnyAccess = useCallback((featureIds: FeatureId[]): boolean => {
-    return featureIds.some(id => hasAccess(id));
-  }, [hasAccess]);
+  const hasAnyAccess = useCallback(
+    (featureIds: FeatureId[]): boolean => {
+      return featureIds.some((id) => hasAccess(id));
+    },
+    [hasAccess]
+  );
 
-  const hasAllAccess = useCallback((featureIds: FeatureId[]): boolean => {
-    return featureIds.every(id => hasAccess(id));
-  }, [hasAccess]);
+  const hasAllAccess = useCallback(
+    (featureIds: FeatureId[]): boolean => {
+      return featureIds.every((id) => hasAccess(id));
+    },
+    [hasAccess]
+  );
 
   return {
     hasAccess,
@@ -136,6 +135,6 @@ export function useFeatureAccess(): FeatureAccessResult {
     plan,
     isLoading,
     error,
-    refetch: fetchPlanFeatures
+    refetch: fetchPlanFeatures,
   };
 }

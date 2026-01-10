@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useInternalChat, useAllUsers } from '@/hooks/useInternalChat';
+import { useInternalChat } from '@/hooks/useInternalChat';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,10 +16,12 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { CreateTaskDialog } from './CreateTaskDialog';
+import { useAuth } from '@/hooks/useAuth';
 
 export const TasksPanel = () => {
-  const { tasks, tasksLoading, updateTaskStatus, currentUserId } = useInternalChat();
-  const { data: allUsers } = useAllUsers();
+  const { tasks, tasksLoading, updateTask } = useInternalChat();
+  const { user } = useAuth();
+  const currentUserId = user?.id;
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [filter, setFilter] = useState<'all' | 'mine' | 'assigned'>('all');
 
@@ -51,105 +53,112 @@ export const TasksPanel = () => {
     }
   };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const cycleStatus = (currentStatus: string) => {
+    const statuses = ['pending', 'in_progress', 'completed'];
+    const currentIndex = statuses.indexOf(currentStatus);
+    return statuses[(currentIndex + 1) % statuses.length];
   };
 
-  const cycleStatus = (currentStatus: string) => {
-    const statusOrder = ['pending', 'in_progress', 'completed'];
-    const currentIndex = statusOrder.indexOf(currentStatus);
-    return statusOrder[(currentIndex + 1) % statusOrder.length] as 'pending' | 'in_progress' | 'completed';
+  const handleStatusChange = (taskId: string, currentStatus: string) => {
+    const newStatus = cycleStatus(currentStatus);
+    updateTask.mutate({ id: taskId, updates: { status: newStatus as 'pending' | 'in_progress' | 'completed' } });
   };
+
+  if (tasksLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Minhas Tarefas</h3>
-          <Button size="sm" onClick={() => setShowCreateTask(true)}>
-            <Plus className="h-4 w-4" />
-          </Button>
+      <div className="p-4 border-b flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <CheckSquare className="h-5 w-5" />
+          <h2 className="font-semibold">Tarefas</h2>
+          <Badge variant="secondary">{filteredTasks?.length || 0}</Badge>
         </div>
-        <div className="flex gap-1">
-          <Button 
-            variant={filter === 'all' ? 'default' : 'ghost'} 
-            size="sm"
-            onClick={() => setFilter('all')}
-          >
-            Todas
-          </Button>
-          <Button 
-            variant={filter === 'mine' ? 'default' : 'ghost'} 
-            size="sm"
-            onClick={() => setFilter('mine')}
-          >
-            Para mim
-          </Button>
-          <Button 
-            variant={filter === 'assigned' ? 'default' : 'ghost'} 
-            size="sm"
-            onClick={() => setFilter('assigned')}
-          >
-            Criadas
-          </Button>
-        </div>
+        <Button size="sm" onClick={() => setShowCreateTask(true)}>
+          <Plus className="h-4 w-4 mr-1" />
+          Nova
+        </Button>
+      </div>
+
+      <div className="px-4 py-2 border-b flex gap-2">
+        <Button
+          size="sm"
+          variant={filter === 'all' ? 'default' : 'ghost'}
+          onClick={() => setFilter('all')}
+        >
+          Todas
+        </Button>
+        <Button
+          size="sm"
+          variant={filter === 'mine' ? 'default' : 'ghost'}
+          onClick={() => setFilter('mine')}
+        >
+          Minhas
+        </Button>
+        <Button
+          size="sm"
+          variant={filter === 'assigned' ? 'default' : 'ghost'}
+          onClick={() => setFilter('assigned')}
+        >
+          Criadas por mim
+        </Button>
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="p-2 space-y-2">
-          {tasksLoading ? (
-            <div className="text-center text-muted-foreground py-8">Carregando...</div>
-          ) : filteredTasks?.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
-              <CheckSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Nenhuma tarefa</p>
+        <div className="p-4 space-y-3">
+          {filteredTasks?.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhuma tarefa encontrada
             </div>
           ) : (
-            filteredTasks?.map((task) => (
+            filteredTasks?.map(task => (
               <div
                 key={task.id}
                 className={cn(
-                  "p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors",
+                  "p-3 rounded-lg border transition-colors",
                   task.status === 'completed' && "opacity-60"
                 )}
               >
                 <div className="flex items-start gap-3">
                   <button
-                    onClick={() => updateTaskStatus.mutate({ 
-                      taskId: task.id, 
-                      status: cycleStatus(task.status) 
-                    })}
                     className="mt-0.5"
+                    onClick={() => handleStatusChange(task.id, task.status)}
                   >
                     {getStatusIcon(task.status)}
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className={cn(
-                      "font-medium text-sm",
+                    <div className={cn(
+                      "font-medium",
                       task.status === 'completed' && "line-through"
                     )}>
                       {task.title}
-                    </p>
+                    </div>
                     {task.description && (
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      <div className="text-sm text-muted-foreground line-clamp-2 mt-1">
                         {task.description}
-                      </p>
+                      </div>
                     )}
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <div className="flex items-center gap-3 mt-2">
                       <Badge variant="outline" className="text-xs">
                         {getStatusLabel(task.status)}
                       </Badge>
                       {task.due_date && (
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Clock className="h-3 w-3" />
-                          {format(new Date(task.due_date), 'dd/MM', { locale: ptBR })}
+                          {format(new Date(task.due_date), "dd/MM", { locale: ptBR })}
                         </div>
                       )}
                       {task.assignee && (
                         <div className="flex items-center gap-1">
                           <Avatar className="h-4 w-4">
-                            <AvatarFallback className="text-[8px]">
-                              {getInitials(task.assignee.full_name || task.assignee.username || '?')}
+                            <AvatarFallback className="text-[10px]">
+                              {(task.assignee.full_name || task.assignee.username || '?')[0]}
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-xs text-muted-foreground">
@@ -166,10 +175,10 @@ export const TasksPanel = () => {
         </div>
       </ScrollArea>
 
-      <CreateTaskDialog
-        open={showCreateTask}
+      <CreateTaskDialog 
+        open={showCreateTask} 
         onOpenChange={setShowCreateTask}
-        allUsers={allUsers || []}
+        allUsers={[]}
       />
     </div>
   );

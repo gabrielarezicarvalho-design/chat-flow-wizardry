@@ -11,48 +11,62 @@ export const useSettings = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
+      // Buscar company_id do perfil
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!profile?.company_id) return null;
+
       const { data, error } = await supabase
         .from('settings')
         .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('company_id', profile.company_id);
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data;
+      
+      // Converter array de configurações para objeto
+      const settingsObj: Record<string, any> = {};
+      data?.forEach(item => {
+        settingsObj[item.key] = item.value;
+      });
+      
+      return settingsObj;
     }
   });
 
   const updateSettings = useMutation({
-    mutationFn: async (updates: any) => {
+    mutationFn: async (updates: Record<string, any>) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data: existing } = await supabase
-        .from('settings')
-        .select('id')
-        .eq('user_id', user.id)
+      // Buscar company_id do perfil
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
         .maybeSingle();
 
-      if (existing) {
-        const { data, error } = await supabase
+      if (!profile?.company_id) throw new Error('Empresa não encontrada');
+
+      // Upsert cada configuração
+      for (const [key, value] of Object.entries(updates)) {
+        const { error } = await supabase
           .from('settings')
-          .update(updates)
-          .eq('user_id', user.id)
-          .select()
-          .maybeSingle();
+          .upsert({
+            company_id: profile.company_id,
+            key,
+            value
+          }, {
+            onConflict: 'company_id,key'
+          });
         
         if (error) throw error;
-        return data;
-      } else {
-        const { data, error } = await supabase
-          .from('settings')
-          .insert([{ ...updates, user_id: user.id }])
-          .select()
-          .maybeSingle();
-        
-        if (error) throw error;
-        return data;
       }
+      
+      return updates;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] });

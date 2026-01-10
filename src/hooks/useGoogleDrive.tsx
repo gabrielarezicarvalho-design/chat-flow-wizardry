@@ -1,123 +1,49 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useState } from 'react';
 import { useAuth } from './useAuth';
 
+// Hook simplificado - tabelas google_drive_tokens e conversation_backups não existem no schema atual
 export const useGoogleDrive = () => {
-  const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [isLoading] = useState(false);
+  const [loadingBackups] = useState(false);
 
-  const { data: driveConnection, isLoading } = useQuery({
-    queryKey: ['google-drive-connection', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      
-      const { data, error } = await supabase
-        .from('google_drive_tokens')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data;
+  const connectDrive = {
+    mutate: () => {
+      console.log('Google Drive connect não implementado - tabelas não existem', user?.id);
     },
-    enabled: !!user,
-  });
+    mutateAsync: async () => {
+      console.log('Google Drive connect não implementado - tabelas não existem');
+      return null;
+    },
+    isPending: false
+  };
 
-  const { data: backups, isLoading: loadingBackups } = useQuery({
-    queryKey: ['conversation-backups', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      
-      const { data, error } = await supabase
-        .from('conversation_backups')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(100);
-      
-      if (error) throw error;
-      return data || [];
+  const disconnectDrive = {
+    mutate: () => {
+      console.log('Google Drive disconnect não implementado - tabelas não existem');
     },
-    enabled: !!user,
-  });
+    mutateAsync: async () => {
+      console.log('Google Drive disconnect não implementado - tabelas não existem');
+    },
+    isPending: false
+  };
 
-  const connectDrive = useMutation({
-    mutationFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Não autenticado');
-
-      const response = await supabase.functions.invoke('google-drive-auth', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-
-      if (response.error) throw new Error(response.error.message);
-      
-      return response.data.authUrl;
+  const runBackup = {
+    mutate: (_data?: { month?: string; testMode?: boolean }) => {
+      console.log('Google Drive backup não implementado - tabelas não existem');
     },
-    onSuccess: (authUrl) => {
-      // Full page redirect to Google OAuth (goes through our callback to save tokens)
-      window.location.href = authUrl;
+    mutateAsync: async (_data?: { month?: string; testMode?: boolean }) => {
+      console.log('Google Drive backup não implementado - tabelas não existem');
+      return null;
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Erro ao conectar Google Drive');
-    },
-  });
-
-  const disconnectDrive = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Não autenticado');
-
-      const { error } = await supabase
-        .from('google_drive_tokens')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success('Google Drive desconectado');
-      queryClient.invalidateQueries({ queryKey: ['google-drive-connection'] });
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Erro ao desconectar');
-    },
-  });
-
-  const runBackup = useMutation({
-    mutationFn: async ({ month, testMode }: { month?: string; testMode?: boolean } = {}) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Não autenticado');
-
-      const response = await supabase.functions.invoke('google-drive-backup', {
-        body: { 
-          userId: user?.id,
-          month: month || new Date().toISOString().slice(0, 7),
-          testMode: testMode || false,
-        },
-      });
-
-      if (response.error) throw new Error(response.error.message);
-      return response.data;
-    },
-    onSuccess: (data) => {
-      if (data.testMode) {
-        toast.success(`✅ Backup de teste criado! Verifique seu Google Drive.`);
-      } else {
-        toast.success(`Backup concluído! ${data.backedUp} conversas salvas.`);
-      }
-      queryClient.invalidateQueries({ queryKey: ['conversation-backups'] });
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Erro ao fazer backup');
-    },
-  });
+    isPending: false
+  };
 
   return {
-    driveConnection,
-    isConnected: !!driveConnection,
+    driveConnection: null,
+    isConnected: false,
     isLoading,
-    backups,
+    backups: [],
     loadingBackups,
     connectDrive,
     disconnectDrive,

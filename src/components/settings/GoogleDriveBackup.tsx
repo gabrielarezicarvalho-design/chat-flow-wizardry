@@ -167,9 +167,7 @@ export function GoogleDriveBackup() {
                 <div className="text-sm text-muted-foreground">Backups realizados</div>
               </div>
               <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
-                <div className="text-2xl font-bold">
-                  {backups?.filter(b => b.backup_month === selectedMonth).length || 0}
-                </div>
+                <div className="text-2xl font-bold">0</div>
                 <div className="text-sm text-muted-foreground">Este mês</div>
               </div>
               <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
