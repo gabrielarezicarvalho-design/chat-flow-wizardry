@@ -1,7 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useState } from 'react';
 
+// Hook simplificado - tabela agent_functions não existe no schema atual
 export interface AgentFunction {
   id: string;
   agent_id: string;
@@ -34,117 +33,55 @@ export interface FunctionVariable {
   required: boolean;
 }
 
-export const useAgentFunctions = (agentId: string | null) => {
-  const queryClient = useQueryClient();
+export const useAgentFunctions = (_agentId: string | null) => {
+  const [functions] = useState<AgentFunction[]>([]);
+  const [isLoading] = useState(false);
 
-  const { data: functions, isLoading } = useQuery({
-    queryKey: ['agent-functions', agentId],
-    queryFn: async () => {
-      if (!agentId) return [];
-      
-      const { data, error } = await supabase
-        .from('agent_functions')
-        .select('*')
-        .eq('agent_id', agentId)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data as AgentFunction[];
+  const createFunction = {
+    mutate: (_newFunction: Omit<AgentFunction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+      console.log('Função não implementada - tabela não existe');
     },
-    enabled: !!agentId
-  });
+    mutateAsync: async (_newFunction: Omit<AgentFunction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+      console.log('Função não implementada - tabela não existe');
+      return null;
+    },
+    isPending: false
+  };
 
-  const createFunction = useMutation({
-    mutationFn: async (newFunction: Omit<AgentFunction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
+  const updateFunction = {
+    mutate: (_data: { id: string; updates: Partial<AgentFunction> }) => {
+      console.log('Função não implementada - tabela não existe');
+    },
+    mutateAsync: async (_data: { id: string; updates: Partial<AgentFunction> }) => {
+      console.log('Função não implementada - tabela não existe');
+      return null;
+    },
+    isPending: false
+  };
 
-      const { data, error } = await supabase
-        .from('agent_functions')
-        .insert({
-          ...newFunction,
-          user_id: user.id
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+  const deleteFunction = {
+    mutate: (_functionId: string) => {
+      console.log('Função não implementada - tabela não existe');
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agent-functions', agentId] });
-      toast.success('Função criada com sucesso!');
+    mutateAsync: async (_functionId: string) => {
+      console.log('Função não implementada - tabela não existe');
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Erro ao criar função');
-    }
-  });
+    isPending: false
+  };
 
-  const updateFunction = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<AgentFunction> }) => {
-      const { data, error } = await supabase
-        .from('agent_functions')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+  const toggleFunction = {
+    mutate: (_functionId: string) => {
+      console.log('Função não implementada - tabela não existe');
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agent-functions', agentId] });
-      toast.success('Função atualizada!');
+    mutateAsync: async (_functionId: string) => {
+      console.log('Função não implementada - tabela não existe');
+      return null;
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Erro ao atualizar função');
-    }
-  });
-
-  const deleteFunction = useMutation({
-    mutationFn: async (functionId: string) => {
-      const { error } = await supabase
-        .from('agent_functions')
-        .delete()
-        .eq('id', functionId);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agent-functions', agentId] });
-      toast.success('Função excluída!');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Erro ao excluir função');
-    }
-  });
-
-  const toggleFunction = useMutation({
-    mutationFn: async (functionId: string) => {
-      const func = functions?.find(f => f.id === functionId);
-      if (!func) throw new Error('Função não encontrada');
-
-      const { data, error } = await supabase
-        .from('agent_functions')
-        .update({ is_enabled: !func.is_enabled })
-        .eq('id', functionId)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['agent-functions', agentId] });
-      toast.success(`Função ${data.is_enabled ? 'ativada' : 'desativada'}!`);
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Erro ao alterar função');
-    }
-  });
+    isPending: false
+  };
 
   return {
-    functions: functions || [],
+    functions,
     isLoading,
     createFunction,
     updateFunction,

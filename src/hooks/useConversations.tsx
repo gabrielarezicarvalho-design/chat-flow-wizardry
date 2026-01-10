@@ -11,10 +11,7 @@ export const useConversations = () => {
       console.log('🔄 [Conversations] Fetching...');
       const { data, error } = await supabase
         .from('conversations')
-        .select(`
-          *,
-          leads (name, phone, avatar)
-        `)
+        .select('*')
         .order('updated_at', { ascending: false });
       
       if (error) throw error;
@@ -26,9 +23,6 @@ export const useConversations = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: true
   });
-
-  // Real-time updates are handled by the global channel in useMessages.tsx
-  // No need for a separate channel here - it was causing CHANNEL_ERROR
 
   const updateConversation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
@@ -56,27 +50,14 @@ export const useConversations = () => {
 
   const deleteConversation = useMutation({
     mutationFn: async (id: string) => {
-      // First remove conversation reference from ai_tickets
-      await supabase
-        .from('ai_tickets')
-        .update({ conversation_id: null })
-        .eq('conversation_id', id);
-
-      // Delete conversation_tags
-      await supabase
-        .from('conversation_tags')
-        .delete()
-        .eq('conversation_id', id);
-
       // Delete all messages for this conversation
       const { error: messagesError } = await supabase
         .from('messages')
         .delete()
-        .eq('id_da_conversa', id);
+        .eq('conversation_id', id);
       
       if (messagesError) {
         console.error('Error deleting messages:', messagesError);
-        // Continue anyway - messages might not exist
       }
 
       // Then delete the conversation

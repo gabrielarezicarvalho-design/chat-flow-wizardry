@@ -25,30 +25,21 @@ export const useAgentNotifications = () => {
           const message = payload.new;
           
           // Only notify for received messages (not sent by us)
-          if (!message.recebido) return;
+          if (message.sender_type !== 'contact') return;
 
           // Check if this conversation is assigned to this agent
           const { data: conversation } = await supabase
             .from('conversations')
-            .select('id, user_name, assigned_agent, user_id')
-            .eq('id', message.id_da_conversa)
+            .select('id, contact_name, assigned_to, user_id')
+            .eq('id', message.conversation_id)
             .single();
 
           if (!conversation) return;
 
-          // Check if assigned to this agent OR if agent owns this conversation via user_connections
-          const isAssigned = conversation.assigned_agent === user.id;
-          
-          // Check if agent has access via user_connections
-          const { data: userConnection } = await supabase
-            .from('user_connections')
-            .select('id')
-            .eq('user_id', user.id)
-            .single();
+          // Check if assigned to this agent
+          const isAssigned = conversation.assigned_to === user.id || conversation.user_id === user.id;
 
-          const hasAccess = isAssigned || userConnection;
-
-          if (hasAccess) {
+          if (isAssigned) {
             // Play notification sound
             try {
               const playSound = getGlobalNotificationSound();
@@ -58,10 +49,10 @@ export const useAgentNotifications = () => {
             }
 
             // Show toast notification
-            const contactName = conversation.user_name || 'Contato';
-            const messagePreview = message.conteudo?.substring(0, 50) || 'Nova mensagem';
+            const contactName = conversation.contact_name || 'Contato';
+            const messagePreview = message.content?.substring(0, 50) || 'Nova mensagem';
             
-            toast.info(`${contactName}: ${messagePreview}${message.conteudo?.length > 50 ? '...' : ''}`, {
+            toast.info(`${contactName}: ${messagePreview}${message.content?.length > 50 ? '...' : ''}`, {
               description: 'Clique para ver a conversa',
               duration: 5000,
             });

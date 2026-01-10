@@ -11,7 +11,7 @@ interface StorageStats {
   buckets: BucketStats[];
   totalSize: number;
   totalFiles: number;
-  planLimit: number; // in bytes
+  planLimit: number;
 }
 
 const formatBytes = (bytes: number): string => {
@@ -34,7 +34,6 @@ export const useStorageStats = () => {
       
       for (const bucketName of bucketNames) {
         try {
-          // List all files in the bucket for this user
           const { data: files, error } = await supabase.storage
             .from(bucketName)
             .list(user.id, {
@@ -48,7 +47,6 @@ export const useStorageStats = () => {
             continue;
           }
 
-          // Calculate total size
           let totalSize = 0;
           let fileCount = 0;
 
@@ -72,26 +70,11 @@ export const useStorageStats = () => {
         }
       }
 
-      // Also get agent_documents table sizes
-      const { data: agentDocs } = await supabase
-        .from('agent_documents')
-        .select('file_size')
-        .eq('user_id', user.id);
-
-      const docsSize = agentDocs?.reduce((acc, doc) => acc + (doc.file_size || 0), 0) || 0;
-      
-      // Update agent-documents bucket with DB data if storage API didn't return sizes
-      const agentDocsBucket = bucketStats.find(b => b.name === 'agent-documents');
-      if (agentDocsBucket && agentDocsBucket.size === 0 && docsSize > 0) {
-        agentDocsBucket.size = docsSize;
-        agentDocsBucket.fileCount = agentDocs?.length || 0;
-      }
-
       const totalSize = bucketStats.reduce((acc, b) => acc + b.size, 0);
       const totalFiles = bucketStats.reduce((acc, b) => acc + b.fileCount, 0);
       
-      // Plan limit: 101.6 MB per company
-      const planLimit = 101.6 * 1024 * 1024;
+      // Default plan limit: 1GB
+      const planLimit = 1024 * 1024 * 1024;
 
       return {
         buckets: bucketStats,
@@ -100,8 +83,7 @@ export const useStorageStats = () => {
         planLimit
       };
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false
+    staleTime: 60000,
   });
 
   return {
