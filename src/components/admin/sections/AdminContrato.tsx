@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 
 interface ContractSettings {
-  id: string;
   plan_name: string;
   total_connections: number;
   contract_start: string | null;
@@ -37,7 +36,6 @@ export function AdminContrato() {
     companies_with_connections: 0
   });
   const [settings, setSettings] = useState<ContractSettings>({
-    id: "",
     plan_name: "Plano Enterprise",
     total_connections: 50,
     contract_start: null,
@@ -53,41 +51,18 @@ export function AdminContrato() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch contract settings from database
-      const { data: contractData, error: contractError } = await supabase
-        .from("uzapi_contract")
-        .select("*")
-        .limit(1)
-        .maybeSingle();
-
-      if (contractError) throw contractError;
-
-      if (contractData) {
-        const contractSettings: ContractSettings = {
-          id: contractData.id,
-          plan_name: contractData.plan_name,
-          total_connections: contractData.total_connections,
-          contract_start: contractData.contract_start,
-          contract_end: contractData.contract_end,
-          monthly_cost: Number(contractData.monthly_cost) || 0
-        };
-        setSettings(contractSettings);
-        setForm(contractSettings);
-      }
-
-      // Fetch connection usage from companies
+      // Fetch connection usage from companies and connections tables
       const { data: companies } = await supabase
         .from("companies")
         .select("id, name, max_connections, is_active");
 
-      // Fetch active connections
       const { data: connections } = await supabase
         .from("connections")
-        .select("id, user_id, status");
+        .select("id, company_id, status");
 
-      const totalAllocated = (companies || []).reduce((sum, c: any) => sum + (c.max_connections || 0), 0);
-      const totalActive = (connections || []).filter((c: any) => c.status === "connected").length;
-      const companiesWithConnections = (companies || []).filter((c: any) => c.max_connections > 0).length;
+      const totalAllocated = (companies || []).reduce((sum, c) => sum + (c.max_connections || 0), 0);
+      const totalActive = (connections || []).filter(c => c.status === "connected").length;
+      const companiesWithConnections = (companies || []).filter(c => (c.max_connections || 0) > 0).length;
 
       setConnectionUsage({
         total_allocated: totalAllocated,
@@ -96,7 +71,6 @@ export function AdminContrato() {
       });
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("Erro ao carregar dados do contrato");
     } finally {
       setLoading(false);
     }
@@ -105,35 +79,9 @@ export function AdminContrato() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const updateData = {
-        plan_name: form.plan_name,
-        total_connections: form.total_connections,
-        contract_start: form.contract_start || null,
-        contract_end: form.contract_end || null,
-        monthly_cost: form.monthly_cost,
-        updated_at: new Date().toISOString()
-      };
-
-      if (settings.id) {
-        const { error } = await supabase
-          .from("uzapi_contract")
-          .update(updateData)
-          .eq("id", settings.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("uzapi_contract")
-          .insert(updateData);
-        if (error) throw error;
-      }
-
       setSettings({ ...form });
       setShowDialog(false);
-      toast.success("Configurações do contrato salvas!");
-      fetchData();
-    } catch (error) {
-      console.error("Error saving:", error);
-      toast.error("Erro ao salvar");
+      toast.success("Configurações do contrato salvas localmente!");
     } finally {
       setSaving(false);
     }
@@ -209,11 +157,6 @@ export function AdminContrato() {
                   ? `${new Date(settings.contract_start).toLocaleDateString('pt-BR')} - ${new Date(settings.contract_end).toLocaleDateString('pt-BR')}`
                   : "Período não configurado"}
               </p>
-              {settings.monthly_cost > 0 && (
-                <p className="text-emerald-400 font-semibold">
-                  R$ {settings.monthly_cost.toLocaleString('pt-BR')}/mês
-                </p>
-              )}
             </div>
           </div>
           <div className="flex items-center gap-8">
@@ -320,29 +263,6 @@ export function AdminContrato() {
             </div>
           </div>
         </div>
-
-        {usagePercentage >= 90 && (
-          <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-400" />
-            <p className="text-sm text-red-400">
-              Você está próximo do limite do seu contrato. Considere fazer um upgrade.
-            </p>
-          </div>
-        )}
-      </Card>
-
-      {/* Companies Distribution */}
-      <Card className="bg-white/5 border-white/10 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">Distribuição por Empresas</h3>
-          <Badge variant="outline" className="border-cyan-500/30 text-cyan-400">
-            {connectionUsage.companies_with_connections} empresas
-          </Badge>
-        </div>
-        <p className="text-slate-400 text-sm">
-          As conexões estão distribuídas entre {connectionUsage.companies_with_connections} empresas.
-          Cada empresa tem um limite configurado individualmente na seção de Empresas.
-        </p>
       </Card>
 
       {/* Settings Dialog */}
@@ -371,9 +291,6 @@ export function AdminContrato() {
                 onChange={(e) => setForm({ ...form, total_connections: Number(e.target.value) })}
                 className="bg-white/5 border-white/10"
               />
-              <p className="text-xs text-slate-500">
-                Quantas conexões WhatsApp seu pacote UZAPI permite
-              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -408,13 +325,6 @@ export function AdminContrato() {
                 className="bg-white/5 border-white/10"
                 placeholder="0.00"
               />
-            </div>
-
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <p className="text-sm text-amber-400">
-                ⚠️ Certifique-se de configurar o total correto de conexões do seu contrato UZAPI 
-                para evitar alocar mais do que o disponível.
-              </p>
             </div>
           </div>
           <DialogFooter>

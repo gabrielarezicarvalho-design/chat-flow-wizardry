@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { secret_key } = await req.json();
+    const { secret_key, email, password, username } = await req.json();
     
     // Simple secret to prevent unauthorized access
     if (secret_key !== "MARKETFLOW_ADMIN_SETUP_2026") {
@@ -31,35 +31,44 @@ Deno.serve(async (req) => {
       },
     });
 
+    const userEmail = email || "admin@marketflow.com.br";
+    const userPassword = password || "@marketflow2026#";
+    const userUsername = username || "admin";
+
     // Check if admin already exists
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const adminExists = existingUsers?.users?.some(u => u.email === "admin@marketflow.com.br");
+    const adminExists = existingUsers?.users?.some(u => u.email === userEmail);
     
     if (adminExists) {
-      // Find the user and ensure they have admin role
-      const adminUser = existingUsers?.users?.find(u => u.email === "admin@marketflow.com.br");
+      const adminUser = existingUsers?.users?.find(u => u.email === userEmail);
       
       if (adminUser) {
         // Ensure admin role exists
         await supabase
           .from("user_roles")
           .upsert({ user_id: adminUser.id, role: "admin" }, { onConflict: "user_id,role" });
+        
+        // Update profile username
+        await supabase
+          .from("profiles")
+          .update({ username: userUsername, full_name: userUsername })
+          .eq("id", adminUser.id);
       }
       
       return new Response(
-        JSON.stringify({ message: "Admin user already exists", email: "admin@marketflow.com.br" }),
+        JSON.stringify({ message: "Admin user already exists and updated", email: userEmail }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     // Create admin user
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-      email: "admin@marketflow.com.br",
-      password: "@marketflow2026#",
+      email: userEmail,
+      password: userPassword,
       email_confirm: true,
       user_metadata: {
-        full_name: "MarketFlow Admin",
-        company_name: "MarketFlow"
+        full_name: userUsername,
+        username: userUsername
       }
     });
 
@@ -80,26 +89,26 @@ Deno.serve(async (req) => {
       console.error("Error assigning role:", roleError);
     }
 
-    // Create profile
+    // Update profile
     const { error: profileError } = await supabase
       .from("profiles")
-      .upsert({
-        id: newUser.user.id,
-        full_name: "MarketFlow Admin",
-        company_name: "MarketFlow",
+      .update({
+        full_name: userUsername,
+        username: userUsername,
         is_company_admin: true
-      });
+      })
+      .eq("id", newUser.user.id);
 
     if (profileError) {
-      console.error("Error creating profile:", profileError);
+      console.error("Error updating profile:", profileError);
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: "Admin user created successfully",
-        email: "admin@marketflow.com.br",
-        password: "@marketflow2026#"
+        email: userEmail,
+        username: userUsername
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
