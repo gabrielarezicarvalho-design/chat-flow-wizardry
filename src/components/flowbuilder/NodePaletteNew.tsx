@@ -66,11 +66,11 @@ export const NodePaletteNew = ({ onDragStart }: NodePaletteNewProps) => {
               </TooltipTrigger>
               <TooltipContent 
                 side="bottom" 
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg px-3 py-2 z-50"
+                className="z-[9999] bg-white border border-gray-300 shadow-xl px-3 py-2"
                 sideOffset={8}
               >
-                <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{node.label}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{node.description}</p>
+                <p className="font-semibold text-sm text-black">{node.label}</p>
+                <p className="text-xs text-gray-600">{node.description}</p>
               </TooltipContent>
             </Tooltip>
           ))}
