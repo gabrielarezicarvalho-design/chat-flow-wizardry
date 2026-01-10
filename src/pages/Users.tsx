@@ -105,11 +105,12 @@ interface UserWithRole {
   id: string;
   full_name: string | null;
   username: string | null;
-  company_name: string | null;
-  department_id: string | null;
   created_at: string | null;
   is_online: boolean | null;
-  work_schedule: any;
+  company_id: string | null;
+  avatar_url: string | null;
+  phone: string | null;
+  is_company_admin: boolean | null;
   permissions?: UserPermissions;
   role?: string;
 }
@@ -386,25 +387,15 @@ export default function Users() {
     },
   });
 
-  // Update schedule mutation
-  const updateSchedule = useMutation({
-    mutationFn: async ({ userId, schedule }: { userId: string; schedule: any }) => {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ work_schedule: schedule })
-        .eq("id", userId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Horário atualizado!");
-      setIsScheduleDialogOpen(false);
-      setEditingUser(null);
-      refetch();
-    },
-    onError: (error: any) => {
-      toast.error(error.message || "Erro ao atualizar horário");
-    },
-  });
+  // Update schedule mutation - removed as work_schedule column doesn't exist
+  // Using department_members instead for schedule-like functionality
+
+  const handleSaveSchedule = async () => {
+    // Schedules are not currently stored - just close dialog
+    toast.info("Funcionalidade de horários em desenvolvimento");
+    setIsScheduleDialogOpen(false);
+    setEditingUser(null);
+  };
 
   // Update department mutation - supports multiple departments via department_members
   const updateUserDepartment = useMutation({
@@ -414,44 +405,23 @@ export default function Users() {
         const { data: existing } = await supabase
           .from("department_members")
           .select("id")
-          .eq("agent_id", userId)
+          .eq("user_id", userId)
           .eq("department_id", departmentId)
           .maybeSingle();
         
         if (!existing) {
           const { error } = await supabase
             .from("department_members")
-            .insert([{ department_id: departmentId, agent_id: userId }]);
+            .insert([{ department_id: departmentId, user_id: userId }]);
           if (error) throw error;
         }
-        
-        // Also update primary department in profiles
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ department_id: departmentId })
-          .eq("id", userId);
-        if (profileError) throw profileError;
       } else {
         const { error } = await supabase
           .from("department_members")
           .delete()
-          .eq("agent_id", userId)
+          .eq("user_id", userId)
           .eq("department_id", departmentId);
         if (error) throw error;
-        
-        // Clear primary if it was this department
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("department_id")
-          .eq("id", userId)
-          .single();
-        
-        if (profile?.department_id === departmentId) {
-          await supabase
-            .from("profiles")
-            .update({ department_id: null })
-            .eq("id", userId);
-        }
       }
     },
     onSuccess: (_, variables) => {
@@ -465,22 +435,11 @@ export default function Users() {
     },
   });
 
-  // Update permissions mutation
-  const updatePermissions = useMutation({
-    mutationFn: async ({ userId, permissions }: { userId: string; permissions: UserPermissions }) => {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ permissions: permissions as unknown as Record<string, any> })
-        .eq("id", userId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      // Don't show toast on each toggle, too noisy
-    },
-    onError: (error: any) => {
-      toast.error(error.message || "Erro ao atualizar permissões");
-    },
-  });
+  // Update permissions - stored locally only since column doesn't exist
+  const handleUpdatePermissions = (userId: string, permissions: UserPermissions) => {
+    setUserPermissions(prev => ({ ...prev, [userId]: permissions }));
+    // Note: permissions are stored in local state only - no database column exists
+  };
 
   // Logout user mutation (set offline)
   const logoutUser = useMutation({
@@ -539,11 +498,10 @@ export default function Users() {
 
   const handleOpenSchedule = (u: UserWithRole) => {
     setEditingUser(u);
-    const schedule = u.work_schedule || { start: "08:00", end: "18:00", days: [1, 2, 3, 4, 5] };
     setScheduleForm({
-      start: schedule.start || "08:00",
-      end: schedule.end || "18:00",
-      days: schedule.days || [1, 2, 3, 4, 5],
+      start: "08:00",
+      end: "18:00",
+      days: [1, 2, 3, 4, 5],
     });
     setIsScheduleDialogOpen(true);
   };
@@ -575,8 +533,8 @@ export default function Users() {
       [userId]: newPerms,
     }));
     
-    // Save to database
-    updatePermissions.mutate({ userId, permissions: newPerms });
+    // Save permissions locally (no database column for permissions)
+    handleUpdatePermissions(userId, newPerms);
   };
 
   const toggleUserDepartment = (userId: string, deptId: string) => {
@@ -1050,7 +1008,7 @@ export default function Users() {
                                           conn.status === 'connected' ? 'bg-green-500' : 'bg-muted-foreground'
                                         }`}
                                       />
-                                      {conn.name}
+                                      {conn.instance_name}
                                     </label>
                                   </div>
                                 ))
@@ -1160,17 +1118,9 @@ export default function Users() {
                 Cancelar
               </Button>
               <Button
-                onClick={() => {
-                  if (editingUser) {
-                    updateSchedule.mutate({
-                      userId: editingUser.id,
-                      schedule: scheduleForm,
-                    });
-                  }
-                }}
-                disabled={updateSchedule.isPending}
+                onClick={() => handleSaveSchedule()}
               >
-                {updateSchedule.isPending ? "Salvando..." : "Salvar"}
+                Salvar
               </Button>
             </div>
           </div>

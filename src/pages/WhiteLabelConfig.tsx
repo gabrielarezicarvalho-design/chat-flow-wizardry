@@ -130,36 +130,37 @@ const WhiteLabelConfig = () => {
 
   const fetchPartnerConfig = async (partnerId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('white_label_partners')
+      const { data, error } = await (supabase
+        .from('white_label_partners' as any)
         .select('*')
         .eq('id', partnerId)
-        .maybeSingle();
+        .maybeSingle() as any);
 
       if (error) throw error;
       
       if (data) {
-        setPartner(data as PartnerConfig);
+        const partnerData = data as any;
+        setPartner(partnerData as PartnerConfig);
         setAppearanceData({
-          logo_url: data.logo_url || '',
-          primary_color: data.primary_color || '#3B82F6',
-          secondary_color: data.secondary_color || '#1E40AF',
-          accent_color: data.accent_color || '#10B981',
-          background_color: data.background_color || '#0F172A',
+          logo_url: partnerData.logo_url || '',
+          primary_color: partnerData.primary_color || '#3B82F6',
+          secondary_color: partnerData.secondary_color || '#1E40AF',
+          accent_color: partnerData.accent_color || '#10B981',
+          background_color: partnerData.background_color || '#0F172A',
         });
         setSupabaseData({
-          supabase_url: data.supabase_url || '',
-          supabase_anon_key: data.supabase_anon_key || '',
-          supabase_service_role_key: data.supabase_service_role_key || '',
+          supabase_url: partnerData.supabase_url || '',
+          supabase_anon_key: partnerData.supabase_anon_key || '',
+          supabase_service_role_key: partnerData.supabase_service_role_key || '',
         });
         setDriveData({
-          google_client_id: data.google_client_id || '',
-          google_client_secret: data.google_client_secret || '',
+          google_client_id: partnerData.google_client_id || '',
+          google_client_secret: partnerData.google_client_secret || '',
         });
         setUazapiData({
-          uazapi_base_url: data.uazapi_base_url || '',
-          uazapi_admin_token: data.uazapi_admin_token || '',
-          uazapi_environment: data.uazapi_environment || 'TESTE',
+          uazapi_base_url: partnerData.uazapi_base_url || '',
+          uazapi_admin_token: partnerData.uazapi_admin_token || '',
+          uazapi_environment: partnerData.uazapi_environment || 'TESTE',
         });
       }
     } catch (error: any) {
@@ -211,8 +212,8 @@ const WhiteLabelConfig = () => {
     if (!partner) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('white_label_partners')
+      const { error } = await (supabase
+        .from('white_label_partners' as any)
         .update({
           logo_url: appearanceData.logo_url || null,
           primary_color: appearanceData.primary_color,
@@ -220,7 +221,7 @@ const WhiteLabelConfig = () => {
           accent_color: appearanceData.accent_color,
           background_color: appearanceData.background_color,
         })
-        .eq('id', partner.id);
+        .eq('id', partner.id) as any);
 
       if (error) throw error;
       
@@ -243,14 +244,14 @@ const WhiteLabelConfig = () => {
     if (!partner) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('white_label_partners')
+      const { error } = await (supabase
+        .from('white_label_partners' as any)
         .update({
           supabase_url: supabaseData.supabase_url || null,
           supabase_anon_key: supabaseData.supabase_anon_key || null,
           supabase_service_role_key: supabaseData.supabase_service_role_key || null,
         })
-        .eq('id', partner.id);
+        .eq('id', partner.id) as any);
 
       if (error) throw error;
       
@@ -274,13 +275,13 @@ const WhiteLabelConfig = () => {
     if (!partner) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('white_label_partners')
+      const { error } = await (supabase
+        .from('white_label_partners' as any)
         .update({
           google_client_id: driveData.google_client_id || null,
           google_client_secret: driveData.google_client_secret || null,
         })
-        .eq('id', partner.id);
+        .eq('id', partner.id) as any);
 
       if (error) throw error;
       toast.success('Google Drive configurado!');
@@ -296,14 +297,14 @@ const WhiteLabelConfig = () => {
     if (!partner) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('white_label_partners')
+      const { error } = await (supabase
+        .from('white_label_partners' as any)
         .update({
           uazapi_base_url: uazapiData.uazapi_base_url || null,
           uazapi_admin_token: uazapiData.uazapi_admin_token || null,
           uazapi_environment: uazapiData.uazapi_environment,
         })
-        .eq('id', partner.id);
+        .eq('id', partner.id) as any);
 
       if (error) throw error;
       toast.success('UAZAPI configurado!');

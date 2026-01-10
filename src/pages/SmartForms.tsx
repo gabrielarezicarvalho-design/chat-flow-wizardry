@@ -300,7 +300,7 @@ const SmartFormsContent = () => {
 
       // Buscar primeira conexão ativa
       const activeConnection = connections.find(c => c.status === 'connected');
-      addLog('info', `🔌 Conexão ativa: ${activeConnection?.name || 'Nenhuma'}`);
+      addLog('info', `🔌 Conexão ativa: ${activeConnection?.instance_name || 'Nenhuma'}`);
 
       // Chamar Edge Function para gerar link
       addLog('info', '📡 Chamando smart-form-generate...');

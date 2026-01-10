@@ -353,6 +353,7 @@ const InternalChatContent = () => {
       <CreateTaskDialog 
         open={showCreateTask} 
         onOpenChange={setShowCreateTask}
+        allUsers={[]}
       />
     </div>
   );

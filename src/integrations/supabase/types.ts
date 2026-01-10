@@ -804,6 +804,142 @@ export type Database = {
           },
         ]
       }
+      smart_form_submissions: {
+        Row: {
+          answers: Json
+          connection_id: string | null
+          contacted_at: string | null
+          conversation_id: string | null
+          created_at: string
+          department_id: string | null
+          form_id: string | null
+          id: string
+          name: string | null
+          notes: string | null
+          phone: string
+          status: string
+          submitted_at: string | null
+          unique_token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          connection_id?: string | null
+          contacted_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          department_id?: string | null
+          form_id?: string | null
+          id?: string
+          name?: string | null
+          notes?: string | null
+          phone: string
+          status?: string
+          submitted_at?: string | null
+          unique_token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          connection_id?: string | null
+          contacted_at?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          department_id?: string | null
+          form_id?: string | null
+          id?: string
+          name?: string | null
+          notes?: string | null
+          phone?: string
+          status?: string
+          submitted_at?: string | null
+          unique_token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "smart_form_submissions_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "smart_form_submissions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "smart_form_submissions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "smart_form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "smart_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      smart_forms: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          fields: Json
+          id: string
+          is_active: boolean
+          name: string
+          success_message: string
+          updated_at: string
+          user_id: string
+          welcome_message: string
+          whatsapp_confirmation: boolean
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          fields?: Json
+          id?: string
+          is_active?: boolean
+          name: string
+          success_message?: string
+          updated_at?: string
+          user_id: string
+          welcome_message?: string
+          whatsapp_confirmation?: boolean
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          fields?: Json
+          id?: string
+          is_active?: boolean
+          name?: string
+          success_message?: string
+          updated_at?: string
+          user_id?: string
+          welcome_message?: string
+          whatsapp_confirmation?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "smart_forms_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tags: {
         Row: {
           color: string | null
@@ -835,6 +971,35 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_connections: {
+        Row: {
+          connection_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          connection_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          connection_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_connections_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
             referencedColumns: ["id"]
           },
         ]
