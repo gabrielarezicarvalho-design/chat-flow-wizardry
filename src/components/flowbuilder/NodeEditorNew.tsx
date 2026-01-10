@@ -455,14 +455,15 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
       </div>
       <div className="space-y-2">
         <Label className="text-sm font-medium">Gatilho</Label>
-        <Select value={nodeData.trigger || 'message'} onValueChange={(v) => handleUpdate('trigger', v)}>
+        <Select value={nodeData.trigger || 'first_message'} onValueChange={(v) => handleUpdate('trigger', v)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="message">Mensagem recebida</SelectItem>
-            <SelectItem value="keyword">Palavra-chave</SelectItem>
-            <SelectItem value="new_contact">Novo contato</SelectItem>
+            <SelectItem value="first_message">Primeira mensagem</SelectItem>
+            <SelectItem value="keyword">Palavra-chave específica</SelectItem>
+            <SelectItem value="business_hours">Horário comercial</SelectItem>
+            <SelectItem value="out_of_hours">Fora do horário</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -472,8 +473,25 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
           <Input
             value={nodeData.keyword || ''}
             onChange={(e) => handleUpdate('keyword', e.target.value)}
-            placeholder="Ex: oi, olá, menu"
+            placeholder="Ex: oi, olá, menu, orçamento"
           />
+          <p className="text-xs text-muted-foreground">
+            Separe múltiplas palavras-chave com vírgula
+          </p>
+        </div>
+      )}
+      {nodeData.trigger === 'business_hours' && (
+        <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+          <p className="text-sm text-emerald-600">
+            Este fluxo será ativado apenas durante o horário comercial configurado nas configurações.
+          </p>
+        </div>
+      )}
+      {nodeData.trigger === 'out_of_hours' && (
+        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <p className="text-sm text-amber-600">
+            Este fluxo será ativado apenas fora do horário comercial.
+          </p>
         </div>
       )}
     </div>
