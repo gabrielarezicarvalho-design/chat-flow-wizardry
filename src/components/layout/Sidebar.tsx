@@ -1,5 +1,6 @@
 import { useState, createContext, useContext } from "react";
 import { NavLink } from "@/components/NavLink";
+import { useLocation } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureAccess, FeatureId } from "@/hooks/useFeatureAccess";
@@ -23,11 +24,17 @@ import {
   MessagesSquare,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Target
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 // Create context for sidebar state
 interface SidebarContextType {
@@ -47,6 +54,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   feature?: FeatureId;
+  children?: NavItem[];
 }
 
 // Admin-only navigation items with feature requirements
@@ -58,9 +66,15 @@ const adminNavItems: NavItem[] = [
   { to: "/mass-sending", icon: Megaphone, label: "Envio em Massa", feature: "mass_sending" },
   { to: "/auto-prospecting", icon: Target, label: "Prospecção Automática", feature: "mass_sending" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
-  { to: "/departments", icon: Briefcase, label: "Departamentos", feature: "departments" },
   { to: "/flows", icon: GitBranch, label: "Flow Builder", feature: "flows_basic" },
-  { to: "/connections", icon: LinkIcon, label: "Conexões" },
+  { 
+    to: "/connections", 
+    icon: LinkIcon, 
+    label: "Conexões",
+    children: [
+      { to: "/departments", icon: Briefcase, label: "Departamentos", feature: "departments" },
+    ]
+  },
   { to: "/users", icon: UsersRound, label: "Usuários" },
   { to: "/attendance", icon: Phone, label: "Atendimentos", feature: "chat" },
   { to: "/settings", icon: Settings, label: "Configurações" },
@@ -74,6 +88,100 @@ const agentNavItems: NavItem[] = [
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
   { to: "/attendance-reports", icon: ClipboardList, label: "Histórico", feature: "reports" },
 ];
+
+// Component for nav items with children (submenu)
+const NavItemWithChildren = ({ 
+  item, 
+  collapsed, 
+  hasAccess 
+}: { 
+  item: NavItem; 
+  collapsed: boolean; 
+  hasAccess: (feature: FeatureId) => boolean;
+}) => {
+  const location = useLocation();
+  const isChildActive = item.children?.some(child => location.pathname === child.to);
+  const isActive = location.pathname === item.to || isChildActive;
+  const [isOpen, setIsOpen] = useState(isChildActive);
+
+  const filteredChildren = item.children?.filter(child => {
+    if (!child.feature) return true;
+    return hasAccess(child.feature);
+  });
+
+  if (collapsed) {
+    return (
+      <div className="relative group">
+        <NavLink
+          to={item.to}
+          end
+          className={cn(
+            "flex items-center gap-3 rounded-lg text-white/80 hover:bg-white/10 transition-all px-3 py-3 justify-center",
+            isActive && "bg-white/20 text-white font-medium shadow-lg"
+          )}
+          activeClassName="bg-white/20 text-white font-medium shadow-lg"
+        >
+          <item.icon className="w-5 h-5 flex-shrink-0" />
+        </NavLink>
+        <div className="absolute left-full ml-2 px-2 py-2 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto whitespace-nowrap z-50 transition-opacity">
+          <div className="font-medium mb-1">{item.label}</div>
+          {filteredChildren?.map(child => (
+            <NavLink
+              key={child.to}
+              to={child.to}
+              className="block px-2 py-1 hover:bg-white/10 rounded"
+              activeClassName="bg-white/20"
+            >
+              {child.label}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger asChild>
+        <button
+          className={cn(
+            "flex items-center gap-3 rounded-lg text-white/80 hover:bg-white/10 transition-all w-full px-4 py-3",
+            isActive && "bg-white/20 text-white font-medium shadow-lg"
+          )}
+        >
+          <item.icon className="w-5 h-5 flex-shrink-0" />
+          <span className="flex-1 text-left">{item.label}</span>
+          <ChevronDown className={cn(
+            "w-4 h-4 transition-transform",
+            isOpen && "rotate-180"
+          )} />
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pl-4 space-y-1">
+        <NavLink
+          to={item.to}
+          end
+          className="flex items-center gap-3 rounded-lg text-white/80 hover:bg-white/10 transition-all px-4 py-2 text-sm"
+          activeClassName="bg-white/20 text-white font-medium"
+        >
+          <item.icon className="w-4 h-4 flex-shrink-0" />
+          <span>{item.label}</span>
+        </NavLink>
+        {filteredChildren?.map(child => (
+          <NavLink
+            key={child.to}
+            to={child.to}
+            className="flex items-center gap-3 rounded-lg text-white/80 hover:bg-white/10 transition-all px-4 py-2 text-sm"
+            activeClassName="bg-white/20 text-white font-medium"
+          >
+            <child.icon className="w-4 h-4 flex-shrink-0" />
+            <span>{child.label}</span>
+          </NavLink>
+        ))}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -174,25 +282,34 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
         {/* Navigation */}
         <nav className="flex-1 p-2 space-y-1 overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/"}
-              className={cn(
-                "flex items-center gap-3 rounded-lg text-white/80 hover:bg-white/10 transition-all group relative",
-                collapsed ? "px-3 py-3 justify-center" : "px-4 py-3"
-              )}
-              activeClassName="bg-white/20 text-white font-medium shadow-lg"
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span>{item.label}</span>}
-              {/* Tooltip for collapsed state */}
-              {collapsed && (
-                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
-                  {item.label}
-                </div>
-              )}
-            </NavLink>
+            item.children ? (
+              <NavItemWithChildren 
+                key={item.to} 
+                item={item} 
+                collapsed={collapsed} 
+                hasAccess={hasAccess}
+              />
+            ) : (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === "/"}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg text-white/80 hover:bg-white/10 transition-all group relative",
+                  collapsed ? "px-3 py-3 justify-center" : "px-4 py-3"
+                )}
+                activeClassName="bg-white/20 text-white font-medium shadow-lg"
+              >
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {!collapsed && <span>{item.label}</span>}
+                {/* Tooltip for collapsed state */}
+                {collapsed && (
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
+                    {item.label}
+                  </div>
+                )}
+              </NavLink>
+            )
           ))}
         </nav>
 
