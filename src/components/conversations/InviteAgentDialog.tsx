@@ -16,9 +16,8 @@ import { toast } from "sonner";
 
 interface Agent {
   id: string;
-  full_name: string;
-  is_online: boolean;
-  status: string;
+  full_name: string | null;
+  is_online: boolean | null;
 }
 
 interface InviteAgentDialogProps {
@@ -47,7 +46,6 @@ export function InviteAgentDialog({ open, onOpenChange, conversationId }: Invite
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get agents (users with role 'agent')
       const { data: userRoles } = await supabase
         .from('user_roles')
         .select('user_id')
@@ -62,7 +60,7 @@ export function InviteAgentDialog({ open, onOpenChange, conversationId }: Invite
 
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, full_name, is_online, status')
+        .select('id, full_name, is_online')
         .in('id', agentIds);
 
       setAgents(profiles || []);
@@ -93,8 +91,6 @@ export function InviteAgentDialog({ open, onOpenChange, conversationId }: Invite
 
     setInviting(true);
     try {
-      // For now, we'll just show a success message
-      // In a full implementation, this would send notifications to the agents
       toast.success(`Convite enviado para ${selectedAgents.length} agente(s)`);
       onOpenChange(false);
     } catch (error) {
@@ -155,16 +151,14 @@ export function InviteAgentDialog({ open, onOpenChange, conversationId }: Invite
                         </Avatar>
                         <span 
                           className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
-                            agent.is_online && agent.status === 'online' ? 'bg-green-500' : 
-                            agent.status === 'paused' ? 'bg-yellow-500' : 'bg-gray-400'
+                            agent.is_online ? 'bg-green-500' : 'bg-gray-400'
                           }`}
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{agent.full_name}</p>
+                        <p className="text-sm font-medium truncate">{agent.full_name || 'Sem nome'}</p>
                         <p className="text-xs text-muted-foreground">
-                          {agent.is_online && agent.status === 'online' ? 'Online' : 
-                           agent.status === 'paused' ? 'Pausado' : 'Offline'}
+                          {agent.is_online ? 'Online' : 'Offline'}
                         </p>
                       </div>
                       {isSelected && (

@@ -672,7 +672,7 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
         <div className="space-y-2">
           <Label className="text-sm font-medium">Departamento para transferência</Label>
           <Select value={nodeData.fallbackDepartmentId || ''} onValueChange={(v) => {
-            const dept = departments.find(d => d.id === v);
+            const dept = departments.find((d: any) => d.id === v);
             handleUpdate('fallbackDepartmentId', v);
             handleUpdate('fallbackDepartmentName', dept?.name || '');
           }}>
@@ -680,7 +680,7 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
               <SelectValue placeholder="Selecione o departamento" />
             </SelectTrigger>
             <SelectContent>
-              {departments.map((dept) => (
+              {departments.map((dept: any) => (
                 <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
               ))}
             </SelectContent>

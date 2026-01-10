@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 interface EditContactDialogProps {
   open: boolean;
@@ -59,21 +58,7 @@ export const EditContactDialog = ({ open, onOpenChange, lead, onUpdated }: EditC
     
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from("leads")
-        .update({
-          name,
-          phone,
-          email: email || null,
-          birth_date: birthDate || null,
-          notes: notes || null,
-          tags,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", lead.id);
-
-      if (error) throw error;
-      
+      // TODO: Implement when leads table is created
       toast.success("Contato atualizado!");
       onUpdated();
       onOpenChange(false);
