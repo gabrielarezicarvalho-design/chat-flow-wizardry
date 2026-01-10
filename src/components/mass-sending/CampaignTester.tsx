@@ -11,7 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Play, Loader2, Trash2, FlaskConical, Clock, Users, Zap, Send, Plus, X, 
+  Play, Loader2, FlaskConical, Users, Send, Plus, X, 
   Pause, CheckCircle, AlertCircle, Timer, Settings, Calendar, Terminal
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,23 +35,6 @@ interface TestResult {
   duration: number;
   contactsCount: number;
   type?: 'immediate' | 'scheduled';
-}
-
-interface CampaignProgress {
-  id: string;
-  campaign_name: string;
-  total_messages: number;
-  sent_count: number;
-  failed_count: number;
-  current_status: string;
-  current_message_index: number;
-  delay_min: number;
-  delay_max: number;
-  pause_every_x: number;
-  pause_duration: number;
-  pause_until: string | null;
-  started_at: string | null;
-  created_at: string;
 }
 
 interface LogEntry {
@@ -78,10 +61,6 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
   const [pauseEveryX, setPauseEveryX] = useState(10);
   const [pauseDuration, setPauseDuration] = useState(60);
   
-  // Live progress
-  const [activeProgress, setActiveProgress] = useState<CampaignProgress | null>(null);
-  const [countdown, setCountdown] = useState<number>(0);
-  
   // Logs
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [showLogs, setShowLogs] = useState(true);
@@ -96,48 +75,6 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
     setLogs(prev => [entry, ...prev].slice(0, 50));
     console.log(`[CampaignTester] [${type.toUpperCase()}] ${message}`, data || '');
   };
-
-  // Listen for realtime updates on campaign_progress
-  useEffect(() => {
-    const channel = supabase
-      .channel('campaign-progress-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'campaign_progress'
-        },
-        (payload) => {
-          addLog('info', 'Atualização realtime recebida', payload);
-          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-            const newProgress = payload.new as CampaignProgress;
-            setActiveProgress(newProgress);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  // Countdown timer for delays
-  useEffect(() => {
-    if (activeProgress?.current_status === 'paused' && activeProgress.pause_until) {
-      const interval = setInterval(() => {
-        const remaining = Math.max(0, new Date(activeProgress.pause_until!).getTime() - Date.now());
-        setCountdown(Math.ceil(remaining / 1000));
-        
-        if (remaining <= 0) {
-          clearInterval(interval);
-        }
-      }, 1000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [activeProgress?.current_status, activeProgress?.pause_until]);
 
   const addNumber = () => {
     setTestNumbers([...testNumbers, ""]);
@@ -201,7 +138,7 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
       if (useSchedule) {
         if (scheduleType === 'minutes' && scheduleMinutes > 0) {
           payload.scheduled_for = scheduleMinutes;
-          payload.action = "simple"; // Use simple action for scheduled
+          payload.action = "simple";
           addLog('info', `Agendando para ${scheduleMinutes} minuto(s) no futuro`);
         } else if (scheduleType === 'datetime' && scheduleDatetime) {
           const targetDate = new Date(scheduleDatetime);
@@ -210,21 +147,18 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
           
           if (diffMinutes <= 0) {
             toast.error("A data/hora deve ser no futuro");
-            addLog('error', 'Data/hora inválida - deve ser no futuro', { scheduleDatetime, diffMinutes });
+            addLog('error', 'Data/hora inválida - deve ser no futuro');
             setTesting(false);
             return;
           }
           
           payload.scheduled_for = diffMinutes;
-          payload.action = "simple"; // Use simple action for scheduled
-          addLog('info', `Agendando para ${format(targetDate, 'dd/MM/yyyy HH:mm')} (${diffMinutes} minutos)`, {
-            targetDate: targetDate.toISOString(),
-            diffMinutes
-          });
+          payload.action = "simple";
+          addLog('info', `Agendando para ${format(targetDate, 'dd/MM/yyyy HH:mm')}`);
         }
       } else {
-        payload.action = "campaign_with_progress"; // Use progress tracking for immediate
-        addLog('info', 'Enviando imediatamente com progresso ao vivo');
+        payload.action = "simple";
+        addLog('info', 'Enviando imediatamente');
       }
 
       addLog('info', 'Enviando payload para wa-sender', payload);
@@ -234,7 +168,7 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
       const duration = Date.now() - startTime;
 
       if (error) {
-        addLog('error', 'Erro na resposta da Edge Function', { error: error.message, details: error });
+        addLog('error', 'Erro na resposta da Edge Function', { error: error.message });
         throw new Error(error.message);
       }
 
@@ -247,24 +181,8 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
           toast.success(`Campanha agendada com sucesso!`);
           addLog('success', 'Campanha agendada com sucesso', data);
         } else {
-          toast.success(`Campanha iniciada! Acompanhe o progresso ao vivo.`);
-          addLog('success', 'Campanha iniciada com sucesso', data);
-          
-          // Load the progress immediately
-          if (data?.progressId) {
-            const { data: progress, error: progressError } = await supabase
-              .from('campaign_progress')
-              .select('*')
-              .eq('id', data.progressId)
-              .single();
-            
-            if (progressError) {
-              addLog('error', 'Erro ao carregar progresso', progressError);
-            } else if (progress) {
-              setActiveProgress(progress as CampaignProgress);
-              addLog('info', 'Progresso carregado', progress);
-            }
-          }
+          toast.success(`Campanha enviada com sucesso!`);
+          addLog('success', 'Campanha enviada com sucesso', data);
         }
       } else {
         toast.error(`Erro: ${data?.error || 'Erro desconhecido'}`);
@@ -281,7 +199,7 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
       }, ...prev].slice(0, 10));
     } catch (err: any) {
       const duration = Date.now() - startTime;
-      addLog('error', `Exceção capturada: ${err.message}`, { stack: err.stack });
+      addLog('error', `Exceção capturada: ${err.message}`);
       
       setResults(prev => [{
         success: false,
@@ -295,40 +213,6 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
     }
 
     setTesting(false);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'sending': return 'bg-blue-500';
-      case 'paused': return 'bg-orange-500';
-      case 'completed': return 'bg-green-500';
-      case 'failed': return 'bg-red-500';
-      case 'scheduled': return 'bg-purple-500';
-      default: return 'bg-muted';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'sending': return <Loader2 className="w-4 h-4 animate-spin" />;
-      case 'paused': return <Pause className="w-4 h-4" />;
-      case 'completed': return <CheckCircle className="w-4 h-4" />;
-      case 'failed': return <AlertCircle className="w-4 h-4" />;
-      case 'scheduled': return <Calendar className="w-4 h-4" />;
-      default: return <Timer className="w-4 h-4" />;
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'sending': return 'Enviando';
-      case 'paused': return 'Pausado';
-      case 'completed': return 'Concluído';
-      case 'failed': return 'Falhou';
-      case 'pending': return 'Aguardando';
-      case 'scheduled': return 'Agendado';
-      default: return status;
-    }
   };
 
   const getLogTypeColor = (type: LogEntry['type']) => {
@@ -347,7 +231,7 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
         <div className="flex items-center gap-2 mb-5">
           <FlaskConical className="w-5 h-5 text-primary" />
           <h3 className="font-semibold">Teste de Campanha</h3>
-          <Badge variant="outline" className="ml-auto">Com Progresso</Badge>
+          <Badge variant="outline" className="ml-auto">Simples</Badge>
         </div>
 
         <div className="space-y-4">
@@ -424,17 +308,16 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
             />
           </div>
 
-          {/* Delay Settings - New Design */}
+          {/* Delay Settings */}
           <div className="p-4 bg-muted/30 rounded-lg space-y-5">
             <div className="flex items-center gap-2">
               <Settings className="w-4 h-4 text-primary" />
               <div>
                 <Label className="text-sm font-medium">Configurações de Envio</Label>
-                <p className="text-xs text-muted-foreground">Configure os intervalos para reduzir risco de banimento</p>
+                <p className="text-xs text-muted-foreground">Configure os intervalos</p>
               </div>
             </div>
 
-            {/* Intervalo entre mensagens */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-sm">Intervalo entre mensagens</Label>
@@ -447,12 +330,8 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
                 max={120}
                 step={1}
               />
-              <p className="text-xs text-muted-foreground">
-                Tempo mínimo entre cada mensagem enviada (recomendado: 10-30s)
-              </p>
             </div>
 
-            {/* Pausar a cada X mensagens */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-sm">Pausar a cada X mensagens</Label>
@@ -465,12 +344,8 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
                 max={50}
                 step={1}
               />
-              <p className="text-xs text-muted-foreground">
-                A cada X mensagens, faz uma pausa maior para simular comportamento humano
-              </p>
             </div>
 
-            {/* Duração da pausa */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-sm">Duração da pausa</Label>
@@ -483,9 +358,6 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
                 max={300}
                 step={10}
               />
-              <p className="text-xs text-muted-foreground">
-                Duração da pausa a cada X envios (recomendado: 60-120s)
-              </p>
             </div>
           </div>
 
@@ -494,298 +366,140 @@ export function CampaignTester({ connections }: CampaignTesterProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-purple-500" />
-                <Label className="text-sm">Agendar Envio</Label>
+                <Label className="text-sm">Agendar envio</Label>
               </div>
-              <Switch checked={useSchedule} onCheckedChange={setUseSchedule} />
+              <Switch
+                checked={useSchedule}
+                onCheckedChange={setUseSchedule}
+              />
             </div>
-            
+
             {useSchedule && (
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant={scheduleType === 'minutes' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setScheduleType('minutes')}
-                  >
-                    <Clock className="w-3 h-3 mr-1" />
-                    Em X minutos
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={scheduleType === 'datetime' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setScheduleType('datetime')}
-                  >
-                    <Calendar className="w-3 h-3 mr-1" />
-                    Data/Hora
-                  </Button>
-                </div>
-                
+              <div className="space-y-3 pt-2">
+                <Select value={scheduleType} onValueChange={(v: 'minutes' | 'datetime') => setScheduleType(v)}>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="minutes">Em X minutos</SelectItem>
+                    <SelectItem value="datetime">Data/Hora específica</SelectItem>
+                  </SelectContent>
+                </Select>
+
                 {scheduleType === 'minutes' ? (
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Enviar em (minutos)</Label>
+                  <div className="flex items-center gap-2">
                     <Input
                       type="number"
                       value={scheduleMinutes}
-                      onChange={(e) => setScheduleMinutes(parseInt(e.target.value) || 1)}
-                      placeholder="1"
+                      onChange={(e) => setScheduleMinutes(Number(e.target.value))}
                       min={1}
-                      className="mt-1"
+                      max={1440}
+                      className="w-20 text-sm"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Mínimo: 1 minuto
-                    </p>
+                    <span className="text-sm text-muted-foreground">minutos</span>
                   </div>
                 ) : (
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Data e Hora</Label>
-                    <Input
-                      type="datetime-local"
-                      value={scheduleDatetime}
-                      onChange={(e) => setScheduleDatetime(e.target.value)}
-                      className="mt-1"
-                      min={new Date().toISOString().slice(0, 16)}
-                    />
-                  </div>
+                  <Input
+                    type="datetime-local"
+                    value={scheduleDatetime}
+                    onChange={(e) => setScheduleDatetime(e.target.value)}
+                    className="text-sm"
+                  />
                 )}
               </div>
             )}
           </div>
 
-          {/* Run Button */}
           <Button 
-            onClick={runCampaignTest} 
-            disabled={testing || !selectedConnection}
-            className="w-full"
+            className="w-full" 
+            onClick={runCampaignTest}
+            disabled={testing}
           >
             {testing ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Iniciando campanha...
+                Enviando...
               </>
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />
-                Enviar Campanha de Teste
+                {useSchedule ? 'Agendar Campanha' : 'Enviar Agora'}
               </>
             )}
           </Button>
         </div>
       </Card>
 
-      {/* Results + Live Progress */}
-      <div className="space-y-4">
-        {/* Live Progress Dashboard */}
-        {activeProgress && activeProgress.current_status !== 'completed' && (
-          <Card className="p-5 border-2 border-primary/20">
-            <div className="flex items-center gap-2 mb-4">
-              <div className={`w-3 h-3 rounded-full ${getStatusColor(activeProgress.current_status)} animate-pulse`} />
-              <h4 className="font-medium">Progresso ao Vivo</h4>
-              <Badge variant="outline" className="ml-auto flex items-center gap-1">
-                {getStatusIcon(activeProgress.current_status)}
-                {getStatusText(activeProgress.current_status)}
-              </Badge>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="mb-4">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-muted-foreground">Enviando mensagens</span>
-                <span className="font-medium">
-                  {activeProgress.sent_count + activeProgress.failed_count}/{activeProgress.total_messages}
-                </span>
-              </div>
-              <Progress 
-                value={((activeProgress.sent_count + activeProgress.failed_count) / activeProgress.total_messages) * 100} 
-              />
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="text-center p-2 bg-green-500/10 rounded-lg">
-                <p className="text-lg font-bold text-green-600">{activeProgress.sent_count}</p>
-                <p className="text-xs text-muted-foreground">Enviadas</p>
-              </div>
-              <div className="text-center p-2 bg-red-500/10 rounded-lg">
-                <p className="text-lg font-bold text-red-600">{activeProgress.failed_count}</p>
-                <p className="text-xs text-muted-foreground">Falharam</p>
-              </div>
-              <div className="text-center p-2 bg-muted/50 rounded-lg">
-                <p className="text-lg font-bold">{activeProgress.total_messages - activeProgress.sent_count - activeProgress.failed_count}</p>
-                <p className="text-xs text-muted-foreground">Pendentes</p>
-              </div>
-            </div>
-
-            {/* Pause Countdown */}
-            {activeProgress.current_status === 'paused' && countdown > 0 && (
-              <div className="p-3 bg-orange-500/10 rounded-lg text-center">
-                <div className="flex items-center justify-center gap-2 text-orange-600">
-                  <Pause className="w-4 h-4" />
-                  <span className="font-medium">Campanha pausada</span>
-                </div>
-                <p className="text-2xl font-bold text-orange-600 mt-1">{countdown}s</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Retomando após pausa de {activeProgress.pause_duration}s (a cada {activeProgress.pause_every_x} mensagens)
-                </p>
-              </div>
-            )}
-
-            {/* Config Summary */}
-            <div className="text-xs text-muted-foreground mt-3 flex flex-wrap gap-2">
-              <Badge variant="secondary">Intervalo: {activeProgress.delay_min}s</Badge>
-              {activeProgress.pause_every_x > 0 && (
-                <>
-                  <Badge variant="secondary">Pausa a cada: {activeProgress.pause_every_x} msgs</Badge>
-                  <Badge variant="secondary">Duração: {activeProgress.pause_duration}s</Badge>
-                </>
-              )}
-            </div>
-          </Card>
-        )}
-
-        {/* Completed Progress */}
-        {activeProgress && activeProgress.current_status === 'completed' && (
-          <Card className="p-5 border-2 border-green-500/20">
-            <div className="flex items-center gap-2 mb-4">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <h4 className="font-medium">Campanha Concluída</h4>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="ml-auto"
-                onClick={() => setActiveProgress(null)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="text-center p-3 bg-green-500/10 rounded-lg">
-                <p className="text-2xl font-bold text-green-600">{activeProgress.sent_count}</p>
-                <p className="text-sm text-muted-foreground">Enviadas com sucesso</p>
-              </div>
-              <div className="text-center p-3 bg-red-500/10 rounded-lg">
-                <p className="text-2xl font-bold text-red-600">{activeProgress.failed_count}</p>
-                <p className="text-sm text-muted-foreground">Falharam</p>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Debug Logs */}
-        <Card className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-primary" />
-              <h4 className="font-medium">Logs de Debug</h4>
-              <Badge variant="outline">{logs.length}</Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setShowLogs(!showLogs)}>
-                {showLogs ? 'Ocultar' : 'Mostrar'}
-              </Button>
-              {logs.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={clearLogs}>
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
+      {/* Logs Panel */}
+      <Card className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Terminal className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold">Console de Logs</h3>
           </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={clearLogs}>
+              Limpar
+            </Button>
+            <Switch
+              checked={showLogs}
+              onCheckedChange={setShowLogs}
+            />
+          </div>
+        </div>
 
-          {showLogs && (
-            logs.length === 0 ? (
-              <div className="h-32 flex items-center justify-center text-muted-foreground">
-                <div className="text-center">
-                  <Terminal className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-xs">Logs aparecerão aqui</p>
-                </div>
-              </div>
+        {showLogs && (
+          <ScrollArea className="h-[400px] border rounded-lg p-3 bg-muted/20 font-mono text-xs">
+            {logs.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                Nenhum log ainda. Execute um teste para ver os logs.
+              </p>
             ) : (
-              <ScrollArea className="h-[200px] bg-muted/30 rounded-lg p-2">
-                <div className="space-y-1 font-mono text-xs">
-                  {logs.map((log, idx) => (
-                    <div key={idx} className="flex gap-2">
-                      <span className="text-muted-foreground shrink-0">[{log.timestamp}]</span>
-                      <span className={`shrink-0 uppercase font-semibold ${getLogTypeColor(log.type)}`}>
-                        [{log.type}]
-                      </span>
-                      <span className="text-foreground">{log.message}</span>
-                      {log.data && (
-                        <details className="inline">
-                          <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-                            ver dados
-                          </summary>
-                          <pre className="mt-1 p-2 bg-background rounded text-[10px] overflow-x-auto max-w-full">
-                            {JSON.stringify(log.data, null, 2)}
-                          </pre>
-                        </details>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            )
-          )}
-        </Card>
-
-        {/* Results History */}
-        <Card className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="font-medium">Histórico de Resultados</h4>
-            {results.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={() => setResults([])}>
-                <Trash2 className="w-4 h-4 mr-1" />
-                Limpar
-              </Button>
-            )}
-          </div>
-
-          {results.length === 0 ? (
-            <div className="h-32 flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <FlaskConical className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-xs">Execute um teste para ver resultados</p>
-              </div>
-            </div>
-          ) : (
-            <ScrollArea className="h-[250px]">
-              <div className="space-y-3">
-                {results.map((result, idx) => (
-                  <Card
-                    key={idx}
-                    className={`p-3 border-l-4 ${result.success ? "border-l-green-500" : "border-l-destructive"}`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={result.success ? "default" : "destructive"} className="text-xs">
-                          {result.success ? "SUCESSO" : "ERRO"}
-                        </Badge>
-                        {result.type && (
-                          <Badge variant="outline" className="text-xs">
-                            {result.type === 'scheduled' ? 'Agendado' : 'Imediato'}
-                          </Badge>
-                        )}
-                        <span className="text-xs text-muted-foreground">{result.timestamp}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {result.contactsCount} contatos
-                        </Badge>
-                        <Badge variant="secondary" className="text-xs">
-                          {result.duration}ms
-                        </Badge>
-                      </div>
-                    </div>
-                    <pre className="p-2 bg-muted rounded text-xs overflow-x-auto max-h-24">
-                      {JSON.stringify(result.response, null, 2)}
-                    </pre>
-                  </Card>
+              <div className="space-y-1">
+                {logs.map((log, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <span className="text-muted-foreground shrink-0">[{log.timestamp}]</span>
+                    <span className={`font-semibold shrink-0 ${getLogTypeColor(log.type)}`}>
+                      [{log.type.toUpperCase()}]
+                    </span>
+                    <span className="break-all">{log.message}</span>
+                  </div>
                 ))}
               </div>
-            </ScrollArea>
-          )}
-        </Card>
-      </div>
+            )}
+          </ScrollArea>
+        )}
+
+        {/* Results Summary */}
+        {results.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <h4 className="text-sm font-medium">Resultados Recentes</h4>
+            <div className="space-y-2">
+              {results.slice(0, 3).map((result, idx) => (
+                <div 
+                  key={idx} 
+                  className={`p-2 rounded-lg text-xs flex items-center justify-between ${
+                    result.success ? 'bg-green-500/10' : 'bg-red-500/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {result.success ? (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-red-500" />
+                    )}
+                    <span>{result.timestamp}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {result.type === 'scheduled' ? 'Agendado' : 'Imediato'}
+                    </Badge>
+                  </div>
+                  <span className="text-muted-foreground">{result.duration}ms</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

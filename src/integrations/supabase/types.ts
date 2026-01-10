@@ -14,6 +14,305 @@ export type Database = {
   }
   public: {
     Tables: {
+      agents: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          model: string | null
+          name: string
+          status: string | null
+          system_prompt: string | null
+          temperature: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          model?: string | null
+          name: string
+          status?: string | null
+          system_prompt?: string | null
+          temperature?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          model?: string | null
+          name?: string
+          status?: string | null
+          system_prompt?: string | null
+          temperature?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      birthday_campaigns: {
+        Row: {
+          buttons: Json | null
+          connection_id: string | null
+          created_at: string
+          days_before: number | null
+          id: string
+          interactive_type: string | null
+          is_active: boolean | null
+          media_url: string | null
+          message_content: string | null
+          message_type: string | null
+          name: string
+          send_time: string | null
+          user_id: string | null
+        }
+        Insert: {
+          buttons?: Json | null
+          connection_id?: string | null
+          created_at?: string
+          days_before?: number | null
+          id?: string
+          interactive_type?: string | null
+          is_active?: boolean | null
+          media_url?: string | null
+          message_content?: string | null
+          message_type?: string | null
+          name: string
+          send_time?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          buttons?: Json | null
+          connection_id?: string | null
+          created_at?: string
+          days_before?: number | null
+          id?: string
+          interactive_type?: string | null
+          is_active?: boolean | null
+          media_url?: string | null
+          message_content?: string | null
+          message_type?: string | null
+          name?: string
+          send_time?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      birthday_contacts: {
+        Row: {
+          birth_date: string
+          campaign_id: string | null
+          created_at: string
+          id: string
+          last_sent_year: number | null
+          name: string
+          phone: string
+          user_id: string | null
+        }
+        Insert: {
+          birth_date: string
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          last_sent_year?: number | null
+          name: string
+          phone: string
+          user_id?: string | null
+        }
+        Update: {
+          birth_date?: string
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          last_sent_year?: number | null
+          name?: string
+          phone?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "birthday_contacts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "birthday_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_responses: {
+        Row: {
+          campaign_id: string | null
+          contact_name: string | null
+          contact_phone: string
+          created_at: string
+          id: string
+          responded_at: string | null
+          response_text: string | null
+          response_type: string | null
+          response_value: string | null
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          contact_name?: string | null
+          contact_phone: string
+          created_at?: string
+          id?: string
+          responded_at?: string | null
+          response_text?: string | null
+          response_type?: string | null
+          response_value?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          contact_name?: string | null
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          responded_at?: string | null
+          response_text?: string | null
+          response_type?: string | null
+          response_value?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_responses_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_templates: {
+        Row: {
+          buttons: Json | null
+          carousel_cards: Json | null
+          connection_id: string | null
+          contact_source: string | null
+          created_at: string
+          id: string
+          interactive_type: string | null
+          list_items: Json | null
+          media_url: string | null
+          message_content: string | null
+          message_type: string | null
+          name: string
+          selected_tags: string[] | null
+          user_id: string | null
+        }
+        Insert: {
+          buttons?: Json | null
+          carousel_cards?: Json | null
+          connection_id?: string | null
+          contact_source?: string | null
+          created_at?: string
+          id?: string
+          interactive_type?: string | null
+          list_items?: Json | null
+          media_url?: string | null
+          message_content?: string | null
+          message_type?: string | null
+          name: string
+          selected_tags?: string[] | null
+          user_id?: string | null
+        }
+        Update: {
+          buttons?: Json | null
+          carousel_cards?: Json | null
+          connection_id?: string | null
+          contact_source?: string | null
+          created_at?: string
+          id?: string
+          interactive_type?: string | null
+          list_items?: Json | null
+          media_url?: string | null
+          message_content?: string | null
+          message_type?: string | null
+          name?: string
+          selected_tags?: string[] | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      campaigns: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          created_at: string
+          failed_count: number | null
+          id: string
+          media_url: string | null
+          message_content: string | null
+          message_type: string | null
+          name: string
+          scheduled_at: string | null
+          sent_count: number | null
+          status: string | null
+          total_contacts: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          failed_count?: number | null
+          id?: string
+          media_url?: string | null
+          message_content?: string | null
+          message_type?: string | null
+          name: string
+          scheduled_at?: string | null
+          sent_count?: number | null
+          status?: string | null
+          total_contacts?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          failed_count?: number | null
+          id?: string
+          media_url?: string | null
+          message_content?: string | null
+          message_type?: string | null
+          name?: string
+          scheduled_at?: string | null
+          sent_count?: number | null
+          status?: string | null
+          total_contacts?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
@@ -112,6 +411,88 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          assigned_to: string | null
+          company_id: string | null
+          connection_id: string | null
+          contact_avatar: string | null
+          contact_name: string | null
+          contact_phone: string
+          created_at: string
+          department_id: string | null
+          id: string
+          last_message: string | null
+          last_message_at: string | null
+          protocol: string | null
+          status: string | null
+          tags: string[] | null
+          unread_count: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          company_id?: string | null
+          connection_id?: string | null
+          contact_avatar?: string | null
+          contact_name?: string | null
+          contact_phone: string
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          last_message?: string | null
+          last_message_at?: string | null
+          protocol?: string | null
+          status?: string | null
+          tags?: string[] | null
+          unread_count?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          company_id?: string | null
+          connection_id?: string | null
+          contact_avatar?: string | null
+          contact_name?: string | null
+          contact_phone?: string
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          last_message?: string | null
+          last_message_at?: string | null
+          protocol?: string | null
+          status?: string | null
+          tags?: string[] | null
+          unread_count?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       department_members: {
         Row: {
           created_at: string | null
@@ -181,6 +562,159 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flows: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          description: string | null
+          flow_data: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          trigger_type: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          flow_data?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          trigger_type?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          flow_data?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          trigger_type?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flows_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          custom_fields: Json | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          source: string | null
+          status: string | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          custom_fields?: Json | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          custom_fields?: Json | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string | null
+          conversation_id: string | null
+          created_at: string
+          external_id: string | null
+          id: string
+          media_url: string | null
+          message_type: string | null
+          metadata: Json | null
+          sender_id: string | null
+          sender_type: string
+          status: string | null
+        }
+        Insert: {
+          content?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          media_url?: string | null
+          message_type?: string | null
+          metadata?: Json | null
+          sender_id?: string | null
+          sender_type: string
+          status?: string | null
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          media_url?: string | null
+          message_type?: string | null
+          metadata?: Json | null
+          sender_id?: string | null
+          sender_type?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -263,6 +797,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tags: {
+        Row: {
+          color: string | null
+          company_id: string | null
+          created_at: string
+          id: string
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          color?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          color?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tags_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
