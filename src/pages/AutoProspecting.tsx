@@ -397,7 +397,7 @@ const AutoProspecting = () => {
                 <SelectContent>
                   {connections.map((conn) => (
                     <SelectItem key={conn.id} value={conn.id}>
-                      {conn.name} {conn.status === "connected" && "✓"}
+                      {conn.instance_name} {conn.status === "connected" && "✓"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -606,7 +606,7 @@ const AutoProspecting = () => {
                 <SelectContent>
                   {connections.map((conn) => (
                     <SelectItem key={conn.id} value={conn.id}>
-                      {conn.name} {conn.status === "connected" && "✓"}
+                      {conn.instance_name} {conn.status === "connected" && "✓"}
                     </SelectItem>
                   ))}
                 </SelectContent>

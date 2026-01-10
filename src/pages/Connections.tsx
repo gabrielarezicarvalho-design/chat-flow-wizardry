@@ -127,14 +127,13 @@ const Connections = () => {
   useEffect(() => {
     const syncConnectionStatus = async () => {
       for (const connection of connections) {
-        // Check all connections that have a token and are not already marked as deleted
-        if (connection.token && connection.status !== 'deleted') {
+        // Check all connections that have an instance_id and are not already marked as deleted
+        const connAny = connection as any;
+        if (connAny.instance_id && connection.status !== 'deleted') {
           try {
             const { data, error } = await supabase.functions.invoke('wa-status-instance', {
               body: { 
-                token: connection.token, 
-                environment: connection.environment,
-                base_url: connection.base_url
+                instance_id: connAny.instance_id
               }
             });
 
@@ -158,48 +157,48 @@ const Connections = () => {
               (errorData?.status === 500 && errorMessage.includes('details'));
             
             if (isInstanceGone && connection.status !== 'deleted') {
-              console.log(`Connection ${connection.name} instance was deleted in UAZAPI, marking as deleted...`);
+              console.log(`Connection ${connection.instance_name} instance was deleted in UAZAPI, marking as deleted...`);
               
               // Only update status - don't clear token/instance_id to avoid FK constraint issues
               await updateConnection.mutateAsync({
                 id: connection.id,
                 updates: { status: 'deleted' }
               });
-              toast.error(`🗑️ ${connection.name} foi removida da UAZAPI. Crie uma nova conexão.`);
+              toast.error(`🗑️ ${connection.instance_name} foi removida da UAZAPI. Crie uma nova conexão.`);
               continue;
             }
 
             // If UAZAPI reports disconnected but local status is connected, update the database
             if (data?.success && !data?.connected && connection.status === 'connected') {
-              console.log(`Connection ${connection.name} is disconnected in UAZAPI, updating local status...`);
+              console.log(`Connection ${connection.instance_name} is disconnected in UAZAPI, updating local status...`);
               await updateConnection.mutateAsync({
                 id: connection.id,
                 updates: { status: 'disconnected' }
               });
-              toast.warning(`⚠️ ${connection.name} foi desconectado do WhatsApp`);
+              toast.warning(`⚠️ ${connection.instance_name} foi desconectado do WhatsApp`);
             }
             
             // If UAZAPI reports connected but local status is disconnected, update
             if (data?.success && data?.connected && connection.status === 'disconnected') {
-              console.log(`Connection ${connection.name} is connected in UAZAPI, updating local status...`);
+              console.log(`Connection ${connection.instance_name} is connected in UAZAPI, updating local status...`);
               await updateConnection.mutateAsync({
                 id: connection.id,
                 updates: { status: 'connected' }
               });
-              toast.success(`✅ ${connection.name} está conectado!`);
+              toast.success(`✅ ${connection.instance_name} está conectado!`);
             }
           } catch (err: any) {
             // Try to parse error message for instance deletion
             const errMsg = (err?.message || '').toLowerCase();
             if ((errMsg.includes('instancedeleted') || errMsg.includes('instance details')) && connection.status !== 'deleted') {
-              console.log(`Connection ${connection.name} instance was deleted (caught error), marking as deleted...`);
+              console.log(`Connection ${connection.instance_name} instance was deleted (caught error), marking as deleted...`);
               await updateConnection.mutateAsync({
                 id: connection.id,
                 updates: { status: 'deleted' }
               });
-              toast.error(`🗑️ ${connection.name} foi removida da UAZAPI.`);
+              toast.error(`🗑️ ${connection.instance_name} foi removida da UAZAPI.`);
             } else {
-              console.error(`Error checking status for ${connection.name}:`, err);
+              console.error(`Error checking status for ${connection.instance_name}:`, err);
             }
           }
         }
@@ -636,20 +635,20 @@ const Connections = () => {
         }
       });
 
-      // If a flow is selected, update the flow's connection_id to link it
+      // If a flow is selected, update the flow's is_active to link it
       if (settings.sendToUra && settings.sendToUra !== "none") {
-        // First, unlink any previously linked flows from this connection
+        // First, deactivate any previously linked flows from this connection
         const { data: previousFlows } = await supabase
           .from("flows")
           .select("id")
-          .eq("connection_id", selectedConnection.id);
+          .eq("is_active", true);
 
         if (previousFlows && previousFlows.length > 0) {
           for (const prevFlow of previousFlows) {
             if (prevFlow.id !== settings.sendToUra) {
               await supabase
                 .from("flows")
-                .update({ connection_id: null })
+                .update({ is_active: false })
                 .eq("id", prevFlow.id);
             }
           }
@@ -659,8 +658,7 @@ const Connections = () => {
         const { error: flowError } = await supabase
           .from("flows")
           .update({ 
-            connection_id: selectedConnection.id,
-            status: "active" 
+            is_active: true 
           })
           .eq("id", settings.sendToUra);
 
@@ -671,11 +669,10 @@ const Connections = () => {
           toast.success("Configurações e fluxo salvos com sucesso!");
         }
       } else {
-        // Unlink all flows from this connection if "none" is selected
+        // Deactivate all flows if "none" is selected
         await supabase
           .from("flows")
-          .update({ connection_id: null })
-          .eq("connection_id", selectedConnection.id);
+          .update({ is_active: false });
           
         toast.success("Configurações salvas com sucesso!");
       }
@@ -839,8 +836,8 @@ const Connections = () => {
                       }`} />
                     </div>
                     <div>
-                      <h4 className="font-medium text-foreground text-sm">{connection.name}</h4>
-                      <p className="text-xs text-muted-foreground">{connection.environment}</p>
+                      <h4 className="font-medium text-foreground text-sm">{connection.instance_name}</h4>
+                      <p className="text-xs text-muted-foreground">{connection.status}</p>
                     </div>
                   </div>
                   <Badge 
