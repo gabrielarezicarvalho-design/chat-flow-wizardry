@@ -95,8 +95,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Assign admin role (or moderator for company admins)
-    const role = is_company_admin ? "moderator" : "admin";
+    // Assign admin role for company administrators
+    // Company admins should have "admin" role to have full access within their company
+    const role = "admin";
     const { error: roleError } = await supabase
       .from("user_roles")
       .insert({ user_id: newUser.user.id, role });
