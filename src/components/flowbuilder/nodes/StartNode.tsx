@@ -1,5 +1,5 @@
 import { Handle, Position } from '@xyflow/react';
-import { Play, ChevronRight, MessageCircle, Search, Clock, Moon } from 'lucide-react';
+import { Play, ChevronRight, MessageCircle, Search, Clock, Moon, UserPlus, Tag } from 'lucide-react';
 
 interface StartNodeProps {
   data: Record<string, any>;
@@ -11,6 +11,8 @@ const triggerLabels: Record<string, { label: string; icon: React.ElementType }> 
   keyword: { label: 'Palavra-chave', icon: Search },
   business_hours: { label: 'Horário comercial', icon: Clock },
   out_of_hours: { label: 'Fora do horário', icon: Moon },
+  new_contact: { label: 'Novo contato', icon: UserPlus },
+  tag_added: { label: 'Tag adicionada', icon: Tag },
 };
 
 export const StartNode = ({ data, selected }: StartNodeProps) => {

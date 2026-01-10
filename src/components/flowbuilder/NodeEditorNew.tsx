@@ -462,6 +462,8 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
           <SelectContent>
             <SelectItem value="first_message">Primeira mensagem</SelectItem>
             <SelectItem value="keyword">Palavra-chave específica</SelectItem>
+            <SelectItem value="new_contact">Novo contato</SelectItem>
+            <SelectItem value="tag_added">Tag adicionada</SelectItem>
             <SelectItem value="business_hours">Horário comercial</SelectItem>
             <SelectItem value="out_of_hours">Fora do horário</SelectItem>
           </SelectContent>
@@ -477,6 +479,26 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
           />
           <p className="text-xs text-muted-foreground">
             Separe múltiplas palavras-chave com vírgula
+          </p>
+        </div>
+      )}
+      {nodeData.trigger === 'tag_added' && (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Nome da Tag</Label>
+          <Input
+            value={nodeData.tagName || ''}
+            onChange={(e) => handleUpdate('tagName', e.target.value)}
+            placeholder="Ex: cliente_vip, lead_quente"
+          />
+          <p className="text-xs text-muted-foreground">
+            O fluxo será ativado quando esta tag for adicionada ao contato
+          </p>
+        </div>
+      )}
+      {nodeData.trigger === 'new_contact' && (
+        <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+          <p className="text-sm text-blue-600">
+            Este fluxo será ativado quando um novo contato enviar a primeira mensagem.
           </p>
         </div>
       )}
