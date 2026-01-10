@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart3, MessageSquare, Users, Clock, TrendingUp, RefreshCw } from "lucide-react";
+import { BarChart3, Building2, Users, RefreshCw } from "lucide-react";
 
 export function AdminRelatorios() {
   const [stats, setStats] = useState({
-    totalMessages: 0,
-    totalConversations: 0,
-    avgResponseTime: "—",
-    resolvedConversations: 0
+    totalCompanies: 0,
+    totalProfiles: 0,
+    totalConnections: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -18,18 +17,16 @@ export function AdminRelatorios() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const [messagesRes, conversationsRes] = await Promise.all([
-        supabase.from("messages").select("id", { count: "exact", head: true }),
-        supabase.from("conversations").select("id, status")
+      const [companiesRes, profilesRes, connectionsRes] = await Promise.all([
+        supabase.from("companies").select("id", { count: "exact", head: true }),
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("connections").select("id", { count: "exact", head: true })
       ]);
-
-      const conversations = conversationsRes.data || [];
       
       setStats({
-        totalMessages: messagesRes.count || 0,
-        totalConversations: conversations.length,
-        avgResponseTime: "2min", // Would need calculation logic
-        resolvedConversations: conversations.filter(c => c.status === "closed").length
+        totalCompanies: companiesRes.count || 0,
+        totalProfiles: profilesRes.count || 0,
+        totalConnections: connectionsRes.count || 0
       });
     } catch (error) {
       console.error("Error:", error);
@@ -39,12 +36,10 @@ export function AdminRelatorios() {
   };
 
   const reports = [
-    { title: "Mensagens por Empresa", description: "Volume de mensagens enviadas/recebidas" },
-    { title: "Conversas por Canal", description: "WhatsApp, Web, etc." },
-    { title: "Tempo Médio de Resposta", description: "Por empresa e agente" },
-    { title: "Conversas Resolvidas", description: "Taxa de resolução" },
-    { title: "Consumo de API Meta", description: "Chamadas e limites" },
-    { title: "Performance por Agente", description: "Métricas de desempenho" }
+    { title: "Empresas por Plano", description: "Distribuição de empresas por tipo de plano" },
+    { title: "Usuários por Empresa", description: "Quantidade de usuários cadastrados" },
+    { title: "Conexões Ativas", description: "WhatsApp conectados por empresa" },
+    { title: "Departamentos", description: "Estrutura organizacional" }
   ];
 
   if (loading) {
@@ -64,13 +59,13 @@ export function AdminRelatorios() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border border-emerald-500/20">
           <div className="flex items-center gap-3">
-            <MessageSquare className="h-8 w-8 text-emerald-400" />
+            <Building2 className="h-8 w-8 text-emerald-400" />
             <div>
-              <p className="text-2xl font-bold text-white">{stats.totalMessages.toLocaleString()}</p>
-              <p className="text-xs text-slate-400">Total de Mensagens</p>
+              <p className="text-2xl font-bold text-white">{stats.totalCompanies}</p>
+              <p className="text-xs text-slate-400">Total de Empresas</p>
             </div>
           </div>
         </div>
@@ -78,26 +73,17 @@ export function AdminRelatorios() {
           <div className="flex items-center gap-3">
             <Users className="h-8 w-8 text-cyan-400" />
             <div>
-              <p className="text-2xl font-bold text-white">{stats.totalConversations}</p>
-              <p className="text-xs text-slate-400">Total de Conversas</p>
+              <p className="text-2xl font-bold text-white">{stats.totalProfiles}</p>
+              <p className="text-xs text-slate-400">Total de Usuários</p>
             </div>
           </div>
         </div>
         <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 border border-purple-500/20">
           <div className="flex items-center gap-3">
-            <Clock className="h-8 w-8 text-purple-400" />
+            <BarChart3 className="h-8 w-8 text-purple-400" />
             <div>
-              <p className="text-2xl font-bold text-white">{stats.avgResponseTime}</p>
-              <p className="text-xs text-slate-400">Tempo Médio Resp.</p>
-            </div>
-          </div>
-        </div>
-        <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/20">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="h-8 w-8 text-amber-400" />
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.resolvedConversations}</p>
-              <p className="text-xs text-slate-400">Conversas Resolvidas</p>
+              <p className="text-2xl font-bold text-white">{stats.totalConnections}</p>
+              <p className="text-xs text-slate-400">Conexões WhatsApp</p>
             </div>
           </div>
         </div>
@@ -106,7 +92,7 @@ export function AdminRelatorios() {
       {/* Reports List */}
       <div>
         <h2 className="text-lg font-semibold text-white mb-4">Relatórios Disponíveis</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {reports.map((report) => (
             <div 
               key={report.title}

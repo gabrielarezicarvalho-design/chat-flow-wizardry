@@ -6,19 +6,9 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 
-interface AuditLog {
-  id: string;
-  action: string;
-  user_email: string | null;
-  created_at: string;
-  details: string | null;
-  severity: "info" | "warning" | "critical";
-}
-
 export function AdminSeguranca() {
   const [loading, setLoading] = useState(true);
-  const [recentLogins, setRecentLogins] = useState<any[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [recentProfiles, setRecentProfiles] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -27,23 +17,13 @@ export function AdminSeguranca() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch real audit logs
-      const { data: logs } = await supabase
-        .from("audit_logs")
-        .select("id, action, user_email, created_at, details, severity")
-        .order("created_at", { ascending: false })
-        .limit(20);
-
-      setAuditLogs((logs as AuditLog[]) || []);
-
-      // Get recent profile activity as proxy for logins
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, full_name, is_online, last_seen_at")
         .order("last_seen_at", { ascending: false })
         .limit(10);
 
-      setRecentLogins(profiles || []);
+      setRecentProfiles(profiles || []);
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -90,7 +70,7 @@ export function AdminSeguranca() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Audit Logs */}
+        {/* Audit Logs Placeholder */}
         <div className="rounded-xl border border-white/10 overflow-hidden">
           <div className="p-4 bg-white/5 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -101,36 +81,11 @@ export function AdminSeguranca() {
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             </Button>
           </div>
-          {auditLogs.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">
-              Nenhum log de auditoria registrado
-            </div>
-          ) : (
-            <div className="divide-y divide-white/5 max-h-80 overflow-y-auto">
-              {auditLogs.map((log) => (
-                <div key={log.id} className="p-4 hover:bg-white/5 transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge className={
-                          log.severity === "critical" ? "bg-red-500/20 text-red-400" :
-                          log.severity === "warning" ? "bg-amber-500/20 text-amber-400" :
-                          "bg-slate-500/20 text-slate-400"
-                        }>
-                          {log.action}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-slate-300">{log.details || "Sem detalhes"}</p>
-                      <p className="text-xs text-slate-500 mt-1">Por: {log.user_email || "Sistema"}</p>
-                    </div>
-                    <span className="text-xs text-slate-500">
-                      {format(new Date(log.created_at), "dd/MM HH:mm", { locale: ptBR })}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="p-8 text-center text-slate-400">
+            <Activity className="h-12 w-12 mx-auto mb-4 text-slate-600" />
+            <p>Logs de auditoria serão exibidos aqui</p>
+            <p className="text-xs mt-2">Tabela audit_logs necessária</p>
+          </div>
         </div>
 
         {/* Recent Activity */}
@@ -143,9 +98,13 @@ export function AdminSeguranca() {
             <div className="p-8 text-center">
               <RefreshCw className="h-6 w-6 animate-spin mx-auto text-emerald-500" />
             </div>
+          ) : recentProfiles.length === 0 ? (
+            <div className="p-8 text-center text-slate-500">
+              Nenhuma atividade recente
+            </div>
           ) : (
             <div className="divide-y divide-white/5">
-              {recentLogins.map((user) => (
+              {recentProfiles.map((user) => (
                 <div key={user.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
