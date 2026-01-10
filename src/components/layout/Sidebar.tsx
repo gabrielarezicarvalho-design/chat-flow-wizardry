@@ -15,14 +15,12 @@ import {
   Contact, 
   Megaphone, 
   GitBranch, 
-  FileText, 
   ClipboardList,
   LogOut,
   Shield,
   Headphones,
   Ticket,
   MessagesSquare,
-  Bug,
   ChevronLeft,
   ChevronRight,
   Target
@@ -59,14 +57,11 @@ const adminNavItems: NavItem[] = [
   { to: "/ai-tickets", icon: Ticket, label: "Chamados IA", feature: "ai_agents" },
   { to: "/mass-sending", icon: Megaphone, label: "Envio em Massa", feature: "mass_sending" },
   { to: "/auto-prospecting", icon: Target, label: "Prospecção Automática", feature: "mass_sending" },
-  { to: "/smart-forms", icon: ClipboardList, label: "Smart Forms", feature: "smart_forms" },
-  { to: "/formularios", icon: FileText, label: "Respostas", feature: "smart_forms" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
   { to: "/departments", icon: Briefcase, label: "Departamentos", feature: "departments" },
   { to: "/flows", icon: GitBranch, label: "Flow Builder", feature: "flows_basic" },
   { to: "/connections", icon: LinkIcon, label: "Conexões" },
   { to: "/users", icon: UsersRound, label: "Usuários" },
-  { to: "/feedback", icon: Bug, label: "Bugs & Melhorias" },
   { to: "/attendance", icon: Phone, label: "Atendimentos", feature: "chat" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
@@ -77,7 +72,6 @@ const agentNavItems: NavItem[] = [
   { to: "/internal-chat", icon: MessagesSquare, label: "Chat Interno", feature: "internal_chat" },
   { to: "/conversations", icon: MessageSquare, label: "Conversas", feature: "chat" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
-  { to: "/feedback", icon: Bug, label: "Bugs & Melhorias" },
   { to: "/attendance-reports", icon: ClipboardList, label: "Histórico", feature: "reports" },
 ];
 
