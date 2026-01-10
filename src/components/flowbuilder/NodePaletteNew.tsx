@@ -43,36 +43,38 @@ interface NodePaletteNewProps {
 
 export const NodePaletteNew = ({ onDragStart }: NodePaletteNewProps) => {
   return (
-    <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-2.5 flex items-center gap-1.5 overflow-x-auto scrollbar-thin">
-      <TooltipProvider delayDuration={100}>
-        {nodeTypes.map((node) => (
-          <Tooltip key={node.type}>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  "group relative w-10 h-10 rounded-xl flex items-center justify-center cursor-grab",
-                  "active:cursor-grabbing transition-all duration-200 ease-out",
-                  "hover:scale-110 hover:shadow-lg hover:-translate-y-0.5",
-                  "bg-gradient-to-br shadow-sm",
-                  node.color
-                )}
-                draggable
-                onDragStart={(e) => onDragStart(e, node.type)}
+    <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-2.5">
+      <TooltipProvider delayDuration={0}>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {nodeTypes.map((node) => (
+            <Tooltip key={node.type}>
+              <TooltipTrigger asChild>
+                <div
+                  className={cn(
+                    "group relative w-10 h-10 rounded-xl flex items-center justify-center cursor-grab",
+                    "active:cursor-grabbing transition-all duration-200 ease-out",
+                    "hover:scale-110 hover:shadow-lg hover:-translate-y-0.5",
+                    "bg-gradient-to-br shadow-sm",
+                    node.color
+                  )}
+                  draggable
+                  onDragStart={(e) => onDragStart(e, node.type)}
+                >
+                  <node.icon className="h-5 w-5 text-white drop-shadow-sm" />
+                  <div className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/10 transition-colors" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent 
+                side="bottom" 
+                className="bg-popover border shadow-lg px-3 py-2 z-50"
+                sideOffset={8}
               >
-                <node.icon className="h-5 w-5 text-white drop-shadow-sm" />
-                <div className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/10 transition-colors" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent 
-              side="bottom" 
-              className="bg-popover border shadow-lg px-3 py-2"
-              sideOffset={8}
-            >
-              <p className="font-medium text-sm">{node.label}</p>
-              <p className="text-xs text-muted-foreground">{node.description}</p>
-            </TooltipContent>
-          </Tooltip>
-        ))}
+                <p className="font-medium text-sm">{node.label}</p>
+                <p className="text-xs text-muted-foreground">{node.description}</p>
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
       </TooltipProvider>
     </div>
   );
