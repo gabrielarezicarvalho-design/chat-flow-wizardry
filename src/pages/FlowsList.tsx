@@ -33,7 +33,7 @@ const FlowsList = () => {
       is_active: false,
     });
     if (newFlow?.id) {
-      navigate(`/flowbuilder/${newFlow.id}`);
+      navigate(`/flow-builder/${newFlow.id}`);
     }
     setShowCreateDialog(false);
   };
@@ -126,7 +126,7 @@ const FlowsList = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate(`/flowbuilder/${flow.id}`)}
+                    onClick={() => navigate(`/flow-builder/${flow.id}`)}
                   >
                     <Edit className="w-4 h-4 mr-1" />
                     Editar
