@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 interface CreateFlowDialogProps {
@@ -20,31 +19,30 @@ interface CreateFlowDialogProps {
 
 export const CreateFlowDialog = ({ open, onOpenChange, onCreateFlow, template }: CreateFlowDialogProps) => {
   const [name, setName] = useState(template || "");
-  const [trigger, setTrigger] = useState("Primeira mensagem");
-  const [message, setMessage] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleCreate = () => {
     onCreateFlow({
       name,
-      trigger,
+      trigger: "first_message",
       status: "active",
       flow_data: {
-        message,
+        description,
         template: template || "custom"
       }
     });
     onOpenChange(false);
     setName("");
-    setMessage("");
+    setDescription("");
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Criar Novo Fluxo</DialogTitle>
           <DialogDescription>
-            Configure o nome, gatilho e mensagem automática para o seu novo fluxo
+            Configure o nome do seu fluxo. O gatilho será configurado dentro do editor de fluxo.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -60,30 +58,13 @@ export const CreateFlowDialog = ({ open, onOpenChange, onCreateFlow, template }:
           </div>
           
           <div>
-            <Label htmlFor="trigger">Gatilho</Label>
-            <Select value={trigger} onValueChange={setTrigger}>
-              <SelectTrigger className="mt-2">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Primeira mensagem">Primeira mensagem</SelectItem>
-                <SelectItem value="Palavra-chave: 'orçamento'">Palavra-chave: 'orçamento'</SelectItem>
-                <SelectItem value="Palavra-chave: 'ajuda'">Palavra-chave: 'ajuda'</SelectItem>
-                <SelectItem value="Palavra-chave: 'preço'">Palavra-chave: 'preço'</SelectItem>
-                <SelectItem value="Horário comercial">Horário comercial</SelectItem>
-                <SelectItem value="Fora do horário">Fora do horário</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="message">Mensagem Automática</Label>
+            <Label htmlFor="description">Descrição (opcional)</Label>
             <Textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Digite a mensagem que será enviada automaticamente..."
-              className="mt-2 min-h-[120px]"
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Descreva o objetivo deste fluxo..."
+              className="mt-2 min-h-[80px]"
             />
           </div>
         </div>
@@ -94,7 +75,7 @@ export const CreateFlowDialog = ({ open, onOpenChange, onCreateFlow, template }:
           </Button>
           <Button 
             onClick={handleCreate}
-            disabled={!name || !message}
+            disabled={!name}
           >
             Criar Fluxo
           </Button>
