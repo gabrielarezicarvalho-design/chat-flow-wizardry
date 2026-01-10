@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { 
   Building2, Plus, Pencil, Trash2, Lock, Unlock, Search, 
-  RefreshCw, Loader2, CheckCircle, XCircle
+  RefreshCw, Loader2, CheckCircle, XCircle, User, Eye, EyeOff
 } from "lucide-react";
 
 interface Company {
@@ -31,13 +31,18 @@ export function AdminEmpresas() {
   const [showDialog, setShowDialog] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     name: "",
     slug: "",
     is_active: true,
     max_users: 10,
     max_connections: 3,
-    plan: "basic"
+    plan: "basic",
+    // Admin user fields
+    admin_username: "",
+    admin_password: "",
+    admin_full_name: ""
   });
 
   useEffect(() => {
@@ -68,6 +73,18 @@ export function AdminEmpresas() {
       return;
     }
 
+    // Validate admin user for new companies
+    if (!editingCompany) {
+      if (!form.admin_username) {
+        toast.error("Usuário do administrador é obrigatório");
+        return;
+      }
+      if (!form.admin_password || form.admin_password.length < 6) {
+        toast.error("Senha deve ter no mínimo 6 caracteres");
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const data = {
@@ -87,11 +104,35 @@ export function AdminEmpresas() {
         if (error) throw error;
         toast.success("Empresa atualizada!");
       } else {
-        const { error } = await supabase
+        // Create company first
+        const { data: newCompany, error: companyError } = await supabase
           .from("companies")
-          .insert(data);
-        if (error) throw error;
-        toast.success("Empresa criada!");
+          .insert(data)
+          .select()
+          .single();
+        
+        if (companyError) throw companyError;
+
+        // Create admin user for the company using edge function
+        const { data: adminResult, error: adminError } = await supabase.functions.invoke('create-admin-user', {
+          body: {
+            secret_key: "MARKETFLOW_ADMIN_SETUP_2026",
+            username: form.admin_username,
+            password: form.admin_password,
+            full_name: form.admin_full_name || form.admin_username,
+            company_id: newCompany.id,
+            is_company_admin: true
+          }
+        });
+
+        if (adminError) {
+          console.error("Error creating admin:", adminError);
+          // Delete the company if admin creation failed
+          await supabase.from("companies").delete().eq("id", newCompany.id);
+          throw new Error("Erro ao criar administrador: " + adminError.message);
+        }
+
+        toast.success(`Empresa criada! Admin: ${form.admin_username}`);
       }
 
       setShowDialog(false);
@@ -141,8 +182,12 @@ export function AdminEmpresas() {
       is_active: true,
       max_users: 10,
       max_connections: 3,
-      plan: "basic"
+      plan: "basic",
+      admin_username: "",
+      admin_password: "",
+      admin_full_name: ""
     });
+    setShowPassword(false);
   };
 
   const openEdit = (company: Company) => {
@@ -153,7 +198,10 @@ export function AdminEmpresas() {
       is_active: company.is_active,
       max_users: company.max_users,
       max_connections: company.max_connections,
-      plan: company.plan
+      plan: company.plan,
+      admin_username: "",
+      admin_password: "",
+      admin_full_name: ""
     });
     setShowDialog(true);
   };
@@ -317,7 +365,7 @@ export function AdminEmpresas() {
 
       {/* Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-slate-900 border-white/10 text-white max-w-lg">
+        <DialogContent className="bg-slate-900 border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingCompany ? "Editar Empresa" : "Nova Empresa"}</DialogTitle>
           </DialogHeader>
@@ -372,6 +420,61 @@ export function AdminEmpresas() {
                 onCheckedChange={(checked) => setForm({ ...form, is_active: checked })}
               />
             </div>
+
+            {/* Admin User Section - Only for new companies */}
+            {!editingCompany && (
+              <div className="pt-4 border-t border-white/10">
+                <div className="flex items-center gap-2 mb-4">
+                  <User className="h-5 w-5 text-emerald-400" />
+                  <h3 className="font-semibold text-white">Administrador da Empresa</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Nome Completo</Label>
+                    <Input
+                      value={form.admin_full_name}
+                      onChange={(e) => setForm({ ...form, admin_full_name: e.target.value })}
+                      className="bg-white/5 border-white/10"
+                      placeholder="Nome do administrador"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Usuário de Login *</Label>
+                    <Input
+                      value={form.admin_username}
+                      onChange={(e) => setForm({ ...form, admin_username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
+                      className="bg-white/5 border-white/10"
+                      placeholder="admin_empresa"
+                    />
+                    <p className="text-xs text-slate-500">Apenas letras minúsculas, números e underscore</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Senha *</Label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        value={form.admin_password}
+                        onChange={(e) => setForm({ ...form, admin_password: e.target.value })}
+                        className="bg-white/5 border-white/10 pr-10"
+                        placeholder="Mínimo 6 caracteres"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)} className="border-white/20 text-white">
@@ -379,11 +482,11 @@ export function AdminEmpresas() {
             </Button>
             <Button 
               onClick={handleSave}
-              disabled={saving || !form.name}
+              disabled={saving || !form.name || (!editingCompany && (!form.admin_username || form.admin_password.length < 6))}
               className="bg-gradient-to-r from-emerald-500 to-cyan-500"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              {editingCompany ? "Salvar" : "Criar"}
+              {editingCompany ? "Salvar" : "Criar Empresa"}
             </Button>
           </DialogFooter>
         </DialogContent>

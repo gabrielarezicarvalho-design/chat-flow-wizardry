@@ -9,24 +9,27 @@ import { MessageSquare, Cog } from "lucide-react";
 interface CreateURADialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateURA: (ura: {
+  onCreateURA?: (ura: {
+    name: string;
+    type: "chat" | "automation";
+    trigger: string;
+  }) => void;
+  onSubmit?: (ura: {
     name: string;
     type: "chat" | "automation";
     trigger: string;
   }) => void;
 }
 
-export const CreateURADialog = ({ open, onOpenChange, onCreateURA }: CreateURADialogProps) => {
+export const CreateURADialog = ({ open, onOpenChange, onCreateURA, onSubmit }: CreateURADialogProps) => {
   const [name, setName] = useState("");
   const [type, setType] = useState<"chat" | "automation">("chat");
   const [trigger, setTrigger] = useState("Primeira mensagem");
 
   const handleCreate = () => {
-    onCreateURA({
-      name,
-      type,
-      trigger,
-    });
+    const data = { name, type, trigger };
+    if (onCreateURA) onCreateURA(data);
+    if (onSubmit) onSubmit(data);
     onOpenChange(false);
     setName("");
     setType("chat");
