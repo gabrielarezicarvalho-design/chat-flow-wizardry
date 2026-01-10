@@ -125,7 +125,7 @@ export function AdminUsuarios() {
     }
   };
 
-  const handleUpdateRole = async (userId: string, newRole: string) => {
+  const handleUpdateRole = async (userId: string, newRole: "admin" | "moderator" | "user" | "agent") => {
     try {
       const { data: existing } = await supabase
         .from("user_roles")
@@ -202,7 +202,7 @@ export function AdminUsuarios() {
 
         <Select 
           value={user.role} 
-          onValueChange={(v) => handleUpdateRole(user.id, v)}
+          onValueChange={(v) => handleUpdateRole(user.id, v as "admin" | "moderator" | "user" | "agent")}
         >
           <SelectTrigger className="w-32 bg-white/5 border-white/10 text-white h-8 text-xs">
             <SelectValue />
