@@ -25,7 +25,6 @@ export const DebugConsole = () => {
   const consoleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Keyboard shortcut: Shift + 8 (which is *)
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.shiftKey && e.key === '*') {
         e.preventDefault();
@@ -34,7 +33,6 @@ export const DebugConsole = () => {
           addLog('info', '🔧 Console aberto via Shift+8');
         }
       }
-      // Also support Ctrl+Shift+D
       if (e.ctrlKey && e.shiftKey && e.key === 'D') {
         e.preventDefault();
         setIsVisible(prev => !prev);
@@ -46,45 +44,6 @@ export const DebugConsole = () => {
 
     window.addEventListener('keydown', handleKeyPress);
 
-    // Listen for real-time messages
-    const channel = supabase
-      .channel('debug_messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages'
-        },
-        (payload: any) => {
-          addLog('success', `✅ Nova mensagem: ID ${payload.new.id} | De: ${payload.new.remetente} | "${payload.new.conteudo?.substring(0, 50)}..."`);
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'conversations'
-        },
-        (payload) => {
-          addLog('success', `✅ Nova conversa: ID ${payload.new.id} | Lead: ${payload.new.lead_id}`);
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'leads'
-        },
-        (payload) => {
-          addLog('success', `✅ Novo lead: ${payload.new.name} | Tel: ${payload.new.phone}`);
-        }
-      )
-      .subscribe();
-
-    // Listen for console errors
     const originalError = console.error;
     console.error = (...args) => {
       const message = args.map(arg => 
@@ -94,18 +53,15 @@ export const DebugConsole = () => {
       originalError.apply(console, args);
     };
 
-    // Initial log
     addLog('info', '🔧 Console iniciado - Pressione Shift+8 ou Ctrl+Shift+D para abrir');
     addLog('info', '💡 Digite "help" para ver comandos disponíveis');
 
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
-      supabase.removeChannel(channel);
       console.error = originalError;
     };
   }, [isVisible]);
 
-  // Drag handling
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
@@ -165,10 +121,7 @@ export const DebugConsole = () => {
         addLog('info', '  • help - Mostra esta mensagem');
         addLog('info', '  • clear - Limpa o console');
         addLog('info', '  • status - Verifica status do sistema');
-        addLog('info', '  • connections - Lista conexões ativas');
-        addLog('info', '  • messages - Últimas 5 mensagens');
-        addLog('info', '  • flows - Lista fluxos ativos');
-        addLog('info', '  • agents - Lista agentes e status');
+        addLog('info', '  • connections - Lista conexões');
         addLog('info', '  • departments - Lista departamentos');
         addLog('info', '  • export - Exporta logs para arquivo');
         break;
@@ -184,18 +137,6 @@ export const DebugConsole = () => {
       
       case 'connections':
         checkConnections();
-        break;
-      
-      case 'messages':
-        checkRecentMessages();
-        break;
-      
-      case 'flows':
-        checkFlows();
-        break;
-        
-      case 'agents':
-        checkAgents();
         break;
         
       case 'departments':
@@ -221,23 +162,15 @@ export const DebugConsole = () => {
       addLog('success', `✅ Autenticação: ${user ? 'Conectado como ' + user.email : 'Desconectado'}`);
       
       if (user) {
-        const { count: convsCount } = await supabase
-          .from('conversations')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id);
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
         
-        const { count: msgsCount } = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true });
-        
-        const { count: flowsCount } = await supabase
-          .from('flows')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id);
-        
-        addLog('info', `📊 Conversas: ${convsCount || 0}`);
-        addLog('info', `💬 Mensagens totais: ${msgsCount || 0}`);
-        addLog('info', `🔄 Fluxos: ${flowsCount || 0}`);
+        if (profile) {
+          addLog('info', `👤 Perfil: ${profile.full_name || profile.username || 'N/A'}`);
+        }
       }
     } catch (error: any) {
       addLog('error', `❌ Erro ao verificar status: ${error.message}`);
@@ -254,99 +187,31 @@ export const DebugConsole = () => {
         return;
       }
       
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.company_id) {
+        addLog('warning', '⚠️ Usuário sem empresa associada');
+        return;
+      }
+      
       const { data: connections } = await supabase
         .from('connections')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('company_id', profile.company_id);
       
       if (!connections || connections.length === 0) {
         addLog('warning', '⚠️ Nenhuma conexão encontrada');
       } else {
         connections.forEach(conn => {
-          addLog('success', `✅ ${conn.name} | Status: ${conn.status} | Env: ${conn.environment} | ID: ${conn.instance_id}`);
+          addLog('success', `✅ ${conn.instance_name} | Status: ${conn.status} | ID: ${conn.instance_id}`);
         });
       }
     } catch (error: any) {
       addLog('error', `❌ Erro ao verificar conexões: ${error.message}`);
-    }
-  };
-
-  const checkRecentMessages = async () => {
-    addLog('info', '🔍 Buscando últimas mensagens...');
-    
-    try {
-      const { data: messages } = await supabase
-        .from('messages')
-        .select('*')
-        .order('criado_em', { ascending: false })
-        .limit(5);
-      
-      if (!messages || messages.length === 0) {
-        addLog('warning', '⚠️ Nenhuma mensagem encontrada');
-      } else {
-        messages.forEach((msg: any) => {
-          addLog('info', `💬 ${msg.remetente}: "${msg.conteudo?.substring(0, 40)}..." | ${new Date(msg.criado_em).toLocaleString()}`);
-        });
-      }
-    } catch (error: any) {
-      addLog('error', `❌ Erro ao buscar mensagens: ${error.message}`);
-    }
-  };
-
-  const checkFlows = async () => {
-    addLog('info', '🔍 Buscando fluxos...');
-    
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        addLog('error', '❌ Usuário não autenticado');
-        return;
-      }
-      
-      const { data: flows } = await supabase
-        .from('flows')
-        .select('*')
-        .eq('user_id', user.id);
-      
-      if (!flows || flows.length === 0) {
-        addLog('warning', '⚠️ Nenhum fluxo encontrado');
-      } else {
-        flows.forEach((flow: any) => {
-          addLog('info', `🔄 ${flow.name} | Status: ${flow.status} | Trigger: ${flow.trigger}`);
-        });
-      }
-    } catch (error: any) {
-      addLog('error', `❌ Erro ao buscar fluxos: ${error.message}`);
-    }
-  };
-
-  const checkAgents = async () => {
-    addLog('info', '🔍 Buscando agentes...');
-    
-    try {
-      const { data: roles } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'agent');
-      
-      if (!roles || roles.length === 0) {
-        addLog('warning', '⚠️ Nenhum agente encontrado');
-        return;
-      }
-      
-      const userIds = roles.map(r => r.user_id);
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('id', userIds);
-      
-      if (profiles) {
-        profiles.forEach((p: any) => {
-          addLog('info', `👤 ${p.full_name || p.username} | ${p.is_online ? '🟢 Online' : '⚫ Offline'} | Status: ${p.status || 'N/A'}`);
-        });
-      }
-    } catch (error: any) {
-      addLog('error', `❌ Erro ao buscar agentes: ${error.message}`);
     }
   };
 
@@ -360,17 +225,27 @@ export const DebugConsole = () => {
         return;
       }
       
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.company_id) {
+        addLog('warning', '⚠️ Usuário sem empresa associada');
+        return;
+      }
+      
       const { data: departments } = await supabase
         .from('departments')
-        .select('*, department_members(count)')
-        .eq('user_id', user.id);
+        .select('*')
+        .eq('company_id', profile.company_id);
       
       if (!departments || departments.length === 0) {
         addLog('warning', '⚠️ Nenhum departamento encontrado');
       } else {
         departments.forEach((d: any) => {
-          const memberCount = d.department_members?.[0]?.count || 0;
-          addLog('info', `🏢 ${d.name} | Membros: ${memberCount} | Cor: ${d.color || 'N/A'}`);
+          addLog('info', `🏢 ${d.name} | Cor: ${d.color || 'N/A'}`);
         });
       }
     } catch (error: any) {
@@ -414,7 +289,6 @@ export const DebugConsole = () => {
         cursor: isDragging ? 'grabbing' : 'default'
       }}
     >
-      {/* Draggable Header */}
       <div 
         className="p-2 border-b border-[#0066ff]/50 flex items-center justify-between bg-gradient-to-r from-[#0066ff]/20 to-[#00d4ff]/10 cursor-grab active:cursor-grabbing select-none"
         onMouseDown={handleDragStart}
@@ -497,44 +371,31 @@ export const DebugConsole = () => {
           <ScrollArea className="flex-1 p-3 bg-[#0d0d1a]" ref={scrollRef}>
             <div className="space-y-1 font-mono text-xs">
               {filteredLogs.map((log, index) => (
-                <div
+                <div 
                   key={index}
-                  className={`${
-                    log.type === 'error' ? 'text-red-400' :
-                    log.type === 'success' ? 'text-green-400' :
-                    log.type === 'warning' ? 'text-yellow-400' :
-                    log.type === 'command' ? 'text-cyan-400 font-bold' :
+                  className={`px-2 py-1 rounded ${
+                    log.type === 'error' ? 'bg-red-500/10 text-red-400' :
+                    log.type === 'success' ? 'bg-green-500/10 text-green-400' :
+                    log.type === 'warning' ? 'bg-yellow-500/10 text-yellow-400' :
+                    log.type === 'command' ? 'bg-[#0066ff]/10 text-[#00d4ff]' :
                     'text-gray-400'
                   }`}
                 >
-                  <span className="text-gray-600">[{log.timestamp}]</span>{' '}
-                  <span>{log.message}</span>
+                  <span className="text-gray-600">[{log.timestamp}]</span> {log.message}
                 </div>
               ))}
-              {filteredLogs.length === 0 && (
-                <div className="text-gray-600 text-center py-8">
-                  {filter === 'all' 
-                    ? 'Nenhum log ainda... Digite "help" para ver comandos'
-                    : `Nenhum log do tipo "${filter}"`
-                  }
-                </div>
-              )}
             </div>
           </ScrollArea>
-
+          
           <div className="p-2 border-t border-[#0066ff]/50 bg-[#0d0d1a]">
-            <div className="flex gap-2 items-center">
-              <span className="text-[#00d4ff] font-mono text-sm font-bold">{'$>'}</span>
+            <div className="flex gap-2">
+              <span className="text-[#00d4ff] font-mono text-sm">$</span>
               <Input
                 value={commandInput}
                 onChange={(e) => setCommandInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleCommand();
-                  }
-                }}
-                placeholder="Digite um comando (ex: help, status, clear, flows, agents)..."
-                className="flex-1 bg-[#1a1a2e] border-[#0066ff]/30 text-[#00d4ff] font-mono text-xs focus-visible:ring-[#00d4ff]/50 placeholder:text-gray-600"
+                onKeyDown={(e) => e.key === 'Enter' && handleCommand()}
+                placeholder="Digite um comando..."
+                className="flex-1 h-7 bg-transparent border-none text-white font-mono text-xs focus-visible:ring-0 px-0"
               />
             </div>
           </div>
