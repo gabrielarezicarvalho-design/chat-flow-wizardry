@@ -80,7 +80,7 @@ function App() {
               }}
             >
               <AuthProvider>
-                <WelcomePopup />
+                {/* WelcomePopup removed */}
                 <MultiSessionAlert />
                 <Suspense fallback={<Loading />}>
                   <Routes>
