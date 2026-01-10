@@ -61,10 +61,17 @@ interface NavItem {
 const adminNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/internal-chat", icon: MessagesSquare, label: "Chat Interno", feature: "internal_chat" },
-  { to: "/agents", icon: Sparkles, label: "Meus Agentes", feature: "ai_agents" },
-  { to: "/ai-tickets", icon: Ticket, label: "Chamados IA", feature: "ai_agents" },
+  { 
+    to: "/agents", 
+    icon: Sparkles, 
+    label: "Meus Agentes", 
+    feature: "ai_agents",
+    children: [
+      { to: "/ai-tickets", icon: Ticket, label: "Chamados IA", feature: "ai_agents" },
+      { to: "/auto-prospecting", icon: Target, label: "Prospecção Automática", feature: "mass_sending" },
+    ]
+  },
   { to: "/mass-sending", icon: Megaphone, label: "Envio em Massa", feature: "mass_sending" },
-  { to: "/auto-prospecting", icon: Target, label: "Prospecção Automática", feature: "mass_sending" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
   { to: "/flows", icon: GitBranch, label: "Flow Builder", feature: "flows_basic" },
   { 
