@@ -258,19 +258,8 @@ const Connections = () => {
         });
       }
 
-      // Load linked flow from database
-      if (selectedConnection?.id) {
-        const { data: linkedFlow } = await supabase
-          .from("flows")
-          .select("id")
-          .eq("connection_id", selectedConnection.id)
-          .limit(1)
-          .single();
-
-        if (linkedFlow) {
-          setSettings(prev => ({ ...prev, sendToUra: linkedFlow.id }));
-        }
-      }
+      // Load linked flow - simplified without connection_id
+      // Connection-flow linking is stored in flow settings instead
     };
 
     loadSettings();

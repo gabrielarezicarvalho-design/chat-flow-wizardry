@@ -207,14 +207,25 @@ function MassSendingContent() {
       if (userData.user) {
         const userId = userData.user.id;
         const [connectionsRes, campaignsRes, tagsRes, leadsRes, templatesRes] = await Promise.all([
-          supabase.from("connections").select("id, name, status, token, environment").eq("user_id", userId).eq("status", "connected"),
+          supabase.from("connections").select("id, instance_name, status"),
           supabase.from("campaigns").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
           supabase.from("tags").select("*").eq("user_id", userId),
           supabase.from("leads").select("*").eq("user_id", userId),
           supabase.from("campaign_templates").select("*").eq("user_id", userId).order("created_at", { ascending: false })
         ]);
-        setConnections((connectionsRes.data as Connection[]) || []);
-        setCampaigns((campaignsRes.data as Campaign[]) || []);
+        // Map connections to expected interface
+        const mappedConnections = (connectionsRes.data || []).map((c: any) => ({
+          id: c.id,
+          name: c.instance_name,
+          status: c.status
+        })) as Connection[];
+        setConnections(mappedConnections);
+        // Map campaigns without started_at
+        const mappedCampaigns = (campaignsRes.data || []).map((c: any) => ({
+          ...c,
+          started_at: null
+        })) as Campaign[];
+        setCampaigns(mappedCampaigns);
         setTags((tagsRes.data as TagItem[]) || []);
         setLeads((leadsRes.data as Lead[]) || []);
         setTemplates((templatesRes.data as CampaignTemplate[]) || []);
@@ -628,7 +639,7 @@ function MassSendingContent() {
         toast.success(`Campanha enviada! ${sentCount} enviados, ${failedCount} falhas`);
       }
       
-      // Apply tag on send if configured
+      // Apply tag on send if configured - update leads tags array directly
       if (tagOnSend && tagOnSendId) {
         addLog("info", "Aplicando etiqueta aos contatos enviados...");
         const phoneNumbers = nums.map(n => n.replace("@s.whatsapp.net", ""));
@@ -637,19 +648,11 @@ function MassSendingContent() {
         for (const phone of phoneNumbers) {
           const lead = leads.find(l => l.phone.replace(/\D/g, "") === phone.replace(/\D/g, ""));
           if (lead) {
-            // Check if lead_tags already has this tag
-            const { data: existingTag } = await supabase
-              .from("lead_tags")
-              .select("id")
-              .eq("lead_id", lead.id)
-              .eq("tag_id", tagOnSendId)
-              .single();
-            
-            if (!existingTag) {
-              await supabase.from("lead_tags").insert({
-                lead_id: lead.id,
-                tag_id: tagOnSendId
-              });
+            // Get tag name
+            const tag = tags.find(t => t.id === tagOnSendId);
+            if (tag && (!lead.tags || !lead.tags.includes(tag.name))) {
+              const newTags = [...(lead.tags || []), tag.name];
+              await supabase.from("leads").update({ tags: newTags }).eq("id", lead.id);
             }
           }
         }
@@ -738,20 +741,17 @@ function MassSendingContent() {
         .update({ status: "sending", started_at: new Date().toISOString() })
         .eq("id", campaignId);
       
-      const contacts = campaign.contacts || [];
-      if (!Array.isArray(contacts) || contacts.length === 0) {
+      const campaignContacts = (campaign as any).contacts || [];
+      if (!Array.isArray(campaignContacts) || campaignContacts.length === 0) {
         throw new Error("Nenhum contato na campanha");
       }
       
       // Build messages for UZAPI
-      const messages = contacts.map((contact: string) => {
-        const cleanNumber = contact.replace("@s.whatsapp.net", "").replace(/\D/g, "");
-        return {
-          number: cleanNumber,
-          type: "text",
-          text: campaign.message_content || ""
-        };
-      });
+      const campaignMessages = campaignContacts.map((contact: string) => ({
+        number: contact.replace("@s.whatsapp.net", "").replace(/\D/g, ""),
+        type: "text",
+        text: campaign.message_content || ""
+      }));
       
       // Send via UZAPI
       const response = await fetch(`${connection.base_url}/sender/advanced`, {
@@ -765,7 +765,7 @@ function MassSendingContent() {
           delayMin: 10,
           delayMax: 30,
           info: campaign.name,
-          messages
+          messages: campaignMessages
         })
       });
       
@@ -784,12 +784,12 @@ function MassSendingContent() {
         .from("campaigns")
         .update({ 
           status: "sent",
-          sent_count: messages.length,
+          sent_count: campaignMessages.length,
           completed_at: new Date().toISOString()
         })
         .eq("id", campaignId);
       
-      toast.success(`Campanha enviada! ${messages.length} mensagens.`);
+      toast.success(`Campanha enviada! ${campaignMessages.length} mensagens.`);
       loadData();
     } catch (err: any) {
       console.error("Error executing campaign:", err);

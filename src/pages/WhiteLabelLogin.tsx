@@ -26,12 +26,12 @@ const WhiteLabelLogin = () => {
     setLoading(true);
     try {
       // Buscar parceiro pelo username (slug)
-      const { data: partner, error: partnerError } = await supabase
-        .from('white_label_partners')
+      const { data: partner, error: partnerError } = await (supabase
+        .from('white_label_partners' as any)
         .select('id, name, slug, logo_url, primary_color, secondary_color, accent_color, background_color, supabase_url, supabase_anon_key, partner_password')
         .eq('slug', username.trim().toLowerCase())
         .eq('is_active', true)
-        .maybeSingle();
+        .maybeSingle() as any);
 
       if (partnerError) throw partnerError;
       
