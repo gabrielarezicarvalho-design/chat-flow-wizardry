@@ -73,7 +73,7 @@ const adminNavItems: NavItem[] = [
   },
   { to: "/mass-sending", icon: Megaphone, label: "Envio em Massa", feature: "mass_sending" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
-  { to: "/flows", icon: GitBranch, label: "Flow Builder", feature: "flows_basic" },
+  { to: "/flows", icon: GitBranch, label: "Chatbot", feature: "flows_basic" },
   { 
     to: "/connections", 
     icon: LinkIcon, 
