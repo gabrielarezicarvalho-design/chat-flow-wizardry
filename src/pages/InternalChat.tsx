@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useInternalChat, useAllUsers, ChatRoom, ChatMessage } from '@/hooks/useInternalChat';
+import { useInternalChat, ChatRoom, ChatMessage } from '@/hooks/useInternalChat';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,8 +14,6 @@ import {
   Pin,
   Reply,
   Smile,
-  Paperclip,
-  Mic,
   CheckSquare,
   FileText,
   MoreVertical,
@@ -43,15 +41,12 @@ const InternalChatContent = () => {
   const {
     rooms,
     roomsLoading,
-    useRoomMessages,
+    messages,
     sendMessage,
-    toggleReaction,
-    togglePin,
-    currentUserId
+    selectedRoom,
+    setSelectedRoom
   } = useInternalChat();
-  const { data: allUsers } = useAllUsers();
 
-  const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
@@ -62,9 +57,6 @@ const InternalChatContent = () => {
   const [activeTab, setActiveTab] = useState('chats');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const { data: messages, isLoading: messagesLoading } = useRoomMessages(selectedRoom?.id || null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -73,21 +65,11 @@ const InternalChatContent = () => {
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedRoom) return;
 
-    const mentionRegex = /@(\w+)/g;
-    const mentionMatches = messageInput.match(mentionRegex) || [];
-    const mentionIds = mentionMatches
-      .map(match => {
-        const username = match.slice(1);
-        return allUsers?.find(u => u.username === username)?.id;
-      })
-      .filter(Boolean) as string[];
-
     await sendMessage.mutateAsync({
       roomId: selectedRoom.id,
       content: messageInput,
       type: 'text',
-      replyTo: replyTo?.id,
-      mentionIds
+      replyTo: replyTo?.id
     });
 
     setMessageInput('');
@@ -103,8 +85,7 @@ const InternalChatContent = () => {
 
   const getRoomDisplayName = (room: ChatRoom) => {
     if (room.type === 'group') return room.name || 'Grupo';
-    const otherParticipant = room.participants?.find(p => p.user_id !== currentUserId);
-    return otherParticipant?.profile?.full_name || otherParticipant?.profile?.username || 'Conversa';
+    return room.name || 'Conversa';
   };
 
   const getRoomAvatar = (room: ChatRoom) => {
@@ -123,11 +104,6 @@ const InternalChatContent = () => {
   });
 
   const pinnedMessages = messages?.filter(m => m.is_pinned) || [];
-
-  const handleCreateTaskForUser = (userId: string) => {
-    setTaskForUser(userId);
-    setShowCreateTask(true);
-  };
 
   return (
     <div className="h-[calc(100vh-6rem)] flex bg-background rounded-lg border overflow-hidden">
@@ -201,17 +177,7 @@ const InternalChatContent = () => {
                           <span className="font-medium truncate">
                             {getRoomDisplayName(room)}
                           </span>
-                          {room.last_message && (
-                            <span className="text-xs text-muted-foreground shrink-0">
-                              {format(new Date(room.last_message.created_at), 'HH:mm')}
-                            </span>
-                          )}
                         </div>
-                        {room.last_message && (
-                          <p className="text-sm text-muted-foreground truncate">
-                            {room.last_message.content || '[Mídia]'}
-                          </p>
-                        )}
                       </div>
                     </div>
                   </button>
@@ -246,12 +212,7 @@ const InternalChatContent = () => {
                 <div>
                   <h3 className="font-semibold">{getRoomDisplayName(selectedRoom)}</h3>
                   <p className="text-xs text-muted-foreground">
-                    {selectedRoom.type === 'group' 
-                      ? `${selectedRoom.participants?.length || 0} participantes`
-                      : selectedRoom.participants?.find(p => p.user_id !== currentUserId)?.profile?.is_online
-                        ? 'Online'
-                        : 'Offline'
-                    }
+                    {selectedRoom.type === 'group' ? 'Grupo' : 'Conversa privada'}
                   </p>
                 </div>
               </div>
@@ -280,9 +241,7 @@ const InternalChatContent = () => {
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4">
               <div className="space-y-4">
-                {messagesLoading ? (
-                  <div className="text-center text-muted-foreground py-8">Carregando mensagens...</div>
-                ) : messages?.length === 0 ? (
+                {messages?.length === 0 ? (
                   <div className="text-center text-muted-foreground py-8">
                     <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
                     <p>Nenhuma mensagem ainda</p>
@@ -290,156 +249,26 @@ const InternalChatContent = () => {
                   </div>
                 ) : (
                   messages?.map((msg) => {
-                    const isOwn = msg.sender_id === currentUserId;
                     const senderName = msg.sender?.full_name || msg.sender?.username || 'Usuário';
 
                     return (
-                      <div
-                        key={msg.id}
-                        className={cn(
-                          "flex gap-2 group",
-                          isOwn && "flex-row-reverse"
-                        )}
-                      >
-                        {!isOwn && (
-                          <Avatar className="h-8 w-8 shrink-0">
-                            <AvatarFallback className="text-xs bg-primary/10">
-                              {getInitials(senderName)}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        <div className={cn("max-w-[70%]", isOwn && "items-end")}>
-                          {msg.reply_message && (
-                            <div className="text-xs bg-muted/50 rounded px-2 py-1 mb-1 border-l-2 border-primary">
-                              <span className="font-medium">
-                                {msg.reply_message.sender?.full_name}:
-                              </span>{' '}
-                              {msg.reply_message.content?.slice(0, 50)}...
-                            </div>
-                          )}
-                          
-                          <div
-                            className={cn(
-                              "rounded-lg px-3 py-2 relative",
-                              isOwn 
-                                ? "bg-primary text-primary-foreground" 
-                                : "bg-muted",
-                              msg.is_pinned && "ring-2 ring-yellow-400"
-                            )}
-                          >
-                            {!isOwn && selectedRoom.type === 'group' && (
-                              <p className="text-xs font-medium mb-1 opacity-70">{senderName}</p>
-                            )}
-                            
-                            {msg.type === 'text' && (
-                              <p className="whitespace-pre-wrap break-words">
-                                {msg.content?.split(/(@\w+)/g).map((part, i) => {
-                                  if (part.startsWith('@')) {
-                                    return (
-                                      <span key={i} className="bg-blue-500/20 text-blue-300 rounded px-1">
-                                        {part}
-                                      </span>
-                                    );
-                                  }
-                                  return part;
-                                })}
-                              </p>
-                            )}
-                            
-                            {msg.type === 'image' && msg.file_url && (
-                              <img src={msg.file_url} alt="" className="max-w-full rounded" />
-                            )}
-                            
-                            {msg.type === 'file' && msg.file_url && (
-                              <a 
-                                href={msg.file_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 text-sm underline"
-                              >
-                                <FileText className="h-4 w-4" />
-                                {msg.file_name || 'Arquivo'}
-                              </a>
-                            )}
-
-                            <span className={cn(
-                              "text-[10px] mt-1 block",
-                              isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
-                            )}>
+                      <div key={msg.id} className="flex gap-2 group">
+                        <Avatar className="h-8 w-8 shrink-0">
+                          <AvatarFallback className="text-xs bg-primary/10">
+                            {getInitials(senderName)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="max-w-[70%]">
+                          <div className={cn(
+                            "rounded-lg px-3 py-2 relative bg-muted",
+                            msg.is_pinned && "ring-2 ring-yellow-400"
+                          )}>
+                            <p className="text-xs font-medium mb-1 opacity-70">{senderName}</p>
+                            <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                            <span className="text-[10px] mt-1 block text-muted-foreground">
                               {format(new Date(msg.created_at), 'HH:mm')}
                             </span>
-
-                            {/* Actions on hover */}
-                            <div className={cn(
-                              "absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1",
-                              isOwn ? "left-0 -translate-x-full pr-2" : "right-0 translate-x-full pl-2"
-                            )}>
-                              <Popover open={showEmojiPicker === msg.id} onOpenChange={(open) => setShowEmojiPicker(open ? msg.id : null)}>
-                                <PopoverTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                                    <Smile className="h-4 w-4" />
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-2">
-                                  <EmojiPicker 
-                                    onSelect={(emoji) => {
-                                      toggleReaction.mutate({ messageId: msg.id, emoji });
-                                      setShowEmojiPicker(null);
-                                    }} 
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-7 w-7"
-                                onClick={() => setReplyTo(msg)}
-                              >
-                                <Reply className="h-4 w-4" />
-                              </Button>
-
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  <DropdownMenuItem onClick={() => togglePin.mutate({ messageId: msg.id, isPinned: msg.is_pinned })}>
-                                    <Pin className="h-4 w-4 mr-2" />
-                                    {msg.is_pinned ? 'Desafixar' : 'Fixar'}
-                                  </DropdownMenuItem>
-                                  {!isOwn && (
-                                    <DropdownMenuItem onClick={() => handleCreateTaskForUser(msg.sender_id)}>
-                                      <CheckSquare className="h-4 w-4 mr-2" />
-                                      Criar tarefa
-                                    </DropdownMenuItem>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
                           </div>
-
-                          {/* Reactions */}
-                          {msg.reactions && msg.reactions.length > 0 && (
-                            <div className="flex gap-1 mt-1">
-                              {Object.entries(
-                                msg.reactions.reduce((acc, r) => {
-                                  acc[r.emoji] = (acc[r.emoji] || 0) + 1;
-                                  return acc;
-                                }, {} as Record<string, number>)
-                              ).map(([emoji, count]) => (
-                                <button
-                                  key={emoji}
-                                  onClick={() => toggleReaction.mutate({ messageId: msg.id, emoji })}
-                                  className="text-xs bg-muted rounded-full px-2 py-0.5 hover:bg-accent"
-                                >
-                                  {emoji} {count}
-                                </button>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
                     );
@@ -449,17 +278,21 @@ const InternalChatContent = () => {
               </div>
             </div>
 
-            {/* Reply Preview */}
+            {/* Reply indicator */}
             {replyTo && (
-              <div className="px-4 py-2 bg-muted/50 border-t flex items-center justify-between shrink-0">
+              <div className="px-4 py-2 bg-muted/50 border-t flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Reply className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">
-                    Respondendo a <strong>{replyTo.sender?.full_name}</strong>
+                  <span className="text-sm text-muted-foreground">
+                    Respondendo a <span className="font-medium">{replyTo.sender?.full_name}</span>
                   </span>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setReplyTo(null)}>
-                  ✕
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setReplyTo(null)}
+                >
+                  Cancelar
                 </Button>
               </div>
             )}
@@ -467,73 +300,59 @@ const InternalChatContent = () => {
             {/* Message Input */}
             <div className="p-4 border-t bg-card shrink-0">
               <div className="flex items-center gap-2">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*,.pdf,.doc,.docx"
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="shrink-0">
+                      <Smile className="h-5 w-5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2">
+                    <EmojiPicker 
+                      onSelect={(emoji) => setMessageInput(prev => prev + emoji)} 
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                <Input
+                  placeholder="Digite sua mensagem..."
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  className="flex-1"
                 />
-                <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
-                  <Paperclip className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Mic className="h-5 w-5" />
-                </Button>
-                <div className="flex-1 relative">
-                  <Input
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Digite sua mensagem... (use @nome para mencionar)"
-                    className="pr-10"
-                  />
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                      >
-                        <Smile className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-2">
-                      <EmojiPicker onSelect={(emoji) => setMessageInput(prev => prev + emoji)} />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <Button onClick={handleSendMessage} disabled={!messageInput.trim()}>
-                  <Send className="h-5 w-5" />
+
+                <Button 
+                  size="icon" 
+                  onClick={handleSendMessage}
+                  disabled={!messageInput.trim() || sendMessage.isPending}
+                >
+                  <Send className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
-              <MessageSquare className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="text-lg font-medium mb-2">Selecione uma conversa</h3>
-              <p className="text-muted-foreground">
-                Escolha uma conversa à esquerda ou {isAdmin ? 'crie uma nova' : 'aguarde ser adicionado'}
-              </p>
+              <MessageSquare className="h-16 w-16 mx-auto mb-4 opacity-30" />
+              <p className="text-lg">Selecione uma conversa</p>
+              <p className="text-sm">Escolha uma sala para começar a conversar</p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Dialogs */}
+      {/* Create Group Dialog */}
       <CreateGroupDialog 
         open={showCreateGroup} 
         onOpenChange={setShowCreateGroup}
-        allUsers={allUsers || []}
+        allUsers={[]}
       />
-      
-      <CreateTaskDialog
-        open={showCreateTask}
+
+      {/* Create Task Dialog */}
+      <CreateTaskDialog 
+        open={showCreateTask} 
         onOpenChange={setShowCreateTask}
-        defaultAssignee={taskForUser}
-        roomId={selectedRoom?.id}
-        allUsers={allUsers || []}
       />
     </div>
   );

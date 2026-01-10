@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { secret_key, email, password, username } = await req.json();
+    const { secret_key, email, password, username, full_name, company_id, is_company_admin } = await req.json();
     
     // Simple secret to prevent unauthorized access
     if (secret_key !== "MARKETFLOW_ADMIN_SETUP_2026") {
@@ -31,11 +31,13 @@ Deno.serve(async (req) => {
       },
     });
 
-    const userEmail = email || "admin@marketflow.com.br";
-    const userPassword = password || "@marketflow2026#";
+    // Use username-based email if no email provided
     const userUsername = username || "admin";
+    const userEmail = email || `${userUsername}@internal.marketflow.local`;
+    const userPassword = password || "@marketflow2026#";
+    const userFullName = full_name || userUsername;
 
-    // Check if admin already exists
+    // Check if user already exists by email
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
     const adminExists = existingUsers?.users?.some(u => u.email === userEmail);
     
@@ -48,15 +50,27 @@ Deno.serve(async (req) => {
           .from("user_roles")
           .upsert({ user_id: adminUser.id, role: "admin" }, { onConflict: "user_id,role" });
         
-        // Update profile username
+        // Update profile
+        const profileUpdate: Record<string, any> = {
+          username: userUsername, 
+          full_name: userFullName
+        };
+        
+        if (company_id) {
+          profileUpdate.company_id = company_id;
+        }
+        if (is_company_admin !== undefined) {
+          profileUpdate.is_company_admin = is_company_admin;
+        }
+        
         await supabase
           .from("profiles")
-          .update({ username: userUsername, full_name: userUsername })
+          .update(profileUpdate)
           .eq("id", adminUser.id);
       }
       
       return new Response(
-        JSON.stringify({ message: "Admin user already exists and updated", email: userEmail }),
+        JSON.stringify({ message: "Admin user already exists and updated", email: userEmail, username: userUsername }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -67,7 +81,7 @@ Deno.serve(async (req) => {
       password: userPassword,
       email_confirm: true,
       user_metadata: {
-        full_name: userUsername,
+        full_name: userFullName,
         username: userUsername
       }
     });
@@ -80,23 +94,30 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Assign admin role
+    // Assign admin role (or moderator for company admins)
+    const role = is_company_admin ? "moderator" : "admin";
     const { error: roleError } = await supabase
       .from("user_roles")
-      .insert({ user_id: newUser.user.id, role: "admin" });
+      .insert({ user_id: newUser.user.id, role });
 
     if (roleError) {
       console.error("Error assigning role:", roleError);
     }
 
-    // Update profile
+    // Update profile with company info
+    const profileUpdate: Record<string, any> = {
+      full_name: userFullName,
+      username: userUsername,
+      is_company_admin: is_company_admin || false
+    };
+    
+    if (company_id) {
+      profileUpdate.company_id = company_id;
+    }
+
     const { error: profileError } = await supabase
       .from("profiles")
-      .update({
-        full_name: userUsername,
-        username: userUsername,
-        is_company_admin: true
-      })
+      .update(profileUpdate)
       .eq("id", newUser.user.id);
 
     if (profileError) {
