@@ -88,7 +88,7 @@ const FlowsContent = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {flows.map((flow) => {
-              const Icon = flowIcons[flow.trigger] || Repeat;
+              const Icon = flowIcons[flow.trigger_type || 'default'] || Repeat;
               
               return (
                 <Card key={flow.id} className="p-6 hover:shadow-lg transition-shadow">
@@ -99,15 +99,15 @@ const FlowsContent = () => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-foreground">{flow.name}</h3>
-                        <p className="text-sm text-muted-foreground">{flow.trigger}</p>
+                        <p className="text-sm text-muted-foreground">{flow.trigger_type || 'Sem trigger'}</p>
                       </div>
                     </div>
-                    <Badge className="bg-success">{flow.status === "active" ? "Ativo" : "Inativo"}</Badge>
+                    <Badge className="bg-success">{flow.is_active ? "Ativo" : "Inativo"}</Badge>
                   </div>
 
                   <div className="flex items-center justify-between text-sm mb-4">
-                    <span className="text-muted-foreground">Execuções hoje</span>
-                    <span className="font-semibold text-foreground">{flow.executions_today}</span>
+                    <span className="text-muted-foreground">Descrição</span>
+                    <span className="font-semibold text-foreground truncate max-w-[150px]">{flow.description || '-'}</span>
                   </div>
 
                   <div className="space-y-2">

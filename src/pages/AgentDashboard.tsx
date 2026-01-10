@@ -30,8 +30,8 @@ const AgentDashboard = () => {
       const { count } = await supabase
         .from('conversations')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'active')
-        .eq('assigned_agent', currentUser.id);
+        .eq('status', 'open')
+        .eq('assigned_to', currentUser.id);
 
       return count || 0;
     },
@@ -52,7 +52,7 @@ const AgentDashboard = () => {
       const { count } = await supabase
         .from('conversations')
         .select('*', { count: 'exact', head: true })
-        .eq('assigned_agent', currentUser.id)
+        .eq('assigned_to', currentUser.id)
         .gte('updated_at', today.toISOString());
 
       return count || 0;
@@ -98,11 +98,8 @@ const AgentDashboard = () => {
         .single();
       if (data) {
         setProfile(data);
-        if (data.status) {
-          setAgentStatus(data.status as 'online' | 'paused' | 'offline');
-        } else {
-          setAgentStatus(data.is_online ? 'online' : 'offline');
-        }
+        // Use is_online field since profiles table doesn't have status column
+        setAgentStatus(data.is_online ? 'online' : 'offline');
       }
     };
     fetchProfile();
@@ -136,8 +133,7 @@ const AgentDashboard = () => {
   const handleStatusChange = async (status: 'online' | 'paused' | 'offline') => {
     if (!user?.id) return;
     try {
-      const updateData: any = {
-        status,
+      const updateData = {
         is_online: status === 'online',
         last_seen_at: new Date().toISOString()
       };
@@ -274,7 +270,7 @@ const AgentDashboard = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-gray-900 text-sm truncate">
-                    {conn.name.toUpperCase()}
+                    {conn.instance_name?.toUpperCase() || 'Conexão'}
                   </h3>
                   <span className={`text-xs ${conn.status === 'connected' ? 'text-green-600' : 'text-red-500'}`}>
                     {conn.status === 'connected' ? 'Conectado' : 

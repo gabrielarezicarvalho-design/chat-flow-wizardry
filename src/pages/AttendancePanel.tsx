@@ -156,7 +156,7 @@ export default function AttendancePanel() {
       
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, company_name, department_id, created_at, is_online, last_seen_at, status, company_id")
+        .select("id, full_name, created_at, is_online, last_seen_at, company_id")
         .eq("company_id", currentProfile.company_id)
         .order("created_at", { ascending: false });
 
@@ -165,15 +165,21 @@ export default function AttendancePanel() {
       // Enrich with conversation counts and calculate online time
       return (data || []).map((profile) => {
         const activeConvs = conversations.filter(
-          (c) => c.assigned_agent === profile.id
+          (c) => c.assigned_to === profile.id
         ).length;
         
-        // Use is_online field directly, fallback to status
+        // Use is_online field directly
         const isOnline = profile.is_online === true;
-        const profileStatus = isOnline ? "online" : ((profile.status as AgentStatus) || "offline");
+        const profileStatus: AgentStatus = isOnline ? "online" : "offline";
         
         return {
-          ...profile,
+          id: profile.id,
+          full_name: profile.full_name,
+          company_name: null,
+          department_id: null,
+          created_at: profile.created_at,
+          is_online: profile.is_online,
+          last_seen_at: profile.last_seen_at,
           status: profileStatus,
           active_conversations: activeConvs,
         } as UserProfile;
@@ -185,9 +191,10 @@ export default function AttendancePanel() {
   // Classify conversations
   const classifiedConversations = useMemo(() => {
     return conversations.map((conv) => {
-      const flowState = conv.flow_state as any;
+      const convAny = conv as any;
+      const flowState = convAny.flow_state;
       const hasFlowState = flowState && Object.keys(flowState).length > 0;
-      const hasAssignedAgent = conv.assigned_agent_id || conv.assigned_agent;
+      const hasAssignedAgent = conv.assigned_to;
       const isAiAgent = hasFlowState && flowState.waiting_for === "aiAgent";
 
       let classification: "in_flow" | "waiting" | "in_attendance" | "ai_agent" = "waiting";
@@ -217,7 +224,7 @@ export default function AttendancePanel() {
           if (conv.classification !== "in_flow") return false;
         } else if (agentFilter === "waiting") {
           if (conv.classification !== "waiting") return false;
-        } else if (conv.assigned_agent !== agentFilter) {
+        } else if (conv.assigned_to !== agentFilter) {
           return false;
         }
       }
@@ -225,8 +232,8 @@ export default function AttendancePanel() {
       // Filter by search
       if (search) {
         const searchLower = search.toLowerCase();
-        const name = conv.user_name?.toLowerCase() || "";
-        const phone = conv.user_phone || "";
+        const name = conv.contact_name?.toLowerCase() || "";
+        const phone = conv.contact_phone || "";
         if (!name.includes(searchLower) && !phone.includes(searchLower)) {
           return false;
         }
@@ -250,7 +257,7 @@ export default function AttendancePanel() {
   const { data: aiAgents = [] } = useQuery({
     queryKey: ["agents-for-attendance"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("agents").select("id, name, signature");
+      const { data, error } = await supabase.from("agents").select("id, name");
       if (error) throw error;
       return data || [];
     },
@@ -258,7 +265,7 @@ export default function AttendancePanel() {
 
   const getAiAgentName = (agentId: string | null) => {
     if (!agentId) return "Assistente IA";
-    const agent = aiAgents.find((a) => a.id === agentId);
+    const agent = aiAgents.find((a: any) => a.id === agentId);
     return agent?.name || "Assistente IA";
   };
 
@@ -663,16 +670,16 @@ export default function AttendancePanel() {
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
                             <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                              {getInitials(conv.user_name)}
+                              {getInitials(conv.contact_name)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <span className="font-medium truncate max-w-[200px] block">
-                              {conv.user_name || conv.user_phone || "Desconhecido"}
+                              {conv.contact_name || conv.contact_phone || "Desconhecido"}
                             </span>
-                            {conv.user_phone && (
+                            {conv.contact_phone && (
                               <span className="text-xs text-muted-foreground">
-                                {conv.user_phone}
+                                {conv.contact_phone}
                               </span>
                             )}
                           </div>
@@ -698,15 +705,15 @@ export default function AttendancePanel() {
                               <div>
                                 <p className="font-medium text-sm">Na URA</p>
                                 <p className="text-xs text-muted-foreground">
-                                  {getFlowName(conv.flow_state)}
+                                  {getFlowName((conv as any).flow_state)}
                                 </p>
                               </div>
                             </>
-                          ) : conv.assigned_agent ? (
+                          ) : conv.assigned_to ? (
                             <>
                               <Users className="w-4 h-4 text-green-500" />
                               <span className="text-sm">
-                                {getAgentName(conv.assigned_agent)}
+                                {getAgentName(conv.assigned_to)}
                               </span>
                             </>
                           ) : (
@@ -737,7 +744,7 @@ export default function AttendancePanel() {
 
                       {/* Assigned time */}
                       <TableCell className="text-sm text-muted-foreground">
-                        {conv.assigned_agent ? getTimeOpen(conv.updated_at) : "-"}
+                        {conv.assigned_to ? getTimeOpen(conv.updated_at) : "-"}
                       </TableCell>
 
                       {/* Actions */}

@@ -143,8 +143,8 @@ const AgentsContent = () => {
         systemPrompt: currentAgent.system_prompt || "",
         outputMarkers: "",
         temperature: currentAgent.temperature || 0.7,
-        responseStyle: currentAgent.response_style || "friendly",
-        behavior: currentAgent.behavior || "reactive",
+        responseStyle: (currentAgent as any).response_style || "friendly",
+        behavior: (currentAgent as any).behavior || "reactive",
         voiceEnabled: agentData.voice_enabled || false,
         voiceId: agentData.voice_id || "pFZP5JQG7iQjIQuC4Bku",
         voiceStability: agentData.voice_stability ?? 0.5,
@@ -1017,7 +1017,7 @@ const AgentsContent = () => {
                 <div>
                   <h3 className="font-semibold text-foreground">{agent.name}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {agent.status === "active" ? "Ativo" : "Inativo"} • {agent.conversations_today || 0} conversas hoje
+                    {agent.status === "active" ? "Ativo" : "Inativo"}
                   </p>
                 </div>
               </div>

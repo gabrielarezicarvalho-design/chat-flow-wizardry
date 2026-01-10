@@ -38,8 +38,8 @@ const FlowBuilder = () => {
       const flow = flows.find((f) => f.id === id);
       if (flow) {
         setFlowName(flow.name);
-        setFlowStatus(flow.status || 'inactive');
-        const flowJson = flow.flow_json as any;
+        setFlowStatus(flow.is_active ? 'active' : 'inactive');
+        const flowJson = flow.flow_data as any;
         if (flowJson?.type) setFlowType(flowJson.type);
         if (flowJson?.nodes) setNodes(flowJson.nodes);
         if (flowJson?.edges) setEdges(flowJson.edges);
