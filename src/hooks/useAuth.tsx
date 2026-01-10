@@ -61,11 +61,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       let email = usernameOrEmail;
       
-      // If it doesn't look like an email, treat it as username
+      // If it doesn't look like an email, try to find the user by username
       if (!usernameOrEmail.includes('@')) {
-        email = `${usernameOrEmail}@internal.marketflow.local`;
+        // First try with internal.marketflow.local domain
+        const internalEmail = `${usernameOrEmail}@internal.marketflow.local`;
+        
+        const { error: internalError } = await supabase.auth.signInWithPassword({
+          email: internalEmail,
+          password,
+        });
+
+        if (!internalError) {
+          toast.success('Login realizado com sucesso!');
+          navigate('/');
+          return;
+        }
+
+        // If that fails, try looking up the email by username in profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', usernameOrEmail)
+          .single();
+
+        if (profile) {
+          // Get the email from auth.users through the user's ID
+          // Try common email patterns
+          const patterns = [
+            `${usernameOrEmail}@marketflow.com.br`,
+            `${usernameOrEmail}@internal.marketflow.local`,
+          ];
+          
+          for (const testEmail of patterns) {
+            const { error: patternError } = await supabase.auth.signInWithPassword({
+              email: testEmail,
+              password,
+            });
+            
+            if (!patternError) {
+              toast.success('Login realizado com sucesso!');
+              navigate('/');
+              return;
+            }
+          }
+        }
+
+        throw new Error('Credenciais inválidas');
       }
 
+      // If it's already an email, use it directly
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -76,7 +120,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       toast.success('Login realizado com sucesso!');
       navigate('/');
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao fazer login');
+      toast.error('Credenciais inválidas');
       throw error;
     }
   };

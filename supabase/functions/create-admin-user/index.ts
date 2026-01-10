@@ -31,9 +31,10 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Use username-based email if no email provided
+    // Use username-based email - ALWAYS use internal.marketflow.local domain
     const userUsername = username || "admin";
-    const userEmail = email || `${userUsername}@internal.marketflow.local`;
+    // Force internal email format for username-based login
+    const userEmail = `${userUsername}@internal.marketflow.local`;
     const userPassword = password || "@marketflow2026#";
     const userFullName = full_name || userUsername;
 
