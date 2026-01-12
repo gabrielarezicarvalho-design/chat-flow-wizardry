@@ -58,43 +58,23 @@ interface NavItem {
   children?: NavItem[];
 }
 
-// Admin-only navigation items with feature requirements
+// Admin-only navigation items - focused on Mass Sending and Marketing
 const adminNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/internal-chat", icon: MessagesSquare, label: "Chat Interno", feature: "internal_chat" },
-  { 
-    to: "/agents", 
-    icon: Sparkles, 
-    label: "Meus Agentes", 
-    feature: "ai_agents",
-    children: [
-      { to: "/ai-tickets", icon: Ticket, label: "Chamados IA", feature: "ai_agents" },
-      { to: "/auto-prospecting", icon: Target, label: "Prospecção Automática", feature: "mass_sending" },
-    ]
-  },
-  { to: "/mass-sending", icon: Megaphone, label: "Envio em Massa", feature: "mass_sending" },
+  { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
   { to: "/flows", icon: Bot, label: "Chatbot", feature: "flows_basic" },
-  { 
-    to: "/connections", 
-    icon: LinkIcon, 
-    label: "Conexões",
-    children: [
-      { to: "/departments", icon: Briefcase, label: "Departamentos", feature: "departments" },
-    ]
-  },
+  { to: "/connections", icon: LinkIcon, label: "Conexões" },
   { to: "/users", icon: UsersRound, label: "Usuários" },
-  { to: "/attendance", icon: Phone, label: "Atendimentos", feature: "chat" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
 
-// Agent-only navigation items with feature requirements
+// Agent-only navigation items - focused on Mass Sending and Marketing
 const agentNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Painel" },
-  { to: "/internal-chat", icon: MessagesSquare, label: "Chat Interno", feature: "internal_chat" },
-  { to: "/conversations", icon: MessageSquare, label: "Conversas", feature: "chat" },
+  { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
-  { to: "/attendance-reports", icon: ClipboardList, label: "Histórico", feature: "reports" },
+  { to: "/settings", icon: Settings, label: "Configurações" },
 ];
 
 // Component for nav items with children (submenu)
