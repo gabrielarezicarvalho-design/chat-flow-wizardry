@@ -6,27 +6,20 @@ import { useAuth } from "@/hooks/useAuth";
 import { useFeatureAccess, FeatureId } from "@/hooks/useFeatureAccess";
 import { 
   LayoutDashboard, 
-  MessageSquare, 
   Settings, 
   Sparkles, 
-  Phone, 
   Link as LinkIcon, 
-  Briefcase, 
   UsersRound, 
   Contact, 
   Megaphone, 
-  GitBranch, 
-  Bot,
-  ClipboardList,
   LogOut,
   Shield,
   Headphones,
-  Ticket,
-  MessagesSquare,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Target
+  BarChart3,
+  Tags
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,8 +55,9 @@ interface NavItem {
 const adminNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
+  { to: "/campaign-reports", icon: BarChart3, label: "Relatórios" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
-  { to: "/flows", icon: Bot, label: "Chatbot", feature: "flows_basic" },
+  { to: "/segmentation", icon: Tags, label: "Segmentação" },
   { to: "/connections", icon: LinkIcon, label: "Conexões" },
   { to: "/users", icon: UsersRound, label: "Usuários" },
   { to: "/settings", icon: Settings, label: "Configurações" },
@@ -73,6 +67,7 @@ const adminNavItems: NavItem[] = [
 const agentNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Painel" },
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
+  { to: "/campaign-reports", icon: BarChart3, label: "Relatórios" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
