@@ -25,6 +25,8 @@ import { BirthdayCampaigns } from "@/components/mass-sending/BirthdayCampaigns";
 import { SatisfactionSurveys } from "@/components/mass-sending/SatisfactionSurveys";
 import { CampaignActionsStep } from "@/components/mass-sending/CampaignActionsStep";
 import { CampaignReports } from "@/components/mass-sending/CampaignReports";
+import { MessageTemplates } from "@/components/mass-sending/MessageTemplates";
+import { CampaignScheduler } from "@/components/mass-sending/CampaignScheduler";
 import { FeatureGate } from "@/components/FeatureGate";
 import { WebhookFieldConfig } from "@/components/mass-sending/WebhookFieldConfig";
 
@@ -121,7 +123,7 @@ function MassSendingContent() {
   const [tags, setTags] = useState<TagItem[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"campaigns" | "templates" | "webhook" | "birthday" | "satisfaction" | "tester" | "reports">("campaigns");
+  const [activeTab, setActiveTab] = useState<"campaigns" | "templates" | "message-templates" | "scheduler" | "webhook" | "birthday" | "satisfaction" | "tester" | "reports">("campaigns");
 
   const [wizard, setWizard] = useState(false);
   const [step, setStep] = useState(1);
@@ -1784,7 +1786,7 @@ function MassSendingContent() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="grid w-full grid-cols-8 max-w-6xl">
+        <TabsList className="grid w-full grid-cols-10 max-w-7xl">
           <TabsTrigger value="campaigns" className="flex items-center gap-2">
             <Megaphone className="w-4 h-4" />Campanhas
           </TabsTrigger>
@@ -1793,6 +1795,12 @@ function MassSendingContent() {
           </TabsTrigger>
           <TabsTrigger value="responses" className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />Respostas
+          </TabsTrigger>
+          <TabsTrigger value="message-templates" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />Mensagens
+          </TabsTrigger>
+          <TabsTrigger value="scheduler" className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />Agendar
           </TabsTrigger>
           <TabsTrigger value="webhook" className="flex items-center gap-2">
             <Link className="w-4 h-4" />Webhook
@@ -1804,7 +1812,7 @@ function MassSendingContent() {
             <Star className="w-4 h-4" />Satisfação
           </TabsTrigger>
           <TabsTrigger value="templates" className="flex items-center gap-2">
-            <BookmarkPlus className="w-4 h-4" />Templates
+            <BookmarkPlus className="w-4 h-4" />Salvos
           </TabsTrigger>
           <TabsTrigger value="tester" className="flex items-center gap-2">
             <Terminal className="w-4 h-4" />Tester
@@ -2017,6 +2025,24 @@ function MassSendingContent() {
 
         <TabsContent value="reports" className="mt-6">
           <CampaignReports />
+        </TabsContent>
+
+        <TabsContent value="message-templates" className="mt-6">
+          <MessageTemplates onSelectTemplate={(content) => {
+            setMsg(content);
+            setWizard(true);
+            setStep(3);
+          }} />
+        </TabsContent>
+
+        <TabsContent value="scheduler" className="mt-6">
+          <CampaignScheduler 
+            campaignName={name}
+            onSchedule={(date, recurrence) => {
+              setSchedule(true);
+              setDate(date.toISOString().slice(0, 16));
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="templates" className="mt-6">

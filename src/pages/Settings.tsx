@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Building, User, Key, Webhook, Link as LinkIcon, CreditCard, Bot, Eye, EyeOff, Check, AlertCircle, Loader2, HardDrive, RefreshCw, FileText, Image, Database } from "lucide-react";
+import { Building, User, Key, Webhook, Link as LinkIcon, CreditCard, Eye, EyeOff, Check, AlertCircle, Loader2, HardDrive, RefreshCw, FileText, Image, Database } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -15,7 +15,7 @@ import {
 import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/hooks/useAuth";
 import { useStorageStats } from "@/hooks/useStorageStats";
-import { AISettingsSection } from "@/components/settings/AISettingsSection";
+
 import { toast } from "sonner";
 
 
@@ -75,7 +75,6 @@ const Settings = () => {
 
   const tabs = [
     { id: "geral", icon: Building, label: "Geral" },
-    { id: "ia", icon: Bot, label: "IA" },
     { id: "armazenamento", icon: HardDrive, label: "Armazenamento" },
     { id: "perfil", icon: User, label: "Perfil" },
     { id: "apikeys", icon: Key, label: "API Keys" },
@@ -270,9 +269,6 @@ const Settings = () => {
             </>
           )}
 
-          {activeTab === "ia" && (
-            <AISettingsSection />
-          )}
 
           {activeTab === "armazenamento" && (
             <Card className="p-6">
