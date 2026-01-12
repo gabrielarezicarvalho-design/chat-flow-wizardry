@@ -1,10 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bot, Send, Sparkles, Zap, ArrowRight, Brain, Rocket, Target, BarChart3 } from "lucide-react";
+import { Send, Sparkles, Zap, ArrowRight, Rocket, Target, BarChart3, Users, Calendar, FileText, TrendingUp, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAgents } from "@/hooks/useAgents";
 import { motion } from "framer-motion";
 import robotImage from "@/assets/marketflow-robot.png";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -37,21 +38,53 @@ const floatAnimation = {
   },
 };
 
+interface Stats {
+  totalCampaigns: number;
+  messagesSent: number;
+  totalContacts: number;
+  deliveryRate: number;
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { agents } = useAgents();
+  const [stats, setStats] = useState<Stats>({
+    totalCampaigns: 0,
+    messagesSent: 0,
+    totalContacts: 0,
+    deliveryRate: 0,
+  });
 
-  const activeAgents = agents.filter(a => a.status === 'active').length;
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) return;
+
+        const [campaignsRes, leadsRes] = await Promise.all([
+          supabase.from("campaigns").select("*").eq("user_id", userData.user.id),
+          supabase.from("leads").select("id").eq("user_id", userData.user.id),
+        ]);
+
+        const campaigns = campaignsRes.data || [];
+        const totalSent = campaigns.reduce((acc, c) => acc + (c.sent_count || 0), 0);
+        const totalFailed = campaigns.reduce((acc, c) => acc + (c.failed_count || 0), 0);
+        const deliveryRate = totalSent > 0 ? ((totalSent - totalFailed) / totalSent) * 100 : 0;
+
+        setStats({
+          totalCampaigns: campaigns.length,
+          messagesSent: totalSent,
+          totalContacts: leadsRes.data?.length || 0,
+          deliveryRate: Math.round(deliveryRate),
+        });
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const features = [
-    {
-      title: "Agentes de IA",
-      description: "Configure agentes inteligentes para automatizar atendimentos",
-      icon: Bot,
-      to: "/agents",
-      gradient: "from-violet-500 to-purple-600",
-      metrics: `${activeAgents} ativos`,
-    },
     {
       title: "Disparos em Massa",
       description: "Envie campanhas personalizadas para milhares de contatos",
@@ -60,17 +93,28 @@ const Dashboard = () => {
       gradient: "from-blue-500 to-cyan-500",
       metrics: "Ilimitado",
     },
+    {
+      title: "Relatórios",
+      description: "Acompanhe métricas detalhadas de suas campanhas",
+      icon: BarChart3,
+      to: "/campaign-reports",
+      gradient: "from-emerald-500 to-green-500",
+      metrics: `${stats.totalCampaigns} campanhas`,
+    },
+    {
+      title: "Segmentação",
+      description: "Segmente contatos por tags e comportamento",
+      icon: Users,
+      to: "/segmentation",
+      gradient: "from-violet-500 to-purple-600",
+      metrics: `${stats.totalContacts} contatos`,
+    },
   ];
 
   const capabilities = [
     {
-      icon: Brain,
-      title: "IA Avançada",
-      description: "Modelos de última geração para respostas inteligentes",
-    },
-    {
       icon: Target,
-      title: "Segmentação",
+      title: "Segmentação Avançada",
       description: "Alcance o público certo com precisão",
     },
     {
@@ -83,6 +127,18 @@ const Dashboard = () => {
       title: "Relatórios",
       description: "Acompanhe métricas em tempo real",
     },
+    {
+      icon: Calendar,
+      title: "Agendamento",
+      description: "Programe campanhas com calendário visual",
+    },
+  ];
+
+  const statsCards = [
+    { label: "Campanhas", value: stats.totalCampaigns, icon: Rocket, color: "text-blue-500" },
+    { label: "Mensagens Enviadas", value: stats.messagesSent.toLocaleString(), icon: MessageSquare, color: "text-emerald-500" },
+    { label: "Taxa de Entrega", value: `${stats.deliveryRate}%`, icon: TrendingUp, color: "text-violet-500" },
+    { label: "Contatos", value: stats.totalContacts.toLocaleString(), icon: Users, color: "text-orange-500" },
   ];
 
   return (
@@ -114,7 +170,7 @@ const Dashboard = () => {
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4"
             >
               <Sparkles className="w-4 h-4" />
-              Plataforma de IA & Automação
+              Plataforma de Marketing & Automação
             </motion.div>
             
             <motion.h1 
@@ -125,7 +181,7 @@ const Dashboard = () => {
             >
               Potencialize com{" "}
               <span className="bg-gradient-to-r from-primary via-violet-500 to-blue-500 bg-clip-text text-transparent">
-                Inteligência Artificial
+                Disparos em Massa
               </span>
             </motion.h1>
             <motion.p 
@@ -134,7 +190,7 @@ const Dashboard = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              Automatize atendimentos com IA avançada e alcance milhares de clientes com disparos em massa inteligentes.
+              Alcance milhares de clientes com campanhas personalizadas, templates prontos e relatórios detalhados.
             </motion.p>
             <motion.div
               className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start"
@@ -144,21 +200,21 @@ const Dashboard = () => {
             >
               <Button 
                 size="lg" 
-                onClick={() => navigate('/agents')}
+                onClick={() => navigate('/mass-sending')}
                 className="group bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90"
               >
-                <Bot className="mr-2 w-5 h-5" />
-                Criar Agente IA
+                <Rocket className="mr-2 w-5 h-5" />
+                Criar Campanha
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
                 size="lg" 
                 variant="outline"
-                onClick={() => navigate('/mass-sending')}
+                onClick={() => navigate('/campaign-reports')}
                 className="group border-primary/30 hover:bg-primary/10"
               >
-                <Rocket className="mr-2 w-5 h-5" />
-                Disparos em Massa
+                <BarChart3 className="mr-2 w-5 h-5" />
+                Ver Relatórios
               </Button>
             </motion.div>
           </div>
@@ -181,13 +237,38 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
+      {/* Stats Grid */}
+      <motion.div variants={itemVariants}>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {statsCards.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              variants={itemVariants}
+              whileHover={{ y: -4 }}
+            >
+              <Card className="p-5 border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg bg-muted ${stat.color}`}>
+                    <stat.icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
       {/* Main Features */}
       <motion.div variants={itemVariants}>
         <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
           <Zap className="w-6 h-6 text-primary" />
           Recursos Principais
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((feature) => (
             <motion.div
               key={feature.title}
@@ -202,23 +283,21 @@ const Dashboard = () => {
                 {/* Gradient Background */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
                 
-                <div className="relative flex items-start gap-5">
-                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${feature.gradient} shadow-lg`}>
+                <div className="relative">
+                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${feature.gradient} shadow-lg w-fit mb-4`}>
                     <feature.icon className="w-8 h-8 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-xl font-bold text-foreground">{feature.title}</h3>
-                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
-                        {feature.metrics}
-                      </span>
-                    </div>
-                    <p className="text-muted-foreground mb-4">{feature.description}</p>
-                    <Button variant="ghost" size="sm" className="group/btn -ml-2">
-                      Acessar
-                      <ArrowRight className="ml-1 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                    </Button>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xl font-bold text-foreground">{feature.title}</h3>
+                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
+                      {feature.metrics}
+                    </span>
                   </div>
+                  <p className="text-muted-foreground mb-4">{feature.description}</p>
+                  <Button variant="ghost" size="sm" className="group/btn -ml-2">
+                    Acessar
+                    <ArrowRight className="ml-1 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </Button>
                 </div>
               </Card>
             </motion.div>
@@ -273,16 +352,16 @@ const Dashboard = () => {
               Pronto para começar?
             </h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Configure seu primeiro agente de IA ou inicie uma campanha de disparos agora mesmo.
+              Crie sua primeira campanha de disparos e alcance milhares de clientes.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={() => navigate('/agents')} size="lg">
-                <Bot className="mr-2 w-5 h-5" />
-                Configurar Agente
-              </Button>
-              <Button onClick={() => navigate('/mass-sending')} variant="outline" size="lg">
+              <Button onClick={() => navigate('/mass-sending')} size="lg">
                 <Send className="mr-2 w-5 h-5" />
                 Criar Campanha
+              </Button>
+              <Button onClick={() => navigate('/campaign-reports')} variant="outline" size="lg">
+                <BarChart3 className="mr-2 w-5 h-5" />
+                Ver Relatórios
               </Button>
             </div>
           </div>
