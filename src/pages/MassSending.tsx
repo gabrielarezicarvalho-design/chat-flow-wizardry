@@ -27,6 +27,7 @@ import { CampaignActionsStep } from "@/components/mass-sending/CampaignActionsSt
 import { CampaignReports } from "@/components/mass-sending/CampaignReports";
 import { MessageTemplates } from "@/components/mass-sending/MessageTemplates";
 import { CampaignScheduler } from "@/components/mass-sending/CampaignScheduler";
+import { OptimalTimeSuggestions } from "@/components/mass-sending/OptimalTimeSuggestions";
 import { FeatureGate } from "@/components/FeatureGate";
 import { WebhookFieldConfig } from "@/components/mass-sending/WebhookFieldConfig";
 
@@ -123,7 +124,7 @@ function MassSendingContent() {
   const [tags, setTags] = useState<TagItem[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"campaigns" | "templates" | "message-templates" | "scheduler" | "webhook" | "birthday" | "satisfaction" | "tester" | "reports">("campaigns");
+  const [activeTab, setActiveTab] = useState<"campaigns" | "templates" | "message-templates" | "scheduler" | "optimal-times" | "webhook" | "birthday" | "satisfaction" | "tester" | "reports">("campaigns");
 
   const [wizard, setWizard] = useState(false);
   const [step, setStep] = useState(1);
@@ -1786,7 +1787,7 @@ function MassSendingContent() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="grid w-full grid-cols-10 max-w-7xl">
+        <TabsList className="grid w-full grid-cols-11 max-w-7xl">
           <TabsTrigger value="campaigns" className="flex items-center gap-2">
             <Megaphone className="w-4 h-4" />Campanhas
           </TabsTrigger>
@@ -1801,6 +1802,9 @@ function MassSendingContent() {
           </TabsTrigger>
           <TabsTrigger value="scheduler" className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />Agendar
+          </TabsTrigger>
+          <TabsTrigger value="optimal-times" className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />Horários
           </TabsTrigger>
           <TabsTrigger value="webhook" className="flex items-center gap-2">
             <Link className="w-4 h-4" />Webhook
@@ -2043,6 +2047,10 @@ function MassSendingContent() {
               setDate(date.toISOString().slice(0, 16));
             }}
           />
+        </TabsContent>
+
+        <TabsContent value="optimal-times" className="mt-6">
+          <OptimalTimeSuggestions />
         </TabsContent>
 
         <TabsContent value="templates" className="mt-6">
