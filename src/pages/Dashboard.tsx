@@ -1,12 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Send, Sparkles, Zap, ArrowRight, Rocket, Target, BarChart3, Users, Calendar, FileText, TrendingUp, MessageSquare } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Send, Sparkles, Zap, ArrowRight, Rocket, Target, BarChart3, Users, Calendar, FileText, TrendingUp, MessageSquare, FlaskConical, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import robotImage from "@/assets/marketflow-robot.png";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
+import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
+import { ABTesting } from "@/components/mass-sending/ABTesting";
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -260,6 +262,28 @@ const Dashboard = () => {
             </motion.div>
           ))}
         </div>
+      </motion.div>
+
+      {/* Tabs for Real-time Metrics and A/B Testing */}
+      <motion.div variants={itemVariants}>
+        <Tabs defaultValue="metrics" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="metrics" className="gap-2">
+              <Activity className="w-4 h-4" />
+              Métricas em Tempo Real
+            </TabsTrigger>
+            <TabsTrigger value="ab-testing" className="gap-2">
+              <FlaskConical className="w-4 h-4" />
+              Testes A/B
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="metrics">
+            <RealTimeMetrics />
+          </TabsContent>
+          <TabsContent value="ab-testing">
+            <ABTesting />
+          </TabsContent>
+        </Tabs>
       </motion.div>
 
       {/* Main Features */}
