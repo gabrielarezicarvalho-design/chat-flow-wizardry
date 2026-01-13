@@ -363,41 +363,59 @@ export type Database = {
       }
       connections: {
         Row: {
+          base_url: string | null
           company_id: string | null
           created_at: string | null
+          credentials: Json | null
+          environment: string | null
           id: string
           instance_id: string | null
           instance_name: string
           is_active: boolean | null
+          last_test: string | null
+          name: string | null
           phone_number: string | null
           qr_code: string | null
           status: string | null
+          token: string | null
           updated_at: string | null
           webhook_url: string | null
         }
         Insert: {
+          base_url?: string | null
           company_id?: string | null
           created_at?: string | null
+          credentials?: Json | null
+          environment?: string | null
           id?: string
           instance_id?: string | null
           instance_name: string
           is_active?: boolean | null
+          last_test?: string | null
+          name?: string | null
           phone_number?: string | null
           qr_code?: string | null
           status?: string | null
+          token?: string | null
           updated_at?: string | null
           webhook_url?: string | null
         }
         Update: {
+          base_url?: string | null
           company_id?: string | null
           created_at?: string | null
+          credentials?: Json | null
+          environment?: string | null
           id?: string
           instance_id?: string | null
           instance_name?: string
           is_active?: boolean | null
+          last_test?: string | null
+          name?: string | null
           phone_number?: string | null
           qr_code?: string | null
           status?: string | null
+          token?: string | null
           updated_at?: string | null
           webhook_url?: string | null
         }
