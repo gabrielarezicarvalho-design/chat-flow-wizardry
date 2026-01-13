@@ -128,13 +128,15 @@ const Connections = () => {
   useEffect(() => {
     const syncConnectionStatus = async () => {
       for (const connection of connections) {
-        // Check all connections that have an instance_id and are not already marked as deleted
+        // Check all connections that have a token and are not already marked as deleted
         const connAny = connection as any;
-        if (connAny.instance_id && connection.status !== 'deleted') {
+        if (connAny.token && connection.status !== 'deleted') {
           try {
             const { data, error } = await supabase.functions.invoke('wa-status-instance', {
               body: { 
-                instance_id: connAny.instance_id
+                token: connAny.token,
+                environment: connAny.environment || 'PROD',
+                base_url: connAny.base_url
               }
             });
 
