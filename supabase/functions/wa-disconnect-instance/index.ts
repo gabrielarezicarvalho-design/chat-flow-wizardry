@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { token, environment, base_url } = await req.json();
+    const { token, base_url } = await req.json();
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Missing instance token" }), {
@@ -20,26 +20,22 @@ serve(async (req) => {
       });
     }
 
-    // Use the connection's base_url if provided, otherwise fall back to defaults
-    let BASE_URL = base_url;
-    if (!BASE_URL) {
-      BASE_URL = environment?.toUpperCase() === "PROD"
-        ? "https://app.uazapi.com"
-        : "https://free.uazapi.com";
-    }
+    // Use the connection's base_url if provided, otherwise use default
+    const BASE_URL = base_url || "https://marketflowchat.uazapi.com";
 
-    console.log(`Disconnecting instance from ${BASE_URL}/instance/disconnect`);
+    console.log(`Disconnecting instance from ${BASE_URL}/instance/logout`);
     console.log(`Token: ${token.substring(0, 8)}...`);
 
-    const response = await fetch(`${BASE_URL}/instance/disconnect`, {
-      method: "POST",
+    // Use /instance/logout endpoint with DELETE method
+    const response = await fetch(`${BASE_URL}/instance/logout`, {
+      method: "DELETE",
       headers: {
+        "Accept": "application/json",
         "Content-Type": "application/json",
-        token
+        "token": token
       }
     });
 
-    // Get response as text first to handle non-JSON responses
     const responseText = await response.text();
     console.log(`Response status: ${response.status}`);
     console.log(`Response text: ${responseText}`);
@@ -48,17 +44,15 @@ serve(async (req) => {
     try {
       result = responseText ? JSON.parse(responseText) : {};
     } catch (parseError) {
-      console.log("Response is not JSON, treating as success if status is OK");
-      // If we can't parse the response but status is OK, consider it successful
       if (response.ok) {
         result = { success: true, message: "Instance disconnected" };
       } else {
-        result = { error: responseText || "Unknown error from UZAPI" };
+        result = { error: responseText || "Unknown error from UAZAPI" };
       }
     }
 
     if (!response.ok) {
-      console.error("UZAPI disconnect error:", result);
+      console.error("UAZAPI disconnect error:", result);
       return new Response(JSON.stringify({
         error: "Failed to disconnect instance",
         details: result
@@ -73,7 +67,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       message: "Instance disconnected successfully",
-      status: result?.instance?.status || result?.status || "disconnected"
+      data: result
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
