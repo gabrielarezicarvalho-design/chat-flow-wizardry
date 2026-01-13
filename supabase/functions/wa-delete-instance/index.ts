@@ -38,15 +38,43 @@ serve(async (req) => {
 
     // If we have a token, use it directly with /instance/delete
     if (token) {
-      console.log("🗑️ Deleting with instance token...");
-      const deleteResponse = await fetch(`${BASE_URL}/instance/delete`, {
-        method: "POST",
+      console.log("🗑️ Deleting with instance token using DELETE method...");
+      
+      // Try DELETE method first (standard REST)
+      let deleteResponse = await fetch(`${BASE_URL}/instance/delete`, {
+        method: "DELETE",
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
           "token": token
         }
       });
+
+      // If DELETE fails, try POST
+      if (deleteResponse.status === 405) {
+        console.log("🔄 DELETE failed, trying POST...");
+        deleteResponse = await fetch(`${BASE_URL}/instance/delete`, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "token": token
+          }
+        });
+      }
+
+      // If still fails, try /instance/logout (disconnects and removes)
+      if (!deleteResponse.ok) {
+        console.log("🔄 Trying /instance/logout endpoint...");
+        deleteResponse = await fetch(`${BASE_URL}/instance/logout`, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "token": token
+          }
+        });
+      }
 
       const responseText = await deleteResponse.text();
       console.log("📡 Delete response:", responseText);
