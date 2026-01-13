@@ -380,6 +380,7 @@ export type Database = {
           status: string | null
           token: string | null
           updated_at: string | null
+          user_id: string | null
           webhook_url: string | null
         }
         Insert: {
@@ -400,6 +401,7 @@ export type Database = {
           status?: string | null
           token?: string | null
           updated_at?: string | null
+          user_id?: string | null
           webhook_url?: string | null
         }
         Update: {
@@ -420,6 +422,7 @@ export type Database = {
           status?: string | null
           token?: string | null
           updated_at?: string | null
+          user_id?: string | null
           webhook_url?: string | null
         }
         Relationships: [
