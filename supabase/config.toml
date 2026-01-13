@@ -1,1 +1,7 @@
 project_id = "usxpwndgjlnhbdxxoujf"
+
+[functions.wa-list-instances]
+verify_jwt = false
+
+[functions.wa-delete-instance]
+verify_jwt = false
