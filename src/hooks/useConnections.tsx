@@ -25,9 +25,16 @@ export const useConnections = () => {
       const { data: authData } = await client.auth.getUser();
       const userId = authData?.user?.id;
 
+      // Ensure instance_name is set from name if not provided
+      const connectionData = {
+        ...newConnection,
+        user_id: userId || newConnection.user_id,
+        instance_name: newConnection.instance_name || newConnection.name
+      };
+
       const { data, error } = await client
         .from('connections')
-        .insert([{ ...newConnection, user_id: userId || newConnection.user_id }])
+        .insert([connectionData])
         .select()
         .maybeSingle();
       
