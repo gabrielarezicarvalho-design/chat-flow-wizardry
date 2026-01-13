@@ -16,6 +16,7 @@ import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
 import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle } from "lucide-react";
+import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -749,6 +750,10 @@ const Connections = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Orphaned Instances Alert */}
+        <OrphanedInstancesAlert />
+
         {/* Connection Status Header */}
         {selectedConnection && (
           <Card className="border-border">
