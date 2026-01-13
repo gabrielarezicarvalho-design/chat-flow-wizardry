@@ -375,6 +375,7 @@ export type Database = {
           last_test: string | null
           name: string | null
           phone_number: string | null
+          platform: string | null
           qr_code: string | null
           status: string | null
           token: string | null
@@ -394,6 +395,7 @@ export type Database = {
           last_test?: string | null
           name?: string | null
           phone_number?: string | null
+          platform?: string | null
           qr_code?: string | null
           status?: string | null
           token?: string | null
@@ -413,6 +415,7 @@ export type Database = {
           last_test?: string | null
           name?: string | null
           phone_number?: string | null
+          platform?: string | null
           qr_code?: string | null
           status?: string | null
           token?: string | null
