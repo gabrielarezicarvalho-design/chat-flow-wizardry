@@ -370,7 +370,7 @@ export type Database = {
           environment: string | null
           id: string
           instance_id: string | null
-          instance_name: string
+          instance_name: string | null
           is_active: boolean | null
           last_test: string | null
           name: string | null
@@ -391,7 +391,7 @@ export type Database = {
           environment?: string | null
           id?: string
           instance_id?: string | null
-          instance_name: string
+          instance_name?: string | null
           is_active?: boolean | null
           last_test?: string | null
           name?: string | null
@@ -412,7 +412,7 @@ export type Database = {
           environment?: string | null
           id?: string
           instance_id?: string | null
-          instance_name?: string
+          instance_name?: string | null
           is_active?: boolean | null
           last_test?: string | null
           name?: string | null
