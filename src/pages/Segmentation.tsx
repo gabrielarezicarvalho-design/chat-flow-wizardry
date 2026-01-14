@@ -149,10 +149,11 @@ const Segmentation = () => {
 
       if (data?.success) {
         queryClient.invalidateQueries({ queryKey: ["tags"] });
-        if (data.total === 0) {
+        queryClient.invalidateQueries({ queryKey: ["leads-segmentation"] });
+        if (data.totalLabels === 0) {
           toast.info("Nenhuma etiqueta encontrada no WhatsApp Business");
         } else {
-          toast.success(`${data.added} etiquetas sincronizadas! (${data.skipped} já existentes)`);
+          toast.success(`${data.addedTags || 0} etiquetas sincronizadas! ${data.addedContacts || 0} contatos atualizados`);
         }
       } else {
         toast.error(data?.error || "Erro ao sincronizar etiquetas");
