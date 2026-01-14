@@ -52,6 +52,25 @@ serve(async (req) => {
     }
 
     if (!response.ok) {
+      // Treat "record not found" as success - instance already deleted
+      const errorMessage = result?.error || result?.message || JSON.stringify(result);
+      const isAlreadyDeleted = 
+        errorMessage.includes("record not found") || 
+        errorMessage.includes("not found") ||
+        errorMessage.includes("instance not found") ||
+        response.status === 404;
+      
+      if (isAlreadyDeleted) {
+        console.log("Instance already deleted or not found, treating as success");
+        return new Response(JSON.stringify({
+          success: true,
+          message: "Instance already deleted or not found",
+          data: result
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+      
       console.error("UAZAPI delete error:", result);
       return new Response(JSON.stringify({
         error: "Failed to delete instance",
