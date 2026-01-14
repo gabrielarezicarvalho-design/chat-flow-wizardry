@@ -46,16 +46,65 @@ serve(async (req) => {
         const fullUrl = `${base_url}${endpoint}`;
         console.log(`🔄 Tentativa: ${method} ${fullUrl}`);
         
-        // Corpo da requisição para UZAPI
+        // Corpo da requisição para UZAPI - TODOS OS EVENTOS
+        const allEvents = [
+          // Mensagens
+          "messages",
+          "RECEIVE_MESSAGE", 
+          "MESSAGE_STATUS",
+          "messages.upsert",
+          "messages.update",
+          "message",
+          "message.any",
+          // Enquetes/Polls
+          "poll",
+          "poll.vote",
+          "poll_vote",
+          "pollUpdate",
+          "polls.vote",
+          // Conexão
+          "connection",
+          "connection.update",
+          "qrcode",
+          "qr",
+          // Contatos e Chats
+          "contacts.update",
+          "contacts.upsert",
+          "chats.update",
+          "chats.upsert",
+          // Grupos
+          "groups.update",
+          "groups.upsert",
+          "group-participants.update",
+          // Presença
+          "presence.update",
+          // Labels
+          "labels.edit",
+          "labels.association",
+          // Status de chamada
+          "call"
+        ];
+
         const requestBody = {
           url: webhookUrl,
           webhookURL: webhookUrl,
           webhook: webhookUrl,
           enabled: true,
-          events: ["messages", "RECEIVE_MESSAGE", "MESSAGE_STATUS"],
+          events: allEvents,
+          allEvents: true,
           on_message: true,
           on_message_received: true,
-          excludeMessages: ["wasSentByApi"]
+          on_poll: true,
+          on_poll_vote: true,
+          webhookByEvents: false,
+          webhookBase64: true,
+          readMessages: true,
+          rejectCall: false,
+          msgCall: "",
+          groupsIgnore: false,
+          alwaysOnline: false,
+          readStatus: true,
+          syncFullHistory: false
         };
 
         console.log("📤 Body:", JSON.stringify(requestBody, null, 2));
