@@ -526,23 +526,49 @@ function MassSendingContent() {
       
       if (useMenuEndpoint) {
         addLog("info", `Enviando menu interativo (tipo: ${uzapiMenuType})...`);
-        addLog("info", `Payload: ${JSON.stringify({ menuType: uzapiMenuType, text: finalMessage, choices: menuChoices })}`);
+        
+        // Build the payload based on interactive type
+        const menuPayload: any = {
+          action: "menu",
+          connectionId: connId,
+          numbers: nums,
+          menuType: uzapiMenuType,
+          text: finalMessage,
+          delayMin: delayInterval,
+          delayMax: delayInterval + 5,
+          pauseEveryX: pauseEveryX,
+          pauseDuration: pauseDuration,
+        };
+        
+        if (interactiveType === "carousel") {
+          // Format carousel cards for UZAPI /send/carousel endpoint
+          // UZAPI expects: { text: "Title\nDescription", image: "url", buttons: [{id, text, type}] }
+          menuPayload.carousel = carouselCards.filter(c => c.title.trim()).map(card => ({
+            text: card.description ? `${card.title}\n${card.description}` : card.title,
+            image: card.imageUrl || "",
+            buttons: card.buttons.filter(b => b.label.trim()).map(btn => {
+              // Determine button type and id based on action
+              const isUrl = btn.action && (btn.action.startsWith("http://") || btn.action.startsWith("https://"));
+              return {
+                id: isUrl ? btn.action : btn.label.toLowerCase().replace(/\s+/g, "_"),
+                text: btn.label,
+                type: isUrl ? "URL" : "REPLY"
+              };
+            })
+          }));
+          addLog("info", `Carousel payload: ${JSON.stringify(menuPayload.carousel)}`);
+        } else if (interactiveType === "poll") {
+          menuPayload.choices = menuChoices;
+          menuPayload.selectableCount = pollMultiSelect ? pollOptions.filter(o => o.text.trim()).length : 1;
+        } else {
+          menuPayload.choices = menuChoices;
+        }
+        
+        addLog("info", `Payload: ${JSON.stringify(menuPayload)}`);
         
         // Use menu endpoint for interactive messages
         const { data, error } = await supabase.functions.invoke("wa-sender", {
-          body: {
-            action: "menu",
-            connectionId: connId,
-            numbers: nums,
-            menuType: uzapiMenuType,
-            text: finalMessage,
-            choices: menuChoices,
-            delayMin: delayInterval,
-            delayMax: delayInterval + 5,
-            pauseEveryX: pauseEveryX,
-            pauseDuration: pauseDuration,
-            selectableCount: interactiveType === "poll" && pollMultiSelect ? pollOptions.filter(o => o.text.trim()).length : 1
-          }
+          body: menuPayload
         });
         
         if (error) {
