@@ -283,11 +283,13 @@ function MassSendingContent() {
     reader.readAsText(file);
   };
 
-  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setMediaFile(file);
-    if (file.type.startsWith("image/")) {
+    
+    // Set preview for images and videos
+    if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
       const reader = new FileReader();
       reader.onload = (evt) => {
         setMediaPreview(evt.target?.result as string);
@@ -296,12 +298,55 @@ function MassSendingContent() {
     } else {
       setMediaPreview("");
     }
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      setMediaUrl(evt.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-    toast.success("Arquivo carregado: " + file.name);
+    
+    // For videos and large files, upload to storage and use URL
+    // For smaller files (images, audio, documents), use base64
+    const shouldUploadToStorage = file.type.startsWith("video/") || file.size > 5 * 1024 * 1024; // 5MB limit for base64
+    
+    if (shouldUploadToStorage) {
+      try {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) {
+          toast.error("Você precisa estar logado para enviar vídeos");
+          setMediaFile(null);
+          return;
+        }
+        
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${userData.user.id}/${Date.now()}_media.${fileExt}`;
+        
+        toast.loading("Enviando arquivo para servidor...", { id: "media-upload" });
+        
+        const { error: uploadError } = await supabase.storage
+          .from("campaign-media")
+          .upload(fileName, file);
+        
+        if (uploadError) {
+          toast.error("Erro ao enviar arquivo: " + uploadError.message, { id: "media-upload" });
+          setMediaFile(null);
+          return;
+        }
+        
+        const { data: publicUrl } = supabase.storage
+          .from("campaign-media")
+          .getPublicUrl(fileName);
+        
+        setMediaUrl(publicUrl.publicUrl);
+        toast.success("Arquivo enviado: " + file.name, { id: "media-upload" });
+        console.log("[MassSending] Media uploaded to storage:", publicUrl.publicUrl);
+      } catch (error: any) {
+        toast.error("Erro ao enviar arquivo: " + error.message, { id: "media-upload" });
+        setMediaFile(null);
+      }
+    } else {
+      // Use base64 for smaller files
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        setMediaUrl(evt.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+      toast.success("Arquivo carregado: " + file.name);
+    }
   };
 
   const checkConnectionStatus = async (connectionId: string): Promise<boolean> => {
