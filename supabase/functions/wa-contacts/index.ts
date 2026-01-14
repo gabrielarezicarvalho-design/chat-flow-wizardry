@@ -164,8 +164,8 @@ serve(async (req) => {
             user_id: ownerId,
             phone,
             name: contactName,
-            origin: "WhatsApp Sync",
-            status: "novo"
+            source: "WhatsApp Sync",
+            status: "new"
           });
 
         if (insertError) {
