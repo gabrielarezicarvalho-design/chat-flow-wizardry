@@ -503,12 +503,9 @@ function MassSendingContent() {
         message_type: useMenuEndpoint ? `interactive_${interactiveType}` : messageType,
         message_content: finalMessage,
         media_url: mediaUrl || null,
-        contacts: nums,
         total_contacts: nums.length,
-        connection_id: connId,
         scheduled_at: schedule && date ? new Date(date).toISOString() : null,
-        status: schedule ? "scheduled" : "sending",
-        started_at: schedule ? null : new Date().toISOString()
+        status: schedule ? "scheduled" : "sending"
       }).select().single();
       
       if (campaignError) {
