@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,12 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { 
   Search, Users, Download, Upload, Tag, RefreshCw, Plus, 
-  Pencil, X, ChevronLeft, ChevronRight 
+  Pencil, X, ChevronLeft, ChevronRight, Check, Loader2
 } from "lucide-react";
 import { useLeads } from "@/hooks/useLeads";
 import { useConnections } from "@/hooks/useConnections";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -29,13 +29,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -53,7 +51,26 @@ const Contacts = () => {
     email: "",
     notes: ""
   });
+  const [applyingTag, setApplyingTag] = useState<string | null>(null);
+  const [tagPopoverOpen, setTagPopoverOpen] = useState<string | null>(null);
   const queryClient = useQueryClient();
+
+  // Fetch available tags
+  const { data: availableTags = [] } = useQuery({
+    queryKey: ['tags'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('tags')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
   
   const activeConnection = connections.find(c => c.status === 'connected');
 
@@ -157,6 +174,52 @@ const Contacts = () => {
       await deleteLead.mutateAsync(id);
     } catch (err) {
       console.error("Error deleting contact:", err);
+    }
+  };
+
+  const handleToggleTag = async (lead: any, tagName: string) => {
+    const currentTags = lead.tags || [];
+    const hasTag = currentTags.includes(tagName);
+    const newTags = hasTag 
+      ? currentTags.filter((t: string) => t !== tagName)
+      : [...currentTags, tagName];
+
+    setApplyingTag(`${lead.id}-${tagName}`);
+
+    try {
+      // Update local first
+      await updateLead.mutateAsync({
+        id: lead.id,
+        updates: { tags: newTags }
+      });
+
+      // Sync with WhatsApp if connected
+      if (activeConnection && lead.phone) {
+        const connAny = activeConnection as any;
+        if (connAny.token) {
+          const tag = availableTags.find((t: any) => t.name === tagName);
+          
+          if (tag && !hasTag) {
+            // Add label to contact in WhatsApp
+            await supabase.functions.invoke('wa-labels', {
+              body: {
+                action: 'add_to_contact',
+                connectionId: activeConnection.id,
+                labelId: tag.id,
+                labelName: tagName,
+                phone: lead.phone
+              }
+            });
+          }
+        }
+      }
+
+      toast.success(hasTag ? `Etiqueta "${tagName}" removida` : `Etiqueta "${tagName}" aplicada`);
+    } catch (err) {
+      console.error("Error toggling tag:", err);
+      toast.error("Erro ao atualizar etiqueta");
+    } finally {
+      setApplyingTag(null);
     }
   };
 
@@ -362,22 +425,72 @@ const Contacts = () => {
                       {lead.email || "-"}
                     </TableCell>
                     <TableCell>
-                      {lead.tags && lead.tags.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {lead.tags.slice(0, 2).map((tag: string, idx: number) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                          {lead.tags.length > 2 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{lead.tags.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
-                      )}
+                      <Popover 
+                        open={tagPopoverOpen === lead.id} 
+                        onOpenChange={(open) => setTagPopoverOpen(open ? lead.id : null)}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-auto p-1 min-w-[80px] justify-start"
+                          >
+                            {lead.tags && lead.tags.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {lead.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                  <Badge key={idx} variant="outline" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                                {lead.tags.length > 2 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    +{lead.tags.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground text-sm flex items-center gap-1">
+                                <Tag className="w-3 h-3" />
+                                Adicionar
+                              </span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-2" align="start">
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium px-2 py-1">Etiquetas</p>
+                            {availableTags.length === 0 ? (
+                              <p className="text-sm text-muted-foreground px-2 py-2">
+                                Nenhuma etiqueta disponível. Crie etiquetas em Segmentação.
+                              </p>
+                            ) : (
+                              availableTags.map((tag: any) => {
+                                const isSelected = lead.tags?.includes(tag.name);
+                                const isLoading = applyingTag === `${lead.id}-${tag.name}`;
+                                
+                                return (
+                                  <div
+                                    key={tag.id}
+                                    className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-accent cursor-pointer"
+                                    onClick={() => !isLoading && handleToggleTag(lead, tag.name)}
+                                  >
+                                    {isLoading ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <Checkbox checked={isSelected} />
+                                    )}
+                                    <div 
+                                      className="w-3 h-3 rounded-full" 
+                                      style={{ backgroundColor: tag.color || '#6b7280' }}
+                                    />
+                                    <span className="text-sm flex-1">{tag.name}</span>
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="text-xs">
