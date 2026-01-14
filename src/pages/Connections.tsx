@@ -15,7 +15,7 @@ import { useFlows } from "@/hooks/useFlows";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
-import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle } from "lucide-react";
+import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download } from "lucide-react";
 import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -37,6 +37,10 @@ const Connections = () => {
   const [activeTab, setActiveTab] = useState("conexao");
   const [savingSettings, setSavingSettings] = useState(false);
   const [savingMessages, setSavingMessages] = useState(false);
+  const [syncingContacts, setSyncingContacts] = useState(false);
+  const [syncingLabels, setSyncingLabels] = useState(false);
+  const [contactsStats, setContactsStats] = useState({ synced: 0, lastSync: '' });
+  const [labelsStats, setLabelsStats] = useState({ synced: 0, lastSync: '' });
   const [instanceLimit, setInstanceLimit] = useState<number>(2);
   const [formData, setFormData] = useState({
     name: '',
@@ -733,6 +737,134 @@ const Connections = () => {
     toast.success("Copiado para a área de transferência!");
   };
 
+  // Sync contacts from WhatsApp
+  const handleSyncContacts = async () => {
+    if (!selectedConnection) {
+      toast.error("Selecione uma conexão");
+      return;
+    }
+
+    const connAny = selectedConnection as any;
+    if (!connAny.token) {
+      toast.error("Conexão sem token configurado");
+      return;
+    }
+
+    setSyncingContacts(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase.functions.invoke('wa-contacts', {
+        body: {
+          action: 'sync',
+          connectionId: selectedConnection.id,
+          userId: user?.id
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setContactsStats({
+          synced: data.added || 0,
+          lastSync: new Date().toLocaleTimeString('pt-BR')
+        });
+        toast.success(`${data.added} contatos sincronizados! (${data.skipped} já existentes)`);
+      } else {
+        toast.error(data?.error || "Erro ao sincronizar contatos");
+      }
+    } catch (err) {
+      console.error("Error syncing contacts:", err);
+      toast.error("Erro ao sincronizar contatos");
+    } finally {
+      setSyncingContacts(false);
+    }
+  };
+
+  // Sync labels/tags from WhatsApp
+  const handleSyncLabels = async () => {
+    if (!selectedConnection) {
+      toast.error("Selecione uma conexão");
+      return;
+    }
+
+    const connAny = selectedConnection as any;
+    if (!connAny.token) {
+      toast.error("Conexão sem token configurado");
+      return;
+    }
+
+    setSyncingLabels(true);
+    try {
+      const baseUrl = connAny.base_url || "https://marketflowchat.uazapi.com";
+      
+      // Fetch labels from WhatsApp using UAZAPI
+      const response = await fetch(`${baseUrl}/chat/labels`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'token': connAny.token
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Falha ao buscar etiquetas");
+      }
+
+      const result = await response.json();
+      let labels: any[] = [];
+      
+      if (Array.isArray(result)) {
+        labels = result;
+      } else if (result?.labels || result?.data) {
+        labels = result.labels || result.data;
+      }
+
+      // Save labels to tags table
+      const { data: { user } } = await supabase.auth.getUser();
+      let addedCount = 0;
+
+      for (const label of labels) {
+        const labelName = label.name || label.displayName || label.title;
+        const labelColor = label.color || label.hexColor || '#3b82f6';
+        
+        if (!labelName) continue;
+
+        // Check if tag already exists
+        const { data: existing } = await supabase
+          .from('tags')
+          .select('id')
+          .eq('user_id', user?.id)
+          .eq('name', labelName)
+          .maybeSingle();
+
+        if (!existing) {
+          const { error: insertError } = await supabase
+            .from('tags')
+            .insert({
+              user_id: user?.id,
+              name: labelName,
+              color: labelColor
+            });
+
+          if (!insertError) addedCount++;
+        }
+      }
+
+      setLabelsStats({
+        synced: addedCount,
+        lastSync: new Date().toLocaleTimeString('pt-BR')
+      });
+      
+      toast.success(`${addedCount} etiquetas sincronizadas!`);
+    } catch (err) {
+      console.error("Error syncing labels:", err);
+      toast.error("Erro ao sincronizar etiquetas");
+    } finally {
+      setSyncingLabels(false);
+    }
+  };
+
 
   const renderConnectionTab = () => {
     // Calculate active instances
@@ -1230,6 +1362,106 @@ const Connections = () => {
     );
   };
 
+  const renderContactsTab = () => (
+    <div className="space-y-6">
+      {/* Sync Contacts Card */}
+      <Card className="border-border">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Sincronizar Contatos do WhatsApp
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Importe os contatos salvos no WhatsApp para sua base de leads. Contatos duplicados serão ignorados.
+          </p>
+          
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+            <div className="flex items-center gap-3">
+              <Download className="w-5 h-5 text-primary" />
+              <div>
+                <p className="text-sm font-medium">Contatos do WhatsApp</p>
+                <p className="text-xs text-muted-foreground">
+                  {contactsStats.lastSync 
+                    ? `Última sincronização: ${contactsStats.lastSync} (${contactsStats.synced} novos)`
+                    : 'Nunca sincronizado'
+                  }
+                </p>
+              </div>
+            </div>
+            <Button 
+              onClick={handleSyncContacts} 
+              disabled={syncingContacts || !selectedConnection}
+              variant="outline"
+            >
+              {syncingContacts ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              {syncingContacts ? 'Sincronizando...' : 'Sincronizar Contatos'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Sync Labels Card */}
+      <Card className="border-border">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Tag className="w-5 h-5" />
+            Sincronizar Etiquetas do WhatsApp
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Importe as etiquetas do WhatsApp Business para usar como tags no sistema.
+          </p>
+          
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+            <div className="flex items-center gap-3">
+              <Tag className="w-5 h-5 text-primary" />
+              <div>
+                <p className="text-sm font-medium">Etiquetas do WhatsApp</p>
+                <p className="text-xs text-muted-foreground">
+                  {labelsStats.lastSync 
+                    ? `Última sincronização: ${labelsStats.lastSync} (${labelsStats.synced} novas)`
+                    : 'Nunca sincronizado'
+                  }
+                </p>
+              </div>
+            </div>
+            <Button 
+              onClick={handleSyncLabels} 
+              disabled={syncingLabels || !selectedConnection}
+              variant="outline"
+            >
+              {syncingLabels ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4 mr-2" />
+              )}
+              {syncingLabels ? 'Sincronizando...' : 'Sincronizar Etiquetas'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Connection Info */}
+      {!selectedConnection && (
+        <Card className="border-dashed border-2 border-muted-foreground/25">
+          <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+            <Wifi className="w-12 h-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">
+              Selecione uma conexão na aba "Conexão" para sincronizar contatos e etiquetas.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
   const renderMessagesTab = () => (
     <Card className="border-border">
       <CardHeader>
@@ -1443,11 +1675,11 @@ const Connections = () => {
             Conexão
           </TabsTrigger>
           <TabsTrigger 
-            value="configuracoes"
+            value="contatos"
             className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3"
           >
-            <Settings className="w-4 h-4 mr-2" />
-            Configurações
+            <Users className="w-4 h-4 mr-2" />
+            Contatos
           </TabsTrigger>
           <TabsTrigger 
             value="mensagens"
@@ -1469,8 +1701,8 @@ const Connections = () => {
           {renderConnectionTab()}
         </TabsContent>
 
-        <TabsContent value="configuracoes" className="mt-6">
-          {renderSettingsTab()}
+        <TabsContent value="contatos" className="mt-6">
+          {renderContactsTab()}
         </TabsContent>
 
         <TabsContent value="mensagens" className="mt-6">
