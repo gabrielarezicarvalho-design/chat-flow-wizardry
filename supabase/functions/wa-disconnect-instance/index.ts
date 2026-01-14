@@ -23,11 +23,11 @@ serve(async (req) => {
     // Use the connection's base_url if provided, otherwise use default
     const BASE_URL = base_url || "https://marketflowchat.uazapi.com";
 
-    console.log(`Disconnecting instance from ${BASE_URL}/session/logout`);
+    console.log(`Disconnecting instance from ${BASE_URL}/instance/disconnect`);
     console.log(`Token: ${token.substring(0, 8)}...`);
 
-    // Try /session/logout endpoint with POST method
-    const response = await fetch(`${BASE_URL}/session/logout`, {
+    // Use /instance/disconnect endpoint with POST method
+    const response = await fetch(`${BASE_URL}/instance/disconnect`, {
       method: "POST",
       headers: {
         "Accept": "application/json",
