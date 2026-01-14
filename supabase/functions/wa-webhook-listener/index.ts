@@ -2547,6 +2547,122 @@ serve(async (req) => {
     const eventType = payload.EventType || payload.event || payload.wook || "";
     console.log("🔔 Tipo de evento:", eventType);
 
+    // ========================================
+    // HANDLE LABEL EVENTS - Sync labels from WhatsApp to system
+    // ========================================
+    const labelEventTypes = ["labels", "label", "label.edit", "label.association", "labels.chat", "LABELS_UPDATE", "LABEL_EDIT"];
+    if (eventType && labelEventTypes.some(t => eventType.toLowerCase().includes(t.toLowerCase()))) {
+      console.log("🏷️ Evento de LABEL detectado:", eventType);
+      console.log("📝 Payload completo:", JSON.stringify(payload, null, 2));
+      
+      try {
+        // Find connection by instance token
+        const payloadToken = payload.token || instanceToken || "";
+        let connection = null;
+        
+        if (payloadToken) {
+          const { data: connData } = await supabase
+            .from("connections")
+            .select("*")
+            .eq("token", payloadToken)
+            .single();
+          connection = connData;
+        }
+        
+        if (connection) {
+          // Extract label info from payload
+          const labelData = payload.label || payload.labels || payload.data || {};
+          const chatId = payload.chatId || payload.chat?.id || payload.message?.chatid || labelData.chatId || "";
+          const labelId = labelData.id || labelData.labelid || labelData.labelId || "";
+          const labelName = labelData.name || labelData.displayName || "";
+          const action = labelData.action || payload.action || "add"; // add, remove, edit
+          
+          console.log("🏷️ Label info:", { chatId, labelId, labelName, action });
+          
+          // Extract phone from chatId (format: "5511999999999@s.whatsapp.net")
+          const phone = chatId.replace(/@.*$/, "").replace(/\D/g, "");
+          
+          if (phone && labelName) {
+            console.log(`📱 Syncing label "${labelName}" for phone ${phone}`);
+            
+            // Find lead by phone
+            const { data: leads } = await supabase
+              .from("leads")
+              .select("id, tags, user_id")
+              .or(`phone.eq.${phone},phone.ilike.%${phone}%`)
+              .eq("user_id", connection.user_id)
+              .limit(1);
+            
+            if (leads && leads.length > 0) {
+              const lead = leads[0];
+              const currentTags = lead.tags || [];
+              
+              if (action === "remove") {
+                // Remove tag
+                const newTags = currentTags.filter((t: string) => t.toLowerCase() !== labelName.toLowerCase());
+                await supabase
+                  .from("leads")
+                  .update({ tags: newTags, updated_at: new Date().toISOString() })
+                  .eq("id", lead.id);
+                console.log(`✅ Tag "${labelName}" removida do lead ${lead.id}`);
+              } else {
+                // Add tag if not exists
+                if (!currentTags.some((t: string) => t.toLowerCase() === labelName.toLowerCase())) {
+                  await supabase
+                    .from("leads")
+                    .update({ tags: [...currentTags, labelName], updated_at: new Date().toISOString() })
+                    .eq("id", lead.id);
+                  console.log(`✅ Tag "${labelName}" adicionada ao lead ${lead.id}`);
+                } else {
+                  console.log(`ℹ️ Tag "${labelName}" já existe no lead ${lead.id}`);
+                }
+              }
+              
+              // Also ensure tag exists in tags table
+              const { data: existingTag } = await supabase
+                .from("tags")
+                .select("id")
+                .eq("user_id", connection.user_id)
+                .ilike("name", labelName)
+                .single();
+              
+              if (!existingTag) {
+                await supabase
+                  .from("tags")
+                  .insert({
+                    user_id: connection.user_id,
+                    name: labelName,
+                    color: "#3b82f6"
+                  });
+                console.log(`✅ Tag "${labelName}" criada na tabela tags`);
+              }
+            } else {
+              console.log(`⚠️ Lead não encontrado para o telefone ${phone}`);
+            }
+          }
+        } else {
+          console.log("⚠️ Conexão não encontrada para o token");
+        }
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          eventType: "label",
+          processed: true
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      } catch (labelError: any) {
+        console.error("❌ Erro ao processar evento de label:", labelError);
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: labelError.message 
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+    }
+
     // Skip non-message events
     if (eventType && !["messages", "message", "RECEIVE_MESSAGE"].includes(eventType)) {
       console.log("⚠️ Evento não é mensagem, ignorando:", eventType);
