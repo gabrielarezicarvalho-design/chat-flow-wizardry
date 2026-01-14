@@ -205,7 +205,12 @@ serve(async (req) => {
             case "video":
               msg.file = simpleMedia;
               if (params.text) msg.text = params.text;
-              if (params.viewOnce) msg.viewOnce = true;
+              // Ensure viewOnce is properly set as boolean
+              const isViewOnce = params.viewOnce === true || params.viewOnce === "true";
+              if (isViewOnce) {
+                msg.viewOnce = true;
+                console.log(`[wa-sender] Setting viewOnce=true for ${cleanNumber}`);
+              }
               break;
               
             case "audio":
