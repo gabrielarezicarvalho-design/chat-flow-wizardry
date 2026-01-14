@@ -24,7 +24,7 @@ serve(async (req) => {
       throw new Error("Campos obrigatórios ausentes: instance_id, base_url, token");
     }
 
-    const webhookUrl = `https://lvldqyyzhlygwbgcdqcg.supabase.co/functions/v1/wa-webhook-listener`;
+    const webhookUrl = `https://usxpwndgjlnhbdxxoujf.supabase.co/functions/v1/wa-webhook-listener`;
 
     console.log("🎯 Webhook URL destino:", webhookUrl);
     console.log("-".repeat(80));
