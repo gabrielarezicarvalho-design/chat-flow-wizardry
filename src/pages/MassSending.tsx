@@ -211,7 +211,7 @@ function MassSendingContent() {
       if (userData.user) {
         const userId = userData.user.id;
         const [connectionsRes, campaignsRes, tagsRes, leadsRes, templatesRes] = await Promise.all([
-          supabase.from("connections").select("id, instance_name, status"),
+          supabase.from("connections").select("id, instance_name, status, token, environment, base_url"),
           supabase.from("campaigns").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
           supabase.from("tags").select("*").eq("user_id", userId),
           supabase.from("leads").select("*").eq("user_id", userId),
@@ -221,7 +221,10 @@ function MassSendingContent() {
         const mappedConnections = (connectionsRes.data || []).map((c: any) => ({
           id: c.id,
           name: c.instance_name,
-          status: c.status
+          status: c.status,
+          token: c.token,
+          environment: c.environment,
+          base_url: c.base_url
         })) as Connection[];
         setConnections(mappedConnections);
         // Map campaigns without started_at
