@@ -227,6 +227,130 @@ const Connections = () => {
     };
   }, [connections, updateConnection]);
 
+  // Track which connections have been auto-synced to avoid repeated syncs
+  const [autoSyncedConnections, setAutoSyncedConnections] = useState<Set<string>>(new Set());
+
+  // Auto-sync contacts and labels when connection is selected and connected
+  useEffect(() => {
+    const autoSync = async () => {
+      if (!selectedConnection) return;
+      
+      const connAny = selectedConnection as any;
+      
+      // Only auto-sync if:
+      // 1. Connection is connected
+      // 2. Connection has a token
+      // 3. Haven't already synced this connection in this session
+      if (
+        selectedConnection.status === 'connected' && 
+        connAny.token && 
+        !autoSyncedConnections.has(selectedConnection.id)
+      ) {
+        // Mark as synced to prevent repeated syncs
+        setAutoSyncedConnections(prev => new Set(prev).add(selectedConnection.id));
+        
+        // Auto-sync contacts
+        try {
+          setSyncingContacts(true);
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          const { data: contactsData } = await supabase.functions.invoke('wa-contacts', {
+            body: {
+              action: 'sync',
+              connectionId: selectedConnection.id,
+              userId: user?.id
+            }
+          });
+
+          if (contactsData?.success) {
+            setContactsStats({
+              synced: contactsData.added || 0,
+              lastSync: new Date().toLocaleTimeString('pt-BR')
+            });
+            if (contactsData.added > 0) {
+              toast.success(`📱 ${contactsData.added} contatos sincronizados automaticamente!`);
+            }
+          }
+        } catch (err) {
+          console.error("Auto-sync contacts error:", err);
+        } finally {
+          setSyncingContacts(false);
+        }
+
+        // Auto-sync labels
+        try {
+          setSyncingLabels(true);
+          const baseUrl = connAny.base_url || "https://marketflowchat.uazapi.com";
+          
+          const response = await fetch(`${baseUrl}/chat/labels`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'token': connAny.token
+            }
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            let labels: any[] = [];
+            
+            if (Array.isArray(result)) {
+              labels = result;
+            } else if (result?.labels || result?.data) {
+              labels = result.labels || result.data;
+            }
+
+            const { data: { user } } = await supabase.auth.getUser();
+            let addedTagsCount = 0;
+
+            for (const label of labels) {
+              const labelName = label.name || label.displayName || label.title;
+              const labelColor = label.color || label.hexColor || '#3b82f6';
+              
+              if (!labelName) continue;
+
+              const { data: existing } = await supabase
+                .from('tags')
+                .select('id')
+                .eq('user_id', user?.id)
+                .eq('name', labelName)
+                .maybeSingle();
+
+              if (!existing) {
+                const { error: insertError } = await supabase
+                  .from('tags')
+                  .insert({
+                    user_id: user?.id,
+                    name: labelName,
+                    color: labelColor
+                  });
+
+                if (!insertError) {
+                  addedTagsCount++;
+                }
+              }
+            }
+
+            setLabelsStats({
+              synced: addedTagsCount,
+              lastSync: new Date().toLocaleTimeString('pt-BR')
+            });
+
+            if (addedTagsCount > 0) {
+              toast.success(`🏷️ ${addedTagsCount} etiquetas sincronizadas automaticamente!`);
+            }
+          }
+        } catch (err) {
+          console.error("Auto-sync labels error:", err);
+        } finally {
+          setSyncingLabels(false);
+        }
+      }
+    };
+
+    autoSync();
+  }, [selectedConnection, autoSyncedConnections]);
+
   // Load settings when connection changes
   useEffect(() => {
     const loadSettings = async () => {
