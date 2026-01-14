@@ -262,13 +262,15 @@ serve(async (req) => {
       }
 
       case "add_to_contact": {
+        console.log("=== ADD_TO_CONTACT ACTION STARTED ===");
+        console.log(`Received: labelName=${labelName}, contactPhone=${contactPhone}, labelId=${labelId}`);
+        
         // Add label to a contact - now accepts labelName and finds/creates the label
-        const { labelName: tagName, phone: phoneNumber } = await (async () => ({ 
-          labelName: labelName, 
-          phone: contactPhone 
-        }))();
+        const tagName = labelName;
+        const phoneNumber = contactPhone;
 
         if (!tagName && !labelId) {
+          console.log("ERROR: Missing labelName and labelId");
           return new Response(JSON.stringify({ 
             error: "Missing labelName or labelId" 
           }), {
@@ -278,6 +280,7 @@ serve(async (req) => {
         }
 
         if (!phoneNumber) {
+          console.log("ERROR: Missing phoneNumber");
           return new Response(JSON.stringify({ 
             error: "Missing phone/contactPhone" 
           }), {
@@ -292,9 +295,10 @@ serve(async (req) => {
         let waLabelId = labelId;
         
         if (!waLabelId && tagName) {
+          console.log("Looking for label in WhatsApp...");
           const listEndpoints = [
-            `${baseUrl}/label/list`,
             `${baseUrl}/labels`,
+            `${baseUrl}/label/list`,
             `${baseUrl}/misc/getLabels`
           ];
 
@@ -312,9 +316,11 @@ serve(async (req) => {
                 }
               });
 
+              console.log(`Response status: ${response.status}`);
+              
               if (response.ok) {
                 const result = await response.json();
-                console.log(`Labels response:`, JSON.stringify(result));
+                console.log(`Labels found:`, JSON.stringify(result).substring(0, 500));
                 
                 if (Array.isArray(result)) {
                   existingLabels = result;
@@ -329,7 +335,9 @@ serve(async (req) => {
             }
           }
 
-          // Find label by name
+          console.log(`Total labels found: ${existingLabels.length}`);
+
+          // Find label by name (case insensitive)
           const matchingLabel = existingLabels.find((l: any) => {
             const name = l.name || l.displayName || l.title;
             return name && name.toLowerCase() === tagName.toLowerCase();
@@ -337,7 +345,7 @@ serve(async (req) => {
 
           if (matchingLabel) {
             waLabelId = matchingLabel.labelid || matchingLabel.id || matchingLabel.labelId;
-            console.log(`Found existing WhatsApp label ID: ${waLabelId}`);
+            console.log(`Found existing WhatsApp label ID: ${waLabelId} for "${tagName}"`);
           } else {
             // Create the label in WhatsApp
             console.log(`Label "${tagName}" not found in WhatsApp, creating...`);
@@ -349,6 +357,7 @@ serve(async (req) => {
 
             for (const endpoint of createEndpoints) {
               try {
+                console.log(`Creating label at: ${endpoint.url}`);
                 const response = await fetch(endpoint.url, {
                   method: "POST",
                   headers: {
@@ -360,7 +369,7 @@ serve(async (req) => {
                 });
 
                 const result = await response.json();
-                console.log(`Create label response:`, JSON.stringify(result));
+                console.log(`Create label response (${response.status}):`, JSON.stringify(result));
 
                 if (response.ok && !result.error) {
                   waLabelId = result.labelid || result.id || result.labelId || result.label?.id;
@@ -375,35 +384,38 @@ serve(async (req) => {
         }
 
         if (!waLabelId) {
-          console.log(`Could not find or create WhatsApp label for "${tagName}"`);
+          console.log(`ERROR: Could not find or create WhatsApp label for "${tagName}"`);
           return new Response(JSON.stringify({
             success: false,
             error: "Could not find or create label in WhatsApp",
             localOnly: true
           }), {
-            status: 200, // Return 200 so it doesn't break the UI
+            status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         }
 
         // Format phone number - just digits
         const phone = phoneNumber.replace(/\D/g, "");
+        console.log(`Formatted phone: ${phone}, waLabelId: ${waLabelId}`);
 
-        console.log(`Adding label ${waLabelId} to contact ${phone}`);
-
-        // Use the correct UAZAPI endpoint format:
+        // According to UAZAPI docs:
         // PUT /labels/chats with body: { number: "5511999999999", add_labelid: "10" }
         const addEndpoints = [
           { url: `${baseUrl}/labels/chats`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
           { url: `${baseUrl}/label/chats`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
-          // Fallback formats
           { url: `${baseUrl}/labels/chat`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
           { url: `${baseUrl}/chat/labels`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
         ];
 
+        let lastError = null;
+        let lastResponse = null;
+
         for (const endpoint of addEndpoints) {
           try {
-            console.log(`Trying add endpoint: ${endpoint.url} (${endpoint.method}) with body:`, JSON.stringify(endpoint.body));
+            console.log(`Trying: ${endpoint.method} ${endpoint.url}`);
+            console.log(`Body:`, JSON.stringify(endpoint.body));
+            
             const response = await fetch(endpoint.url, {
               method: endpoint.method,
               headers: {
@@ -414,10 +426,20 @@ serve(async (req) => {
               body: JSON.stringify(endpoint.body)
             });
 
-            const result = await response.json();
-            console.log(`Add response (${response.status}):`, JSON.stringify(result));
+            const responseText = await response.text();
+            console.log(`Response (${response.status}): ${responseText}`);
+
+            let result;
+            try {
+              result = JSON.parse(responseText);
+            } catch {
+              result = { raw: responseText };
+            }
+
+            lastResponse = { status: response.status, result };
 
             if (response.ok && !result.error) {
+              console.log("=== SUCCESS: Label added to WhatsApp! ===");
               return new Response(JSON.stringify({
                 success: true,
                 message: "Label added to contact in WhatsApp",
@@ -426,18 +448,25 @@ serve(async (req) => {
               }), {
                 headers: { ...corsHeaders, "Content-Type": "application/json" }
               });
+            } else {
+              lastError = result.error || result.message || `Status ${response.status}`;
             }
           } catch (err) {
-            console.log(`Add to contact failed:`, err);
+            console.log(`Request failed:`, err);
+            lastError = String(err);
           }
         }
 
-        // Even if WhatsApp sync fails, the local update was successful
+        console.log(`=== FAILED: Could not add label to WhatsApp. Last error: ${lastError} ===`);
+        
+        // Return success for local but indicate WhatsApp sync failed
         return new Response(JSON.stringify({
           success: true,
           localOnly: true,
-          message: "Label saved locally. WhatsApp sync may not be available.",
-          waLabelId
+          message: "Label saved locally. WhatsApp sync failed.",
+          waLabelId,
+          lastError,
+          lastResponse
         }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" }
