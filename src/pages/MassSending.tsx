@@ -615,6 +615,7 @@ function MassSendingContent() {
         addLog("success", `Campanha finalizada: ${sentCount} enviados, ${failedCount} falhas`);
       } else {
         addLog("info", "Enviando mensagem simples via UZAPI...");
+        addLog("info", `ViewOnce ativo: ${viewOnce}`);
         // Use simple endpoint for regular messages
         const { data, error } = await supabase.functions.invoke("wa-sender", {
           body: {
@@ -624,7 +625,7 @@ function MassSendingContent() {
             type: messageType,
             text: finalMessage,
             media: mediaUrl || undefined,
-            viewOnce: viewOnce,
+            viewOnce: viewOnce === true,
             delayMin: delayInterval,
             delayMax: delayInterval + 5,
             pauseEveryX: pauseEveryX,
