@@ -704,27 +704,60 @@ const Connections = () => {
     // If user chose to delete data, remove leads and tags associated with this connection
     if (deleteData) {
       try {
-        // Delete leads associated with conversations from this connection
-        const { data: conversations } = await supabase
-          .from('conversations')
-          .select('contact_phone')
-          .eq('connection_id', id);
+        // Get current user
+        const { data: authData } = await supabase.auth.getUser();
+        const userId = authData?.user?.id;
         
-        if (conversations && conversations.length > 0) {
-          const phones = conversations.map(c => c.contact_phone);
-          
-          // Delete leads with matching phones
-          await supabase
+        if (userId) {
+          // Delete all leads synced from WhatsApp (source = 'WhatsApp Sync')
+          const { data: deletedLeads, error: leadsError } = await supabase
             .from('leads')
             .delete()
-            .in('phone', phones);
+            .eq('user_id', userId)
+            .eq('source', 'WhatsApp Sync')
+            .select('id');
           
-          toast.success(`${phones.length} contatos removidos`);
+          if (leadsError) {
+            console.error("Error deleting leads:", leadsError);
+          } else {
+            const leadsCount = deletedLeads?.length || 0;
+            if (leadsCount > 0) {
+              toast.success(`${leadsCount} contatos removidos`);
+            }
+          }
+          
+          // Delete all tags associated with this user
+          const { data: deletedTags, error: tagsError } = await supabase
+            .from('tags')
+            .delete()
+            .eq('user_id', userId)
+            .select('id');
+          
+          if (tagsError) {
+            console.error("Error deleting tags:", tagsError);
+          } else {
+            const tagsCount = deletedTags?.length || 0;
+            if (tagsCount > 0) {
+              toast.success(`${tagsCount} etiquetas removidas`);
+            }
+          }
+          
+          // Also delete conversations associated with this connection
+          const { data: deletedConvs, error: convsError } = await supabase
+            .from('conversations')
+            .delete()
+            .eq('connection_id', id)
+            .select('id');
+          
+          if (convsError) {
+            console.error("Error deleting conversations:", convsError);
+          } else {
+            const convsCount = deletedConvs?.length || 0;
+            if (convsCount > 0) {
+              toast.info(`${convsCount} conversas removidas`);
+            }
+          }
         }
-        
-        // Delete tags associated with this connection's user
-        // (Tags don't have connection_id, so we'll inform the user)
-        toast.info("Tags mantidas - remova manualmente se necessário");
       } catch (err) {
         console.error("Error deleting associated data:", err);
         toast.error("Erro ao remover dados associados");
