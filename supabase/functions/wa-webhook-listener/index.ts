@@ -2753,6 +2753,125 @@ serve(async (req) => {
       }
     }
 
+    // ========================================
+    // HANDLE POLL VOTE EVENTS - Save poll responses
+    // ========================================
+    const pollEventTypes = ["poll", "poll.vote", "poll_vote", "pollUpdate", "messages.update"];
+    const isPollEvent = eventType && pollEventTypes.some(t => eventType.toLowerCase().includes(t.toLowerCase()));
+    const hasPollUpdates = payload.pollUpdates || payload.data?.pollUpdates || payload.message?.pollUpdates;
+    
+    if (isPollEvent || hasPollUpdates) {
+      console.log("📊 Evento de ENQUETE detectado:", eventType);
+      console.log("📝 Payload completo:", JSON.stringify(payload, null, 2));
+      
+      try {
+        // Extract poll vote data
+        const pollData = payload.data || payload.pollUpdates || payload.message?.pollUpdates || payload;
+        const pollResult = pollData.pollResult || pollData.results || pollData.votes || [];
+        const voterPhone = pollData.voter || pollData.from || payload.message?.sender_pn || payload.message?.sender || telefone || "";
+        const cleanVoterPhone = voterPhone.replace(/@.*$/, "").replace(/\D/g, "");
+        
+        // Get voted options
+        let votedOptions: string[] = [];
+        
+        if (Array.isArray(pollResult)) {
+          // Format: [{ name: "Option", voters: ["phone@s.whatsapp.net"] }]
+          pollResult.forEach((opt: any) => {
+            const voters = opt.voters || [];
+            if (voters.some((v: string) => v.includes(cleanVoterPhone))) {
+              votedOptions.push(opt.name || opt.option || opt.text || "");
+            }
+          });
+        } else if (pollData.selectedOptions || pollData.vote?.selectedOptions) {
+          // Format: { selectedOptions: ["Option1", "Option2"] }
+          votedOptions = pollData.selectedOptions || pollData.vote?.selectedOptions || [];
+        }
+        
+        console.log("📊 Votante:", cleanVoterPhone);
+        console.log("📊 Opções votadas:", votedOptions);
+        
+        if (cleanVoterPhone && votedOptions.length > 0) {
+          // Find connection
+          const payloadToken = payload.token || instanceToken || "";
+          const payloadInstanceId = payload.instance_id || payload.instanceId || payload.id || "";
+          let connection = null;
+          
+          if (payloadInstanceId) {
+            const { data: connByInstance } = await supabase
+              .from("connections")
+              .select("*")
+              .eq("instance_id", payloadInstanceId)
+              .single();
+            connection = connByInstance;
+          }
+          
+          if (!connection && payloadToken) {
+            const { data: connData } = await supabase
+              .from("connections")
+              .select("*")
+              .eq("token", payloadToken)
+              .single();
+            connection = connData;
+          }
+          
+          if (connection) {
+            const userId = connection.user_id;
+            
+            // Get contact name from leads
+            const { data: lead } = await supabase
+              .from("leads")
+              .select("name")
+              .eq("phone", cleanVoterPhone)
+              .eq("user_id", userId)
+              .single();
+            
+            const contactName = lead?.name || cleanVoterPhone;
+            
+            // Save poll response to campaign_responses
+            for (const option of votedOptions) {
+              const { error: insertError } = await supabase
+                .from("campaign_responses")
+                .insert({
+                  user_id: userId,
+                  contact_phone: cleanVoterPhone,
+                  contact_name: contactName,
+                  response_type: "poll",
+                  response_value: option,
+                  response_text: `Votou na opção: ${option}`,
+                  responded_at: new Date().toISOString()
+                });
+              
+              if (insertError) {
+                console.error("❌ Erro ao salvar voto:", insertError);
+              } else {
+                console.log(`✅ Voto salvo: ${contactName} votou em "${option}"`);
+              }
+            }
+          } else {
+            console.log("⚠️ Conexão não encontrada para evento de enquete");
+          }
+        }
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          eventType: "poll",
+          processed: true,
+          votedOptions
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      } catch (pollError: any) {
+        console.error("❌ Erro ao processar evento de enquete:", pollError);
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: pollError.message 
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+    }
+
     // Skip non-message events
     if (eventType && !["messages", "message", "RECEIVE_MESSAGE"].includes(eventType)) {
       console.log("⚠️ Evento não é mensagem, ignorando:", eventType);
