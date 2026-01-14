@@ -170,6 +170,7 @@ function MassSendingContent() {
   const [delayInterval, setDelayInterval] = useState(10); // seconds between messages
   const [pauseEveryX, setPauseEveryX] = useState(10); // pause every X messages
   const [pauseDuration, setPauseDuration] = useState(60); // pause duration in seconds
+  const [sendImmediately, setSendImmediately] = useState(true); // send immediately or queue
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const [sending, setSending] = useState(false);
@@ -594,6 +595,7 @@ function MassSendingContent() {
             delayMax: delayInterval + 5,
             pauseEveryX: pauseEveryX,
             pauseDuration: pauseDuration,
+            sendImmediately: sendImmediately,
             info: name
           }
         });
@@ -718,6 +720,7 @@ function MassSendingContent() {
     setDelayInterval(10);
     setPauseEveryX(10);
     setPauseDuration(60);
+    setSendImmediately(true);
     setAcceptedTerms(false);
   };
 
@@ -1733,6 +1736,8 @@ function MassSendingContent() {
               setPauseEveryX={setPauseEveryX}
               pauseDuration={pauseDuration}
               setPauseDuration={setPauseDuration}
+              sendImmediately={sendImmediately}
+              setSendImmediately={setSendImmediately}
               acceptedTerms={acceptedTerms}
               setAcceptedTerms={setAcceptedTerms}
             />

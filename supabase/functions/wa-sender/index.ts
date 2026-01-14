@@ -256,18 +256,21 @@ serve(async (req) => {
         };
         
         // Handle scheduling - can be timestamp in ms or minutes from now
-        // If user set scheduled_for, use it; otherwise schedule with delay
+        // If user set scheduled_for, use it; otherwise check sendImmediately flag
         if (params.scheduled_for) {
           body.scheduled_for = params.scheduled_for;
-        } else if (advancedMessages.length === 1) {
+        } else if (advancedMessages.length === 1 && params.sendImmediately !== true) {
           // For single message, use scheduled_for to simulate delay
           // Since delay only works between multiple messages, we schedule for X minutes from now
           // Use 1 minute as minimum to ensure the message is not sent immediately
+          // Only do this if sendImmediately is not explicitly set to true
           body.scheduled_for = 1; // Schedule for 1 minute from now
-          console.log(`[wa-sender] Single message detected, scheduling for 1 minute from now to avoid immediate send`);
+          console.log(`[wa-sender] Single message detected, scheduling for 1 minute from now`);
+        } else if (params.sendImmediately === true) {
+          console.log(`[wa-sender] Send immediately mode enabled, not adding scheduled_for`);
         }
         
-        console.log(`[wa-sender] Advanced campaign: ${advancedMessages.length} messages, delay ${body.delayMin}-${body.delayMax}s`);
+        console.log(`[wa-sender] Advanced campaign: ${advancedMessages.length} messages, delay ${body.delayMin}-${body.delayMax}s, immediate: ${params.sendImmediately}`);
         console.log(`[wa-sender] Full body:`, JSON.stringify(body, null, 2));
         break;
 
