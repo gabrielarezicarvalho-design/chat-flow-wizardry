@@ -315,7 +315,7 @@ serve(async (req) => {
       }
 
       case "sync": {
-        // Sync labels from WhatsApp to local tags table
+        // Sync labels from WhatsApp to local tags table AND their contacts
         if (!ownerId) {
           return new Response(JSON.stringify({ 
             error: "Missing userId for sync" 
@@ -363,70 +363,181 @@ serve(async (req) => {
           }
         }
 
-        let addedCount = 0;
-        let skippedCount = 0;
+        let addedTagsCount = 0;
+        let addedContactsCount = 0;
+        let skippedContactsCount = 0;
 
         // Color mapping for WhatsApp label colors (numeric)
         const colorMap: { [key: number]: string } = {
-          0: '#808080', // Gray
-          1: '#25D366', // Green
-          2: '#128C7E', // Teal
-          3: '#075E54', // Dark teal
-          4: '#DCF8C6', // Light green
-          5: '#34B7F1', // Blue
-          6: '#FF6B6B', // Red
-          7: '#F7DC6F', // Yellow
-          8: '#BB8FCE', // Purple
-          9: '#F5B041', // Orange
+          0: '#ff9484', // Pink/Salmon
+          1: '#64c4ff', // Blue
+          2: '#fed428', // Yellow
+          3: '#dfaef0', // Purple/Lavender
+          4: '#9adf9c', // Green
+          5: '#ffd099', // Orange/Peach
+          6: '#8edaff', // Light Blue
+          7: '#d2b48c', // Tan
+          8: '#c0c0c0', // Silver
+          9: '#87ceeb', // Sky Blue
+          10: '#01d0e2', // Cyan
+          11: '#98fb98', // Pale Green
+          12: '#dda0dd', // Plum
+          13: '#f64847', // Red
+        };
+
+        // Helper function to extract phone from JID
+        const extractPhoneFromJid = (jid: string): string => {
+          if (!jid) return '';
+          return jid.replace('@s.whatsapp.net', '').replace('@c.us', '').replace(/\D/g, '');
         };
 
         for (const label of labels) {
           const labelName = label.name || label.displayName || label.title;
           if (!labelName) continue;
 
-          // Convert numeric color to hex
-          let labelColor = '#3b82f6';
-          if (typeof label.color === 'number') {
+          // Convert numeric color to hex, also use colorHex if available
+          let labelColor = label.colorHex || '#3b82f6';
+          if (!label.colorHex && typeof label.color === 'number') {
             labelColor = colorMap[label.color] || '#3b82f6';
-          } else if (typeof label.color === 'string' && label.color.startsWith('#')) {
-            labelColor = label.color;
           }
 
+          // Get label ID
+          const labelId = label.labelid || label.id || label.labelId;
+
           // Check if tag exists
-          const { data: existing } = await supabase
+          const { data: existingTag } = await supabase
             .from('tags')
-            .select('id')
+            .select('id, name')
             .eq('user_id', ownerId)
             .eq('name', labelName)
             .maybeSingle();
 
-          if (!existing) {
-            const { error: insertError } = await supabase
+          let tagId = existingTag?.id;
+          const tagName = existingTag?.name || labelName;
+
+          if (!existingTag) {
+            const { data: newTag, error: insertError } = await supabase
               .from('tags')
               .insert({
                 user_id: ownerId,
                 name: labelName,
                 color: labelColor
-              });
+              })
+              .select('id, name')
+              .single();
 
-            if (!insertError) {
-              addedCount++;
-            } else {
-              skippedCount++;
+            if (!insertError && newTag) {
+              addedTagsCount++;
+              tagId = newTag.id;
             }
-          } else {
-            skippedCount++;
+          }
+
+          // Now fetch contacts for this label
+          if (labelId) {
+            console.log(`Fetching contacts for label: ${labelName} (ID: ${labelId})`);
+            
+            const contactEndpoints = [
+              `${baseUrl}/label/${labelId}/chats`,
+              `${baseUrl}/label/chats/${labelId}`,
+              `${baseUrl}/misc/getLabelChats/${labelId}`,
+              `${baseUrl}/chat/findLabelChats/${labelId}`
+            ];
+
+            let labelContacts: any[] = [];
+
+            for (const endpoint of contactEndpoints) {
+              try {
+                console.log(`Trying contacts endpoint: ${endpoint}`);
+                const response = await fetch(endpoint, {
+                  method: "GET",
+                  headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "token": instanceToken
+                  }
+                });
+
+                if (response.ok) {
+                  const result = await response.json();
+                  console.log(`Contacts response for ${labelName}:`, JSON.stringify(result).substring(0, 500));
+                  
+                  if (Array.isArray(result)) {
+                    labelContacts = result;
+                    break;
+                  } else if (result?.chats || result?.contacts || result?.data) {
+                    labelContacts = result.chats || result.contacts || result.data;
+                    break;
+                  }
+                }
+              } catch (err) {
+                console.log(`Contacts endpoint failed:`, err);
+              }
+            }
+
+            // Save contacts with this tag
+            for (const contact of labelContacts) {
+              const phone = extractPhoneFromJid(contact.id || contact.jid || contact.phone || '');
+              const name = contact.name || contact.pushname || contact.notify || phone || 'Sem nome';
+
+              if (!phone) continue;
+
+              // Check if lead exists
+              const { data: existingLead } = await supabase
+                .from('leads')
+                .select('id, tags')
+                .eq('user_id', ownerId)
+                .eq('phone', phone)
+                .maybeSingle();
+
+              if (existingLead) {
+                // Update existing lead with new tag if not already present
+                const currentTags = existingLead.tags || [];
+                if (!currentTags.includes(tagName)) {
+                  const { error: updateError } = await supabase
+                    .from('leads')
+                    .update({ tags: [...currentTags, tagName] })
+                    .eq('id', existingLead.id);
+
+                  if (!updateError) {
+                    addedContactsCount++;
+                  }
+                } else {
+                  skippedContactsCount++;
+                }
+              } else {
+                // Insert new lead with tag
+                const { error: insertError } = await supabase
+                  .from('leads')
+                  .insert({
+                    user_id: ownerId,
+                    name: name,
+                    phone: phone,
+                    source: 'whatsapp-label',
+                    tags: [tagName]
+                  });
+
+                if (!insertError) {
+                  addedContactsCount++;
+                } else {
+                  console.log(`Insert error for ${phone}:`, insertError);
+                  skippedContactsCount++;
+                }
+              }
+            }
+
+            console.log(`Label ${labelName}: found ${labelContacts.length} contacts`);
           }
         }
 
         return new Response(JSON.stringify({
           success: true,
-          added: addedCount,
-          skipped: skippedCount,
-          total: labels.length,
+          addedTags: addedTagsCount,
+          addedContacts: addedContactsCount,
+          skippedContacts: skippedContactsCount,
+          totalLabels: labels.length,
           message: labels.length === 0 
             ? "Nenhuma etiqueta encontrada no WhatsApp Business" 
-            : `${addedCount} etiquetas sincronizadas`
+            : `${addedTagsCount} etiquetas e ${addedContactsCount} contatos sincronizados`
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
