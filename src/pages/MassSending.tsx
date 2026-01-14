@@ -39,6 +39,7 @@ interface Connection {
   status: string;
   token?: string;
   environment?: string;
+  base_url?: string;
 }
 
 interface Campaign {
@@ -311,7 +312,8 @@ function MassSendingContent() {
       const { data, error } = await supabase.functions.invoke("wa-status-instance", {
         body: {
           token: conn.token,
-          environment: conn.environment || "TESTE"
+          environment: conn.environment || "TESTE",
+          base_url: conn.base_url
         }
       });
       
