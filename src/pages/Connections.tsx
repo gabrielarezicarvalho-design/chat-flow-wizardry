@@ -1610,6 +1610,44 @@ const Connections = () => {
 
   const renderContactsTab = () => (
     <div className="space-y-6">
+      {/* Auto-Sync Progress Indicator */}
+      {(syncingContacts || syncingLabels) && autoSyncedConnections.has(selectedConnection?.id || '') && (
+        <Card className="border-primary/50 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-primary">Sincronização automática em andamento...</p>
+                <p className="text-xs text-muted-foreground">
+                  {syncingContacts && syncingLabels 
+                    ? 'Sincronizando contatos e etiquetas'
+                    : syncingContacts 
+                      ? 'Sincronizando contatos' 
+                      : 'Sincronizando etiquetas'
+                  }
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {syncingContacts && (
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 rounded-full">
+                    <Users className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-xs text-primary font-medium">Contatos</span>
+                  </div>
+                )}
+                {syncingLabels && (
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 rounded-full">
+                    <Tag className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-xs text-primary font-medium">Etiquetas</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Sync Contacts Card */}
       <Card className="border-border">
         <CardHeader className="pb-4">
