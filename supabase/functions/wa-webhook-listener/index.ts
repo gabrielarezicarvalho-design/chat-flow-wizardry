@@ -2550,98 +2550,188 @@ serve(async (req) => {
     // ========================================
     // HANDLE LABEL EVENTS - Sync labels from WhatsApp to system
     // ========================================
-    const labelEventTypes = ["labels", "label", "label.edit", "label.association", "labels.chat", "LABELS_UPDATE", "LABEL_EDIT"];
+    const labelEventTypes = ["labels", "label", "label.edit", "label.association", "labels.chat", "LABELS_UPDATE", "LABEL_EDIT", "chat_labels"];
     if (eventType && labelEventTypes.some(t => eventType.toLowerCase().includes(t.toLowerCase()))) {
       console.log("🏷️ Evento de LABEL detectado:", eventType);
       console.log("📝 Payload completo:", JSON.stringify(payload, null, 2));
       
       try {
-        // Find connection by instance token
+        // Find connection by instance_id first (most reliable), then token
         const payloadToken = payload.token || instanceToken || "";
+        const payloadInstanceId = payload.instance_id || payload.instanceId || payload.id || "";
         let connection = null;
         
-        if (payloadToken) {
+        // First: try by instance_id (most reliable from UAZAPI)
+        if (!connection && payloadInstanceId) {
+          console.log("🔍 Buscando conexão pelo instance_id:", payloadInstanceId);
+          const { data: connByInstance } = await supabase
+            .from("connections")
+            .select("*")
+            .eq("instance_id", payloadInstanceId)
+            .single();
+          if (connByInstance) {
+            connection = connByInstance;
+            console.log("✅ Conexão encontrada pelo instance_id");
+          }
+        }
+        
+        // Second: try by token
+        if (!connection && payloadToken) {
+          console.log("🔍 Buscando conexão pelo token");
           const { data: connData } = await supabase
             .from("connections")
             .select("*")
             .eq("token", payloadToken)
             .single();
-          connection = connData;
+          if (connData) {
+            connection = connData;
+            console.log("✅ Conexão encontrada pelo token");
+          }
+        }
+        
+        // Third: try fallback to any active connection
+        if (!connection) {
+          console.log("🔍 Tentando fallback para conexão ativa...");
+          const { data: activeConn } = await supabase
+            .from("connections")
+            .select("*")
+            .eq("status", "connected")
+            .limit(1)
+            .single();
+          if (activeConn) {
+            connection = activeConn;
+            console.log("✅ Conexão encontrada (fallback ativa)");
+          }
         }
         
         if (connection) {
-          // Extract label info from payload
-          const labelData = payload.label || payload.labels || payload.data || {};
-          const chatId = payload.chatId || payload.chat?.id || payload.message?.chatid || labelData.chatId || "";
-          const labelId = labelData.id || labelData.labelid || labelData.labelId || "";
-          const labelName = labelData.name || labelData.displayName || "";
+          console.log("🔗 Conexão ID:", connection.id, "User ID:", connection.user_id);
+          
+          // Extract label info from UAZAPI payload formats
+          // UAZAPI sends: { event: "labels", data: { labels: [...], chatId: "..." } }
+          // Or: { event: "chat_labels", id: "...", chatId: "...", labels: [...] }
+          const labelData = payload.data || payload;
+          const labels = labelData.labels || payload.labels || [];
+          const chatId = labelData.chatId || payload.chatId || payload.chat?.id || payload.message?.chatid || "";
           const action = labelData.action || payload.action || "add"; // add, remove, edit
           
-          console.log("🏷️ Label info:", { chatId, labelId, labelName, action });
+          console.log("🏷️ Label info:", { chatId, labelsCount: labels.length, action });
+          console.log("🏷️ Labels recebidas:", JSON.stringify(labels));
           
-          // Extract phone from chatId (format: "5511999999999@s.whatsapp.net")
+          // Extract phone from chatId (format: "5511999999999@s.whatsapp.net" or "5511999999999@c.us")
           const phone = chatId.replace(/@.*$/, "").replace(/\D/g, "");
           
-          if (phone && labelName) {
-            console.log(`📱 Syncing label "${labelName}" for phone ${phone}`);
+          if (phone && labels.length > 0) {
+            console.log(`📱 Syncing ${labels.length} label(s) for phone ${phone}`);
             
             // Find lead by phone
-            const { data: leads } = await supabase
+            const { data: leads, error: leadError } = await supabase
               .from("leads")
               .select("id, tags, user_id")
               .or(`phone.eq.${phone},phone.ilike.%${phone}%`)
               .eq("user_id", connection.user_id)
               .limit(1);
             
+            if (leadError) {
+              console.error("❌ Erro ao buscar lead:", leadError);
+            }
+            
             if (leads && leads.length > 0) {
               const lead = leads[0];
+              console.log("✅ Lead encontrado:", lead.id);
               const currentTags = lead.tags || [];
               
-              if (action === "remove") {
-                // Remove tag
-                const newTags = currentTags.filter((t: string) => t.toLowerCase() !== labelName.toLowerCase());
-                await supabase
-                  .from("leads")
-                  .update({ tags: newTags, updated_at: new Date().toISOString() })
-                  .eq("id", lead.id);
-                console.log(`✅ Tag "${labelName}" removida do lead ${lead.id}`);
-              } else {
-                // Add tag if not exists
-                if (!currentTags.some((t: string) => t.toLowerCase() === labelName.toLowerCase())) {
+              // Process each label
+              for (const label of labels) {
+                const labelName = label.name || label.displayName || label.title || "";
+                const labelId = label.id || label.labelId || "";
+                
+                if (!labelName) {
+                  console.log("⚠️ Label sem nome, pulando:", JSON.stringify(label));
+                  continue;
+                }
+                
+                console.log(`🏷️ Processando label: "${labelName}" (ID: ${labelId})`);
+                
+                if (action === "remove") {
+                  // Remove tag
+                  const newTags = currentTags.filter((t: string) => t.toLowerCase() !== labelName.toLowerCase());
                   await supabase
                     .from("leads")
-                    .update({ tags: [...currentTags, labelName], updated_at: new Date().toISOString() })
+                    .update({ tags: newTags, updated_at: new Date().toISOString() })
                     .eq("id", lead.id);
-                  console.log(`✅ Tag "${labelName}" adicionada ao lead ${lead.id}`);
+                  console.log(`✅ Tag "${labelName}" removida do lead ${lead.id}`);
                 } else {
-                  console.log(`ℹ️ Tag "${labelName}" já existe no lead ${lead.id}`);
+                  // Add tag if not exists
+                  if (!currentTags.some((t: string) => t.toLowerCase() === labelName.toLowerCase())) {
+                    const newTags = [...currentTags, labelName];
+                    await supabase
+                      .from("leads")
+                      .update({ tags: newTags, updated_at: new Date().toISOString() })
+                      .eq("id", lead.id);
+                    currentTags.push(labelName); // Update local array for next iteration
+                    console.log(`✅ Tag "${labelName}" adicionada ao lead ${lead.id}`);
+                  } else {
+                    console.log(`ℹ️ Tag "${labelName}" já existe no lead ${lead.id}`);
+                  }
                 }
-              }
-              
-              // Also ensure tag exists in tags table
-              const { data: existingTag } = await supabase
-                .from("tags")
-                .select("id")
-                .eq("user_id", connection.user_id)
-                .ilike("name", labelName)
-                .single();
-              
-              if (!existingTag) {
-                await supabase
+                
+                // Also ensure tag exists in tags table
+                const { data: existingTag } = await supabase
                   .from("tags")
-                  .insert({
-                    user_id: connection.user_id,
-                    name: labelName,
-                    color: "#3b82f6"
-                  });
-                console.log(`✅ Tag "${labelName}" criada na tabela tags`);
+                  .select("id")
+                  .eq("user_id", connection.user_id)
+                  .ilike("name", labelName)
+                  .single();
+                
+                if (!existingTag) {
+                  await supabase
+                    .from("tags")
+                    .insert({
+                      user_id: connection.user_id,
+                      name: labelName,
+                      color: label.color || "#3b82f6"
+                    });
+                  console.log(`✅ Tag "${labelName}" criada na tabela tags`);
+                }
               }
             } else {
               console.log(`⚠️ Lead não encontrado para o telefone ${phone}`);
+              
+              // Try to find in conversations
+              const { data: conversations } = await supabase
+                .from("conversations")
+                .select("id, tags, contact_phone")
+                .or(`contact_phone.eq.${phone},contact_phone.ilike.%${phone}%`)
+                .eq("user_id", connection.user_id)
+                .limit(1);
+              
+              if (conversations && conversations.length > 0) {
+                const conv = conversations[0];
+                console.log("✅ Conversa encontrada:", conv.id);
+                const currentTags = conv.tags || [];
+                
+                for (const label of labels) {
+                  const labelName = label.name || label.displayName || label.title || "";
+                  if (!labelName) continue;
+                  
+                  if (!currentTags.some((t: string) => t.toLowerCase() === labelName.toLowerCase())) {
+                    await supabase
+                      .from("conversations")
+                      .update({ tags: [...currentTags, labelName], updated_at: new Date().toISOString() })
+                      .eq("id", conv.id);
+                    console.log(`✅ Tag "${labelName}" adicionada à conversa ${conv.id}`);
+                  }
+                }
+              }
             }
+          } else if (!phone) {
+            console.log("⚠️ ChatId não encontrado no payload");
+          } else {
+            console.log("⚠️ Nenhuma label no payload");
           }
         } else {
-          console.log("⚠️ Conexão não encontrada para o token");
+          console.log("⚠️ Conexão não encontrada - instance_id:", payloadInstanceId, "token:", payloadToken ? "presente" : "ausente");
         }
         
         return new Response(JSON.stringify({ 
