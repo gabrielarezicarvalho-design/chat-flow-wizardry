@@ -1816,7 +1816,7 @@ function MassSendingContent() {
             <MessageSquare className="w-4 h-4" />Respostas
           </TabsTrigger>
           <TabsTrigger value="message-templates" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />Mensagens
+            <FileText className="w-4 h-4" />Templates
           </TabsTrigger>
           <TabsTrigger value="scheduler" className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />Agendar
@@ -1834,7 +1834,7 @@ function MassSendingContent() {
             <Star className="w-4 h-4" />Satisfação
           </TabsTrigger>
           <TabsTrigger value="templates" className="flex items-center gap-2">
-            <BookmarkPlus className="w-4 h-4" />Salvos
+            <BookmarkPlus className="w-4 h-4" />Favoritos
           </TabsTrigger>
           <TabsTrigger value="tester" className="flex items-center gap-2">
             <Terminal className="w-4 h-4" />Tester
