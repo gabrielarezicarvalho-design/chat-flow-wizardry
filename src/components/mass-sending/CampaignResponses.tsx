@@ -134,7 +134,7 @@ export function CampaignResponses({ campaigns }: CampaignResponsesProps) {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <Card className="p-3 text-center">
           <p className="text-2xl font-bold">{responses.length}</p>
           <p className="text-xs text-muted-foreground">Total de Respostas</p>
@@ -150,6 +150,12 @@ export function CampaignResponses({ campaigns }: CampaignResponsesProps) {
             {responses.filter((r) => r.response_type === "button").length}
           </p>
           <p className="text-xs text-muted-foreground">Cliques em Botões</p>
+        </Card>
+        <Card className="p-3 text-center">
+          <p className="text-2xl font-bold">
+            {responses.filter((r) => r.response_type === "poll").length}
+          </p>
+          <p className="text-xs text-muted-foreground">Votos em Enquetes</p>
         </Card>
         <Card className="p-3 text-center">
           <p className="text-2xl font-bold">
@@ -196,6 +202,8 @@ export function CampaignResponses({ campaigns }: CampaignResponsesProps) {
                           ? "Botão"
                           : r.response_type === "list"
                           ? "Lista"
+                          : r.response_type === "poll"
+                          ? "Enquete"
                           : "Texto"}
                       </Badge>
                     </div>
@@ -262,6 +270,8 @@ export function CampaignResponses({ campaigns }: CampaignResponsesProps) {
                       ? "Clique em Botão"
                       : selectedResponse.response_type === "list"
                       ? "Seleção de Lista"
+                      : selectedResponse.response_type === "poll"
+                      ? "Voto em Enquete"
                       : "Mensagem de Texto"}
                   </Badge>
                 </div>
