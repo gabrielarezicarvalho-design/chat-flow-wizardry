@@ -5,10 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Tag, Send, Bell, AlertTriangle, Settings, UserPlus, Copy, Link } from "lucide-react";
+import { Tag, Send, Bell, AlertTriangle, Settings, UserPlus, Copy, Link, Zap, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface TagItem {
   id: string;
@@ -33,6 +34,8 @@ interface CampaignActionsStepProps {
   setPauseEveryX: (v: number) => void;
   pauseDuration: number;
   setPauseDuration: (v: number) => void;
+  sendImmediately: boolean;
+  setSendImmediately: (v: boolean) => void;
   acceptedTerms: boolean;
   setAcceptedTerms: (v: boolean) => void;
 }
@@ -53,6 +56,8 @@ export function CampaignActionsStep({
   setPauseEveryX,
   pauseDuration,
   setPauseDuration,
+  sendImmediately,
+  setSendImmediately,
   acceptedTerms,
   setAcceptedTerms,
 }: CampaignActionsStepProps) {
@@ -69,6 +74,56 @@ export function CampaignActionsStep({
         </p>
 
         <Card className="p-4 space-y-5">
+          {/* Send Mode Toggle */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Modo de envio</Label>
+            <RadioGroup
+              value={sendImmediately ? "immediate" : "queued"}
+              onValueChange={(v) => setSendImmediately(v === "immediate")}
+              className="grid grid-cols-2 gap-3"
+            >
+              <Label
+                htmlFor="immediate"
+                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                  sendImmediately 
+                    ? "border-primary bg-primary/5 ring-1 ring-primary" 
+                    : "border-border hover:border-primary/50"
+                }`}
+              >
+                <RadioGroupItem value="immediate" id="immediate" className="sr-only" />
+                <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Enviar Agora</p>
+                  <p className="text-xs text-muted-foreground">Envia imediatamente</p>
+                </div>
+              </Label>
+              <Label
+                htmlFor="queued"
+                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                  !sendImmediately 
+                    ? "border-primary bg-primary/5 ring-1 ring-primary" 
+                    : "border-border hover:border-primary/50"
+                }`}
+              >
+                <RadioGroupItem value="queued" id="queued" className="sr-only" />
+                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Enfileirar</p>
+                  <p className="text-xs text-muted-foreground">Agenda para 1 min</p>
+                </div>
+              </Label>
+            </RadioGroup>
+            <p className="text-xs text-muted-foreground">
+              {sendImmediately 
+                ? "As mensagens serão enviadas imediatamente, uma após a outra com o intervalo configurado."
+                : "As mensagens serão enfileiradas e enviadas pelo servidor em 1 minuto."}
+            </p>
+          </div>
+
           {/* Delay Interval */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
