@@ -896,6 +896,39 @@ function MassSendingContent() {
     setCarouselCards(newCards);
   };
 
+  const handleCarouselImageUpload = async (index: number, file: File) => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        toast.error("Você precisa estar logado para fazer upload");
+        return;
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userData.user.id}/${Date.now()}_card_${index}.${fileExt}`;
+
+      toast.loading("Enviando imagem...", { id: "carousel-upload" });
+
+      const { error: uploadError } = await supabase.storage
+        .from("campaign-media")
+        .upload(fileName, file);
+
+      if (uploadError) {
+        toast.error("Erro ao enviar imagem: " + uploadError.message, { id: "carousel-upload" });
+        return;
+      }
+
+      const { data: publicUrl } = supabase.storage
+        .from("campaign-media")
+        .getPublicUrl(fileName);
+
+      updateCarouselCard(index, "imageUrl", publicUrl.publicUrl);
+      toast.success("Imagem enviada com sucesso!", { id: "carousel-upload" });
+    } catch (error: any) {
+      toast.error("Erro ao enviar imagem: " + error.message, { id: "carousel-upload" });
+    }
+  };
+
   const addCarouselButton = (cardIndex: number) => {
     const newCards = [...carouselCards];
     if (newCards[cardIndex].buttons.length >= 3) {
@@ -1593,11 +1626,45 @@ function MassSendingContent() {
                           onChange={(e) => updateCarouselCard(idx, "description", e.target.value)}
                           placeholder="Descrição"
                         />
-                        <Input
-                          value={card.imageUrl}
-                          onChange={(e) => updateCarouselCard(idx, "imageUrl", e.target.value)}
-                          placeholder="URL da imagem (https://...)"
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            value={card.imageUrl}
+                            onChange={(e) => updateCarouselCard(idx, "imageUrl", e.target.value)}
+                            placeholder="URL da imagem ou faça upload →"
+                            className="flex-1"
+                          />
+                          <input
+                            type="file"
+                            id={`carousel-image-${idx}`}
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleCarouselImageUpload(idx, file);
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => document.getElementById(`carousel-image-${idx}`)?.click()}
+                            title="Upload de imagem"
+                          >
+                            <Upload className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        {card.imageUrl && (
+                          <div className="relative">
+                            <img 
+                              src={card.imageUrl} 
+                              alt={`Preview card ${idx + 1}`} 
+                              className="w-full h-24 object-cover rounded-md"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
                         <div className="flex items-center justify-between mt-2">
                           <span className="text-xs text-muted-foreground">Botões do card:</span>
                           <Button 

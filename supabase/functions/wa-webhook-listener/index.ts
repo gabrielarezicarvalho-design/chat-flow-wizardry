@@ -2760,72 +2760,108 @@ serve(async (req) => {
     const isPollEvent = eventType && pollEventTypes.some(t => eventType.toLowerCase().includes(t.toLowerCase()));
     const hasPollUpdates = payload.pollUpdates || payload.data?.pollUpdates || payload.message?.pollUpdates;
     
-    if (isPollEvent || hasPollUpdates) {
+    // UAZAPI specific: check if messageType is PollUpdateMessage
+    const messageType = payload.message?.messageType || "";
+    const isPollUpdateMessage = messageType === "PollUpdateMessage";
+    const hasVoteInChat = payload.chat?.wa_lastMessageTextVote && payload.chat?.wa_lastMessageType === "PollUpdateMessage";
+    
+    if (isPollEvent || hasPollUpdates || isPollUpdateMessage || hasVoteInChat) {
       console.log("📊 Evento de ENQUETE detectado:", eventType);
-      console.log("📝 Payload completo:", JSON.stringify(payload, null, 2));
+      console.log("📊 messageType:", messageType);
+      console.log("📊 hasVoteInChat:", hasVoteInChat);
+      console.log("📊 wa_lastMessageTextVote:", payload.chat?.wa_lastMessageTextVote);
       
       try {
-        // Extract poll vote data
-        const pollData = payload.data || payload.pollUpdates || payload.message?.pollUpdates || payload;
-        const pollResult = pollData.pollResult || pollData.results || pollData.votes || [];
-        const voterPhone = pollData.voter || pollData.from || payload.message?.sender_pn || payload.message?.sender || telefone || "";
-        const cleanVoterPhone = voterPhone.replace(/@.*$/, "").replace(/\D/g, "");
-        
-        // Get voted options
+        // Extract poll vote data - UAZAPI format
         let votedOptions: string[] = [];
+        let voterPhone = "";
+        let voterName = "";
         
-        if (Array.isArray(pollResult)) {
-          // Format: [{ name: "Option", voters: ["phone@s.whatsapp.net"] }]
-          pollResult.forEach((opt: any) => {
-            const voters = opt.voters || [];
-            if (voters.some((v: string) => v.includes(cleanVoterPhone))) {
-              votedOptions.push(opt.name || opt.option || opt.text || "");
-            }
-          });
-        } else if (pollData.selectedOptions || pollData.vote?.selectedOptions) {
-          // Format: { selectedOptions: ["Option1", "Option2"] }
-          votedOptions = pollData.selectedOptions || pollData.vote?.selectedOptions || [];
+        // UAZAPI specific format: vote is in chat.wa_lastMessageTextVote
+        if (hasVoteInChat) {
+          const voteText = payload.chat.wa_lastMessageTextVote;
+          if (voteText) {
+            // Can be single vote or comma-separated for multi-vote
+            votedOptions = voteText.split(",").map((v: string) => v.trim()).filter((v: string) => v);
+          }
+          voterPhone = payload.message?.chatid || payload.chat?.wa_chatid || "";
+          voterName = payload.chat?.wa_contactName || payload.chat?.name || "";
+        } else {
+          // Fallback to other formats
+          const pollData = payload.data || payload.pollUpdates || payload.message?.pollUpdates || payload;
+          const pollResult = pollData.pollResult || pollData.results || pollData.votes || [];
+          voterPhone = pollData.voter || pollData.from || payload.message?.sender_pn || payload.message?.sender || telefone || "";
+          
+          if (Array.isArray(pollResult)) {
+            const cleanPhone = voterPhone.replace(/@.*$/, "").replace(/\D/g, "");
+            pollResult.forEach((opt: any) => {
+              const voters = opt.voters || [];
+              if (voters.some((v: string) => v.includes(cleanPhone))) {
+                votedOptions.push(opt.name || opt.option || opt.text || "");
+              }
+            });
+          } else if (pollData.selectedOptions || pollData.vote?.selectedOptions) {
+            votedOptions = pollData.selectedOptions || pollData.vote?.selectedOptions || [];
+          }
         }
         
+        const cleanVoterPhone = voterPhone.replace(/@.*$/, "").replace(/\D/g, "");
+        
         console.log("📊 Votante:", cleanVoterPhone);
+        console.log("📊 Nome:", voterName);
         console.log("📊 Opções votadas:", votedOptions);
         
         if (cleanVoterPhone && votedOptions.length > 0) {
-          // Find connection
-          const payloadToken = payload.token || instanceToken || "";
-          const payloadInstanceId = payload.instance_id || payload.instanceId || payload.id || "";
+          // Find connection by instance name or token
+          const instanceName = payload.instanceName || payload.instance || "";
           let connection = null;
           
-          if (payloadInstanceId) {
-            const { data: connByInstance } = await supabase
+          if (instanceName) {
+            const { data: connByName } = await supabase
               .from("connections")
               .select("*")
-              .eq("instance_id", payloadInstanceId)
+              .eq("instance_name", instanceName)
               .single();
-            connection = connByInstance;
+            connection = connByName;
           }
           
-          if (!connection && payloadToken) {
-            const { data: connData } = await supabase
-              .from("connections")
-              .select("*")
-              .eq("token", payloadToken)
-              .single();
-            connection = connData;
+          if (!connection) {
+            const payloadToken = payload.token || instanceToken || "";
+            const payloadInstanceId = payload.instance_id || payload.instanceId || payload.id || "";
+            
+            if (payloadInstanceId) {
+              const { data: connByInstance } = await supabase
+                .from("connections")
+                .select("*")
+                .eq("instance_id", payloadInstanceId)
+                .single();
+              connection = connByInstance;
+            }
+            
+            if (!connection && payloadToken) {
+              const { data: connData } = await supabase
+                .from("connections")
+                .select("*")
+                .eq("token", payloadToken)
+                .single();
+              connection = connData;
+            }
           }
           
           if (connection) {
             const userId = connection.user_id;
             
-            // Get contact name from leads
-            const { data: lead } = await supabase
-              .from("leads")
-              .select("name")
-              .eq("phone", cleanVoterPhone)
-              .eq("user_id", userId)
-              .single();
-            
-            const contactName = lead?.name || cleanVoterPhone;
+            // Get contact name from leads or use UAZAPI provided name
+            let contactName = voterName;
+            if (!contactName) {
+              const { data: lead } = await supabase
+                .from("leads")
+                .select("name")
+                .eq("phone", cleanVoterPhone)
+                .eq("user_id", userId)
+                .single();
+              contactName = lead?.name || cleanVoterPhone;
+            }
             
             // Save poll response to campaign_responses
             for (const option of votedOptions) {
@@ -2847,16 +2883,28 @@ serve(async (req) => {
                 console.log(`✅ Voto salvo: ${contactName} votou em "${option}"`);
               }
             }
+            
+            return new Response(JSON.stringify({ 
+              success: true, 
+              eventType: "poll",
+              processed: true,
+              votedOptions,
+              contact: contactName
+            }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" }
+            });
           } else {
             console.log("⚠️ Conexão não encontrada para evento de enquete");
           }
+        } else {
+          console.log("⚠️ Sem votante ou opções votadas");
         }
         
         return new Response(JSON.stringify({ 
           success: true, 
           eventType: "poll",
-          processed: true,
-          votedOptions
+          processed: false,
+          reason: "No valid vote data found"
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
