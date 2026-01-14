@@ -15,6 +15,11 @@ interface ListItem {
   description?: string;
 }
 
+interface PollOption {
+  id: string;
+  text: string;
+}
+
 interface WhatsAppPreviewProps {
   messageType: string;
   message: string;
@@ -24,6 +29,9 @@ interface WhatsAppPreviewProps {
   interactiveType?: InteractiveType;
   listItems?: ListItem[];
   carouselCards?: CarouselCard[];
+  pollQuestion?: string;
+  pollOptions?: PollOption[];
+  pollMultiSelect?: boolean;
 }
 
 export function WhatsAppPreview({ 
@@ -34,7 +42,10 @@ export function WhatsAppPreview({
   buttons = [],
   interactiveType = "none",
   listItems = [],
-  carouselCards = []
+  carouselCards = [],
+  pollQuestion = "",
+  pollOptions = [],
+  pollMultiSelect = false
 }: WhatsAppPreviewProps) {
   const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
@@ -128,6 +139,55 @@ export function WhatsAppPreview({
     );
   };
 
+  const renderPoll = () => {
+    if (interactiveType !== "poll") return null;
+    
+    const validOptions = pollOptions.filter(opt => opt.text.trim());
+    
+    return (
+      <div className="bg-[#1f3631] rounded-lg border border-[#2a3942] overflow-hidden">
+        {/* Poll Header */}
+        <div className="px-3 py-2 border-b border-[#2a3942]">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs text-[#00a884] font-medium">📊 ENQUETE</span>
+            {pollMultiSelect && (
+              <span className="text-[10px] text-gray-400 bg-[#0b141a] px-1.5 py-0.5 rounded">Múltipla escolha</span>
+            )}
+          </div>
+          <p className="text-white text-sm font-medium">
+            {pollQuestion || "Pergunta da enquete..."}
+          </p>
+        </div>
+        
+        {/* Poll Options */}
+        <div className="p-2 space-y-1.5">
+          {validOptions.length > 0 ? (
+            validOptions.map((opt, idx) => (
+              <div 
+                key={opt.id}
+                className="flex items-center gap-2 px-3 py-2 bg-[#0b141a] rounded-lg hover:bg-[#111b21] cursor-pointer transition-colors"
+              >
+                <div className={`w-4 h-4 border-2 border-[#00a884] ${pollMultiSelect ? 'rounded' : 'rounded-full'} flex items-center justify-center`}>
+                  {/* Empty checkbox/radio */}
+                </div>
+                <span className="text-white text-sm flex-1">{opt.text}</span>
+              </div>
+            ))
+          ) : (
+            <div className="px-3 py-2 text-gray-500 text-sm text-center">
+              Adicione opções à enquete
+            </div>
+          )}
+        </div>
+        
+        {/* Vote count */}
+        <div className="px-3 py-2 border-t border-[#2a3942]">
+          <span className="text-xs text-gray-400">0 votos</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="text-sm font-medium text-muted-foreground mb-2">Pré-visualização WhatsApp</div>
@@ -201,8 +261,11 @@ export function WhatsAppPreview({
                 </div>
               )}
 
-              {/* Text Message */}
-              {(message || messageType === "text") && interactiveType !== "carousel" && (
+              {/* Poll */}
+              {interactiveType === "poll" && renderPoll()}
+
+              {/* Text Message - hide for poll if no message */}
+              {interactiveType !== "carousel" && interactiveType !== "poll" && (message || messageType === "text") && (
                 <div className={`bg-[#005c4b] px-3 py-2 ${messageType !== "text" ? "rounded-b-lg" : "rounded-lg"}`}>
                   <p className="text-white text-sm whitespace-pre-wrap break-words">
                     {message || "Digite sua mensagem..."}

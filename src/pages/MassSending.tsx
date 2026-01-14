@@ -1714,6 +1714,9 @@ function MassSendingContent() {
                     imageUrl: c.imageUrl,
                     buttons: c.buttons
                   }))}
+                  pollQuestion={pollQuestion}
+                  pollOptions={pollOptions}
+                  pollMultiSelect={pollMultiSelect}
                 />
               </div>
             </div>
