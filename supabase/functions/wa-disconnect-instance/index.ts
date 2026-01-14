@@ -26,12 +26,11 @@ serve(async (req) => {
     console.log(`Disconnecting instance from ${BASE_URL}/instance/logout`);
     console.log(`Token: ${token.substring(0, 8)}...`);
 
-    // Use /instance/logout endpoint with POST method (not DELETE)
+    // Use /instance/logout endpoint with GET method
     const response = await fetch(`${BASE_URL}/instance/logout`, {
-      method: "POST",
+      method: "GET",
       headers: {
         "Accept": "application/json",
-        "Content-Type": "application/json",
         "token": token
       }
     });
