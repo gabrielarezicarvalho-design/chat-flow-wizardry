@@ -185,6 +185,8 @@ serve(async (req) => {
         const requestedDelayMin = params.delayMin || 10;
         const requestedDelayMax = params.delayMax || 30;
         
+        console.log(`[wa-sender] ViewOnce param received: ${params.viewOnce}`);
+        
         // Build messages array for /sender/advanced
         const advancedMessages: any[] = simpleNumbers.map((num: string) => {
           const cleanNumber = num.replace("@s.whatsapp.net", "").replace(/\D/g, "");
