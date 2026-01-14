@@ -28,9 +28,12 @@ import {
   XCircle,
   Clock,
   Download,
-  Megaphone
+  Megaphone,
+  RefreshCw,
+  Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useConnections } from "@/hooks/useConnections";
 
 interface Tag {
   id: string;
@@ -54,6 +57,7 @@ interface SegmentFilter {
 
 const Segmentation = () => {
   const queryClient = useQueryClient();
+  const { connections } = useConnections();
   const [searchTerm, setSearchTerm] = useState("");
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#10b981");
@@ -63,6 +67,9 @@ const Segmentation = () => {
   const [filterCampaignStatus, setFilterCampaignStatus] = useState<string>("all");
   const [isApplyTagOpen, setIsApplyTagOpen] = useState(false);
   const [selectedTagToApply, setSelectedTagToApply] = useState<string>("");
+  const [syncingLabels, setSyncingLabels] = useState(false);
+
+  const activeConnection = connections.find(c => c.status === 'connected');
 
   // Fetch tags
   const { data: tags = [], isLoading: loadingTags } = useQuery({
@@ -119,12 +126,70 @@ const Segmentation = () => {
     },
   });
 
-  // Create tag mutation
+  // Sync labels from WhatsApp
+  const handleSyncLabels = async () => {
+    if (!activeConnection) {
+      toast.error("Nenhuma conexão ativa. Conecte ao WhatsApp primeiro.");
+      return;
+    }
+
+    setSyncingLabels(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase.functions.invoke('wa-labels', {
+        body: {
+          action: 'sync',
+          connectionId: activeConnection.id,
+          userId: user?.id
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        queryClient.invalidateQueries({ queryKey: ["tags"] });
+        if (data.total === 0) {
+          toast.info("Nenhuma etiqueta encontrada no WhatsApp Business");
+        } else {
+          toast.success(`${data.added} etiquetas sincronizadas! (${data.skipped} já existentes)`);
+        }
+      } else {
+        toast.error(data?.error || "Erro ao sincronizar etiquetas");
+      }
+    } catch (err) {
+      console.error("Error syncing labels:", err);
+      toast.error("Erro ao sincronizar etiquetas do WhatsApp");
+    } finally {
+      setSyncingLabels(false);
+    }
+  };
+
+  // Create tag mutation - also creates in WhatsApp if connected
   const createTagMutation = useMutation({
     mutationFn: async ({ name, color }: { name: string; color: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      // First, try to create in WhatsApp if connected
+      if (activeConnection) {
+        try {
+          const { data: waResult } = await supabase.functions.invoke('wa-labels', {
+            body: {
+              action: 'create',
+              connectionId: activeConnection.id,
+              labelName: name,
+              labelColor: color,
+              userId: user.id
+            }
+          });
+          console.log("WhatsApp label result:", waResult);
+        } catch (waErr) {
+          console.log("Could not create in WhatsApp:", waErr);
+        }
+      }
+
+      // Create locally
       const { data, error } = await supabase
         .from("tags")
         .insert({ name, color, user_id: user.id })
@@ -531,14 +596,45 @@ const Segmentation = () => {
 
         {/* Tags Tab */}
         <TabsContent value="tags" className="space-y-4">
+          {/* Sync Button */}
+          <Card className="border-dashed">
+            <CardContent className="p-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-medium">Sincronizar Etiquetas do WhatsApp</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {activeConnection 
+                      ? `Conectado a: ${activeConnection.instance_name}`
+                      : "Conecte ao WhatsApp para sincronizar etiquetas"
+                    }
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={handleSyncLabels}
+                  disabled={syncingLabels || !activeConnection}
+                >
+                  {syncingLabels ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  {syncingLabels ? 'Sincronizando...' : 'Sincronizar do WhatsApp'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {loadingTags ? (
               <div className="col-span-full text-center py-8 text-muted-foreground">
                 Carregando tags...
               </div>
-            ) : tagStats.length === 0 ? (
+            ) : tags.length === 0 ? (
               <div className="col-span-full text-center py-8 text-muted-foreground">
-                Nenhuma tag criada. Crie sua primeira tag!
+                <Tags className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+                <p className="mb-2">Nenhuma tag criada.</p>
+                <p className="text-sm">Crie sua primeira tag ou sincronize do WhatsApp Business.</p>
               </div>
             ) : (
               tagStats.map(tag => (

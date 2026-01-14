@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.wa-delete-instance]
 verify_jwt = false
+
+[functions.wa-labels]
+verify_jwt = false
