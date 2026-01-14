@@ -196,20 +196,27 @@ const Contacts = () => {
       // Sync with WhatsApp if connected
       if (activeConnection && lead.phone) {
         const connAny = activeConnection as any;
-        if (connAny.token) {
-          const tag = availableTags.find((t: any) => t.name === tagName);
-          
-          if (tag && !hasTag) {
-            // Add label to contact in WhatsApp
-            await supabase.functions.invoke('wa-labels', {
+        if (connAny.token && !hasTag) {
+          // Add label to contact in WhatsApp - using labelName to find/create label
+          try {
+            const { data, error } = await supabase.functions.invoke('wa-labels', {
               body: {
                 action: 'add_to_contact',
                 connectionId: activeConnection.id,
-                labelId: tag.id,
                 labelName: tagName,
-                phone: lead.phone
+                contactPhone: lead.phone
               }
             });
+            
+            if (error) {
+              console.error("WhatsApp sync error:", error);
+            } else if (data?.success) {
+              console.log("WhatsApp label synced:", data);
+            } else if (data?.localOnly) {
+              console.log("Label saved locally only");
+            }
+          } catch (err) {
+            console.error("WhatsApp sync failed:", err);
           }
         }
       }
