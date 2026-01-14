@@ -820,13 +820,25 @@ const Connections = () => {
         labels = result.labels || result.data;
       }
 
-      // Save labels to tags table
       const { data: { user } } = await supabase.auth.getUser();
-      let addedCount = 0;
+      let addedTagsCount = 0;
+      let addedContactsCount = 0;
+
+      // If no labels found
+      if (labels.length === 0) {
+        setLabelsStats({
+          synced: 0,
+          lastSync: new Date().toLocaleTimeString('pt-BR')
+        });
+        toast.info("Nenhuma etiqueta encontrada no WhatsApp Business");
+        setSyncingLabels(false);
+        return;
+      }
 
       for (const label of labels) {
         const labelName = label.name || label.displayName || label.title;
         const labelColor = label.color || label.hexColor || '#3b82f6';
+        const labelId = label.id || label.labelId;
         
         if (!labelName) continue;
 
@@ -838,25 +850,97 @@ const Connections = () => {
           .eq('name', labelName)
           .maybeSingle();
 
+        let tagId = existing?.id;
+
         if (!existing) {
-          const { error: insertError } = await supabase
+          const { data: newTag, error: insertError } = await supabase
             .from('tags')
             .insert({
               user_id: user?.id,
               name: labelName,
               color: labelColor
+            })
+            .select('id')
+            .single();
+
+          if (!insertError && newTag) {
+            addedTagsCount++;
+            tagId = newTag.id;
+          }
+        }
+
+        // Try to fetch contacts with this label
+        if (labelId && tagId) {
+          try {
+            const labelContactsResp = await fetch(`${baseUrl}/chat/labels/${labelId}/contacts`, {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+                'token': connAny.token
+              }
             });
 
-          if (!insertError) addedCount++;
+            if (labelContactsResp.ok) {
+              const labelContacts = await labelContactsResp.json();
+              const contacts = Array.isArray(labelContacts) ? labelContacts : (labelContacts?.contacts || labelContacts?.data || []);
+
+              for (const contact of contacts) {
+                const phone = contact.phone || contact.jid?.replace(/@.*$/, '') || contact.id?.replace(/@.*$/, '');
+                const contactName = contact.name || contact.notify || contact.pushName || 'Sem nome';
+                
+                if (!phone || phone.length < 8) continue;
+
+                // Check if lead exists
+                const { data: existingLead } = await supabase
+                  .from('leads')
+                  .select('id, tags')
+                  .eq('user_id', user?.id)
+                  .eq('phone', phone)
+                  .maybeSingle();
+
+                if (existingLead) {
+                  // Add tag to existing lead
+                  const currentTags = existingLead.tags || [];
+                  if (!currentTags.includes(labelName)) {
+                    await supabase
+                      .from('leads')
+                      .update({ tags: [...currentTags, labelName] })
+                      .eq('id', existingLead.id);
+                    addedContactsCount++;
+                  }
+                } else {
+                  // Create new lead with tag
+                  const { error: insertErr } = await supabase
+                    .from('leads')
+                    .insert({
+                      user_id: user?.id,
+                      phone,
+                      name: contactName,
+                      source: 'WhatsApp Label',
+                      status: 'new',
+                      tags: [labelName]
+                    });
+                  
+                  if (!insertErr) addedContactsCount++;
+                }
+              }
+            }
+          } catch (labelContactsErr) {
+            console.log(`Não foi possível buscar contatos da etiqueta ${labelName}`);
+          }
         }
       }
 
       setLabelsStats({
-        synced: addedCount,
+        synced: addedTagsCount,
         lastSync: new Date().toLocaleTimeString('pt-BR')
       });
       
-      toast.success(`${addedCount} etiquetas sincronizadas!`);
+      if (addedTagsCount === 0 && addedContactsCount === 0) {
+        toast.info("Etiquetas já sincronizadas, nenhum contato etiquetado novo");
+      } else {
+        toast.success(`${addedTagsCount} etiquetas e ${addedContactsCount} contatos etiquetados sincronizados!`);
+      }
     } catch (err) {
       console.error("Error syncing labels:", err);
       toast.error("Erro ao sincronizar etiquetas");
