@@ -400,12 +400,18 @@ serve(async (req) => {
         console.log(`Formatted phone: ${phone}, waLabelId: ${waLabelId}`);
 
         // According to UAZAPI docs:
-        // PUT /labels/chats with body: { number: "5511999999999", add_labelid: "10" }
+        // POST /labels/chats with body: { number: "5511999999999", add_labelid: "10" }
         const addEndpoints = [
-          { url: `${baseUrl}/labels/chats`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
-          { url: `${baseUrl}/label/chats`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
-          { url: `${baseUrl}/labels/chat`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
-          { url: `${baseUrl}/chat/labels`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
+          // Try POST first (most common for adding resources)
+          { url: `${baseUrl}/labels/chats`, method: "POST", body: { number: phone, add_labelid: String(waLabelId) } },
+          { url: `${baseUrl}/label/chats`, method: "POST", body: { number: phone, add_labelid: String(waLabelId) } },
+          { url: `${baseUrl}/labels/chat`, method: "POST", body: { number: phone, add_labelid: String(waLabelId) } },
+          { url: `${baseUrl}/chat/labels`, method: "POST", body: { number: phone, add_labelid: String(waLabelId) } },
+          // Also try PATCH as alternative
+          { url: `${baseUrl}/labels/chats`, method: "PATCH", body: { number: phone, add_labelid: String(waLabelId) } },
+          // Also try with labelids array format
+          { url: `${baseUrl}/labels/chats`, method: "POST", body: { number: phone, labelids: [String(waLabelId)] } },
+          { url: `${baseUrl}/labels/chats`, method: "PUT", body: { number: phone, labelids: [String(waLabelId)] } },
         ];
 
         let lastError = null;
