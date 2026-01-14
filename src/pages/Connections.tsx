@@ -17,6 +17,7 @@ import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
 import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download } from "lucide-react";
 import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
+import { DeleteConnectionDialog } from "@/components/connections/DeleteConnectionDialog";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +43,8 @@ const Connections = () => {
   const [contactsStats, setContactsStats] = useState({ synced: 0, lastSync: '' });
   const [labelsStats, setLabelsStats] = useState({ synced: 0, lastSync: '' });
   const [instanceLimit, setInstanceLimit] = useState<number>(2);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [connectionToDelete, setConnectionToDelete] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -542,13 +545,16 @@ const Connections = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Deseja realmente excluir esta conexão?')) {
-      return;
-    }
+  const handleDeleteClick = (connection: any) => {
+    setConnectionToDelete(connection);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async (deleteData: boolean) => {
+    if (!connectionToDelete) return;
     
-    // Find the connection to get its token
-    const connection = connections.find(c => c.id === id) as any;
+    const connection = connectionToDelete;
+    const id = connection.id;
     
     // If connection has a token, delete from UAZAPI first
     if (connection?.token) {
@@ -571,11 +577,43 @@ const Connections = () => {
       }
     }
     
+    // If user chose to delete data, remove leads and tags associated with this connection
+    if (deleteData) {
+      try {
+        // Delete leads associated with conversations from this connection
+        const { data: conversations } = await supabase
+          .from('conversations')
+          .select('contact_phone')
+          .eq('connection_id', id);
+        
+        if (conversations && conversations.length > 0) {
+          const phones = conversations.map(c => c.contact_phone);
+          
+          // Delete leads with matching phones
+          await supabase
+            .from('leads')
+            .delete()
+            .in('phone', phones);
+          
+          toast.success(`${phones.length} contatos removidos`);
+        }
+        
+        // Delete tags associated with this connection's user
+        // (Tags don't have connection_id, so we'll inform the user)
+        toast.info("Tags mantidas - remova manualmente se necessário");
+      } catch (err) {
+        console.error("Error deleting associated data:", err);
+        toast.error("Erro ao remover dados associados");
+      }
+    }
+    
     // Delete from local database
     await deleteConnection.mutateAsync(id);
     if (selectedConnection?.id === id) {
       setSelectedConnection(connections.find(c => c.id !== id) || null);
     }
+    
+    setConnectionToDelete(null);
   };
 
   const handleReconnect = async (connection: any) => {
@@ -1123,7 +1161,7 @@ const Connections = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => { e.stopPropagation(); handleDelete(connection.id); }}
+                    onClick={(e) => { e.stopPropagation(); handleDeleteClick(connection); }}
                     className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="w-3 h-3" />
@@ -1825,6 +1863,14 @@ const Connections = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Connection Dialog */}
+      <DeleteConnectionDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        connectionName={connectionToDelete?.name || connectionToDelete?.instance_name || "Conexão"}
+        onConfirm={handleDeleteConfirm}
+      />
 
     </div>
   );
