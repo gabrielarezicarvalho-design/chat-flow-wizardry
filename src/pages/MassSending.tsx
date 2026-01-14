@@ -148,6 +148,8 @@ function MassSendingContent() {
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState("");
   const [viewOnce, setViewOnce] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Interactive message states
   const [interactiveType, setInteractiveType] = useState<InteractiveType>("none");
@@ -287,9 +289,10 @@ function MassSendingContent() {
     const file = e.target.files?.[0];
     if (!file) return;
     setMediaFile(file);
+    setUploadProgress(0);
     
-    // Set preview for images and videos
-    if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
+    // Set preview for images (not videos - too heavy for preview in base64)
+    if (file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = (evt) => {
         setMediaPreview(evt.target?.result as string);
@@ -304,39 +307,72 @@ function MassSendingContent() {
     const shouldUploadToStorage = file.type.startsWith("video/") || file.size > 5 * 1024 * 1024; // 5MB limit for base64
     
     if (shouldUploadToStorage) {
+      // Check file size limit (50MB)
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error("Arquivo muito grande. Limite máximo: 50MB");
+        setMediaFile(null);
+        return;
+      }
+      
+      setIsUploading(true);
+      
       try {
         const { data: userData } = await supabase.auth.getUser();
         if (!userData.user) {
           toast.error("Você precisa estar logado para enviar vídeos");
           setMediaFile(null);
+          setIsUploading(false);
           return;
         }
         
         const fileExt = file.name.split('.').pop();
         const fileName = `${userData.user.id}/${Date.now()}_media.${fileExt}`;
         
-        toast.loading("Enviando arquivo para servidor...", { id: "media-upload" });
+        // Simulate progress for better UX (Supabase doesn't provide native progress)
+        const progressInterval = setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return prev + 10;
+          });
+        }, 200);
         
         const { error: uploadError } = await supabase.storage
           .from("campaign-media")
           .upload(fileName, file);
         
+        clearInterval(progressInterval);
+        
         if (uploadError) {
-          toast.error("Erro ao enviar arquivo: " + uploadError.message, { id: "media-upload" });
+          toast.error("Erro ao enviar arquivo: " + uploadError.message);
           setMediaFile(null);
+          setUploadProgress(0);
+          setIsUploading(false);
           return;
         }
+        
+        setUploadProgress(100);
         
         const { data: publicUrl } = supabase.storage
           .from("campaign-media")
           .getPublicUrl(fileName);
         
         setMediaUrl(publicUrl.publicUrl);
-        toast.success("Arquivo enviado: " + file.name, { id: "media-upload" });
+        toast.success("Arquivo enviado: " + file.name);
         console.log("[MassSending] Media uploaded to storage:", publicUrl.publicUrl);
+        
+        // Reset progress after a short delay
+        setTimeout(() => {
+          setUploadProgress(0);
+          setIsUploading(false);
+        }, 1000);
       } catch (error: any) {
-        toast.error("Erro ao enviar arquivo: " + error.message, { id: "media-upload" });
+        toast.error("Erro ao enviar arquivo: " + error.message);
         setMediaFile(null);
+        setUploadProgress(0);
+        setIsUploading(false);
       }
     } else {
       // Use base64 for smaller files
@@ -1507,10 +1543,19 @@ function MassSendingContent() {
                         className="hidden"
                       />
                       <div 
-                        onClick={() => mediaInputRef.current?.click()}
-                        className="mt-2 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
+                        onClick={() => !isUploading && mediaInputRef.current?.click()}
+                        className={`mt-2 border-2 border-dashed rounded-lg p-4 text-center transition-colors ${isUploading ? 'cursor-wait opacity-70' : 'cursor-pointer hover:border-primary hover:bg-primary/5'}`}
                       >
-                        {mediaFile ? (
+                        {isUploading ? (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-center gap-2">
+                              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                              <span className="font-medium text-sm">Enviando {mediaFile?.name}...</span>
+                            </div>
+                            <Progress value={uploadProgress} className="w-full h-2" />
+                            <span className="text-xs text-muted-foreground">{uploadProgress}%</span>
+                          </div>
+                        ) : mediaFile ? (
                           <div className="flex items-center justify-center gap-3">
                             <CheckCircle className="w-5 h-5 text-green-600" />
                             <span className="font-medium text-sm">{mediaFile.name}</span>
@@ -1518,7 +1563,7 @@ function MassSendingContent() {
                         ) : (
                           <>
                             <Upload className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
-                            <p className="text-sm text-muted-foreground">Clique para selecionar</p>
+                            <p className="text-sm text-muted-foreground">Clique para selecionar {messageType === "video" ? "(máx 50MB)" : ""}</p>
                           </>
                         )}
                       </div>
