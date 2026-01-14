@@ -262,26 +262,144 @@ serve(async (req) => {
       }
 
       case "add_to_contact": {
-        // Add label to a contact
-        if (!labelId || !contactPhone) {
+        // Add label to a contact - now accepts labelName and finds/creates the label
+        const { labelName: tagName, phone: phoneNumber } = await (async () => ({ 
+          labelName: labelName, 
+          phone: contactPhone 
+        }))();
+
+        if (!tagName && !labelId) {
           return new Response(JSON.stringify({ 
-            error: "Missing labelId or contactPhone" 
+            error: "Missing labelName or labelId" 
           }), {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         }
 
-        const phone = contactPhone.replace(/\D/g, "");
+        if (!phoneNumber) {
+          return new Response(JSON.stringify({ 
+            error: "Missing phone/contactPhone" 
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+
+        console.log(`Adding label "${tagName}" to contact ${phoneNumber}`);
+
+        // First, get all labels from WhatsApp to find the one matching our tag name
+        let waLabelId = labelId;
+        
+        if (!waLabelId && tagName) {
+          const listEndpoints = [
+            `${baseUrl}/label/list`,
+            `${baseUrl}/labels`,
+            `${baseUrl}/misc/getLabels`
+          ];
+
+          let existingLabels: any[] = [];
+
+          for (const endpoint of listEndpoints) {
+            try {
+              console.log(`Fetching labels from: ${endpoint}`);
+              const response = await fetch(endpoint, {
+                method: "GET",
+                headers: {
+                  "Accept": "application/json",
+                  "Content-Type": "application/json",
+                  "token": instanceToken
+                }
+              });
+
+              if (response.ok) {
+                const result = await response.json();
+                console.log(`Labels response:`, JSON.stringify(result));
+                
+                if (Array.isArray(result)) {
+                  existingLabels = result;
+                  break;
+                } else if (result?.labels || result?.data) {
+                  existingLabels = result.labels || result.data;
+                  break;
+                }
+              }
+            } catch (err) {
+              console.log(`List labels failed:`, err);
+            }
+          }
+
+          // Find label by name
+          const matchingLabel = existingLabels.find((l: any) => {
+            const name = l.name || l.displayName || l.title;
+            return name && name.toLowerCase() === tagName.toLowerCase();
+          });
+
+          if (matchingLabel) {
+            waLabelId = matchingLabel.labelid || matchingLabel.id || matchingLabel.labelId;
+            console.log(`Found existing WhatsApp label ID: ${waLabelId}`);
+          } else {
+            // Create the label in WhatsApp
+            console.log(`Label "${tagName}" not found in WhatsApp, creating...`);
+            
+            const createEndpoints = [
+              { url: `${baseUrl}/label/create`, body: { name: tagName, color: 1 } },
+              { url: `${baseUrl}/misc/createLabel`, body: { name: tagName, labelColor: 1 } }
+            ];
+
+            for (const endpoint of createEndpoints) {
+              try {
+                const response = await fetch(endpoint.url, {
+                  method: "POST",
+                  headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "token": instanceToken
+                  },
+                  body: JSON.stringify(endpoint.body)
+                });
+
+                const result = await response.json();
+                console.log(`Create label response:`, JSON.stringify(result));
+
+                if (response.ok && !result.error) {
+                  waLabelId = result.labelid || result.id || result.labelId || result.label?.id;
+                  console.log(`Created new WhatsApp label ID: ${waLabelId}`);
+                  break;
+                }
+              } catch (err) {
+                console.log(`Create label failed:`, err);
+              }
+            }
+          }
+        }
+
+        if (!waLabelId) {
+          console.log(`Could not find or create WhatsApp label for "${tagName}"`);
+          return new Response(JSON.stringify({
+            success: false,
+            error: "Could not find or create label in WhatsApp",
+            localOnly: true
+          }), {
+            status: 200, // Return 200 so it doesn't break the UI
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+
+        const phone = phoneNumber.replace(/\D/g, "");
         const chatId = `${phone}@s.whatsapp.net`;
 
+        console.log(`Adding label ${waLabelId} to chat ${chatId}`);
+
         const addEndpoints = [
-          { url: `${baseUrl}/label/addToChat`, body: { labelId, chatId } },
-          { url: `${baseUrl}/misc/addLabelToChat`, body: { labelId, chatId } }
+          { url: `${baseUrl}/label/addToChat`, body: { labelId: waLabelId, chatId } },
+          { url: `${baseUrl}/misc/addLabelToChat`, body: { labelId: waLabelId, chatId } },
+          { url: `${baseUrl}/label/add`, body: { labelId: waLabelId, chatId } }
         ];
 
         for (const endpoint of addEndpoints) {
           try {
+            console.log(`Trying add endpoint: ${endpoint.url}`);
             const response = await fetch(endpoint.url, {
               method: "POST",
               headers: {
@@ -292,10 +410,14 @@ serve(async (req) => {
               body: JSON.stringify(endpoint.body)
             });
 
+            const result = await response.json();
+            console.log(`Add response:`, JSON.stringify(result));
+
             if (response.ok) {
               return new Response(JSON.stringify({
                 success: true,
-                message: "Label added to contact"
+                message: "Label added to contact in WhatsApp",
+                waLabelId
               }), {
                 headers: { ...corsHeaders, "Content-Type": "application/json" }
               });
@@ -307,9 +429,10 @@ serve(async (req) => {
 
         return new Response(JSON.stringify({
           success: false,
-          error: "Could not add label to contact"
+          error: "Could not add label to contact",
+          waLabelId
         }), {
-          status: 400,
+          status: 200, // Return 200 so UI continues working
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
       }
