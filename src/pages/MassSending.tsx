@@ -458,7 +458,8 @@ function MassSendingContent() {
       const useMenuEndpoint = interactiveType !== "none" && (
         (interactiveType === "buttons" && buttons.some(b => b.label.trim())) ||
         (interactiveType === "list" && listItems.some(i => i.title.trim())) ||
-        (interactiveType === "carousel" && carouselCards.some(c => c.title.trim()))
+        (interactiveType === "carousel" && carouselCards.some(c => c.title.trim())) ||
+        (interactiveType === "poll" && pollQuestion.trim() && pollOptions.some(o => o.text.trim()))
       );
       
       let finalMessage = msg;
@@ -494,6 +495,12 @@ function MassSendingContent() {
             });
           });
           addLog("info", `Preparando carrossel com ${carouselCards.length} cards`);
+        } else if (interactiveType === "poll") {
+          // Format for poll: ["Opção 1", "Opção 2", ...]
+          uzapiMenuType = "poll";
+          finalMessage = pollQuestion; // Use poll question as the message text
+          menuChoices = pollOptions.filter(o => o.text.trim()).map(o => o.text);
+          addLog("info", `Preparando enquete com ${menuChoices.length} opções`);
         }
       }
       
@@ -533,7 +540,8 @@ function MassSendingContent() {
             delayMin: delayInterval,
             delayMax: delayInterval + 5,
             pauseEveryX: pauseEveryX,
-            pauseDuration: pauseDuration
+            pauseDuration: pauseDuration,
+            selectableCount: interactiveType === "poll" && pollMultiSelect ? pollOptions.filter(o => o.text.trim()).length : 1
           }
         });
         
