@@ -601,36 +601,69 @@ serve(async (req) => {
           if (labelId) {
             console.log(`Fetching contacts for label: ${labelName} (ID: ${labelId})`);
             
+            // According to UAZAPI, try multiple endpoint formats
             const contactEndpoints = [
-              `${baseUrl}/label/${labelId}/chats`,
-              `${baseUrl}/label/chats/${labelId}`,
-              `${baseUrl}/misc/getLabelChats/${labelId}`,
-              `${baseUrl}/chat/findLabelChats/${labelId}`
+              // GET endpoints
+              { method: "GET", url: `${baseUrl}/labels/chats` },
+              { method: "GET", url: `${baseUrl}/label/${labelId}/chats` },
+              { method: "GET", url: `${baseUrl}/label/chats/${labelId}` },
+              { method: "GET", url: `${baseUrl}/labels/${labelId}/chats` },
+              { method: "GET", url: `${baseUrl}/misc/getLabelChats/${labelId}` },
+              { method: "GET", url: `${baseUrl}/chat/findLabelChats/${labelId}` },
+              { method: "GET", url: `${baseUrl}/chat/labels/${labelId}` },
+              // POST endpoints that might return contacts for a label
+              { method: "POST", url: `${baseUrl}/labels/chats`, body: { labelid: String(labelId) } },
+              { method: "POST", url: `${baseUrl}/label/chats`, body: { labelid: String(labelId) } },
             ];
 
             let labelContacts: any[] = [];
 
             for (const endpoint of contactEndpoints) {
               try {
-                console.log(`Trying contacts endpoint: ${endpoint}`);
-                const response = await fetch(endpoint, {
-                  method: "GET",
+                console.log(`Trying contacts endpoint: ${endpoint.method} ${endpoint.url}`);
+                
+                const fetchOptions: RequestInit = {
+                  method: endpoint.method,
                   headers: {
                     "Accept": "application/json",
                     "Content-Type": "application/json",
                     "token": instanceToken
                   }
-                });
+                };
+                
+                if (endpoint.body) {
+                  fetchOptions.body = JSON.stringify(endpoint.body);
+                }
+                
+                const response = await fetch(endpoint.url, fetchOptions);
 
                 if (response.ok) {
                   const result = await response.json();
                   console.log(`Contacts response for ${labelName}:`, JSON.stringify(result).substring(0, 500));
                   
+                  // Parse various response formats
+                  let contacts: any[] = [];
+                  
                   if (Array.isArray(result)) {
-                    labelContacts = result;
-                    break;
+                    // For GET /labels/chats endpoint, filter by labelId
+                    if (endpoint.url.endsWith('/labels/chats') || endpoint.url.endsWith('/label/chats')) {
+                      contacts = result.filter((c: any) => 
+                        c.labelid === String(labelId) || 
+                        c.labelId === String(labelId) ||
+                        c.label_id === String(labelId) ||
+                        (Array.isArray(c.labels) && c.labels.includes(String(labelId))) ||
+                        (Array.isArray(c.labelids) && c.labelids.includes(String(labelId)))
+                      );
+                    } else {
+                      contacts = result;
+                    }
                   } else if (result?.chats || result?.contacts || result?.data) {
-                    labelContacts = result.chats || result.contacts || result.data;
+                    contacts = result.chats || result.contacts || result.data;
+                  }
+                  
+                  if (contacts.length > 0) {
+                    labelContacts = contacts;
+                    console.log(`Found ${contacts.length} contacts for label ${labelName}`);
                     break;
                   }
                 }
@@ -641,8 +674,8 @@ serve(async (req) => {
 
             // Save contacts with this tag
             for (const contact of labelContacts) {
-              const phone = extractPhoneFromJid(contact.id || contact.jid || contact.phone || '');
-              const name = contact.name || contact.pushname || contact.notify || phone || 'Sem nome';
+              const phone = extractPhoneFromJid(contact.id || contact.jid || contact.phone || contact.number || contact.chatId || '');
+              const name = contact.name || contact.pushname || contact.notify || contact.displayName || phone || 'Sem nome';
 
               if (!phone) continue;
 
