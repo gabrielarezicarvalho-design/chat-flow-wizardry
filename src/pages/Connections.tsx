@@ -542,6 +542,32 @@ const Connections = () => {
     if (!confirm('Deseja realmente excluir esta conexão?')) {
       return;
     }
+    
+    // Find the connection to get its token
+    const connection = connections.find(c => c.id === id) as any;
+    
+    // If connection has a token, delete from UAZAPI first
+    if (connection?.token) {
+      try {
+        const { data, error } = await supabase.functions.invoke('wa-delete-instance', {
+          body: {
+            token: connection.token,
+            base_url: connection.base_url
+          }
+        });
+        
+        if (error) {
+          console.error("Error deleting from UAZAPI:", error);
+          // Continue to delete locally even if UAZAPI fails
+        } else if (data?.success) {
+          toast.success("Instância removida da UAZAPI");
+        }
+      } catch (err) {
+        console.error("Error calling wa-delete-instance:", err);
+      }
+    }
+    
+    // Delete from local database
     await deleteConnection.mutateAsync(id);
     if (selectedConnection?.id === id) {
       setSelectedConnection(connections.find(c => c.id !== id) || null);
