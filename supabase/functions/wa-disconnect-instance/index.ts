@@ -26,11 +26,12 @@ serve(async (req) => {
     console.log(`Disconnecting instance from ${BASE_URL}/instance/logout`);
     console.log(`Token: ${token.substring(0, 8)}...`);
 
-    // Use /instance/logout endpoint with GET method
+    // Use /instance/logout endpoint with PUT method
     const response = await fetch(`${BASE_URL}/instance/logout`, {
-      method: "GET",
+      method: "PUT",
       headers: {
         "Accept": "application/json",
+        "Content-Type": "application/json",
         "token": token
       }
     });
