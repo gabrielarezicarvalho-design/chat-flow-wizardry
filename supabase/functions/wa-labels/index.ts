@@ -386,74 +386,24 @@ serve(async (req) => {
           });
         }
 
+        // Format phone number - just digits
         const phone = phoneNumber.replace(/\D/g, "");
-        const chatId = `${phone}@s.whatsapp.net`;
 
-        console.log(`Adding label ${waLabelId} to chat ${chatId}`);
+        console.log(`Adding label ${waLabelId} to contact ${phone}`);
 
-        // First, try to get current labels for this chat
-        let currentLabels: any[] = [];
-        const getLabelsEndpoints = [
-          `${baseUrl}/labels/chats/${chatId}`,
-          `${baseUrl}/label/chat/${chatId}`,
-          `${baseUrl}/chat/${chatId}/labels`
-        ];
-
-        for (const endpoint of getLabelsEndpoints) {
-          try {
-            console.log(`Trying to get current labels: ${endpoint}`);
-            const response = await fetch(endpoint, {
-              method: "GET",
-              headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "token": instanceToken
-              }
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              console.log(`Current labels response:`, JSON.stringify(result));
-              if (Array.isArray(result)) {
-                currentLabels = result;
-                break;
-              } else if (result?.labels) {
-                currentLabels = result.labels;
-                break;
-              }
-            }
-          } catch (err) {
-            console.log(`Get labels failed:`, err);
-          }
-        }
-
-        // Add our new label to the list (if not already present)
-        const labelIds = currentLabels.map((l: any) => l.labelid || l.id || l.labelId);
-        if (!labelIds.includes(String(waLabelId))) {
-          labelIds.push(String(waLabelId));
-        }
-
-        // Build labels array for PUT request
-        const labelsToSet = labelIds.map((id: string) => ({ id: String(id) }));
-
-        // Try different endpoints to add the label
+        // Use the correct UAZAPI endpoint format:
+        // PUT /labels/chats with body: { number: "5511999999999", add_labelid: "10" }
         const addEndpoints = [
-          // PUT endpoints (set full list)
-          { url: `${baseUrl}/labels/chats/${chatId}`, method: "PUT", body: { labels: labelsToSet } },
-          { url: `${baseUrl}/label/chat/${chatId}`, method: "PUT", body: { labels: labelsToSet } },
-          // POST endpoints (add single label)
-          { url: `${baseUrl}/label/addToChat`, method: "POST", body: { labelId: String(waLabelId), chatId } },
-          { url: `${baseUrl}/label/chat/add`, method: "POST", body: { labelId: String(waLabelId), chatId } },
-          { url: `${baseUrl}/chat/label`, method: "POST", body: { labelId: String(waLabelId), chatId } },
-          { url: `${baseUrl}/chat/addLabel`, method: "POST", body: { labelId: String(waLabelId), chatId } },
-          // Gerencia labels endpoint mentioned in UAZAPI docs
-          { url: `${baseUrl}/label/manage`, method: "POST", body: { action: "add", labelId: String(waLabelId), chatId } },
-          { url: `${baseUrl}/labels/manage`, method: "POST", body: { action: "add", labelId: String(waLabelId), chatId } }
+          { url: `${baseUrl}/labels/chats`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
+          { url: `${baseUrl}/label/chats`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
+          // Fallback formats
+          { url: `${baseUrl}/labels/chat`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
+          { url: `${baseUrl}/chat/labels`, method: "PUT", body: { number: phone, add_labelid: String(waLabelId) } },
         ];
 
         for (const endpoint of addEndpoints) {
           try {
-            console.log(`Trying add endpoint: ${endpoint.url} (${endpoint.method})`);
+            console.log(`Trying add endpoint: ${endpoint.url} (${endpoint.method}) with body:`, JSON.stringify(endpoint.body));
             const response = await fetch(endpoint.url, {
               method: endpoint.method,
               headers: {
@@ -467,11 +417,12 @@ serve(async (req) => {
             const result = await response.json();
             console.log(`Add response (${response.status}):`, JSON.stringify(result));
 
-            if (response.ok && result.code !== 405 && !result.error) {
+            if (response.ok && !result.error) {
               return new Response(JSON.stringify({
                 success: true,
                 message: "Label added to contact in WhatsApp",
-                waLabelId
+                waLabelId,
+                response: result
               }), {
                 headers: { ...corsHeaders, "Content-Type": "application/json" }
               });
@@ -485,7 +436,7 @@ serve(async (req) => {
         return new Response(JSON.stringify({
           success: true,
           localOnly: true,
-          message: "Label saved locally. WhatsApp sync not available for this API version.",
+          message: "Label saved locally. WhatsApp sync may not be available.",
           waLabelId
         }), {
           status: 200,
