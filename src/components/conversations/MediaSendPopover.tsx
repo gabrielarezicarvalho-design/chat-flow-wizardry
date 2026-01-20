@@ -50,10 +50,10 @@ export const MediaSendPopover = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file size (max 16MB for images, 64MB for videos, 100MB for documents)
+    // Check file size (max 16MB for images, 1GB for videos, 100MB for documents)
     let maxSize = 16 * 1024 * 1024; // 16MB default
     if (file.type.startsWith('video/')) {
-      maxSize = 64 * 1024 * 1024; // 64MB for videos
+      maxSize = 1024 * 1024 * 1024; // 1GB for videos
     } else if (file.type.startsWith('application/')) {
       maxSize = 100 * 1024 * 1024; // 100MB for documents
     }
@@ -215,7 +215,7 @@ export const MediaSendPopover = ({
               </div>
               
               <p className="text-xs text-muted-foreground text-center">
-                Imagens 16MB, vídeos 64MB, docs 100MB
+                Imagens 16MB, vídeos 1GB, docs 100MB
               </p>
             </div>
           ) : (
