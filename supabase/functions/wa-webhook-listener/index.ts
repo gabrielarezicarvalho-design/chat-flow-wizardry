@@ -2920,6 +2920,146 @@ serve(async (req) => {
       }
     }
 
+    // ========================================
+    // HANDLE SENDER/CAMPAIGN STATUS EVENTS - Update campaign delivery status
+    // ========================================
+    const senderEventTypes = ["sender", "sender.update", "sender.status", "sender.message", "campaign", "campaign.update", "SENDER_STATUS", "sender_update"];
+    const isSenderEvent = eventType && senderEventTypes.some(t => eventType.toLowerCase().includes(t.toLowerCase()));
+    
+    // Also check for folder_id in payload which indicates it's a campaign update
+    const hasFolderId = payload.folder_id || payload.folderId || payload.data?.folder_id;
+    
+    if (isSenderEvent || hasFolderId) {
+      console.log("📤 Evento de STATUS DE ENVIO detectado:", eventType);
+      console.log("📝 Payload completo:", JSON.stringify(payload, null, 2));
+      
+      try {
+        // Extract folder_id from various possible locations
+        const folderId = payload.folder_id || payload.folderId || payload.data?.folder_id || "";
+        const messageStatus = payload.status || payload.messageStatus || payload.data?.status || "";
+        const messageNumber = payload.number || payload.phone || payload.to || payload.data?.number || "";
+        const messageId = payload.message_id || payload.messageId || payload.id || payload.data?.message_id || "";
+        const success = payload.success !== false && !payload.error && messageStatus !== "failed";
+        const errorMessage = payload.error || payload.errorMessage || payload.data?.error || "";
+        
+        console.log("📊 Dados do evento de envio:");
+        console.log(`   - Folder ID: ${folderId}`);
+        console.log(`   - Status: ${messageStatus}`);
+        console.log(`   - Número: ${messageNumber}`);
+        console.log(`   - Sucesso: ${success}`);
+        console.log(`   - Erro: ${errorMessage}`);
+        
+        // Find connection by token
+        const payloadToken = payload.token || instanceToken || "";
+        let connection = null;
+        
+        if (payloadToken) {
+          const { data: connData } = await supabase
+            .from("connections")
+            .select("*")
+            .eq("token", payloadToken)
+            .single();
+          if (connData) {
+            connection = connData;
+          }
+        }
+        
+        if (connection) {
+          console.log("🔗 Conexão encontrada:", connection.id);
+          
+          // Find campaigns that might be queued (status = 'queued' or 'sending')
+          // We'll update based on folder_id match if available, or by user_id if not
+          const { data: campaigns, error: campaignError } = await supabase
+            .from("campaigns")
+            .select("*")
+            .eq("user_id", connection.user_id)
+            .in("status", ["queued", "sending", "processing"])
+            .order("created_at", { ascending: false })
+            .limit(10);
+          
+          if (campaignError) {
+            console.error("❌ Erro ao buscar campanhas:", campaignError);
+          }
+          
+          if (campaigns && campaigns.length > 0) {
+            console.log(`📋 ${campaigns.length} campanha(s) em andamento encontradas`);
+            
+            // Update campaign counts based on the event
+            for (const campaign of campaigns) {
+              const currentSent = campaign.sent_count || 0;
+              const currentFailed = campaign.failed_count || 0;
+              const totalContacts = campaign.total_contacts || 0;
+              
+              let newSentCount = currentSent;
+              let newFailedCount = currentFailed;
+              
+              // If this is a delivery status update for a specific message
+              if (messageStatus === "sent" || messageStatus === "delivered" || success) {
+                newSentCount = currentSent + 1;
+              } else if (messageStatus === "failed" || messageStatus === "error" || !success) {
+                newFailedCount = currentFailed + 1;
+              }
+              
+              // Determine new campaign status
+              const totalProcessed = newSentCount + newFailedCount;
+              let newStatus = campaign.status;
+              
+              if (totalProcessed >= totalContacts) {
+                // All messages processed
+                newStatus = newFailedCount === totalContacts ? "failed" : "completed";
+                console.log(`✅ Campanha ${campaign.id} finalizada: ${newSentCount} enviados, ${newFailedCount} falhas`);
+              } else if (newSentCount > 0 || newFailedCount > 0) {
+                newStatus = "sending";
+              }
+              
+              // Update campaign
+              const updateData: any = {
+                sent_count: newSentCount,
+                failed_count: newFailedCount,
+                status: newStatus,
+                updated_at: new Date().toISOString()
+              };
+              
+              if (newStatus === "completed" || newStatus === "failed") {
+                updateData.completed_at = new Date().toISOString();
+              }
+              
+              await supabase
+                .from("campaigns")
+                .update(updateData)
+                .eq("id", campaign.id);
+              
+              console.log(`📊 Campanha ${campaign.id} atualizada: ${newSentCount}/${totalContacts} enviados, ${newFailedCount} falhas, status: ${newStatus}`);
+              
+              // Only update one campaign per event (the most recent one)
+              break;
+            }
+          } else {
+            console.log("ℹ️ Nenhuma campanha em andamento encontrada");
+          }
+        } else {
+          console.log("⚠️ Conexão não encontrada para atualizar status de campanha");
+        }
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          eventType: "sender_status",
+          processed: true
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      } catch (senderError: any) {
+        console.error("❌ Erro ao processar evento de status de envio:", senderError);
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: senderError.message 
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+    }
+
     // Skip non-message events
     if (eventType && !["messages", "message", "RECEIVE_MESSAGE"].includes(eventType)) {
       console.log("⚠️ Evento não é mensagem, ignorando:", eventType);
