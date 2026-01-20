@@ -314,10 +314,10 @@ export function BirthdayCampaigns({ connections }: BirthdayCampaignsProps) {
       return;
     }
 
-    // Validate file size (10MB for images, 50MB for videos)
-    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    // Validate file size (10MB for images, 1GB for videos)
+    const maxSize = isVideo ? 1024 * 1024 * 1024 : 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      toast.error(`Arquivo muito grande. Máximo: ${isVideo ? "50MB" : "10MB"}`);
+      toast.error(`Arquivo muito grande. Máximo: ${isVideo ? "1GB" : "10MB"}`);
       return;
     }
 

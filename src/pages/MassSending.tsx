@@ -307,9 +307,10 @@ function MassSendingContent() {
     const shouldUploadToStorage = file.type.startsWith("video/") || file.size > 5 * 1024 * 1024; // 5MB limit for base64
     
     if (shouldUploadToStorage) {
-      // Check file size limit (50MB)
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error("Arquivo muito grande. Limite máximo: 50MB");
+      // Check file size limit (1GB for videos, 50MB for others)
+      const maxSize = file.type.startsWith("video/") ? 1024 * 1024 * 1024 : 50 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error(`Arquivo muito grande. Limite máximo: ${file.type.startsWith("video/") ? "1GB" : "50MB"}`);
         setMediaFile(null);
         return;
       }
@@ -1563,7 +1564,7 @@ function MassSendingContent() {
                         ) : (
                           <>
                             <Upload className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
-                            <p className="text-sm text-muted-foreground">Clique para selecionar {messageType === "video" ? "(máx 50MB)" : ""}</p>
+                            <p className="text-sm text-muted-foreground">Clique para selecionar {messageType === "video" ? "(máx 1GB)" : ""}</p>
                           </>
                         )}
                       </div>
