@@ -214,16 +214,16 @@ function MassSendingContent() {
       if (userData.user) {
         const userId = userData.user.id;
         const [connectionsRes, campaignsRes, tagsRes, leadsRes, templatesRes] = await Promise.all([
-          supabase.from("connections").select("id, instance_name, status, token, environment, base_url"),
+          supabase.from("connections").select("id, name, instance_name, status, token, environment, base_url"),
           supabase.from("campaigns").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
           supabase.from("tags").select("*").eq("user_id", userId),
           supabase.from("leads").select("*").eq("user_id", userId),
           supabase.from("campaign_templates").select("*").eq("user_id", userId).order("created_at", { ascending: false })
         ]);
-        // Map connections to expected interface
+        // Map connections to expected interface - use name or instance_name as fallback
         const mappedConnections = (connectionsRes.data || []).map((c: any) => ({
           id: c.id,
-          name: c.instance_name,
+          name: c.name || c.instance_name || 'Sem nome',
           status: c.status,
           token: c.token,
           environment: c.environment,
