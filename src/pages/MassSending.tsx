@@ -747,20 +747,46 @@ function MassSendingContent() {
           throw new Error(data.error || "Erro ao enviar campanha");
         }
         
-        // Count results
-        let sentCount = data?.data?.sent || nums.length;
-        let failedCount = data?.data?.failed || 0;
+        // Count results - check if response indicates queued status
+        const responseData = data?.data;
+        const isQueued = responseData?.status === "queued";
         
-        // Update campaign status to completed
-        await supabase.from("campaigns").update({
-          status: "completed",
-          sent_count: sentCount,
-          failed_count: failedCount,
-          completed_at: new Date().toISOString()
-        }).eq("id", campaignId);
-        
-        addLog("success", `Campanha finalizada: ${sentCount} enviados, ${failedCount} falhas`);
-        toast.success(`Campanha enviada! ${sentCount} enviados, ${failedCount} falhas`);
+        if (isQueued) {
+          // Messages were queued but not sent yet - save folder_id for tracking
+          const folderId = responseData?.folder_id;
+          const queuedCount = responseData?.count || nums.length;
+          
+          addLog("info", `Campanha adicionada à fila: ${queuedCount} mensagens aguardando envio`);
+          addLog("info", `Folder ID: ${folderId}`);
+          
+          // Update campaign with queued status and folder_id for future tracking
+          await supabase.from("campaigns").update({
+            status: "queued",
+            sent_count: 0,
+            failed_count: 0,
+            total_contacts: queuedCount
+          }).eq("id", campaignId);
+          
+          toast.info(`Campanha na fila! ${queuedCount} mensagens aguardando envio. As mensagens serão enviadas gradualmente.`, {
+            duration: 8000
+          });
+          addLog("success", `Campanha "${name}" adicionada à fila com ${queuedCount} mensagens`);
+        } else {
+          // Immediate results available
+          let sentCount = responseData?.sent || nums.length;
+          let failedCount = responseData?.failed || 0;
+          
+          // Update campaign status to completed
+          await supabase.from("campaigns").update({
+            status: "completed",
+            sent_count: sentCount,
+            failed_count: failedCount,
+            completed_at: new Date().toISOString()
+          }).eq("id", campaignId);
+          
+          addLog("success", `Campanha finalizada: ${sentCount} enviados, ${failedCount} falhas`);
+          toast.success(`Campanha enviada! ${sentCount} enviados, ${failedCount} falhas`);
+        }
       }
       
       // Apply tag on send if configured - update leads tags array directly
@@ -1149,6 +1175,7 @@ function MassSendingContent() {
       case "completed": return "bg-green-500/10 text-green-600 border-green-500/20";
       case "sending": return "bg-blue-500/10 text-blue-600 border-blue-500/20";
       case "scheduled": return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
+      case "queued": return "bg-orange-500/10 text-orange-600 border-orange-500/20";
       case "failed": return "bg-red-500/10 text-red-600 border-red-500/20";
       default: return "bg-muted text-muted-foreground";
     }
@@ -1159,6 +1186,7 @@ function MassSendingContent() {
       case "completed": return "Concluída";
       case "sending": return "Enviando";
       case "scheduled": return "Agendada";
+      case "queued": return "Na Fila";
       case "failed": return "Falhou";
       default: return status;
     }
@@ -2055,7 +2083,8 @@ function MassSendingContent() {
                       c.status === "completed" ? "bg-green-500/10" : 
                       c.status === "failed" ? "bg-red-500/10" :
                       c.status === "sending" ? "bg-blue-500/10" : 
-                      c.status === "scheduled" ? "bg-yellow-500/10" : "bg-muted"
+                      c.status === "scheduled" ? "bg-yellow-500/10" :
+                      c.status === "queued" ? "bg-orange-500/10" : "bg-muted"
                     }`}>
                       {c.status === "completed" ? (
                         <CheckCircle className="w-6 h-6 text-green-600" />
@@ -2065,6 +2094,8 @@ function MassSendingContent() {
                         <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
                       ) : c.status === "scheduled" ? (
                         <Clock className="w-6 h-6 text-yellow-600" />
+                      ) : c.status === "queued" ? (
+                        <Loader2 className="w-6 h-6 text-orange-600 animate-spin" />
                       ) : (
                         <Clock className="w-6 h-6 text-muted-foreground" />
                       )}
@@ -2131,6 +2162,15 @@ function MassSendingContent() {
                               style={{ width: `${successRate}%` }}
                             />
                           </div>
+                        </div>
+                      )}
+                      
+                      {/* Message for queued campaigns */}
+                      {c.status === "queued" && (
+                        <div className="mt-2 max-w-md">
+                          <p className="text-xs text-orange-600">
+                            ⏳ {c.total_contacts || 0} mensagens aguardando envio na fila do WhatsApp
+                          </p>
                         </div>
                       )}
                     </div>
