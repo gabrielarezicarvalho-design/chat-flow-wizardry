@@ -620,6 +620,7 @@ function MassSendingContent() {
           delayMax: delayInterval + 5,
           pauseEveryX: pauseEveryX,
           pauseDuration: pauseDuration,
+          campaignId: campaignId, // Pass campaign ID for tracking
         };
         
         if (interactiveType === "carousel") {
@@ -659,6 +660,23 @@ function MassSendingContent() {
         }
         
         addLog("info", `Resposta: ${JSON.stringify(data)}`);
+        
+        // Check for disconnection
+        if (data?.disconnected) {
+          addLog("error", "WhatsApp desconectado durante o envio! Campanha pausada.");
+          toast.error("WhatsApp desconectado! A campanha foi pausada. Reconecte o WhatsApp e retome o envio.", {
+            action: {
+              label: "Ir para Conexões",
+              onClick: () => window.location.href = "/connections"
+            },
+            duration: 10000
+          });
+          
+          loadData();
+          resetForm();
+          setSending(false);
+          return;
+        }
         
         if (data && !data.success) {
           addLog("error", `Erro UZAPI: ${data.error || JSON.stringify(data)}`);
@@ -1176,6 +1194,8 @@ function MassSendingContent() {
       case "sending": return "bg-blue-500/10 text-blue-600 border-blue-500/20";
       case "scheduled": return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
       case "queued": return "bg-orange-500/10 text-orange-600 border-orange-500/20";
+      case "paused": return "bg-gray-500/10 text-gray-600 border-gray-500/20";
+      case "paused_disconnected": return "bg-red-500/10 text-red-600 border-red-500/20";
       case "failed": return "bg-red-500/10 text-red-600 border-red-500/20";
       default: return "bg-muted text-muted-foreground";
     }
@@ -1187,6 +1207,8 @@ function MassSendingContent() {
       case "sending": return "Enviando";
       case "scheduled": return "Agendada";
       case "queued": return "Na Fila";
+      case "paused": return "Pausada";
+      case "paused_disconnected": return "Pausada - WhatsApp Desconectado";
       case "failed": return "Falhou";
       default: return status;
     }
@@ -2084,7 +2106,9 @@ function MassSendingContent() {
                       c.status === "failed" ? "bg-red-500/10" :
                       c.status === "sending" ? "bg-blue-500/10" : 
                       c.status === "scheduled" ? "bg-yellow-500/10" :
-                      c.status === "queued" ? "bg-orange-500/10" : "bg-muted"
+                      c.status === "queued" ? "bg-orange-500/10" :
+                      c.status === "paused" ? "bg-gray-500/10" :
+                      c.status === "paused_disconnected" ? "bg-red-500/10" : "bg-muted"
                     }`}>
                       {c.status === "completed" ? (
                         <CheckCircle className="w-6 h-6 text-green-600" />
@@ -2096,6 +2120,10 @@ function MassSendingContent() {
                         <Clock className="w-6 h-6 text-yellow-600" />
                       ) : c.status === "queued" ? (
                         <Loader2 className="w-6 h-6 text-orange-600 animate-spin" />
+                      ) : c.status === "paused" ? (
+                        <Pause className="w-6 h-6 text-gray-600" />
+                      ) : c.status === "paused_disconnected" ? (
+                        <WifiOff className="w-6 h-6 text-red-600" />
                       ) : (
                         <Clock className="w-6 h-6 text-muted-foreground" />
                       )}
@@ -2173,6 +2201,20 @@ function MassSendingContent() {
                           </p>
                         </div>
                       )}
+                      
+                      {/* Message for paused_disconnected campaigns */}
+                      {c.status === "paused_disconnected" && (
+                        <div className="mt-2 max-w-md p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                          <p className="text-xs text-red-600 font-medium flex items-center gap-1">
+                            <WifiOff className="w-3 h-3" />
+                            WhatsApp desconectado durante o envio
+                          </p>
+                          <p className="text-xs text-red-500 mt-1">
+                            {(c.sent_count || 0)} enviados • {(c.failed_count || 0)} pendentes. 
+                            Reconecte o WhatsApp e clique em "Retomar Envio".
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -2245,6 +2287,35 @@ function MassSendingContent() {
                               <Play className="w-4 h-4 mr-2" />
                             )}
                             Continuar
+                          </DropdownMenuItem>
+                        )}
+                        {c.status === "paused_disconnected" && (
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              toast.info("Reconecte o WhatsApp primeiro na página de Conexões, depois retome a campanha.", {
+                                action: {
+                                  label: "Ir para Conexões",
+                                  onClick: () => window.location.href = "/connections"
+                                },
+                                duration: 8000
+                              });
+                            }}
+                          >
+                            <Wifi className="w-4 h-4 mr-2" />
+                            Reconectar WhatsApp
+                          </DropdownMenuItem>
+                        )}
+                        {c.status === "paused_disconnected" && (
+                          <DropdownMenuItem 
+                            onClick={() => controlCampaign(c.id, "continue")}
+                            disabled={controllingCampaign === c.id}
+                          >
+                            {controllingCampaign === c.id ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <RefreshCw className="w-4 h-4 mr-2" />
+                            )}
+                            Retomar Envio
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem 
