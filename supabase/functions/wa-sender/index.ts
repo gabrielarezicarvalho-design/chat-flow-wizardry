@@ -290,12 +290,18 @@ serve(async (req) => {
         const delayMax = params.delayMax || 30;
         const pauseEveryX = params.pauseEveryX || 0; // 0 = no pause
         const pauseDuration = params.pauseDuration || 60;
+        const campaignId = params.campaignId; // For tracking and pausing
         
         console.log(`[wa-sender] Sending menu type: ${menuType} to ${menuNumbers.length} contacts`);
         console.log(`[wa-sender] Text: ${menuText}`);
         console.log(`[wa-sender] Delay: ${delayMin}-${delayMax}s, Pause every ${pauseEveryX} with ${pauseDuration}s duration`);
+        console.log(`[wa-sender] Campaign ID: ${campaignId}`);
         
         const results = [];
+        let disconnectionDetected = false;
+        let disconnectedAtIndex = -1;
+        const failedNumbers: string[] = [];
+        
         for (let i = 0; i < menuNumbers.length; i++) {
           const number = menuNumbers[i].replace("@s.whatsapp.net", "").replace(/\D/g, "");
           
@@ -349,6 +355,39 @@ serve(async (req) => {
             
             console.log(`[wa-sender] Response for ${number}:`, JSON.stringify(menuResult));
             
+            // Check for WhatsApp disconnection error
+            const errorMessage = menuResult?.error || menuResult?.message || '';
+            const isDisconnected = 
+              errorMessage.toLowerCase().includes('disconnected') ||
+              errorMessage.toLowerCase().includes('no session') ||
+              errorMessage === 'WhatsApp disconnected';
+            
+            if (!success && isDisconnected) {
+              console.log(`[wa-sender] WhatsApp disconnection detected at index ${i}`);
+              disconnectionDetected = true;
+              disconnectedAtIndex = i;
+              
+              // Add current number and all remaining numbers to failed list
+              failedNumbers.push(menuNumbers[i]);
+              for (let j = i + 1; j < menuNumbers.length; j++) {
+                failedNumbers.push(menuNumbers[j]);
+              }
+              
+              results.push({ 
+                number, 
+                success: false, 
+                result: menuResult,
+                error: 'WhatsApp disconnected'
+              });
+              
+              // Break the loop - stop sending
+              break;
+            }
+            
+            if (!success) {
+              failedNumbers.push(menuNumbers[i]);
+            }
+            
             results.push({ 
               number, 
               success, 
@@ -357,7 +396,7 @@ serve(async (req) => {
             });
             
             // Delay logic
-            if (i < menuNumbers.length - 1) {
+            if (i < menuNumbers.length - 1 && !disconnectionDetected) {
               // Check if we need a longer pause
               if (pauseEveryX > 0 && (i + 1) % pauseEveryX === 0) {
                 console.log(`[wa-sender] Taking ${pauseDuration}s pause after ${i + 1} messages`);
@@ -371,16 +410,42 @@ serve(async (req) => {
           } catch (err) {
             console.error(`[wa-sender] Error sending to ${number}:`, err);
             results.push({ number, success: false, error: String(err) });
+            failedNumbers.push(menuNumbers[i]);
           }
         }
         
         const sentCount = results.filter(r => r.success).length;
         const failedCount = results.filter(r => !r.success).length;
         
-        console.log(`[wa-sender] Menu campaign complete: ${sentCount} sent, ${failedCount} failed`);
+        console.log(`[wa-sender] Menu campaign complete: ${sentCount} sent, ${failedCount} failed, disconnected: ${disconnectionDetected}`);
+        
+        // If disconnection detected and we have a campaign ID, update campaign status
+        if (disconnectionDetected && campaignId) {
+          try {
+            const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+            const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+            const supabaseClient = createClient(supabaseUrl, supabaseKey);
+            
+            await supabaseClient
+              .from("campaigns")
+              .update({
+                status: "paused_disconnected",
+                sent_count: sentCount,
+                failed_count: failedNumbers.length
+              })
+              .eq("id", campaignId);
+            
+            console.log(`[wa-sender] Campaign ${campaignId} paused due to disconnection`);
+          } catch (updateErr) {
+            console.error(`[wa-sender] Failed to update campaign status:`, updateErr);
+          }
+        }
         
         return new Response(JSON.stringify({
           success: sentCount > 0,
+          disconnected: disconnectionDetected,
+          disconnectedAtIndex,
+          failedNumbers,
           data: { sent: sentCount, failed: failedCount, results }
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" }
