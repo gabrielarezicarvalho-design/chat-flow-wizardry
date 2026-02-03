@@ -623,6 +623,12 @@ function MassSendingContent() {
           campaignId: campaignId, // Pass campaign ID for tracking
         };
         
+        // Add media URL for buttons with image/video
+        if ((interactiveType === "buttons") && mediaUrl) {
+          menuPayload.mediaUrl = mediaUrl;
+          addLog("info", `Adicionando mídia aos botões: ${mediaUrl}`);
+        }
+        
         if (interactiveType === "carousel") {
           // Format carousel cards for UZAPI /send/carousel endpoint
           // UZAPI expects: { text: "Title\nDescription", image: "url", buttons: [{id, text, type}] }
@@ -968,19 +974,47 @@ function MassSendingContent() {
   };
 
   const saveAsTemplate = async () => {
-    if (!name.trim()) { toast.error("Digite um nome"); return; }
+    if (!name.trim()) { 
+      toast.error("Digite um nome para o template"); 
+      return; 
+    }
     setSavingTemplate(true);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Não autenticado");
-      await (supabase.from("campaign_templates") as any).insert({
-        user_id: userData.user.id, name, connection_id: connId || null,
-        message_type: messageType, message_content: msg, media_url: mediaUrl || null,
-        interactive_type: interactiveType, buttons, list_items: listItems,
-        carousel_cards: carouselCards, contact_source: contactSource, selected_tags: selectedTags
-      });
-      toast.success("Template salvo!"); loadData();
-    } catch (err: any) { toast.error(err.message); }
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        throw new Error("Sessão expirada. Faça login novamente.");
+      }
+      
+      const templateData = {
+        user_id: userData.user.id, 
+        name: name.trim(), 
+        connection_id: connId || null,
+        message_type: messageType, 
+        message_content: msg || null, 
+        media_url: mediaUrl || null,
+        interactive_type: interactiveType !== "none" ? interactiveType : null, 
+        buttons: buttons.length > 0 ? buttons : null, 
+        list_items: listItems.length > 0 ? listItems : null,
+        carousel_cards: carouselCards.length > 0 ? carouselCards : null, 
+        contact_source: contactSource, 
+        selected_tags: selectedTags.length > 0 ? selectedTags : null
+      };
+      
+      console.log("[MassSending] Saving template:", templateData);
+      
+      const { error: insertError } = await (supabase.from("campaign_templates") as any).insert(templateData);
+      
+      if (insertError) {
+        console.error("[MassSending] Template save error:", insertError);
+        throw new Error(insertError.message || "Erro ao salvar template");
+      }
+      
+      toast.success("Template salvo com sucesso!"); 
+      loadData();
+    } catch (err: any) { 
+      console.error("[MassSending] Save template exception:", err);
+      toast.error(err.message || "Erro desconhecido ao salvar template"); 
+    }
     setSavingTemplate(false);
   };
 
@@ -1196,6 +1230,7 @@ function MassSendingContent() {
       case "queued": return "bg-orange-500/10 text-orange-600 border-orange-500/20";
       case "paused": return "bg-gray-500/10 text-gray-600 border-gray-500/20";
       case "paused_disconnected": return "bg-red-500/10 text-red-600 border-red-500/20";
+      case "paused_errors": return "bg-red-500/10 text-red-600 border-red-500/20";
       case "failed": return "bg-red-500/10 text-red-600 border-red-500/20";
       default: return "bg-muted text-muted-foreground";
     }
@@ -1209,6 +1244,7 @@ function MassSendingContent() {
       case "queued": return "Na Fila";
       case "paused": return "Pausada";
       case "paused_disconnected": return "Pausada - WhatsApp Desconectado";
+      case "paused_errors": return "Pausada - Erros Consecutivos";
       case "failed": return "Falhou";
       default: return status;
     }
@@ -2108,7 +2144,8 @@ function MassSendingContent() {
                       c.status === "scheduled" ? "bg-yellow-500/10" :
                       c.status === "queued" ? "bg-orange-500/10" :
                       c.status === "paused" ? "bg-gray-500/10" :
-                      c.status === "paused_disconnected" ? "bg-red-500/10" : "bg-muted"
+                      c.status === "paused_disconnected" ? "bg-red-500/10" : 
+                      c.status === "paused_errors" ? "bg-red-500/10" : "bg-muted"
                     }`}>
                       {c.status === "completed" ? (
                         <CheckCircle className="w-6 h-6 text-green-600" />
@@ -2124,6 +2161,8 @@ function MassSendingContent() {
                         <Pause className="w-6 h-6 text-gray-600" />
                       ) : c.status === "paused_disconnected" ? (
                         <WifiOff className="w-6 h-6 text-red-600" />
+                      ) : c.status === "paused_errors" ? (
+                        <X className="w-6 h-6 text-red-600" />
                       ) : (
                         <Clock className="w-6 h-6 text-muted-foreground" />
                       )}
@@ -2212,6 +2251,20 @@ function MassSendingContent() {
                           <p className="text-xs text-red-500 mt-1">
                             {(c.sent_count || 0)} enviados • {(c.failed_count || 0)} pendentes. 
                             Reconecte o WhatsApp e clique em "Retomar Envio".
+                          </p>
+                        </div>
+                      )}
+                      
+                      {/* Message for paused_errors campaigns */}
+                      {c.status === "paused_errors" && (
+                        <div className="mt-2 max-w-md p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                          <p className="text-xs text-red-600 font-medium flex items-center gap-1">
+                            <X className="w-3 h-3" />
+                            Campanha pausada devido a erros consecutivos
+                          </p>
+                          <p className="text-xs text-red-500 mt-1">
+                            {(c.sent_count || 0)} enviados • {(c.failed_count || 0)} pendentes. 
+                            Verifique a conexão e clique em "Retomar Envio".
                           </p>
                         </div>
                       )}
@@ -2305,7 +2358,7 @@ function MassSendingContent() {
                             Reconectar WhatsApp
                           </DropdownMenuItem>
                         )}
-                        {c.status === "paused_disconnected" && (
+                        {(c.status === "paused_disconnected" || c.status === "paused_errors") && (
                           <DropdownMenuItem 
                             onClick={() => controlCampaign(c.id, "continue")}
                             disabled={controllingCampaign === c.id}
