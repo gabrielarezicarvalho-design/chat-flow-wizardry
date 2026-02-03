@@ -283,9 +283,11 @@ serve(async (req) => {
 
       case "menu":
         // Send interactive menu (button, list, carousel, poll) to multiple numbers
+        // Also supports media + buttons via imageButton parameter
         const menuNumbers = params.numbers || [];
         const menuType = params.menuType || "button"; // button, list, carousel, poll
         const menuText = params.text || "";
+        const menuMediaUrl = params.mediaUrl || params.imageButton || ""; // Support media with buttons
         const delayMin = params.delayMin || 10;
         const delayMax = params.delayMax || 30;
         const pauseEveryX = params.pauseEveryX || 0; // 0 = no pause
@@ -294,6 +296,7 @@ serve(async (req) => {
         
         console.log(`[wa-sender] Sending menu type: ${menuType} to ${menuNumbers.length} contacts`);
         console.log(`[wa-sender] Text: ${menuText}`);
+        console.log(`[wa-sender] Media URL: ${menuMediaUrl}`);
         console.log(`[wa-sender] Delay: ${delayMin}-${delayMax}s, Pause every ${pauseEveryX} with ${pauseDuration}s duration`);
         console.log(`[wa-sender] Campaign ID: ${campaignId}`);
         
@@ -301,6 +304,8 @@ serve(async (req) => {
         let disconnectionDetected = false;
         let disconnectedAtIndex = -1;
         const failedNumbers: string[] = [];
+        let consecutiveErrors = 0;
+        const MAX_CONSECUTIVE_ERRORS = 5; // Stop after 5 consecutive errors
         
         for (let i = 0; i < menuNumbers.length; i++) {
           const number = menuNumbers[i].replace("@s.whatsapp.net", "").replace(/\D/g, "");
@@ -333,8 +338,10 @@ serve(async (req) => {
               if (menuType === "poll" && params.selectableCount) {
                 menuBody.selectableCount = params.selectableCount;
               }
-              if (params.imageButton) {
-                menuBody.imageButton = params.imageButton;
+              // Add image/video to buttons via imageButton parameter
+              if (menuMediaUrl && (menuType === "button" || menuType === "buttons")) {
+                menuBody.imageButton = menuMediaUrl;
+                console.log(`[wa-sender] Adding media to buttons: ${menuMediaUrl}`);
               }
             }
             
@@ -386,6 +393,37 @@ serve(async (req) => {
             
             if (!success) {
               failedNumbers.push(menuNumbers[i]);
+              consecutiveErrors++;
+              
+              // Check for too many consecutive errors - indicates a systemic problem
+              if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                console.log(`[wa-sender] Too many consecutive errors (${consecutiveErrors}), stopping campaign`);
+                
+                // Add all remaining numbers to failed list
+                for (let j = i + 1; j < menuNumbers.length; j++) {
+                  failedNumbers.push(menuNumbers[j]);
+                }
+                
+                // Update campaign status
+                if (campaignId) {
+                  try {
+                    await supabase
+                      .from("campaigns")
+                      .update({
+                        status: "paused_errors",
+                        sent_count: results.filter(r => r.success).length,
+                        failed_count: failedNumbers.length
+                      })
+                      .eq("id", campaignId);
+                  } catch (updateErr) {
+                    console.error(`[wa-sender] Failed to update campaign:`, updateErr);
+                  }
+                }
+                
+                break;
+              }
+            } else {
+              consecutiveErrors = 0; // Reset on success
             }
             
             results.push({ 
@@ -396,7 +434,7 @@ serve(async (req) => {
             });
             
             // Delay logic
-            if (i < menuNumbers.length - 1 && !disconnectionDetected) {
+            if (i < menuNumbers.length - 1 && !disconnectionDetected && consecutiveErrors < MAX_CONSECUTIVE_ERRORS) {
               // Check if we need a longer pause
               if (pauseEveryX > 0 && (i + 1) % pauseEveryX === 0) {
                 console.log(`[wa-sender] Taking ${pauseDuration}s pause after ${i + 1} messages`);
@@ -411,6 +449,15 @@ serve(async (req) => {
             console.error(`[wa-sender] Error sending to ${number}:`, err);
             results.push({ number, success: false, error: String(err) });
             failedNumbers.push(menuNumbers[i]);
+            consecutiveErrors++;
+            
+            if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+              console.log(`[wa-sender] Too many consecutive errors, stopping`);
+              for (let j = i + 1; j < menuNumbers.length; j++) {
+                failedNumbers.push(menuNumbers[j]);
+              }
+              break;
+            }
           }
         }
         
