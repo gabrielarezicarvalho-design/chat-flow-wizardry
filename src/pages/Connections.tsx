@@ -15,7 +15,7 @@ import { useFlows } from "@/hooks/useFlows";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
-import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download } from "lucide-react";
+import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone } from "lucide-react";
 import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
 import { DeleteConnectionDialog } from "@/components/connections/DeleteConnectionDialog";
 import { Progress } from "@/components/ui/progress";
@@ -31,6 +31,8 @@ const Connections = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+  const [pairCode, setPairCode] = useState<string | null>(null);
+  const [connectMethod, setConnectMethod] = useState<'qrcode' | 'paircode'>('qrcode');
   const [loadingQr, setLoadingQr] = useState(false);
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [pendingConnection, setPendingConnection] = useState<any>(null);
@@ -499,7 +501,8 @@ const Connections = () => {
 
       if (data.qrcode) {
         setQrCodeData(data.qrcode);
-        toast.success("QR Code gerado! Escaneie para conectar.");
+        setPairCode(data.paircode || null);
+        toast.success("QR Code gerado! Escaneie ou use o código para conectar.");
       } else {
         throw new Error('QR code não retornado');
       }
@@ -797,7 +800,8 @@ const Connections = () => {
 
       if (data?.success && data?.qrcode) {
         setQrCodeData(data.qrcode);
-        toast.success("QR Code gerado! Escaneie para reconectar.");
+        setPairCode(data.paircode || null);
+        toast.success("QR Code gerado! Escaneie ou use o código para reconectar.");
 
         const startTime = Date.now();
         const maxDuration = 60000;
@@ -2033,24 +2037,95 @@ const Connections = () => {
       </Tabs>
 
       {/* QR Code Dialog */}
-      <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+      <Dialog open={qrDialogOpen} onOpenChange={(open) => {
+        setQrDialogOpen(open);
+        if (!open) {
+          setPairCode(null);
+          setConnectMethod('qrcode');
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>QR Code WhatsApp</DialogTitle>
+            <DialogTitle>Conectar WhatsApp</DialogTitle>
             <DialogDescription>
-              Escaneie o QR Code com seu WhatsApp
+              Escolha como deseja conectar seu WhatsApp
             </DialogDescription>
           </DialogHeader>
+          
+          {/* Method Toggle */}
+          {!loadingQr && (qrCodeData || pairCode) && (
+            <div className="flex gap-2 p-1 bg-muted rounded-lg">
+              <Button
+                variant={connectMethod === 'qrcode' ? 'default' : 'ghost'}
+                size="sm"
+                className="flex-1"
+                onClick={() => setConnectMethod('qrcode')}
+              >
+                <QrCode className="w-4 h-4 mr-2" />
+                QR Code
+              </Button>
+              <Button
+                variant={connectMethod === 'paircode' ? 'default' : 'ghost'}
+                size="sm"
+                className="flex-1"
+                onClick={() => setConnectMethod('paircode')}
+                disabled={!pairCode}
+              >
+                <Smartphone className="w-4 h-4 mr-2" />
+                Código
+              </Button>
+            </div>
+          )}
+
           <div className="flex flex-col items-center justify-center p-6 space-y-4">
             {loadingQr ? (
-              <Loader2 className="w-12 h-12 animate-spin text-primary" />
-            ) : qrCodeData ? (
+              <>
+                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                <p className="text-muted-foreground">Gerando conexão...</p>
+              </>
+            ) : connectMethod === 'qrcode' && qrCodeData ? (
               <>
                 <img src={qrCodeData} alt="QR Code WhatsApp" className="max-w-full rounded-lg border" />
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Aguardando conexão...</span>
                 </div>
+                <p className="text-xs text-center text-muted-foreground">
+                  Abra o WhatsApp {'>'} Menu {'>'} Dispositivos conectados {'>'} Conectar dispositivo
+                </p>
+              </>
+            ) : connectMethod === 'paircode' && pairCode ? (
+              <>
+                <div className="text-center space-y-4">
+                  <div className="bg-primary/10 border-2 border-primary rounded-xl p-6">
+                    <p className="text-3xl font-mono font-bold tracking-[0.3em] text-primary">
+                      {pairCode}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Aguardando conexão...</span>
+                  </div>
+                </div>
+                <div className="text-xs text-center text-muted-foreground space-y-1">
+                  <p className="font-medium">Como usar o código:</p>
+                  <p>1. Abra o WhatsApp no celular</p>
+                  <p>2. Vá em Menu {'>'} Dispositivos conectados</p>
+                  <p>3. Toque em "Conectar dispositivo"</p>
+                  <p>4. Selecione "Conectar com número de telefone"</p>
+                  <p>5. Digite o código acima</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(pairCode);
+                    toast.success("Código copiado!");
+                  }}
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copiar Código
+                </Button>
               </>
             ) : (
               <p className="text-muted-foreground">Gerando QR Code...</p>
