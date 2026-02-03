@@ -322,26 +322,108 @@ serve(async (req) => {
               menuEndpoint = `${base_url}/send/carousel`;
               menuBody.carousel = params.carousel || [];
             } else {
-              // Use /send/menu for button, list, poll
-              menuEndpoint = `${base_url}/send/menu`;
+              // Check if we have video/media that needs to be sent separately first
+              const isVideoMedia = menuMediaUrl && (
+                menuMediaUrl.toLowerCase().includes('.mp4') ||
+                menuMediaUrl.toLowerCase().includes('.mov') ||
+                menuMediaUrl.toLowerCase().includes('.avi') ||
+                menuMediaUrl.toLowerCase().includes('.webm') ||
+                menuMediaUrl.toLowerCase().includes('video')
+              );
               
-              // UZAPI uses "button" not "buttons"
-              menuBody.type = menuType === "buttons" ? "button" : menuType;
-              menuBody.choices = params.choices || [];
+              const isImageMedia = menuMediaUrl && !isVideoMedia && (
+                menuMediaUrl.toLowerCase().includes('.jpg') ||
+                menuMediaUrl.toLowerCase().includes('.jpeg') ||
+                menuMediaUrl.toLowerCase().includes('.png') ||
+                menuMediaUrl.toLowerCase().includes('.gif') ||
+                menuMediaUrl.toLowerCase().includes('.webp') ||
+                menuMediaUrl.toLowerCase().includes('image')
+              );
               
-              if (menuType === "list") {
-                menuBody.listButton = params.listButton || "Ver opções";
-              }
-              if (params.footerText) {
-                menuBody.footerText = params.footerText;
-              }
-              if (menuType === "poll" && params.selectableCount) {
-                menuBody.selectableCount = params.selectableCount;
-              }
-              // Add image/video to buttons via imageButton parameter
-              if (menuMediaUrl && (menuType === "button" || menuType === "buttons")) {
-                menuBody.imageButton = menuMediaUrl;
-                console.log(`[wa-sender] Adding media to buttons: ${menuMediaUrl}`);
+              // For videos with buttons: send video first, then send buttons separately
+              if (isVideoMedia && (menuType === "button" || menuType === "buttons")) {
+                console.log(`[wa-sender] Video + buttons detected, sending video first: ${menuMediaUrl}`);
+                
+                // Send video first
+                const videoBody = {
+                  number: number,
+                  type: "video",
+                  file: menuMediaUrl,
+                  text: menuText || ""
+                };
+                
+                const videoResponse = await fetch(`${base_url}/send/media`, {
+                  method: "POST",
+                  headers: { 
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "token": token
+                  },
+                  body: JSON.stringify(videoBody)
+                });
+                
+                const videoResult = await videoResponse.json();
+                console.log(`[wa-sender] Video sent to ${number}:`, JSON.stringify(videoResult));
+                
+                // Check for video send failure
+                if (!videoResponse.ok || videoResult.error) {
+                  const videoErrorMsg = videoResult?.error || videoResult?.message || '';
+                  const isVideoDisconnected = 
+                    videoErrorMsg.toLowerCase().includes('disconnected') ||
+                    videoErrorMsg.toLowerCase().includes('no session');
+                  
+                  if (isVideoDisconnected) {
+                    console.log(`[wa-sender] WhatsApp disconnection detected during video send`);
+                    disconnectionDetected = true;
+                    disconnectedAtIndex = i;
+                    failedNumbers.push(menuNumbers[i]);
+                    for (let j = i + 1; j < menuNumbers.length; j++) {
+                      failedNumbers.push(menuNumbers[j]);
+                    }
+                    results.push({ 
+                      number, 
+                      success: false, 
+                      result: videoResult,
+                      error: 'WhatsApp disconnected'
+                    });
+                    break;
+                  }
+                }
+                
+                // Small delay between video and buttons
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Now send buttons without media
+                menuEndpoint = `${base_url}/send/menu`;
+                menuBody.type = "button";
+                menuBody.choices = params.choices || [];
+                menuBody.text = "Escolha uma opção:";
+                
+                if (params.footerText) {
+                  menuBody.footerText = params.footerText;
+                }
+              } else {
+                // Use /send/menu for button, list, poll
+                menuEndpoint = `${base_url}/send/menu`;
+                
+                // UZAPI uses "button" not "buttons"
+                menuBody.type = menuType === "buttons" ? "button" : menuType;
+                menuBody.choices = params.choices || [];
+                
+                if (menuType === "list") {
+                  menuBody.listButton = params.listButton || "Ver opções";
+                }
+                if (params.footerText) {
+                  menuBody.footerText = params.footerText;
+                }
+                if (menuType === "poll" && params.selectableCount) {
+                  menuBody.selectableCount = params.selectableCount;
+                }
+                // Add image to buttons via imageButton parameter (images work, videos don't)
+                if (isImageMedia && (menuType === "button" || menuType === "buttons")) {
+                  menuBody.imageButton = menuMediaUrl;
+                  console.log(`[wa-sender] Adding image to buttons: ${menuMediaUrl}`);
+                }
               }
             }
             
