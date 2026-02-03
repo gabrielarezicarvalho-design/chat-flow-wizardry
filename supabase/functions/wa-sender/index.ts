@@ -526,7 +526,6 @@ serve(async (req) => {
               }
             } else {
               consecutiveErrors = 0; // Reset on success
-              consecutiveErrors = 0; // Reset on success
             }
             
             results.push({ 
@@ -535,6 +534,24 @@ serve(async (req) => {
               result: menuResult,
               error: menuResult.error || (menuResponse.ok ? null : `HTTP ${menuResponse.status}`)
             });
+            
+            // Update campaign progress in real-time every 5 messages or on last message
+            if (campaignId && (i % 5 === 0 || i === menuNumbers.length - 1)) {
+              try {
+                const currentSent = results.filter(r => r.success).length;
+                const currentFailed = results.filter(r => !r.success).length;
+                await supabase
+                  .from("campaigns")
+                  .update({
+                    sent_count: currentSent,
+                    failed_count: currentFailed
+                  })
+                  .eq("id", campaignId);
+                console.log(`[wa-sender] Progress update: ${currentSent} sent, ${currentFailed} failed`);
+              } catch (updateErr) {
+                console.error(`[wa-sender] Failed to update progress:`, updateErr);
+              }
+            }
             
             // Delay logic
             if (i < menuNumbers.length - 1 && !disconnectionDetected && consecutiveErrors < MAX_CONSECUTIVE_ERRORS) {
