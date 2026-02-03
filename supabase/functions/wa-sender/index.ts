@@ -317,6 +317,9 @@ serve(async (req) => {
               text: menuText || "Selecione uma opção:"
             };
             
+            // Track if video was sent successfully (for video + buttons combo)
+            let videoSentSuccessfully = false;
+            
             if (menuType === "carousel") {
               // Use /send/carousel endpoint with carousel array format
               menuEndpoint = `${base_url}/send/carousel`;
@@ -365,8 +368,15 @@ serve(async (req) => {
                 const videoResult = await videoResponse.json();
                 console.log(`[wa-sender] Video sent to ${number}:`, JSON.stringify(videoResult));
                 
-                // Check for video send failure
-                if (!videoResponse.ok || videoResult.error) {
+                // Check if video was sent successfully
+                const videoSuccess = videoResponse.ok && !videoResult.error;
+                if (videoSuccess) {
+                  videoSentSuccessfully = true;
+                  console.log(`[wa-sender] Video delivered successfully to ${number}`);
+                }
+                
+                // Check for disconnection only
+                if (!videoSuccess) {
                   const videoErrorMsg = videoResult?.error || videoResult?.message || '';
                   const isVideoDisconnected = 
                     videoErrorMsg.toLowerCase().includes('disconnected') ||
@@ -388,6 +398,9 @@ serve(async (req) => {
                     });
                     break;
                   }
+                  
+                  // If video failed but not due to disconnection, still try buttons
+                  console.log(`[wa-sender] Video failed but trying to send buttons anyway`);
                 }
                 
                 // Small delay between video and buttons
@@ -440,9 +453,15 @@ serve(async (req) => {
             });
             
             const menuResult = await menuResponse.json();
-            const success = menuResponse.ok && !menuResult.error;
+            const menuSuccess = menuResponse.ok && !menuResult.error;
             
-            console.log(`[wa-sender] Response for ${number}:`, JSON.stringify(menuResult));
+            // Consider success if:
+            // 1. Menu/buttons sent successfully, OR
+            // 2. Video was sent successfully (even if buttons failed - user received the content)
+            const success = menuSuccess || videoSentSuccessfully;
+            
+            console.log(`[wa-sender] Response for ${number}: menuSuccess=${menuSuccess}, videoSentSuccessfully=${videoSentSuccessfully}, finalSuccess=${success}`);
+            console.log(`[wa-sender] Menu result:`, JSON.stringify(menuResult));
             
             // Check for WhatsApp disconnection error
             const errorMessage = menuResult?.error || menuResult?.message || '';
@@ -451,6 +470,7 @@ serve(async (req) => {
               errorMessage.toLowerCase().includes('no session') ||
               errorMessage === 'WhatsApp disconnected';
             
+            // Only count as disconnection if video also wasn't sent
             if (!success && isDisconnected) {
               console.log(`[wa-sender] WhatsApp disconnection detected at index ${i}`);
               disconnectionDetected = true;
@@ -505,6 +525,7 @@ serve(async (req) => {
                 break;
               }
             } else {
+              consecutiveErrors = 0; // Reset on success
               consecutiveErrors = 0; // Reset on success
             }
             
