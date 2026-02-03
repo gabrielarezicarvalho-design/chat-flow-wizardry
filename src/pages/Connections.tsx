@@ -1943,7 +1943,7 @@ const Connections = () => {
             <DialogHeader>
               <DialogTitle>Conectar WhatsApp</DialogTitle>
               <DialogDescription>
-                Preencha os dados para gerar o QR Code
+                Preencha os dados e escolha como deseja conectar
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateAndConnect} className="space-y-4">
@@ -1972,12 +1972,54 @@ const Connections = () => {
                 </p>
               </div>
 
+              <div>
+                <Label className="mb-3 block">Método de Conexão</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div 
+                    onClick={() => setConnectMethod('qrcode')}
+                    className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                      connectMethod === 'qrcode' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-2 text-center">
+                      <QrCode className={`w-8 h-8 ${connectMethod === 'qrcode' ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <span className={`text-sm font-medium ${connectMethod === 'qrcode' ? 'text-primary' : ''}`}>
+                        QR Code
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Escaneie com a câmera
+                      </span>
+                    </div>
+                  </div>
+                  <div 
+                    onClick={() => setConnectMethod('paircode')}
+                    className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                      connectMethod === 'paircode' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-2 text-center">
+                      <Smartphone className={`w-8 h-8 ${connectMethod === 'paircode' ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <span className={`text-sm font-medium ${connectMethod === 'paircode' ? 'text-primary' : ''}`}>
+                        Código
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Digite um código
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
                   Cancelar
                 </Button>
                 <Button type="submit" className="flex-1">
-                  Gerar QR Code
+                  {connectMethod === 'qrcode' ? 'Gerar QR Code' : 'Gerar Código'}
                 </Button>
               </div>
             </form>
