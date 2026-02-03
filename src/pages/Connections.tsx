@@ -417,6 +417,12 @@ const Connections = () => {
       return;
     }
 
+    // Phone is required for pairing code method
+    if (connectMethod === 'paircode' && !formData.phone) {
+      toast.error("Digite o número de telefone para usar o código de pareamento");
+      return;
+    }
+
     setLoadingQr(true);
     setDialogOpen(false);
     setQrDialogOpen(true);
@@ -1960,15 +1966,22 @@ const Connections = () => {
               </div>
 
               <div>
-                <Label htmlFor="phone">Telefone (Opcional)</Label>
+                <Label htmlFor="phone">
+                  Telefone {connectMethod === 'paircode' && <span className="text-destructive">*</span>}
+                </Label>
                 <Input
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="Ex: 5511999999999"
+                  required={connectMethod === 'paircode'}
+                  className={connectMethod === 'paircode' && !formData.phone ? 'border-destructive/50' : ''}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Deixe em branco se não quiser vincular a um número específico
+                  {connectMethod === 'paircode' 
+                    ? 'Obrigatório para conexão via código de pareamento'
+                    : 'Opcional - deixe em branco se não quiser vincular a um número específico'
+                  }
                 </p>
               </div>
 
