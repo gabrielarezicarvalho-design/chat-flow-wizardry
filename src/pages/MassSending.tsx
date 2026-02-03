@@ -200,6 +200,44 @@ function MassSendingContent() {
     loadData();
   }, []);
 
+  // Real-time subscription for campaign progress updates
+  useEffect(() => {
+    const setupRealtimeSubscription = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+
+      const channel = supabase
+        .channel('campaign-progress')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'campaigns',
+            filter: `user_id=eq.${userData.user.id}`,
+          },
+          (payload) => {
+            // Update campaign in state with new data
+            setCampaigns(prev => prev.map(c => 
+              c.id === payload.new.id 
+                ? { ...c, ...payload.new, started_at: null } 
+                : c
+            ));
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    };
+
+    const cleanup = setupRealtimeSubscription();
+    return () => {
+      cleanup.then(fn => fn && fn());
+    };
+  }, []);
+
   useEffect(() => {
     // Auto-scroll debug console
     if (debugRef.current) {
@@ -2202,6 +2240,38 @@ function MassSendingContent() {
                           </span>
                         )}
                       </div>
+                      
+                      {/* Real-time progress bar for sending campaigns */}
+                      {c.status === "sending" && (
+                        <div className="mt-2 max-w-md">
+                          <div className="flex items-center gap-2 text-xs mb-1">
+                            <span className="text-blue-600 font-medium animate-pulse">
+                              Enviando... {c.sent_count || 0}/{c.total_contacts}
+                            </span>
+                            {(c.failed_count || 0) > 0 && (
+                              <>
+                                <span className="text-muted-foreground">•</span>
+                                <span className="text-red-600 font-medium">
+                                  {c.failed_count} falhas
+                                </span>
+                              </>
+                            )}
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden relative">
+                            <div 
+                              className="h-full bg-blue-500 transition-all duration-500"
+                              style={{ width: `${c.total_contacts > 0 ? (((c.sent_count || 0) + (c.failed_count || 0)) / c.total_contacts) * 100 : 0}%` }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {c.total_contacts > 0 
+                              ? Math.round((((c.sent_count || 0) + (c.failed_count || 0)) / c.total_contacts) * 100)
+                              : 0
+                            }% concluído
+                          </p>
+                        </div>
+                      )}
                       
                       {/* Progress bar for completed/failed campaigns */}
                       {(c.status === "completed" || c.status === "failed") && (

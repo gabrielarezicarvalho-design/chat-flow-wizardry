@@ -1,25 +1,24 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Clock, TrendingUp, Calendar, Zap, CheckCircle2, BarChart3 } from "lucide-react";
+import { Clock, TrendingUp, Calendar, Zap, CheckCircle2, BarChart3, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TimeSlot {
   hour: number;
   day: string;
   score: number;
-  openRate: number;
-  clickRate: number;
+  successRate: number;
+  totalSent: number;
   campaigns: number;
 }
 
 interface DayPerformance {
   day: string;
   dayName: string;
-  avgOpenRate: number;
-  avgClickRate: number;
+  avgSuccessRate: number;
+  totalSent: number;
   totalCampaigns: number;
 }
 
@@ -28,6 +27,8 @@ export const OptimalTimeSuggestions = () => {
   const [dayPerformance, setDayPerformance] = useState<DayPerformance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [totalCampaignsAnalyzed, setTotalCampaignsAnalyzed] = useState(0);
+  const [hasRealData, setHasRealData] = useState(false);
 
   useEffect(() => {
     analyzeHistoricalData();
@@ -37,104 +38,111 @@ export const OptimalTimeSuggestions = () => {
     setIsLoading(true);
     
     try {
+      // Fetch completed campaigns for analysis
       const { data: campaigns } = await supabase
         .from('campaigns')
         .select('*')
-        .eq('status', 'sent')
+        .in('status', ['completed', 'sent', 'failed'])
         .order('created_at', { ascending: false })
-        .limit(100);
+        .limit(200);
 
       if (campaigns && campaigns.length > 0) {
-        // Analyze time patterns
+        setHasRealData(true);
+        setTotalCampaignsAnalyzed(campaigns.length);
+        
+        // Analyze time patterns from real data
         const timeAnalysis = analyzeTimePatterns(campaigns);
         setBestTimeSlots(timeAnalysis.bestSlots);
         setDayPerformance(timeAnalysis.dayPerformance);
       } else {
-        // Generate sample data for demonstration
-        generateSampleData();
+        setHasRealData(false);
+        setTotalCampaignsAnalyzed(0);
+        // Show empty state instead of sample data
+        setBestTimeSlots([]);
+        setDayPerformance([]);
       }
     } catch (error) {
       console.error('Error analyzing historical data:', error);
-      generateSampleData();
+      setHasRealData(false);
+      setBestTimeSlots([]);
+      setDayPerformance([]);
     }
     
     setIsLoading(false);
   };
 
   const analyzeTimePatterns = (campaigns: any[]) => {
-    const hourStats: Record<number, { opens: number; clicks: number; count: number }> = {};
-    const dayStats: Record<string, { opens: number; clicks: number; count: number }> = {};
+    const hourStats: Record<number, { sent: number; total: number; count: number }> = {};
+    const dayStats: Record<string, { sent: number; total: number; count: number }> = {};
+    const dayNames: Record<string, string> = {
+      '0': 'dom',
+      '1': 'seg',
+      '2': 'ter',
+      '3': 'qua',
+      '4': 'qui',
+      '5': 'sex',
+      '6': 'sáb'
+    };
     
     campaigns.forEach(campaign => {
       const date = new Date(campaign.scheduled_at || campaign.created_at);
       const hour = date.getHours();
-      const day = date.toLocaleDateString('pt-BR', { weekday: 'short' });
+      const dayNum = date.getDay().toString();
+      const day = dayNames[dayNum];
       
-      const sentCount = campaign.sent_count || 1;
-      const openRate = Math.random() * 40 + 20; // Simulated
-      const clickRate = Math.random() * 15 + 5; // Simulated
+      const sentCount = campaign.sent_count || 0;
+      const totalCount = campaign.total_contacts || 1;
       
       if (!hourStats[hour]) {
-        hourStats[hour] = { opens: 0, clicks: 0, count: 0 };
+        hourStats[hour] = { sent: 0, total: 0, count: 0 };
       }
-      hourStats[hour].opens += openRate;
-      hourStats[hour].clicks += clickRate;
+      hourStats[hour].sent += sentCount;
+      hourStats[hour].total += totalCount;
       hourStats[hour].count++;
       
       if (!dayStats[day]) {
-        dayStats[day] = { opens: 0, clicks: 0, count: 0 };
+        dayStats[day] = { sent: 0, total: 0, count: 0 };
       }
-      dayStats[day].opens += openRate;
-      dayStats[day].clicks += clickRate;
+      dayStats[day].sent += sentCount;
+      dayStats[day].total += totalCount;
       dayStats[day].count++;
     });
 
+    // Calculate best time slots based on actual success rate
     const bestSlots: TimeSlot[] = Object.entries(hourStats)
-      .map(([hour, stats]) => ({
-        hour: parseInt(hour),
-        day: 'Todos',
-        score: (stats.opens / stats.count + stats.clicks / stats.count * 2) / 3,
-        openRate: stats.opens / stats.count,
-        clickRate: stats.clicks / stats.count,
-        campaigns: stats.count
-      }))
+      .map(([hour, stats]) => {
+        const successRate = stats.total > 0 ? (stats.sent / stats.total) * 100 : 0;
+        return {
+          hour: parseInt(hour),
+          day: 'Todos',
+          score: successRate,
+          successRate: successRate,
+          totalSent: stats.sent,
+          campaigns: stats.count
+        };
+      })
+      .filter(slot => slot.campaigns >= 1)
       .sort((a, b) => b.score - a.score)
       .slice(0, 5);
 
-    const dayPerformance: DayPerformance[] = Object.entries(dayStats)
-      .map(([day, stats]) => ({
-        day,
-        dayName: getDayFullName(day),
-        avgOpenRate: stats.opens / stats.count,
-        avgClickRate: stats.clicks / stats.count,
-        totalCampaigns: stats.count
-      }))
-      .sort((a, b) => b.avgOpenRate - a.avgOpenRate);
+    // Calculate day performance from real data
+    const dayOrder = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
+    const dayPerformance: DayPerformance[] = dayOrder
+      .filter(day => dayStats[day])
+      .map(day => {
+        const stats = dayStats[day];
+        const successRate = stats.total > 0 ? (stats.sent / stats.total) * 100 : 0;
+        return {
+          day,
+          dayName: getDayFullName(day),
+          avgSuccessRate: successRate,
+          totalSent: stats.sent,
+          totalCampaigns: stats.count
+        };
+      })
+      .sort((a, b) => b.avgSuccessRate - a.avgSuccessRate);
 
     return { bestSlots, dayPerformance };
-  };
-
-  const generateSampleData = () => {
-    const sampleSlots: TimeSlot[] = [
-      { hour: 10, day: 'Terça', score: 92, openRate: 45.2, clickRate: 12.8, campaigns: 28 },
-      { hour: 14, day: 'Quarta', score: 88, openRate: 42.1, clickRate: 11.5, campaigns: 24 },
-      { hour: 9, day: 'Segunda', score: 85, openRate: 40.5, clickRate: 10.2, campaigns: 31 },
-      { hour: 16, day: 'Quinta', score: 82, openRate: 38.9, clickRate: 9.8, campaigns: 19 },
-      { hour: 11, day: 'Sexta', score: 78, openRate: 36.2, clickRate: 8.5, campaigns: 22 },
-    ];
-
-    const sampleDays: DayPerformance[] = [
-      { day: 'ter', dayName: 'Terça-feira', avgOpenRate: 44.5, avgClickRate: 12.3, totalCampaigns: 45 },
-      { day: 'qua', dayName: 'Quarta-feira', avgOpenRate: 42.8, avgClickRate: 11.8, totalCampaigns: 38 },
-      { day: 'seg', dayName: 'Segunda-feira', avgOpenRate: 40.2, avgClickRate: 10.5, totalCampaigns: 52 },
-      { day: 'qui', dayName: 'Quinta-feira', avgOpenRate: 38.9, avgClickRate: 9.9, totalCampaigns: 33 },
-      { day: 'sex', dayName: 'Sexta-feira', avgOpenRate: 35.6, avgClickRate: 8.7, totalCampaigns: 41 },
-      { day: 'sáb', dayName: 'Sábado', avgOpenRate: 28.4, avgClickRate: 6.2, totalCampaigns: 15 },
-      { day: 'dom', dayName: 'Domingo', avgOpenRate: 22.1, avgClickRate: 4.8, totalCampaigns: 8 },
-    ];
-
-    setBestTimeSlots(sampleSlots);
-    setDayPerformance(sampleDays);
   };
 
   const getDayFullName = (day: string): string => {
@@ -152,12 +160,6 @@ export const OptimalTimeSuggestions = () => {
 
   const formatHour = (hour: number): string => {
     return `${hour.toString().padStart(2, '0')}:00`;
-  };
-
-  const getScoreColor = (score: number): string => {
-    if (score >= 85) return 'text-green-500';
-    if (score >= 70) return 'text-yellow-500';
-    return 'text-orange-500';
   };
 
   const getScoreBadge = (score: number): string => {
@@ -185,6 +187,26 @@ export const OptimalTimeSuggestions = () => {
     );
   }
 
+  // Empty state when no data
+  if (!hasRealData) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <AlertTriangle className="h-12 w-12 mx-auto text-yellow-500 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Sem dados suficientes</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Envie algumas campanhas para que possamos analisar os melhores horários 
+                de envio com base no seu histórico real de entregas.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Best Time Slots */}
@@ -195,7 +217,7 @@ export const OptimalTimeSuggestions = () => {
             Melhores Horários para Envio
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Baseado na análise de {bestTimeSlots.reduce((acc, slot) => acc + slot.campaigns, 0)} campanhas anteriores
+            Baseado na análise de {totalCampaignsAnalyzed} campanhas anteriores
           </p>
         </CardHeader>
         <CardContent>
@@ -225,15 +247,15 @@ export const OptimalTimeSuggestions = () => {
                         <Badge variant="outline">{slot.day}</Badge>
                       </div>
                       <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                        <span>📬 Abertura: {slot.openRate.toFixed(1)}%</span>
-                        <span>👆 Cliques: {slot.clickRate.toFixed(1)}%</span>
+                        <span>✅ Taxa de sucesso: {slot.successRate.toFixed(1)}%</span>
+                        <span>📤 {slot.totalSent} enviados</span>
                         <span>📊 {slot.campaigns} campanhas</span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge className={getScoreBadge(slot.score)}>
-                      Score: {slot.score.toFixed(0)}
+                      {slot.score.toFixed(0)}%
                     </Badge>
                     {selectedSlot === slot && (
                       <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -242,17 +264,10 @@ export const OptimalTimeSuggestions = () => {
                 </div>
                 {selectedSlot === slot && (
                   <div className="mt-4 pt-4 border-t">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Taxa de Abertura</p>
-                        <Progress value={slot.openRate} className="h-2" />
-                        <p className="text-sm font-medium mt-1">{slot.openRate.toFixed(1)}%</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Taxa de Cliques</p>
-                        <Progress value={slot.clickRate * 3} className="h-2" />
-                        <p className="text-sm font-medium mt-1">{slot.clickRate.toFixed(1)}%</p>
-                      </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Taxa de Entrega</p>
+                      <Progress value={slot.successRate} className="h-2" />
+                      <p className="text-sm font-medium mt-1">{slot.successRate.toFixed(1)}%</p>
                     </div>
                   </div>
                 )}
@@ -271,24 +286,30 @@ export const OptimalTimeSuggestions = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {dayPerformance.map((day, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <div className="w-32 font-medium">{day.dayName}</div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Progress value={day.avgOpenRate} className="flex-1 h-3" />
-                    <span className="text-sm font-medium w-16 text-right">
-                      {day.avgOpenRate.toFixed(1)}%
-                    </span>
+          {dayPerformance.length > 0 ? (
+            <div className="space-y-4">
+              {dayPerformance.map((day, index) => (
+                <div key={index} className="flex items-center gap-4">
+                  <div className="w-32 font-medium">{day.dayName}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Progress value={day.avgSuccessRate} className="flex-1 h-3" />
+                      <span className="text-sm font-medium w-16 text-right">
+                        {day.avgSuccessRate.toFixed(1)}%
+                      </span>
+                    </div>
                   </div>
+                  <Badge variant="outline" className="text-xs">
+                    {day.totalCampaigns} camp.
+                  </Badge>
                 </div>
-                <Badge variant="outline" className="text-xs">
-                  {day.totalCampaigns} camp.
-                </Badge>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-center py-4">
+              Nenhum dado disponível
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -297,14 +318,14 @@ export const OptimalTimeSuggestions = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
-            Mapa de Calor - Engajamento por Hora
+            Mapa de Calor - Sucesso por Hora
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-12 gap-1">
             {Array.from({ length: 24 }, (_, hour) => {
               const slot = bestTimeSlots.find(s => s.hour === hour);
-              const intensity = slot ? slot.score / 100 : Math.random() * 0.4 + 0.1;
+              const intensity = slot ? slot.score / 100 : 0.1;
               return (
                 <div
                   key={hour}
@@ -313,7 +334,7 @@ export const OptimalTimeSuggestions = () => {
                     backgroundColor: `hsl(var(--primary) / ${intensity})`,
                     color: intensity > 0.5 ? 'white' : 'inherit'
                   }}
-                  title={`${formatHour(hour)} - Score: ${(intensity * 100).toFixed(0)}`}
+                  title={slot ? `${formatHour(hour)} - Taxa: ${slot.score.toFixed(0)}%` : `${formatHour(hour)} - Sem dados`}
                 >
                   {hour}
                 </div>
@@ -322,8 +343,8 @@ export const OptimalTimeSuggestions = () => {
           </div>
           <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-primary/20" />
-              <span>Baixo</span>
+              <div className="w-4 h-4 rounded bg-primary/10" />
+              <span>Sem dados</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-primary/50" />
@@ -338,46 +359,38 @@ export const OptimalTimeSuggestions = () => {
       </Card>
 
       {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Recomendações Inteligentes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="p-4 rounded-lg border bg-green-500/5 border-green-500/20">
-              <h4 className="font-semibold text-green-600 mb-2">✅ Melhor Momento</h4>
-              <p className="text-sm text-muted-foreground">
-                {bestTimeSlots[0] && (
-                  <>
-                    Agende suas campanhas para <strong>{formatHour(bestTimeSlots[0].hour)}</strong> às <strong>{bestTimeSlots[0].day}</strong> para maximizar o engajamento.
-                  </>
-                )}
-              </p>
+      {bestTimeSlots.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Recomendações Baseadas em Dados Reais
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="p-4 rounded-lg border bg-green-500/5 border-green-500/20">
+                <h4 className="font-semibold text-green-600 mb-2">✅ Melhor Momento</h4>
+                <p className="text-sm text-muted-foreground">
+                  {bestTimeSlots[0] && (
+                    <>
+                      Agende suas campanhas para <strong>{formatHour(bestTimeSlots[0].hour)}</strong> para maximizar as entregas. 
+                      Taxa de sucesso média: <strong>{bestTimeSlots[0].successRate.toFixed(1)}%</strong>
+                    </>
+                  )}
+                </p>
+              </div>
+              <div className="p-4 rounded-lg border bg-blue-500/5 border-blue-500/20">
+                <h4 className="font-semibold text-blue-600 mb-2">📊 Análise</h4>
+                <p className="text-sm text-muted-foreground">
+                  Analisamos {totalCampaignsAnalyzed} campanhas para gerar estas recomendações. 
+                  Quanto mais campanhas você enviar, mais precisas serão as sugestões.
+                </p>
+              </div>
             </div>
-            <div className="p-4 rounded-lg border bg-yellow-500/5 border-yellow-500/20">
-              <h4 className="font-semibold text-yellow-600 mb-2">⚠️ Evitar</h4>
-              <p className="text-sm text-muted-foreground">
-                Evite envios nos finais de semana, especialmente domingo, quando as taxas de abertura são até 50% menores.
-              </p>
-            </div>
-            <div className="p-4 rounded-lg border bg-blue-500/5 border-blue-500/20">
-              <h4 className="font-semibold text-blue-600 mb-2">💡 Dica</h4>
-              <p className="text-sm text-muted-foreground">
-                Horários comerciais (9h-17h) tendem a ter melhor desempenho para campanhas B2B, enquanto 19h-21h funciona melhor para B2C.
-              </p>
-            </div>
-            <div className="p-4 rounded-lg border bg-purple-500/5 border-purple-500/20">
-              <h4 className="font-semibold text-purple-600 mb-2">📈 Tendência</h4>
-              <p className="text-sm text-muted-foreground">
-                Suas campanhas têm melhor performance no meio da semana. Considere concentrar os envios de terça a quinta.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
