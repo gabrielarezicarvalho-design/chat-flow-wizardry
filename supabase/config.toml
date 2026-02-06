@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.wa-labels]
 verify_jwt = false
+
+[functions.wa-contacts]
+verify_jwt = false
