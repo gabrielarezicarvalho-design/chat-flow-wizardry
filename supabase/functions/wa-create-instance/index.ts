@@ -106,13 +106,16 @@ serve(async (req) => {
 
     if (!connectResponse.ok) {
       console.error("❌ Connect error:", connectData);
+      // Return success with instance data but no QR code - let frontend handle retry
       return new Response(JSON.stringify({
-        error: "Failed to generate QR code",
+        success: true,
         instance_id: instanceId,
         token: token,
-        base_url: BASE_URL
+        base_url: BASE_URL,
+        qrcode: null,
+        paircode: null,
+        connect_error: connectData?.error || "Failed to generate QR code"
       }), {
-        status: connectResponse.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
