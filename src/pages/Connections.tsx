@@ -497,7 +497,7 @@ const Connections = () => {
         name: formData.name,
         platform: 'whatsapp',
         environment: formData.environment,
-        status: 'connecting',
+        status: data.qrcode ? 'connecting' : 'disconnected',
         instance_id: data.instance_id,
         token: data.token,
         base_url: data.base_url
@@ -510,7 +510,15 @@ const Connections = () => {
         setPairCode(data.paircode || null);
         toast.success("QR Code gerado! Escaneie ou use o código para conectar.");
       } else {
-        throw new Error('QR code não retornado');
+        // Instance created but QR failed (e.g. max connections reached)
+        toast.warning(
+          data.connect_error || "Instância criada, mas não foi possível gerar o QR Code. Use o botão de reconectar.",
+          { duration: 8000 }
+        );
+        setQrDialogOpen(false);
+        setLoadingQr(false);
+        resetForm();
+        return;
       }
 
       if (tempConnection && data.token) {
