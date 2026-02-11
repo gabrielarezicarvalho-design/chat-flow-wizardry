@@ -895,9 +895,69 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
 
+      case "check_folder": {
+        // Check folder status from UAZAPI sender queue
+        const folderId = params.folderId;
+        if (!folderId) {
+          return new Response(JSON.stringify({ success: false, error: "Missing folderId" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+        
+        const folderUrl = `${base_url}/sender/folder/${folderId}`;
+        console.log(`[wa-sender] Checking folder status: ${folderUrl}`);
+        
+        const folderResponse = await fetch(folderUrl, {
+          method: "GET",
+          headers: { "Accept": "application/json", "token": token }
+        });
+        
+        const folderText = await folderResponse.text();
+        console.log(`[wa-sender] Folder response: ${folderText}`);
+        
+        let folderResult;
+        try { folderResult = JSON.parse(folderText); } catch { folderResult = { raw: folderText }; }
+        
+        // Calculate sent/failed/pending from folder data
+        let sent = 0, failed = 0, pending = 0, total = 0;
+        if (Array.isArray(folderResult)) {
+          total = folderResult.length;
+          for (const msg of folderResult) {
+            const s = msg.status || msg.state || "";
+            if (s === "sent" || s === "delivered" || s === "read") sent++;
+            else if (s === "failed" || s === "error") failed++;
+            else pending++;
+          }
+        } else if (folderResult?.messages && Array.isArray(folderResult.messages)) {
+          total = folderResult.messages.length;
+          for (const msg of folderResult.messages) {
+            const s = msg.status || msg.state || "";
+            if (s === "sent" || s === "delivered" || s === "read") sent++;
+            else if (s === "failed" || s === "error") failed++;
+            else pending++;
+          }
+        } else if (folderResult?.status) {
+          // Simple status response
+          return new Response(JSON.stringify({
+            success: true,
+            data: folderResult,
+            progress: { sent: folderResult.sent || 0, failed: folderResult.failed || 0, pending: folderResult.pending || 0, total: folderResult.total || 0, completed: folderResult.status === "completed" || folderResult.status === "done" }
+          }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+        
+        const completed = pending === 0 && total > 0;
+        
+        return new Response(JSON.stringify({
+          success: true,
+          data: folderResult,
+          progress: { sent, failed, pending, total, completed }
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
       default:
         return new Response(JSON.stringify({ 
-          error: "Invalid action. Use: direct, simple, menu, advanced, control, list, campaign_with_progress" 
+          error: "Invalid action. Use: direct, simple, menu, advanced, control, list, campaign_with_progress, check_folder" 
         }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" }

@@ -257,6 +257,7 @@ export type Database = {
           completed_at: string | null
           created_at: string
           failed_count: number | null
+          folder_id: string | null
           id: string
           media_url: string | null
           message_content: string | null
@@ -274,6 +275,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           failed_count?: number | null
+          folder_id?: string | null
           id?: string
           media_url?: string | null
           message_content?: string | null
@@ -291,6 +293,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           failed_count?: number | null
+          folder_id?: string | null
           id?: string
           media_url?: string | null
           message_content?: string | null
