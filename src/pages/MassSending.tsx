@@ -238,6 +238,48 @@ function MassSendingContent() {
     };
   }, []);
 
+  // Poll UAZAPI folder status for queued campaigns
+  useEffect(() => {
+    const queuedCampaigns = campaigns.filter(c => c.status === "queued" && (c as any).folder_id);
+    if (queuedCampaigns.length === 0) return;
+
+    const checkFolderStatus = async () => {
+      for (const campaign of queuedCampaigns) {
+        const folderId = (campaign as any).folder_id;
+        if (!folderId) continue;
+        
+        // Find connection for this campaign
+        const conn = connections.find(c => c.status === "connected" || c.status === "active");
+        if (!conn) continue;
+
+        try {
+          const { data } = await supabase.functions.invoke("wa-sender", {
+            body: { action: "check_folder", connectionId: conn.id, folderId }
+          });
+
+          if (data?.progress) {
+            const { sent, failed, pending, total, completed } = data.progress;
+            const updates: any = { sent_count: sent, failed_count: failed };
+            
+            if (completed || (pending === 0 && total > 0)) {
+              updates.status = failed > 0 && sent === 0 ? "failed" : "completed";
+              updates.completed_at = new Date().toISOString();
+            }
+            
+            await supabase.from("campaigns").update(updates).eq("id", campaign.id);
+            setCampaigns(prev => prev.map(c => c.id === campaign.id ? { ...c, ...updates } : c));
+          }
+        } catch (err) {
+          console.error("Error checking folder status:", err);
+        }
+      }
+    };
+
+    checkFolderStatus();
+    const interval = setInterval(checkFolderStatus, 15000); // Poll every 15s
+    return () => clearInterval(interval);
+  }, [campaigns, connections]);
+
   useEffect(() => {
     // Auto-scroll debug console
     if (debugRef.current) {
@@ -821,12 +863,13 @@ function MassSendingContent() {
           addLog("info", `Campanha adicionada à fila: ${queuedCount} mensagens aguardando envio`);
           addLog("info", `Folder ID: ${folderId}`);
           
-          // Update campaign with queued status and folder_id for future tracking
+         // Update campaign with queued status and folder_id for future tracking
           await supabase.from("campaigns").update({
             status: "queued",
             sent_count: 0,
             failed_count: 0,
-            total_contacts: queuedCount
+            total_contacts: queuedCount,
+            folder_id: folderId
           }).eq("id", campaignId);
           
           toast.info(`Campanha na fila! ${queuedCount} mensagens aguardando envio. As mensagens serão enviadas gradualmente.`, {
