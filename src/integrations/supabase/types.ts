@@ -1052,6 +1052,68 @@ export type Database = {
         }
         Relationships: []
       }
+      white_label_partners: {
+        Row: {
+          accent_color: string | null
+          background_color: string | null
+          company_id: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          name: string
+          partner_password: string
+          primary_color: string | null
+          secondary_color: string | null
+          slug: string
+          supabase_anon_key: string | null
+          supabase_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          background_color?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name: string
+          partner_password: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug: string
+          supabase_anon_key?: string | null
+          supabase_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          background_color?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string
+          partner_password?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug?: string
+          supabase_anon_key?: string | null
+          supabase_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "white_label_partners_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
