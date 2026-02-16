@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  Building2, Plus, Trash2, Loader2, Palette, Settings, Pencil, Upload, X
+  Building2, Plus, Trash2, Loader2, Palette, Settings, Pencil, Upload, X, Eye, EyeOff, Key
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,49 +14,57 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
-interface CompanyForm {
+interface PartnerForm {
   name: string;
   slug: string;
   primary_color: string;
   secondary_color: string;
+  accent_color: string;
+  background_color: string;
   logo_url: string;
-  custom_domain: string;
-  plan: string;
-  max_users: number;
-  max_connections: number;
+  partner_password: string;
+  supabase_url: string;
+  supabase_anon_key: string;
   is_active: boolean;
+  company_id: string;
 }
 
-const defaultForm: CompanyForm = {
+const defaultForm: PartnerForm = {
   name: '', slug: '', primary_color: '#10b981', secondary_color: '#059669',
-  logo_url: '', custom_domain: '', plan: 'basic', max_users: 10, max_connections: 3, is_active: true,
+  accent_color: '#6366f1', background_color: '#0f172a',
+  logo_url: '', partner_password: '', supabase_url: '', supabase_anon_key: '',
+  is_active: true, company_id: '',
 };
 
 const AdminWhiteLabel = () => {
+  const [partners, setPartners] = useState<any[]>([]);
   const [companies, setCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<CompanyForm>({ ...defaultForm });
+  const [form, setForm] = useState<PartnerForm>({ ...defaultForm });
   const [uploading, setUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { fetchCompanies(); }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const fetchCompanies = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('companies')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      setCompanies(data || []);
+      const [partnersRes, companiesRes] = await Promise.all([
+        supabase.from('white_label_partners' as any).select('*').order('created_at', { ascending: false }),
+        supabase.from('companies').select('id, name').order('name'),
+      ]);
+      setPartners((partnersRes.data as any[]) || []);
+      setCompanies(companiesRes.data || []);
     } catch (error: any) {
-      console.error('Erro ao buscar empresas:', error);
+      console.error('Erro:', error);
     } finally {
       setLoading(false);
     }
@@ -66,59 +74,49 @@ const AdminWhiteLabel = () => {
     setEditingId(null);
     setForm({ ...defaultForm });
     setLogoPreview(null);
+    setShowPassword(false);
     setDialogOpen(true);
   };
 
-  const openEdit = (company: any) => {
-    setEditingId(company.id);
+  const openEdit = (partner: any) => {
+    setEditingId(partner.id);
     setForm({
-      name: company.name || '',
-      slug: company.slug || '',
-      primary_color: company.primary_color || '#10b981',
-      secondary_color: company.secondary_color || '#059669',
-      logo_url: company.logo_url || '',
-      custom_domain: company.custom_domain || '',
-      plan: company.plan || 'basic',
-      max_users: company.max_users ?? 10,
-      max_connections: company.max_connections ?? 3,
-      is_active: company.is_active ?? true,
+      name: partner.name || '',
+      slug: partner.slug || '',
+      primary_color: partner.primary_color || '#10b981',
+      secondary_color: partner.secondary_color || '#059669',
+      accent_color: partner.accent_color || '#6366f1',
+      background_color: partner.background_color || '#0f172a',
+      logo_url: partner.logo_url || '',
+      partner_password: partner.partner_password || '',
+      supabase_url: partner.supabase_url || '',
+      supabase_anon_key: partner.supabase_anon_key || '',
+      is_active: partner.is_active ?? true,
+      company_id: partner.company_id || '',
     });
-    setLogoPreview(company.logo_url || null);
+    setLogoPreview(partner.logo_url || null);
+    setShowPassword(false);
     setDialogOpen(true);
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast.error('Selecione um arquivo de imagem');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Imagem deve ter no máximo 5MB');
-      return;
-    }
+    if (!file.type.startsWith('image/')) { toast.error('Selecione uma imagem'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error('Máximo 5MB'); return; }
 
     setUploading(true);
     try {
       const ext = file.name.split('.').pop();
       const fileName = `logo-${Date.now()}.${ext}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('company-logos')
-        .upload(fileName, file, { upsert: true });
-
+      const { error: uploadError } = await supabase.storage.from('company-logos').upload(fileName, file, { upsert: true });
       if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('company-logos')
-        .getPublicUrl(fileName);
-
+      const { data: urlData } = supabase.storage.from('company-logos').getPublicUrl(fileName);
       setForm(f => ({ ...f, logo_url: urlData.publicUrl }));
       setLogoPreview(urlData.publicUrl);
-      toast.success('Logo enviado com sucesso');
+      toast.success('Logo enviado');
     } catch (err: any) {
-      toast.error('Erro ao enviar logo: ' + err.message);
+      toast.error('Erro: ' + err.message);
     } finally {
       setUploading(false);
     }
@@ -131,33 +129,43 @@ const AdminWhiteLabel = () => {
 
   const handleSave = async () => {
     if (!form.name.trim()) { toast.error('Nome é obrigatório'); return; }
+    if (!form.slug.trim()) { toast.error('Slug é obrigatório'); return; }
+    if (!editingId && !form.partner_password.trim()) { toast.error('Senha é obrigatória'); return; }
+    
     setSaving(true);
     try {
-      const payload = {
+      const payload: any = {
         name: form.name,
-        slug: form.slug || form.name.toLowerCase().replace(/\s+/g, '-'),
+        slug: form.slug.toLowerCase().replace(/\s+/g, '-'),
         primary_color: form.primary_color,
         secondary_color: form.secondary_color,
+        accent_color: form.accent_color,
+        background_color: form.background_color,
         logo_url: form.logo_url || null,
-        custom_domain: form.custom_domain || null,
-        plan: form.plan,
-        max_users: form.max_users,
-        max_connections: form.max_connections,
+        supabase_url: form.supabase_url || null,
+        supabase_anon_key: form.supabase_anon_key || null,
         is_active: form.is_active,
+        company_id: form.company_id || null,
       };
 
+      // Only include password if provided (for edit, empty means keep current)
+      if (form.partner_password.trim()) {
+        payload.partner_password = form.partner_password;
+      }
+
       if (editingId) {
-        const { error } = await supabase.from('companies').update(payload).eq('id', editingId);
+        const { error } = await (supabase.from('white_label_partners' as any).update(payload).eq('id', editingId) as any);
         if (error) throw error;
-        toast.success('Empresa atualizada com sucesso');
+        toast.success('Parceiro atualizado');
       } else {
-        const { error } = await supabase.from('companies').insert(payload);
+        payload.partner_password = form.partner_password;
+        const { error } = await (supabase.from('white_label_partners' as any).insert(payload) as any);
         if (error) throw error;
-        toast.success('Empresa criada com sucesso');
+        toast.success('Parceiro criado');
       }
 
       setDialogOpen(false);
-      fetchCompanies();
+      fetchData();
     } catch (err: any) {
       toast.error('Erro: ' + err.message);
     } finally {
@@ -166,15 +174,15 @@ const AdminWhiteLabel = () => {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Excluir a empresa "${name}"? Esta ação não pode ser desfeita.`)) return;
+    if (!confirm(`Excluir "${name}"? Esta ação não pode ser desfeita.`)) return;
     setDeleting(id);
     try {
-      const { error } = await supabase.from('companies').delete().eq('id', id);
+      const { error } = await (supabase.from('white_label_partners' as any).delete().eq('id', id) as any);
       if (error) throw error;
-      toast.success('Empresa excluída');
-      fetchCompanies();
+      toast.success('Parceiro excluído');
+      fetchData();
     } catch (err: any) {
-      toast.error('Erro ao excluir: ' + err.message);
+      toast.error('Erro: ' + err.message);
     } finally {
       setDeleting(null);
     }
@@ -185,10 +193,10 @@ const AdminWhiteLabel = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">White Label</h2>
-          <p className="text-muted-foreground">Personalizações por empresa</p>
+          <p className="text-muted-foreground">Parceiros e personalizações</p>
         </div>
         <Button onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" /> Nova Empresa
+          <Plus className="h-4 w-4 mr-2" /> Novo Parceiro
         </Button>
       </div>
 
@@ -196,7 +204,7 @@ const AdminWhiteLabel = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar Empresa' : 'Criar Empresa'}</DialogTitle>
+            <DialogTitle>{editingId ? 'Editar Parceiro' : 'Novo Parceiro White Label'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             {/* Logo Upload */}
@@ -206,18 +214,12 @@ const AdminWhiteLabel = () => {
                 {logoPreview ? (
                   <div className="relative">
                     <img src={logoPreview} alt="Logo" className="h-16 w-16 rounded-lg object-contain border bg-muted" />
-                    <button
-                      onClick={removeLogo}
-                      className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
-                    >
+                    <button onClick={removeLogo} className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
                       <X className="h-3 w-3" />
                     </button>
                   </div>
                 ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="h-16 w-16 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center cursor-pointer hover:border-primary transition-colors"
-                  >
+                  <div onClick={() => fileInputRef.current?.click()} className="h-16 w-16 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
                     {uploading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : <Upload className="h-5 w-5 text-muted-foreground" />}
                   </div>
                 )}
@@ -237,10 +239,47 @@ const AdminWhiteLabel = () => {
                 <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Empresa X" />
               </div>
               <div>
-                <Label>Slug</Label>
-                <Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} placeholder="empresa-x" />
+                <Label>Slug (login) *</Label>
+                <Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))} placeholder="empresa-x" />
               </div>
             </div>
+
+            {/* Password */}
+            <div>
+              <Label className="flex items-center gap-1.5">
+                <Key className="h-3.5 w-3.5" />
+                Senha de Acesso {!editingId && '*'}
+              </Label>
+              <div className="relative mt-1">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={form.partner_password}
+                  onChange={e => setForm(f => ({ ...f, partner_password: e.target.value }))}
+                  placeholder={editingId ? 'Deixe vazio para manter a atual' : 'Senha do parceiro'}
+                />
+                <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Usada para login em /entrar-white-label</p>
+            </div>
+
+            {/* Company link */}
+            <div>
+              <Label>Empresa vinculada</Label>
+              <select
+                value={form.company_id}
+                onChange={e => setForm(f => ({ ...f, company_id: e.target.value }))}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="">Nenhuma</option>
+                {companies.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Colors */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Cor Primária</Label>
@@ -257,27 +296,26 @@ const AdminWhiteLabel = () => {
                 </div>
               </div>
             </div>
-            <div>
-              <Label>Domínio Customizado</Label>
-              <Input value={form.custom_domain} onChange={e => setForm(f => ({ ...f, custom_domain: e.target.value }))} placeholder="app.empresa.com" />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Plano</Label>
-                <Input value={form.plan} onChange={e => setForm(f => ({ ...f, plan: e.target.value }))} />
+                <Label>Cor de Destaque</Label>
+                <div className="flex gap-2">
+                  <input type="color" value={form.accent_color} onChange={e => setForm(f => ({ ...f, accent_color: e.target.value }))} className="h-9 w-12 rounded border cursor-pointer" />
+                  <Input value={form.accent_color} onChange={e => setForm(f => ({ ...f, accent_color: e.target.value }))} />
+                </div>
               </div>
               <div>
-                <Label>Máx. Usuários</Label>
-                <Input type="number" value={form.max_users} onChange={e => setForm(f => ({ ...f, max_users: Number(e.target.value) }))} />
-              </div>
-              <div>
-                <Label>Máx. Conexões</Label>
-                <Input type="number" value={form.max_connections} onChange={e => setForm(f => ({ ...f, max_connections: Number(e.target.value) }))} />
+                <Label>Cor de Fundo</Label>
+                <div className="flex gap-2">
+                  <input type="color" value={form.background_color} onChange={e => setForm(f => ({ ...f, background_color: e.target.value }))} className="h-9 w-12 rounded border cursor-pointer" />
+                  <Input value={form.background_color} onChange={e => setForm(f => ({ ...f, background_color: e.target.value }))} />
+                </div>
               </div>
             </div>
+
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active} onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))} />
-              <Label>Ativa</Label>
+              <Label>Ativo</Label>
             </div>
           </div>
           <DialogFooter>
@@ -297,8 +335,8 @@ const AdminWhiteLabel = () => {
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-primary/10"><Building2 className="h-6 w-6 text-primary" /></div>
               <div>
-                <p className="text-2xl font-bold">{companies.length}</p>
-                <p className="text-sm text-muted-foreground">Total de Empresas</p>
+                <p className="text-2xl font-bold">{partners.length}</p>
+                <p className="text-sm text-muted-foreground">Total de Parceiros</p>
               </div>
             </div>
           </CardContent>
@@ -308,7 +346,7 @@ const AdminWhiteLabel = () => {
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-green-500/10"><Palette className="h-6 w-6 text-green-500" /></div>
               <div>
-                <p className="text-2xl font-bold">{companies.filter(c => c.logo_url).length}</p>
+                <p className="text-2xl font-bold">{partners.filter((p: any) => p.logo_url).length}</p>
                 <p className="text-sm text-muted-foreground">Com Logo</p>
               </div>
             </div>
@@ -319,58 +357,59 @@ const AdminWhiteLabel = () => {
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-blue-500/10"><Settings className="h-6 w-6 text-blue-500" /></div>
               <div>
-                <p className="text-2xl font-bold">{companies.filter(c => c.custom_domain).length}</p>
-                <p className="text-sm text-muted-foreground">Com Domínio</p>
+                <p className="text-2xl font-bold">{partners.filter((p: any) => p.is_active).length}</p>
+                <p className="text-sm text-muted-foreground">Ativos</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Companies List */}
+      {/* Partners List */}
       <Card>
         <CardHeader>
-          <CardTitle>Empresas com Personalização</CardTitle>
+          <CardTitle>Parceiros White Label</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
-          ) : companies.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">Nenhuma empresa cadastrada</div>
+          ) : partners.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhum parceiro cadastrado. Crie o primeiro para habilitar o login em /entrar-white-label
+            </div>
           ) : (
             <div className="space-y-4">
-              {companies.map((company) => (
-                <div key={company.id} className="flex items-center justify-between p-4 rounded-lg border bg-card">
+              {partners.map((partner: any) => (
+                <div key={partner.id} className="flex items-center justify-between p-4 rounded-lg border bg-card">
                   <div className="flex items-center gap-4">
-                    {company.logo_url ? (
-                      <img src={company.logo_url} alt={company.name} className="h-10 w-10 rounded-lg object-contain" />
+                    {partner.logo_url ? (
+                      <img src={partner.logo_url} alt={partner.name} className="h-10 w-10 rounded-lg object-contain" />
                     ) : (
-                      <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${company.primary_color}20` }}>
-                        <Building2 className="h-5 w-5" style={{ color: company.primary_color }} />
+                      <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${partner.primary_color}20` }}>
+                        <Building2 className="h-5 w-5" style={{ color: partner.primary_color }} />
                       </div>
                     )}
                     <div>
-                      <p className="font-medium">{company.name}</p>
-                      <p className="text-xs text-muted-foreground">{company.slug || 'Sem identificador'}</p>
+                      <p className="font-medium">{partner.name}</p>
+                      <p className="text-xs text-muted-foreground">Login: {partner.slug}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 rounded-full border" style={{ backgroundColor: company.primary_color }} title="Cor primária" />
-                    <Badge variant={company.is_active ? "default" : "secondary"}>
-                      {company.is_active ? 'Ativo' : 'Inativo'}
+                    <div className="flex gap-1">
+                      {[partner.primary_color, partner.secondary_color, partner.accent_color].map((color, i) => (
+                        <div key={i} className="h-4 w-4 rounded-full border" style={{ backgroundColor: color }} />
+                      ))}
+                    </div>
+                    <Badge variant={partner.is_active ? "default" : "secondary"}>
+                      {partner.is_active ? 'Ativo' : 'Inativo'}
                     </Badge>
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(company)}>
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(partner)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost" size="icon"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(company.id, company.name)}
-                      disabled={deleting === company.id}
-                    >
-                      {deleting === company.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(partner.id, partner.name)} disabled={deleting === partner.id}>
+                      {deleting === partner.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                     </Button>
                   </div>
                 </div>
