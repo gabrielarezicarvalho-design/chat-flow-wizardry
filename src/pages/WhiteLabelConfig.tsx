@@ -580,29 +580,81 @@ const WhiteLabelConfig = () => {
                   </div>
 
                   {domainData.custom_domain && (
-                    <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 space-y-3">
-                      <p className="text-sm font-medium text-slate-300">Configuração DNS necessária:</p>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3 text-xs">
-                          <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
-                          <span className="text-slate-400">@ →</span>
-                          <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">185.158.133.1</code>
+                    <>
+                      <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 space-y-3">
+                        <p className="text-sm font-medium text-slate-300">Configuração DNS necessária:</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3 text-xs">
+                            <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
+                            <span className="text-slate-400">@ →</span>
+                            <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">185.158.133.1</code>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs">
+                            <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
+                            <span className="text-slate-400">www →</span>
+                            <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">185.158.133.1</code>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs">
+                            <Badge variant="outline" className="text-slate-400 border-slate-600">TXT</Badge>
+                            <span className="text-slate-400">_lovable →</span>
+                            <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">lovable_verify=...</code>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3 text-xs">
-                          <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
-                          <span className="text-slate-400">www →</span>
-                          <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">185.158.133.1</code>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs">
-                          <Badge variant="outline" className="text-slate-400 border-slate-600">TXT</Badge>
-                          <span className="text-slate-400">_lovable →</span>
-                          <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">lovable_verify=...</code>
-                        </div>
+                        <p className="text-xs text-slate-500 mt-2">
+                          Após configurar o DNS, a propagação pode levar até 72 horas. O SSL será provisionado automaticamente.
+                        </p>
                       </div>
-                      <p className="text-xs text-slate-500 mt-2">
-                        Após configurar o DNS, a propagação pode levar até 72 horas. O SSL será provisionado automaticamente.
-                      </p>
-                    </div>
+
+                      <div className="bg-slate-900 border border-slate-700 rounded-lg p-5 space-y-4">
+                        <p className="text-sm font-semibold text-white">📋 Passo a passo para configurar o acesso</p>
+                        <ol className="space-y-3 text-sm text-slate-300 list-none">
+                          <li className="flex gap-3">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">1</span>
+                            <div>
+                              <p className="font-medium text-white">Salve o domínio acima</p>
+                              <p className="text-xs text-slate-400">Clique em "Salvar Domínio" para registrar o domínio desejado no sistema.</p>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">2</span>
+                            <div>
+                              <p className="font-medium text-white">Acesse o painel do seu provedor de domínio</p>
+                              <p className="text-xs text-slate-400">Entre no site onde você registrou o domínio (ex: Registro.br, GoDaddy, Cloudflare, Hostinger).</p>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">3</span>
+                            <div>
+                              <p className="font-medium text-white">Configure os registros DNS</p>
+                              <p className="text-xs text-slate-400">
+                                Vá na seção de <strong>DNS</strong> ou <strong>Zona DNS</strong> e adicione os registros mostrados acima:
+                              </p>
+                              <ul className="mt-1 text-xs text-slate-500 space-y-1 ml-2">
+                                <li>• Registro <strong>A</strong> com nome <code className="bg-slate-800 px-1 rounded">@</code> apontando para <code className="bg-slate-800 px-1 rounded text-emerald-400">185.158.133.1</code></li>
+                                <li>• Registro <strong>A</strong> com nome <code className="bg-slate-800 px-1 rounded">www</code> apontando para <code className="bg-slate-800 px-1 rounded text-emerald-400">185.158.133.1</code></li>
+                                <li>• Registro <strong>TXT</strong> com nome <code className="bg-slate-800 px-1 rounded">_lovable</code> com o valor de verificação</li>
+                              </ul>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">4</span>
+                            <div>
+                              <p className="font-medium text-white">Aguarde a propagação do DNS</p>
+                              <p className="text-xs text-slate-400">A propagação pode levar de alguns minutos até 72 horas. Você pode verificar em <a href="https://dnschecker.org" target="_blank" rel="noopener noreferrer" className="text-primary underline">dnschecker.org</a>.</p>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">5</span>
+                            <div>
+                              <p className="font-medium text-white">Acesse pelo domínio configurado</p>
+                              <p className="text-xs text-slate-400">
+                                Após a propagação, seus clientes poderão acessar o sistema diretamente pelo domínio <strong className="text-emerald-400">{domainData.custom_domain}</strong>. O certificado SSL (https) será provisionado automaticamente.
+                              </p>
+                            </div>
+                          </li>
+                        </ol>
+                      </div>
+                    </>
                   )}
 
                   <Button onClick={handleSaveDomain} disabled={saving}>
