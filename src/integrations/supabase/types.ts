@@ -1058,6 +1058,7 @@ export type Database = {
           background_color: string | null
           company_id: string | null
           created_at: string | null
+          custom_domain: string | null
           id: string
           is_active: boolean | null
           logo_url: string | null
@@ -1075,6 +1076,7 @@ export type Database = {
           background_color?: string | null
           company_id?: string | null
           created_at?: string | null
+          custom_domain?: string | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
@@ -1092,6 +1094,7 @@ export type Database = {
           background_color?: string | null
           company_id?: string | null
           created_at?: string | null
+          custom_domain?: string | null
           id?: string
           is_active?: boolean | null
           logo_url?: string | null
