@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  Building2, Plus, Trash2, Loader2, Palette, Settings, Pencil, Upload, X, Eye, EyeOff, Key
+  Building2, Plus, Trash2, Loader2, Palette, Settings, Pencil, Upload, X, Eye, EyeOff, Key, Download, Package
 } from 'lucide-react';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -185,6 +187,207 @@ const AdminWhiteLabel = () => {
       toast.error('Erro: ' + err.message);
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const generateDeployPackage = async (partner: any) => {
+    const toastId = toast.loading('Gerando pacote de deploy...');
+    try {
+      const zip = new JSZip();
+
+      // 1. config.json
+      zip.file('config.json', JSON.stringify({
+        name: partner.name,
+        slug: partner.slug,
+        branding: {
+          primary_color: partner.primary_color,
+          secondary_color: partner.secondary_color,
+          accent_color: partner.accent_color,
+          background_color: partner.background_color,
+          logo_url: partner.logo_url || null,
+        },
+        supabase: {
+          url: partner.supabase_url || 'CONFIGURAR_URL_SUPABASE',
+          anon_key: partner.supabase_anon_key || 'CONFIGURAR_ANON_KEY',
+        },
+      }, null, 2));
+
+      // 2. .env
+      zip.file('.env', `# Configuração ${partner.name}
+VITE_SUPABASE_URL=${partner.supabase_url || 'CONFIGURAR_URL_SUPABASE'}
+VITE_SUPABASE_PUBLISHABLE_KEY=${partner.supabase_anon_key || 'CONFIGURAR_ANON_KEY'}
+VITE_APP_NAME=${partner.name}
+VITE_PRIMARY_COLOR=${partner.primary_color}
+VITE_SECONDARY_COLOR=${partner.secondary_color}
+VITE_ACCENT_COLOR=${partner.accent_color}
+VITE_BACKGROUND_COLOR=${partner.background_color}
+VITE_LOGO_URL=${partner.logo_url || ''}
+`);
+
+      // 3. docker-compose.yml
+      zip.file('docker-compose.yml', `version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+`);
+
+      // 4. Dockerfile
+      zip.file('Dockerfile', `FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+`);
+
+      // 5. nginx.conf
+      zip.file('nginx.conf', `server {
+    listen 80;
+    server_name ${partner.custom_domain || 'localhost'};
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml;
+}
+`);
+
+      // 6. Customized index.css override
+      zip.file('src/brand-override.css', `/* Cores da marca ${partner.name} */
+:root {
+  --brand-primary: ${partner.primary_color};
+  --brand-secondary: ${partner.secondary_color};
+  --brand-accent: ${partner.accent_color};
+  --brand-background: ${partner.background_color};
+}
+`);
+
+      // 7. README.md
+      zip.file('README.md', `# ${partner.name} - Pacote de Deploy
+
+## Informações do Parceiro
+- **Nome:** ${partner.name}
+- **Slug:** ${partner.slug}
+- **Domínio:** ${partner.custom_domain || 'Não configurado'}
+
+## 🚀 Passo a passo para deploy na VPS
+
+### Pré-requisitos
+- VPS com Ubuntu 20.04+ (ou similar)
+- Docker e Docker Compose instalados
+- Domínio apontando para o IP da VPS
+
+### 1. Preparar a VPS
+\`\`\`bash
+# Instalar Docker (se não tiver)
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+
+# Instalar Docker Compose
+sudo apt install docker-compose -y
+\`\`\`
+
+### 2. Enviar os arquivos
+\`\`\`bash
+# Clonar/copiar o código fonte do sistema para a VPS
+# Copiar este pacote de configuração para a raiz do projeto
+cp .env /caminho/do/projeto/.env
+cp docker-compose.yml /caminho/do/projeto/docker-compose.yml
+cp Dockerfile /caminho/do/projeto/Dockerfile
+cp nginx.conf /caminho/do/projeto/nginx.conf
+\`\`\`
+
+### 3. Configurar o .env
+Edite o arquivo \`.env\` e configure:
+- \`VITE_SUPABASE_URL\` - URL do seu banco de dados
+- \`VITE_SUPABASE_PUBLISHABLE_KEY\` - Chave pública do Supabase
+
+### 4. Build e Deploy
+\`\`\`bash
+cd /caminho/do/projeto
+
+# Build e iniciar
+docker-compose up -d --build
+
+# Verificar se está rodando
+docker-compose ps
+docker-compose logs -f
+\`\`\`
+
+### 5. Configurar SSL (HTTPS)
+\`\`\`bash
+# Instalar Certbot
+sudo apt install certbot python3-certbot-nginx -y
+
+# Gerar certificado SSL
+sudo certbot --nginx -d ${partner.custom_domain || 'seu-dominio.com'}
+\`\`\`
+
+### 6. Configurar DNS
+No seu provedor de domínio, adicione:
+
+| Tipo | Nome | Valor |
+|------|------|-------|
+| A    | @    | IP_DA_SUA_VPS |
+| A    | www  | IP_DA_SUA_VPS |
+
+### 🎨 Personalização
+As cores e logo já estão configuradas:
+- Cor Primária: \`${partner.primary_color}\`
+- Cor Secundária: \`${partner.secondary_color}\`
+- Cor de Destaque: \`${partner.accent_color}\`
+- Cor de Fundo: \`${partner.background_color}\`
+${partner.logo_url ? `- Logo: ${partner.logo_url}` : '- Logo: Não configurada'}
+
+### 🔧 Comandos úteis
+\`\`\`bash
+# Reiniciar
+docker-compose restart
+
+# Parar
+docker-compose down
+
+# Ver logs
+docker-compose logs -f
+
+# Rebuild após alterações
+docker-compose up -d --build
+\`\`\`
+
+### ❓ Suporte
+Entre em contato com o administrador do sistema para suporte.
+`);
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      saveAs(blob, `deploy-${partner.slug}-${new Date().toISOString().split('T')[0]}.zip`);
+      toast.success('Pacote gerado com sucesso!', { id: toastId });
+    } catch (err: any) {
+      console.error('Erro ao gerar pacote:', err);
+      toast.error('Erro ao gerar pacote: ' + err.message, { id: toastId });
     }
   };
 
@@ -405,6 +608,9 @@ const AdminWhiteLabel = () => {
                     <Badge variant={partner.is_active ? "default" : "secondary"}>
                       {partner.is_active ? 'Ativo' : 'Inativo'}
                     </Badge>
+                    <Button variant="ghost" size="icon" onClick={() => generateDeployPackage(partner)} title="Gerar pacote de deploy">
+                      <Download className="h-4 w-4" />
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => openEdit(partner)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
