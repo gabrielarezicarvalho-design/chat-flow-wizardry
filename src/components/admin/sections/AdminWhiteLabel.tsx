@@ -222,9 +222,9 @@ const AdminWhiteLabel = () => {
           username: testUserForm.username,
           full_name: testUserForm.full_name,
           password: testUserForm.password,
-          role: 'user',
+          role: 'admin',
           company_id: partner.company_id || null,
-          is_company_admin: false,
+          is_company_admin: true,
         },
       });
 
