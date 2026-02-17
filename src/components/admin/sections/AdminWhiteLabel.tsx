@@ -51,7 +51,7 @@ const AdminWhiteLabel = () => {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [testUserDialog, setTestUserDialog] = useState<{ open: boolean; partner: any | null }>({ open: false, partner: null });
-  const [testUserForm, setTestUserForm] = useState({ username: '', full_name: '', password: '' });
+  const [testUserForm, setTestUserForm] = useState({ username: '', full_name: '', password: '', role: 'admin' as 'admin' | 'user' | 'agent' });
   const [creatingUser, setCreatingUser] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -202,7 +202,7 @@ const AdminWhiteLabel = () => {
   };
 
   const openTestUserDialog = (partner: any) => {
-    setTestUserForm({ username: '', full_name: '', password: '' });
+    setTestUserForm({ username: '', full_name: '', password: '', role: 'admin' });
     setTestUserDialog({ open: true, partner });
   };
 
@@ -222,9 +222,9 @@ const AdminWhiteLabel = () => {
           username: testUserForm.username,
           full_name: testUserForm.full_name,
           password: testUserForm.password,
-          role: 'admin',
+          role: testUserForm.role,
           company_id: partner.company_id || null,
-          is_company_admin: true,
+          is_company_admin: testUserForm.role === 'admin',
         },
       });
 
@@ -724,6 +724,18 @@ Entre em contato com o administrador do sistema para suporte.
                   onChange={e => setTestUserForm(f => ({ ...f, password: e.target.value }))}
                   placeholder="Mínimo 6 caracteres"
                 />
+              </div>
+              <div>
+                <Label>Função *</Label>
+                <select
+                  value={testUserForm.role}
+                  onChange={e => setTestUserForm(f => ({ ...f, role: e.target.value as 'admin' | 'user' | 'agent' }))}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="admin">Administrador</option>
+                  <option value="agent">Agente / Atendente</option>
+                  <option value="user">Usuário</option>
+                </select>
               </div>
             </div>
           )}
