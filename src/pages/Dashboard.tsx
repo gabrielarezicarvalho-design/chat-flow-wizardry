@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
 import { ABTesting } from "@/components/mass-sending/ABTesting";
+import { useTheme } from "@/hooks/useTheme";
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -49,6 +50,7 @@ interface Stats {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { partnerBranding } = useTheme();
   const [stats, setStats] = useState<Stats>({
     totalCampaigns: 0,
     messagesSent: 0,
@@ -92,7 +94,7 @@ const Dashboard = () => {
       description: "Envie campanhas personalizadas para milhares de contatos",
       icon: Send,
       to: "/mass-sending",
-      gradient: "from-blue-500 to-cyan-500",
+      gradient: "from-primary to-primary/70",
       metrics: "Ilimitado",
     },
     {
@@ -100,7 +102,7 @@ const Dashboard = () => {
       description: "Acompanhe métricas detalhadas de suas campanhas",
       icon: BarChart3,
       to: "/campaign-reports",
-      gradient: "from-emerald-500 to-green-500",
+      gradient: "from-primary/80 to-primary/50",
       metrics: `${stats.totalCampaigns} campanhas`,
     },
     {
@@ -108,7 +110,7 @@ const Dashboard = () => {
       description: "Segmente contatos por tags e comportamento",
       icon: Users,
       to: "/segmentation",
-      gradient: "from-violet-500 to-purple-600",
+      gradient: "from-primary/90 to-primary/60",
       metrics: `${stats.totalContacts} contatos`,
     },
   ];
@@ -137,10 +139,10 @@ const Dashboard = () => {
   ];
 
   const statsCards = [
-    { label: "Campanhas", value: stats.totalCampaigns, icon: Rocket, color: "text-blue-500" },
-    { label: "Mensagens Enviadas", value: stats.messagesSent.toLocaleString(), icon: MessageSquare, color: "text-emerald-500" },
-    { label: "Taxa de Entrega", value: `${stats.deliveryRate}%`, icon: TrendingUp, color: "text-violet-500" },
-    { label: "Contatos", value: stats.totalContacts.toLocaleString(), icon: Users, color: "text-orange-500" },
+    { label: "Campanhas", value: stats.totalCampaigns, icon: Rocket, color: "text-primary" },
+    { label: "Mensagens Enviadas", value: stats.messagesSent.toLocaleString(), icon: MessageSquare, color: "text-primary/80" },
+    { label: "Taxa de Entrega", value: `${stats.deliveryRate}%`, icon: TrendingUp, color: "text-primary/70" },
+    { label: "Contatos", value: stats.totalContacts.toLocaleString(), icon: Users, color: "text-primary/60" },
   ];
 
   return (
@@ -158,8 +160,8 @@ const Dashboard = () => {
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-2xl" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-primary/5 rounded-full blur-2xl" />
         </div>
 
         <div className="relative flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -182,7 +184,7 @@ const Dashboard = () => {
               transition={{ delay: 0.2, duration: 0.6 }}
             >
               Potencialize com{" "}
-              <span className="bg-gradient-to-r from-primary via-violet-500 to-blue-500 bg-clip-text text-transparent">
+              <span className="text-primary">
                 Disparos em Massa
               </span>
             </motion.h1>
@@ -203,7 +205,7 @@ const Dashboard = () => {
               <Button 
                 size="lg" 
                 onClick={() => navigate('/mass-sending')}
-                className="group bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90"
+                className="group"
               >
                 <Rocket className="mr-2 w-5 h-5" />
                 Criar Campanha
@@ -221,21 +223,23 @@ const Dashboard = () => {
             </motion.div>
           </div>
 
-          {/* Robot Image */}
-          <motion.div 
-            className="flex-shrink-0"
-            animate={floatAnimation}
-          >
-            <motion.img 
-              src={robotImage} 
-              alt="MarketFlow Robot"
-              className="w-64 h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
-              whileHover={{ scale: 1.05, rotate: 2 }}
-            />
-          </motion.div>
+          {/* Robot Image - only show for main MarketFlow */}
+          {!partnerBranding && (
+            <motion.div 
+              className="flex-shrink-0"
+              animate={floatAnimation}
+            >
+              <motion.img 
+                src={robotImage} 
+                alt="MarketFlow Robot"
+                className="w-64 h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
+                whileHover={{ scale: 1.05, rotate: 2 }}
+              />
+            </motion.div>
+          )}
         </div>
       </motion.div>
 
@@ -356,10 +360,10 @@ const Dashboard = () => {
 
       {/* CTA Section */}
       <motion.div variants={itemVariants}>
-        <Card className="relative overflow-hidden p-8 border-primary/20 bg-gradient-to-br from-primary/5 via-violet-500/5 to-blue-500/5">
+        <Card className="relative overflow-hidden p-8 border-primary/20 bg-gradient-to-br from-primary/5 via-primary/5 to-primary/5">
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-12 -right-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
-            <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl" />
+            <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
           </div>
           
           <div className="relative text-center">
@@ -368,7 +372,7 @@ const Dashboard = () => {
               transition={{ duration: 2, repeat: Infinity }}
               className="inline-block mb-4"
             >
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary to-violet-600 shadow-lg">
+              <div className="p-4 rounded-2xl bg-primary shadow-lg">
                 <Rocket className="w-8 h-8 text-white" />
               </div>
             </motion.div>
