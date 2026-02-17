@@ -21,7 +21,7 @@ serve(async (req) => {
 
     // Verify caller is authenticated and is an admin
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
         JSON.stringify({ success: false, error: "Não autorizado" }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -29,15 +29,17 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user: caller }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    const { data: claimsData, error: claimsError } = await supabaseAdmin.auth.getClaims(token);
     
-    if (authError || !caller) {
-      console.error("Auth error:", authError);
+    if (claimsError || !claimsData?.claims) {
+      console.error("Auth error:", claimsError);
       return new Response(
         JSON.stringify({ success: false, error: "Token inválido" }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const caller = { id: claimsData.claims.sub as string };
 
     // Check if caller has admin role
     const { data: callerRole, error: roleError } = await supabaseAdmin
