@@ -24,6 +24,7 @@ import BetaLanding from "./pages/BetaLanding";
 import Users from "./pages/Users";
 import WhiteLabelLogin from "./pages/WhiteLabelLogin";
 import WhiteLabelConfig from "./pages/WhiteLabelConfig";
+import WhiteLabelPreview from "./pages/WhiteLabelPreview";
 
 // Admin pages - separate login flow
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
@@ -94,6 +95,7 @@ function App() {
                     {/* White Label login - no auth required */}
                     <Route path="/entrar-white-label" element={<WhiteLabelLogin />} />
                     <Route path="/white-label-config" element={<WhiteLabelConfig />} />
+                    <Route path="/preview/:slug" element={<WhiteLabelPreview />} />
                     {/* Conversations with no padding */}
                     <Route
                       path="/conversations"

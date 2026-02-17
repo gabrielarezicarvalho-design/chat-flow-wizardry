@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  Building2, Plus, Trash2, Loader2, Palette, Settings, Pencil, Upload, X, Eye, EyeOff, Key, Download, Package
+  Building2, Plus, Trash2, Loader2, Palette, Settings, Pencil, Upload, X, Eye, EyeOff, Key, Download, ExternalLink, UserPlus
 } from 'lucide-react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -50,6 +50,9 @@ const AdminWhiteLabel = () => {
   const [uploading, setUploading] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [testUserDialog, setTestUserDialog] = useState<{ open: boolean; partner: any | null }>({ open: false, partner: null });
+  const [testUserForm, setTestUserForm] = useState({ username: '', full_name: '', password: '' });
+  const [creatingUser, setCreatingUser] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -187,6 +190,53 @@ const AdminWhiteLabel = () => {
       toast.error('Erro: ' + err.message);
     } finally {
       setDeleting(null);
+    }
+  };
+  const getPreviewUrl = (slug: string) => {
+    return `${window.location.origin}/preview/${slug}`;
+  };
+
+  const copyPreviewLink = (slug: string) => {
+    navigator.clipboard.writeText(getPreviewUrl(slug));
+    toast.success('Link de preview copiado!');
+  };
+
+  const openTestUserDialog = (partner: any) => {
+    setTestUserForm({ username: '', full_name: '', password: '' });
+    setTestUserDialog({ open: true, partner });
+  };
+
+  const handleCreateTestUser = async () => {
+    const partner = testUserDialog.partner;
+    if (!partner) return;
+    if (!testUserForm.username.trim() || !testUserForm.full_name.trim() || !testUserForm.password.trim()) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+
+    setCreatingUser(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: {
+          username: testUserForm.username,
+          full_name: testUserForm.full_name,
+          password: testUserForm.password,
+          role: 'user',
+          company_id: partner.company_id || null,
+          is_company_admin: false,
+        },
+      });
+
+      if (error) throw error;
+      if (data && !data.success) throw new Error(data.error);
+
+      toast.success(data?.updated ? 'Usuário atualizado!' : 'Usuário de teste criado!');
+      setTestUserDialog({ open: false, partner: null });
+    } catch (err: any) {
+      toast.error('Erro: ' + err.message);
+    } finally {
+      setCreatingUser(false);
     }
   };
 
@@ -596,7 +646,12 @@ Entre em contato com o administrador do sistema para suporte.
                     )}
                     <div>
                       <p className="font-medium">{partner.name}</p>
-                      <p className="text-xs text-muted-foreground">Login: {partner.slug}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-muted-foreground">Login: {partner.slug}</p>
+                        <button onClick={() => copyPreviewLink(partner.slug)} className="text-xs text-primary hover:underline">
+                          Copiar link preview
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -608,6 +663,12 @@ Entre em contato com o administrador do sistema para suporte.
                     <Badge variant={partner.is_active ? "default" : "secondary"}>
                       {partner.is_active ? 'Ativo' : 'Inativo'}
                     </Badge>
+                    <Button variant="ghost" size="icon" onClick={() => window.open(getPreviewUrl(partner.slug), '_blank')} title="Preview do sistema">
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => openTestUserDialog(partner)} title="Criar usuário de teste">
+                      <UserPlus className="h-4 w-4" />
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => generateDeployPackage(partner)} title="Gerar pacote de deploy">
                       <Download className="h-4 w-4" />
                     </Button>
@@ -624,6 +685,57 @@ Entre em contato com o administrador do sistema para suporte.
           )}
         </CardContent>
       </Card>
+
+      {/* Dialog Criar Usuário de Teste */}
+      <Dialog open={testUserDialog.open} onOpenChange={(open) => setTestUserDialog({ open, partner: open ? testUserDialog.partner : null })}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Criar Usuário de Teste</DialogTitle>
+          </DialogHeader>
+          {testUserDialog.partner && (
+            <div className="space-y-4 py-2">
+              <div className="p-3 rounded-lg bg-muted/50 border">
+                <p className="text-sm font-medium">Parceiro: {testUserDialog.partner.name}</p>
+                {testUserDialog.partner.company_id && (
+                  <p className="text-xs text-muted-foreground">Vinculado à empresa</p>
+                )}
+              </div>
+              <div>
+                <Label>Usuário *</Label>
+                <Input
+                  value={testUserForm.username}
+                  onChange={e => setTestUserForm(f => ({ ...f, username: e.target.value.toLowerCase().replace(/\s+/g, '') }))}
+                  placeholder="usuario.teste"
+                />
+              </div>
+              <div>
+                <Label>Nome completo *</Label>
+                <Input
+                  value={testUserForm.full_name}
+                  onChange={e => setTestUserForm(f => ({ ...f, full_name: e.target.value }))}
+                  placeholder="Usuário Teste"
+                />
+              </div>
+              <div>
+                <Label>Senha *</Label>
+                <Input
+                  type="password"
+                  value={testUserForm.password}
+                  onChange={e => setTestUserForm(f => ({ ...f, password: e.target.value }))}
+                  placeholder="Mínimo 6 caracteres"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTestUserDialog({ open: false, partner: null })}>Cancelar</Button>
+            <Button onClick={handleCreateTestUser} disabled={creatingUser}>
+              {creatingUser && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Criar Usuário
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
