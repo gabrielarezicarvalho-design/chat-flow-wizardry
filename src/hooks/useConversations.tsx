@@ -1,23 +1,32 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useCompanyId } from './useCompanyId';
 
 export const useConversations = () => {
   const queryClient = useQueryClient();
+  const { companyId, isLoadingCompany } = useCompanyId();
 
   const { data: conversations, isLoading, refetch } = useQuery({
-    queryKey: ['conversations'],
+    queryKey: ['conversations', companyId],
     queryFn: async () => {
       console.log('🔄 [Conversations] Fetching...');
-      const { data, error } = await supabase
+      let query = supabase
         .from('conversations')
         .select('*')
         .order('updated_at', { ascending: false });
       
+      // If user belongs to a company, only show that company's conversations
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       console.log('✅ [Conversations] Loaded:', data?.length);
       return data;
     },
+    enabled: !isLoadingCompany,
     staleTime: 0,
     gcTime: 0,
     refetchOnWindowFocus: false,
@@ -50,7 +59,6 @@ export const useConversations = () => {
 
   const deleteConversation = useMutation({
     mutationFn: async (id: string) => {
-      // Delete all messages for this conversation
       const { error: messagesError } = await supabase
         .from('messages')
         .delete()
@@ -60,7 +68,6 @@ export const useConversations = () => {
         console.error('Error deleting messages:', messagesError);
       }
 
-      // Then delete the conversation
       const { error } = await supabase
         .from('conversations')
         .delete()
@@ -84,7 +91,7 @@ export const useConversations = () => {
 
   return {
     conversations: conversations || [],
-    isLoading,
+    isLoading: isLoading || isLoadingCompany,
     updateConversation,
     deleteConversation,
     refetch

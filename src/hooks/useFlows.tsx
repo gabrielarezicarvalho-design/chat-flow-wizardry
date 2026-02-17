@@ -1,24 +1,29 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useCompanyId } from './useCompanyId';
 
 export const useFlows = () => {
   const queryClient = useQueryClient();
+  const { companyId, isLoadingCompany } = useCompanyId();
 
   const { data: flows, isLoading } = useQuery({
-    queryKey: ['flows'],
+    queryKey: ['flows', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('flows')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) {
-        console.error('Erro ao buscar fluxos:', error);
-        throw new Error(error.message || 'Erro ao carregar fluxos');
+      if (companyId) {
+        query = query.eq('company_id', companyId);
       }
+      
+      const { data, error } = await query;
+      if (error) throw new Error(error.message || 'Erro ao carregar fluxos');
       return data;
-    }
+    },
+    enabled: !isLoadingCompany,
   });
 
   const createFlow = useMutation({
@@ -26,16 +31,16 @@ export const useFlows = () => {
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData?.user?.id;
 
+      const flowData: any = { ...newFlow, user_id: userId || newFlow.user_id };
+      if (companyId) flowData.company_id = companyId;
+
       const { data, error } = await supabase
         .from('flows')
-        .insert([{ ...newFlow, user_id: userId || newFlow.user_id }])
+        .insert([flowData])
         .select()
         .maybeSingle();
       
-      if (error) {
-        console.error('Erro ao criar fluxo:', error);
-        throw new Error(error.message || 'Erro ao criar fluxo');
-      }
+      if (error) throw new Error(error.message || 'Erro ao criar fluxo');
       return data;
     },
     onSuccess: () => {
@@ -43,7 +48,6 @@ export const useFlows = () => {
       toast.success('Fluxo criado com sucesso!');
     },
     onError: (error: any) => {
-      console.error('Erro na criação de fluxo:', error);
       toast.error(error.message || 'Erro ao criar fluxo. Tente novamente.');
     }
   });
@@ -57,10 +61,7 @@ export const useFlows = () => {
         .select()
         .maybeSingle();
       
-      if (error) {
-        console.error('Erro ao atualizar fluxo:', error);
-        throw new Error(error.message || 'Erro ao atualizar fluxo');
-      }
+      if (error) throw new Error(error.message || 'Erro ao atualizar fluxo');
       return data;
     },
     onSuccess: () => {
@@ -68,7 +69,6 @@ export const useFlows = () => {
       toast.success('Fluxo atualizado com sucesso!');
     },
     onError: (error: any) => {
-      console.error('Erro na atualização de fluxo:', error);
       toast.error(error.message || 'Erro ao atualizar fluxo. Tente novamente.');
     }
   });
@@ -80,24 +80,20 @@ export const useFlows = () => {
         .delete()
         .eq('id', id);
       
-      if (error) {
-        console.error('Erro ao excluir fluxo:', error);
-        throw new Error(error.message || 'Erro ao excluir fluxo');
-      }
+      if (error) throw new Error(error.message || 'Erro ao excluir fluxo');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['flows'] });
       toast.success('Fluxo excluído com sucesso!');
     },
     onError: (error: any) => {
-      console.error('Erro na exclusão de fluxo:', error);
       toast.error(error.message || 'Erro ao excluir fluxo. Tente novamente.');
     }
   });
 
   return {
     flows: flows || [],
-    isLoading,
+    isLoading: isLoading || isLoadingCompany,
     createFlow,
     updateFlow,
     deleteFlow

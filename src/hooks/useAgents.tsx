@@ -1,21 +1,29 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useCompanyId } from './useCompanyId';
 
 export const useAgents = () => {
   const queryClient = useQueryClient();
+  const { companyId, isLoadingCompany } = useCompanyId();
 
   const { data: agents, isLoading } = useQuery({
-    queryKey: ['agents'],
+    queryKey: ['agents', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('agents')
         .select('*')
         .order('created_at', { ascending: false });
       
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !isLoadingCompany,
   });
 
   const createAgent = useMutation({
@@ -23,9 +31,12 @@ export const useAgents = () => {
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData?.user?.id;
 
+      const agentData: any = { ...newAgent, user_id: userId || newAgent.user_id };
+      if (companyId) agentData.company_id = companyId;
+
       const { data, error } = await supabase
         .from('agents')
-        .insert([{ ...newAgent, user_id: userId || newAgent.user_id }])
+        .insert([agentData])
         .select()
         .maybeSingle();
       
@@ -108,7 +119,7 @@ export const useAgents = () => {
 
   return {
     agents: agents || [],
-    isLoading,
+    isLoading: isLoading || isLoadingCompany,
     createAgent,
     updateAgent,
     deleteAgent,

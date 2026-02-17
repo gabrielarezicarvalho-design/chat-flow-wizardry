@@ -1,14 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useCompanyId } from './useCompanyId';
 
 export const useDepartments = () => {
   const queryClient = useQueryClient();
+  const { companyId, isLoadingCompany } = useCompanyId();
 
   const { data: departments, isLoading } = useQuery({
-    queryKey: ['departments'],
+    queryKey: ['departments', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('departments')
         .select(`
           *,
@@ -19,9 +21,15 @@ export const useDepartments = () => {
         `)
         .order('created_at', { ascending: false });
       
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !isLoadingCompany,
   });
 
   const createDepartment = useMutation({
@@ -137,7 +145,7 @@ export const useDepartments = () => {
 
   return {
     departments: departments || [],
-    isLoading,
+    isLoading: isLoading || isLoadingCompany,
     createDepartment,
     updateDepartment,
     deleteDepartment,
