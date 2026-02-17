@@ -163,11 +163,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .then();
       }
 
+      // Clear partner branding on logout
+      localStorage.removeItem('partner_branding');
+
       // Navigate first to avoid queries running after logout
       navigate('/auth');
       
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+
+      // Reset CSS variables
+      const root = document.documentElement;
+      root.style.removeProperty('--primary');
+      root.style.removeProperty('--primary-dark');
+      root.style.removeProperty('--accent');
+      root.style.removeProperty('--ring');
+      root.style.removeProperty('--gradient-primary');
 
       toast.success('Logout realizado com sucesso!');
     } catch (error: any) {

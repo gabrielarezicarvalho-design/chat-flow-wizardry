@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useTheme } from '@/hooks/useTheme';
 
 interface PartnerConfig {
   id: string;
@@ -235,6 +236,7 @@ const LoginForm = ({ partner, pc, bgSoft, onLogin }: {
 const WhiteLabelPreview = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { setPartnerBranding } = useTheme();
   const [partner, setPartner] = useState<PartnerConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -266,6 +268,19 @@ const WhiteLabelPreview = () => {
       toast.error('Usuário ou senha incorretos');
       console.error('Login error:', error);
       return;
+    }
+
+    // Save partner branding so the entire system uses these colors
+    if (partner) {
+      setPartnerBranding({
+        name: partner.name,
+        slug: partner.slug,
+        logo_url: partner.logo_url,
+        primary_color: partner.primary_color,
+        secondary_color: partner.secondary_color,
+        accent_color: partner.accent_color,
+        background_color: partner.background_color,
+      });
     }
 
     toast.success(`Bem-vindo, ${data.user?.user_metadata?.full_name || username}!`);

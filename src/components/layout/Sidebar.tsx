@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureAccess, FeatureId } from "@/hooks/useFeatureAccess";
+import { useTheme } from "@/hooks/useTheme";
 import { 
   LayoutDashboard, 
   Settings, 
@@ -175,6 +176,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
   const { isAdmin, isAgent, role, isLoading: roleLoading } = useUserRole();
   const { user, signOut } = useAuth();
   const { hasAccess } = useFeatureAccess();
+  const { partnerBranding } = useTheme();
 
   const getFilteredNavItems = () => {
     const baseItems = isAdmin ? adminNavItems : agentNavItems;
@@ -227,16 +229,27 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
         {/* Logo */}
         <div className={cn("border-b border-white/10", collapsed ? "p-4" : "p-6")}>
           <div className="flex items-center gap-3">
-            <div className={cn(
-              "rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0",
-              collapsed ? "w-10 h-10" : "w-10 h-10"
-            )}>
-              <Sparkles className="w-6 h-6" />
-            </div>
+            {partnerBranding?.logo_url ? (
+              <img
+                src={partnerBranding.logo_url}
+                alt={partnerBranding.name}
+                className={cn(
+                  "rounded-xl object-contain flex-shrink-0",
+                  collapsed ? "w-10 h-10" : "w-10 h-10"
+                )}
+              />
+            ) : (
+              <div className={cn(
+                "rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0",
+                collapsed ? "w-10 h-10" : "w-10 h-10"
+              )}>
+                <Sparkles className="w-6 h-6" />
+              </div>
+            )}
             {!collapsed && (
               <div>
-                <h1 className="text-xl font-bold">MARKETFLOW</h1>
-                <p className="text-xs text-white/70">Automação Inteligente</p>
+                <h1 className="text-xl font-bold">{partnerBranding?.name || 'MARKETFLOW'}</h1>
+                <p className="text-xs text-white/70">{partnerBranding ? 'Plataforma de IA' : 'Automação Inteligente'}</p>
               </div>
             )}
           </div>
