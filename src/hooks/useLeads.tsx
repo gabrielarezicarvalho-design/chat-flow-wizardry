@@ -1,21 +1,30 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useCompanyId } from './useCompanyId';
 
 export const useLeads = () => {
   const queryClient = useQueryClient();
+  const { companyId, isLoadingCompany } = useCompanyId();
 
   const { data: leads, isLoading } = useQuery({
-    queryKey: ['leads'],
+    queryKey: ['leads', companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false });
       
+      // If user belongs to a company, only show that company's leads
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !isLoadingCompany,
   });
 
   const createLead = useMutation({
@@ -23,9 +32,12 @@ export const useLeads = () => {
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData?.user?.id;
       
+      const leadData: any = { ...newLead, user_id: userId || newLead.user_id };
+      if (companyId) leadData.company_id = companyId;
+      
       const { data, error } = await supabase
         .from('leads')
-        .insert([{ ...newLead, user_id: userId || newLead.user_id }])
+        .insert([leadData])
         .select()
         .maybeSingle();
       
@@ -82,7 +94,7 @@ export const useLeads = () => {
 
   return {
     leads: leads || [],
-    isLoading,
+    isLoading: isLoading || isLoadingCompany,
     createLead,
     updateLead,
     deleteLead

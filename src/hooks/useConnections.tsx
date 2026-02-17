@@ -1,23 +1,31 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useCompanyId } from './useCompanyId';
 
 export const useConnections = () => {
   const queryClient = useQueryClient();
-  // Always use main Supabase for connections - they are system-level resources
+  const { companyId, isLoadingCompany } = useCompanyId();
   const client = supabase;
 
   const { data: connections, isLoading } = useQuery({
-    queryKey: ['connections'],
+    queryKey: ['connections', companyId],
     queryFn: async () => {
-      const { data, error } = await client
+      let query = client
         .from('connections')
         .select('*')
         .order('created_at', { ascending: false });
       
+      // If user belongs to a company, only show that company's connections
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !isLoadingCompany,
   });
 
   const createConnection = useMutation({
@@ -25,12 +33,13 @@ export const useConnections = () => {
       const { data: authData } = await client.auth.getUser();
       const userId = authData?.user?.id;
 
-      // Ensure instance_name is set from name if not provided
-      const connectionData = {
+      const connectionData: any = {
         ...newConnection,
         user_id: userId || newConnection.user_id,
         instance_name: newConnection.instance_name || newConnection.name
       };
+      
+      if (companyId) connectionData.company_id = companyId;
 
       const { data, error } = await client
         .from('connections')
@@ -91,7 +100,7 @@ export const useConnections = () => {
 
   return {
     connections: connections || [],
-    isLoading,
+    isLoading: isLoading || isLoadingCompany,
     createConnection,
     updateConnection,
     deleteConnection

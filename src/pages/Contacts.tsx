@@ -55,18 +55,30 @@ const Contacts = () => {
   const [tagPopoverOpen, setTagPopoverOpen] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  // Fetch available tags
-  const { data: availableTags = [] } = useQuery({
-    queryKey: ['tags'],
+  // Fetch available tags - filtered by company
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile-company'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      
-      const { data, error } = await supabase
+      if (!user) return null;
+      const { data } = await supabase.from('profiles').select('company_id').eq('id', user.id).maybeSingle();
+      return data;
+    }
+  });
+
+  const { data: availableTags = [] } = useQuery({
+    queryKey: ['tags', userProfile?.company_id],
+    queryFn: async () => {
+      let query = supabase
         .from('tags')
         .select('*')
         .order('name');
       
+      if (userProfile?.company_id) {
+        query = query.eq('company_id', userProfile.company_id);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     }
