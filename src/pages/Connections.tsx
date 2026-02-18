@@ -191,8 +191,8 @@ const Connections = () => {
               toast.warning(`⚠️ ${connection.instance_name} foi desconectado do WhatsApp`);
             }
             
-            // If UAZAPI reports connected but local status is disconnected, update
-            if (data?.success && data?.connected && connection.status === 'disconnected') {
+            // If UAZAPI reports connected but local status is not connected, update
+            if (data?.success && data?.connected && (connection.status === 'disconnected' || connection.status === 'connecting')) {
               console.log(`Connection ${connection.instance_name} is connected in UAZAPI, updating local status...`);
               await updateConnection.mutateAsync({
                 id: connection.id,
@@ -597,6 +597,56 @@ const Connections = () => {
       });
 
       if (error) throw error;
+
+      // If token is invalid (401), try to find the instance by ID in the UAZAPI list
+      if (!data?.success && data?.originalStatus === 401) {
+        console.log("Token invalid, trying to find instance via list...");
+        const conn = connections.find(c => c.id === connectionId);
+        const connAny = conn as any;
+        if (connAny?.instance_id) {
+          const { data: listData } = await supabase.functions.invoke('wa-list-instances', {
+            body: { environment, base_url: baseUrl }
+          });
+          
+          if (listData?.uazapi_instances) {
+            const match = listData.uazapi_instances.find((inst: any) => inst.id === connAny.instance_id);
+            if (match && match.connected) {
+              // Update token in DB and mark as connected
+              await updateConnection.mutateAsync({
+                id: connectionId,
+                updates: { 
+                  status: 'connected', 
+                  token: match.token,
+                  last_test: new Date().toISOString() 
+                }
+              });
+
+              if (conn) {
+                await handleConfigureWebhook({ ...conn, token: match.token });
+              }
+              await syncContactsAfterConnect(connectionId);
+
+              // 🎆 Fireworks celebration!
+              const duration = 3000;
+              const end = Date.now() + duration;
+              const colors = ['#22c55e', '#3b82f6', '#a855f7', '#eab308', '#ef4444'];
+              const frame = () => {
+                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, colors });
+                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, colors });
+                if (Date.now() < end) requestAnimationFrame(frame);
+              };
+              frame();
+
+              toast.success("🎉 WhatsApp conectado com sucesso!", { duration: 5000 });
+              setQrDialogOpen(false);
+              setQrCodeData(null);
+              setPendingConnection(null);
+              return true;
+            }
+          }
+        }
+        return false;
+      }
 
       if (data?.success && data?.connected) {
         await updateConnection.mutateAsync({
