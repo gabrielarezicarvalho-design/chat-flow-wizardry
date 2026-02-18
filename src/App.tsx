@@ -29,6 +29,7 @@ import WhiteLabelPreview from "./pages/WhiteLabelPreview";
 // Admin pages - separate login flow
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const ConnectQR = lazy(() => import("./pages/ConnectQR"));
 
 // Lazy load other pages
 const Agents = lazy(() => import("./pages/Agents"));
@@ -89,6 +90,8 @@ function App() {
                     {/* Public form routes - no auth required */}
                     <Route path="/f/:token" element={<PublicForm />} />
                     <Route path="/form/:formId" element={<FlowForm />} />
+                    {/* Public connect QR page */}
+                    <Route path="/connect/:id" element={<Suspense fallback={<Loading />}><ConnectQR /></Suspense>} />
                     {/* Beta landing page - no auth required */}
                     <Route path="/testar-beta" element={<BetaLanding />} />
                     <Route path="/beta-obrigado" element={<BetaThankYou />} />
