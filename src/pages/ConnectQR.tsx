@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, RefreshCw, CheckCircle2, Smartphone, Download, QrCode, Wifi } from "lucide-react";
 import { toast } from "sonner";
+import confetti from "canvas-confetti";
 
 const ConnectQR = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +20,22 @@ const ConnectQR = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState("#10b981");
   const [error, setError] = useState<string | null>(null);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const celebrationFired = useRef(false);
+
+  const fireCelebration = useCallback(() => {
+    if (celebrationFired.current) return;
+    celebrationFired.current = true;
+    const duration = 3000;
+    const end = Date.now() + duration;
+    const colors = ['#22c55e', '#3b82f6', '#a855f7', '#eab308', '#ef4444'];
+    const frame = () => {
+      confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, colors });
+      confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, colors });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    };
+    frame();
+  }, []);
 
   const fetchQRCode = useCallback(async (action?: string) => {
     if (!id) return;
@@ -33,6 +50,7 @@ const ConnectQR = () => {
       if (data?.connected) {
         setConnected(true);
         setConnectionName(data.name || "");
+        fireCelebration();
         return;
       }
 
@@ -75,6 +93,15 @@ const ConnectQR = () => {
     toast.success("QR Code atualizado!");
   };
 
+  const handleCheckStatus = async () => {
+    setCheckingStatus(true);
+    await fetchQRCode();
+    setCheckingStatus(false);
+    if (!connected) {
+      toast.info("Ainda não conectado. Escaneie o QR Code e tente novamente.");
+    }
+  };
+
   const handleDownloadQR = () => {
     if (!qrCode) return;
     const link = document.createElement("a");
@@ -108,16 +135,16 @@ const ConnectQR = () => {
   if (connected) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "#0f172a" }}>
-        <Card className="max-w-md w-full bg-slate-900 border-slate-700">
+        <Card className="max-w-md w-full bg-slate-900 border-slate-700 animate-scale-in">
           <CardContent className="p-8 text-center">
-            <div className="h-20 w-20 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ backgroundColor: `${primaryColor}20` }}>
+            <div className="h-20 w-20 rounded-full mx-auto mb-6 flex items-center justify-center animate-fade-in" style={{ backgroundColor: `${primaryColor}20` }}>
               <CheckCircle2 className="h-10 w-10" style={{ color: primaryColor }} />
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">Conectado!</h2>
             <p className="text-slate-400 mb-4">
               O WhatsApp <strong className="text-white">{connectionName}</strong> foi conectado com sucesso.
             </p>
-            <Badge className="text-white" style={{ backgroundColor: primaryColor }}>
+            <Badge className="text-white mb-6" style={{ backgroundColor: primaryColor }}>
               <Wifi className="w-3 h-3 mr-1" />
               Online
             </Badge>
@@ -177,7 +204,7 @@ const ConnectQR = () => {
           )}
 
           {/* Actions */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 mb-3">
             <Button
               className="flex-1 text-white"
               style={{ backgroundColor: primaryColor }}
@@ -197,6 +224,23 @@ const ConnectQR = () => {
               </Button>
             )}
           </div>
+
+          {/* Check Status Button */}
+          {qrSrc && (
+            <Button
+              variant="outline"
+              className="w-full border-slate-600 text-slate-300 hover:text-white"
+              onClick={handleCheckStatus}
+              disabled={checkingStatus}
+            >
+              {checkingStatus ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+              )}
+              Verificar se foi conectado
+            </Button>
+          )}
 
           {/* Instructions */}
           <div className="mt-6 space-y-3">
