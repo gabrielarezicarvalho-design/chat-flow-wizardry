@@ -153,6 +153,47 @@ export type Database = {
           },
         ]
       }
+      campaign_contacts: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          phone: string
+          sent_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          phone: string
+          sent_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          phone?: string
+          sent_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_contacts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_responses: {
         Row: {
           campaign_id: string | null
