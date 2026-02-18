@@ -260,21 +260,32 @@ function MassSendingContent() {
 
           if (data?.progress) {
             const { sent, failed, pending, total, completed, folderGone } = data.progress;
-            const updates: any = { sent_count: sent, failed_count: failed };
             
             // If folder is gone (404), UAZAPI already processed all messages
+            // Don't overwrite sent_count with 0 - keep the existing value from the campaign
             if (folderGone) {
-              updates.status = "completed";
-              updates.completed_at = new Date().toISOString();
-              // Use the campaign's total_contacts since folder no longer has data
-              updates.sent_count = campaign.total_contacts || 0;
+              const updates: any = {
+                status: "completed",
+                completed_at: new Date().toISOString(),
+              };
+              // Only update sent_count if we don't already have a value
+              if (!campaign.sent_count || campaign.sent_count === 0) {
+                updates.sent_count = campaign.total_contacts || 0;
+              }
+              await supabase.from("campaigns").update(updates).eq("id", campaign.id);
+              setCampaigns(prev => prev.map(c => c.id === campaign.id ? { ...c, ...updates } : c));
             } else if (completed || (pending === 0 && total > 0)) {
+              const updates: any = { sent_count: sent, failed_count: failed };
               updates.status = failed > 0 && sent === 0 ? "failed" : "completed";
               updates.completed_at = new Date().toISOString();
+              await supabase.from("campaigns").update(updates).eq("id", campaign.id);
+              setCampaigns(prev => prev.map(c => c.id === campaign.id ? { ...c, ...updates } : c));
+            } else if (sent > 0 || failed > 0) {
+              // Only update counts if we have real data from the folder
+              const updates: any = { sent_count: sent, failed_count: failed };
+              await supabase.from("campaigns").update(updates).eq("id", campaign.id);
+              setCampaigns(prev => prev.map(c => c.id === campaign.id ? { ...c, ...updates } : c));
             }
-            
-            await supabase.from("campaigns").update(updates).eq("id", campaign.id);
-            setCampaigns(prev => prev.map(c => c.id === campaign.id ? { ...c, ...updates } : c));
           }
         } catch (err) {
           console.error("Error checking folder status:", err);
