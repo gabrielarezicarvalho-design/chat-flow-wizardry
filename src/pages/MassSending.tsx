@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, Send, Loader2, ArrowLeft, ArrowRight, Users, Upload, Check, Tag, FileSpreadsheet, Image, FileText, Music, Video, Type, Eye, Trash2, BarChart3, Calendar, Clock, CheckCircle, MoreVertical, Wifi, WifiOff, RefreshCw, Rocket, Megaphone, X, Smartphone, List, LayoutGrid, MousePointer, BookmarkPlus, Terminal, Save, MessageSquare, Gift, Star, BarChart, Pause, Play, Link, Copy, Bell } from "lucide-react";
+import { Plus, Send, Loader2, ArrowLeft, ArrowRight, Users, Upload, Check, Tag, FileSpreadsheet, Image, FileText, Music, Video, Type, Eye, Trash2, BarChart3, Calendar, Clock, CheckCircle, MoreVertical, Wifi, WifiOff, RefreshCw, Rocket, Megaphone, X, Smartphone, List, LayoutGrid, MousePointer, BookmarkPlus, Terminal, Save, MessageSquare, Gift, Star, BarChart, Pause, Play, Link, Copy, Bell, RotateCcw } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -273,6 +273,8 @@ function MassSendingContent() {
                 updates.sent_count = campaign.total_contacts || 0;
               }
               await supabase.from("campaigns").update(updates).eq("id", campaign.id);
+              // Mark all campaign contacts as sent (folder gone = all processed)
+              await supabase.from("campaign_contacts").update({ status: "sent", sent_at: new Date().toISOString() }).eq("campaign_id", campaign.id).eq("status", "pending");
               setCampaigns(prev => prev.map(c => c.id === campaign.id ? { ...c, ...updates } : c));
             } else if (completed || (pending === 0 && total > 0)) {
               const updates: any = { sent_count: sent, failed_count: failed };
@@ -595,6 +597,12 @@ function MassSendingContent() {
           }
           
           console.log("[MassSending] Campaign saved:", savedData);
+          
+          // Save individual contacts for scheduled campaign
+          if (savedData?.id) {
+            await saveCampaignContacts(savedData.id, userData.user.id, nums);
+          }
+          
           addLog("success", `Campanha "${name}" agendada para ${scheduledDate.toLocaleString()} - ID: ${savedData?.id}`);
           toast.success(`Campanha agendada para ${scheduledDate.toLocaleString()}`);
           loadData();
@@ -703,6 +711,13 @@ function MassSendingContent() {
       
       campaignId = campaignData.id;
       addLog("success", "Campanha salva no banco");
+      
+      // Save individual contacts for tracking
+      const { data: userData2 } = await supabase.auth.getUser();
+      if (userData2.user) {
+        await saveCampaignContacts(campaignId, userData2.user.id, nums);
+        addLog("info", `${nums.length} contatos salvos para rastreamento`);
+      }
       
       if (useMenuEndpoint) {
         addLog("info", `Enviando menu interativo (tipo: ${uzapiMenuType})...`);
@@ -815,6 +830,21 @@ function MassSendingContent() {
           completed_at: new Date().toISOString()
         }).eq("id", campaignId);
         
+        // Update individual contact statuses based on results
+        if (campaignId && data?.data?.results) {
+          for (const r of data.data.results) {
+            const phone = (r.number || "").replace("@s.whatsapp.net", "").replace(/\D/g, "");
+            if (r.success) {
+              await supabase.from("campaign_contacts").update({ status: "sent", sent_at: new Date().toISOString() }).eq("campaign_id", campaignId).ilike("phone", `%${phone}%`);
+            } else {
+              await supabase.from("campaign_contacts").update({ status: "failed", error_message: r.error || r.result?.error || "Erro" }).eq("campaign_id", campaignId).ilike("phone", `%${phone}%`);
+            }
+          }
+        } else if (campaignId && sentCount > 0) {
+          // No individual results - mark all as sent
+          await supabase.from("campaign_contacts").update({ status: "sent", sent_at: new Date().toISOString() }).eq("campaign_id", campaignId).eq("status", "pending");
+        }
+        
         toast.success(`Campanha enviada! ${sentCount} enviados, ${failedCount} falhas`);
         addLog("success", `Campanha finalizada: ${sentCount} enviados, ${failedCount} falhas`);
       } else {
@@ -906,6 +936,11 @@ function MassSendingContent() {
             failed_count: failedCount,
             completed_at: new Date().toISOString()
           }).eq("id", campaignId);
+          
+          // Mark all contacts as sent for immediate sends
+          if (campaignId) {
+            await supabase.from("campaign_contacts").update({ status: "sent", sent_at: new Date().toISOString() }).eq("campaign_id", campaignId).eq("status", "pending");
+          }
           
           addLog("success", `Campanha finalizada: ${sentCount} enviados, ${failedCount} falhas`);
           toast.success(`Campanha enviada! ${sentCount} enviados, ${failedCount} falhas`);
@@ -1259,6 +1294,82 @@ function MassSendingContent() {
     toast.success("Campanha excluída");
     loadData();
     setDeleting(null);
+  };
+
+  // Save contacts to campaign_contacts table for tracking
+  const saveCampaignContacts = async (campaignId: string, userId: string, phones: string[]) => {
+    try {
+      const contacts = phones.map(phone => ({
+        campaign_id: campaignId,
+        user_id: userId,
+        phone: phone.replace("@s.whatsapp.net", ""),
+        status: "pending"
+      }));
+      // Insert in batches of 500
+      for (let i = 0; i < contacts.length; i += 500) {
+        const batch = contacts.slice(i, i + 500);
+        await supabase.from("campaign_contacts").insert(batch);
+      }
+    } catch (err) {
+      console.error("Error saving campaign contacts:", err);
+    }
+  };
+
+  // Resend campaign to contacts that were not sent (failed or pending)
+  const resendToUnsent = async (campaign: Campaign) => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        toast.error("Não autenticado");
+        return;
+      }
+
+      // Get contacts that were not successfully sent
+      const { data: unsentContacts, error } = await supabase
+        .from("campaign_contacts")
+        .select("phone")
+        .eq("campaign_id", campaign.id)
+        .in("status", ["pending", "failed"]);
+
+      if (error || !unsentContacts || unsentContacts.length === 0) {
+        toast.info("Todos os contatos desta campanha já foram enviados com sucesso!");
+        return;
+      }
+
+      // Create new campaign with unsent contacts
+      const newName = `${campaign.name} (Reenvio)`;
+      const { data: newCampaign, error: createError } = await supabase
+        .from("campaigns")
+        .insert({
+          user_id: userData.user.id,
+          name: newName,
+          message_type: campaign.message_type,
+          message_content: campaign.message_content,
+          media_url: campaign.media_url,
+          total_contacts: unsentContacts.length,
+          status: "pending"
+        })
+        .select()
+        .single();
+
+      if (createError || !newCampaign) {
+        toast.error("Erro ao criar campanha de reenvio");
+        return;
+      }
+
+      // Save contacts for the new campaign
+      await saveCampaignContacts(
+        newCampaign.id,
+        userData.user.id,
+        unsentContacts.map(c => c.phone)
+      );
+
+      toast.success(`Campanha de reenvio criada com ${unsentContacts.length} contatos não enviados!`);
+      loadData();
+    } catch (err) {
+      console.error("Error resending:", err);
+      toast.error("Erro ao criar reenvio");
+    }
   };
 
   // Control campaign via UZAPI (stop, continue, delete)
@@ -2503,6 +2614,18 @@ function MassSendingContent() {
                               <RefreshCw className="w-4 h-4 mr-2" />
                             )}
                             Retomar Envio
+                          </DropdownMenuItem>
+                        )}
+                        {(c.status === "completed" || c.status === "failed") && (c.failed_count || 0) > 0 && (
+                          <DropdownMenuItem onClick={() => resendToUnsent(c)}>
+                            <RotateCcw className="w-4 h-4 mr-2" />
+                            Reenviar para não enviados
+                          </DropdownMenuItem>
+                        )}
+                        {(c.status === "completed" || c.status === "failed") && (c.failed_count || 0) === 0 && c.sent_count !== null && c.sent_count < c.total_contacts && (
+                          <DropdownMenuItem onClick={() => resendToUnsent(c)}>
+                            <RotateCcw className="w-4 h-4 mr-2" />
+                            Reenviar para não enviados
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem 
