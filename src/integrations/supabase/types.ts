@@ -1002,6 +1002,72 @@ export type Database = {
           },
         ]
       }
+      telegram_notification_configs: {
+        Row: {
+          company_id: string | null
+          connection_id: string | null
+          created_at: string
+          filter_keywords: string[] | null
+          filter_mode: string
+          id: string
+          is_active: boolean
+          name: string
+          notify_campaign_start: boolean
+          notify_lead_response: boolean
+          telegram_bot_token: string | null
+          telegram_chat_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          connection_id?: string | null
+          created_at?: string
+          filter_keywords?: string[] | null
+          filter_mode?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notify_campaign_start?: boolean
+          notify_lead_response?: boolean
+          telegram_bot_token?: string | null
+          telegram_chat_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          connection_id?: string | null
+          created_at?: string
+          filter_keywords?: string[] | null
+          filter_mode?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notify_campaign_start?: boolean
+          notify_lead_response?: boolean
+          telegram_bot_token?: string | null
+          telegram_chat_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_notification_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "telegram_notification_configs_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_connections: {
         Row: {
           connection_id: string

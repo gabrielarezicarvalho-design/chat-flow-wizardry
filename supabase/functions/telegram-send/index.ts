@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { chat_id, message, parse_mode } = await req.json();
+    const { chat_id, message, parse_mode, bot_token } = await req.json();
 
-    const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+    const TELEGRAM_BOT_TOKEN = bot_token || Deno.env.get("TELEGRAM_BOT_TOKEN");
     
     if (!TELEGRAM_BOT_TOKEN) {
       console.error("❌ TELEGRAM_BOT_TOKEN não configurado");

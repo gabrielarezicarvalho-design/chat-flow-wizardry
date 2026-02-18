@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, Send, Loader2, ArrowLeft, ArrowRight, Users, Upload, Check, Tag, FileSpreadsheet, Image, FileText, Music, Video, Type, Eye, Trash2, BarChart3, Calendar, Clock, CheckCircle, MoreVertical, Wifi, WifiOff, RefreshCw, Rocket, Megaphone, X, Smartphone, List, LayoutGrid, MousePointer, BookmarkPlus, Terminal, Save, MessageSquare, Gift, Star, BarChart, Pause, Play, Link, Copy } from "lucide-react";
+import { Plus, Send, Loader2, ArrowLeft, ArrowRight, Users, Upload, Check, Tag, FileSpreadsheet, Image, FileText, Music, Video, Type, Eye, Trash2, BarChart3, Calendar, Clock, CheckCircle, MoreVertical, Wifi, WifiOff, RefreshCw, Rocket, Megaphone, X, Smartphone, List, LayoutGrid, MousePointer, BookmarkPlus, Terminal, Save, MessageSquare, Gift, Star, BarChart, Pause, Play, Link, Copy, Bell } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ import { CampaignScheduler } from "@/components/mass-sending/CampaignScheduler";
 import { OptimalTimeSuggestions } from "@/components/mass-sending/OptimalTimeSuggestions";
 import { FeatureGate } from "@/components/FeatureGate";
 import { WebhookFieldConfig } from "@/components/mass-sending/WebhookFieldConfig";
+import { TelegramNotifications } from "@/components/mass-sending/TelegramNotifications";
 
 type MessageType = "text" | "image" | "document" | "audio" | "video";
 
@@ -125,7 +126,7 @@ function MassSendingContent() {
   const [tags, setTags] = useState<TagItem[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"campaigns" | "templates" | "message-templates" | "scheduler" | "optimal-times" | "webhook" | "birthday" | "satisfaction" | "tester" | "reports">("campaigns");
+  const [activeTab, setActiveTab] = useState<"campaigns" | "templates" | "message-templates" | "scheduler" | "optimal-times" | "webhook" | "birthday" | "satisfaction" | "tester" | "reports" | "notifications">("campaigns");
 
   const [wizard, setWizard] = useState(false);
   const [step, setStep] = useState(1);
@@ -2157,7 +2158,7 @@ function MassSendingContent() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="grid w-full grid-cols-11 max-w-7xl">
+        <TabsList className="grid w-full grid-cols-12 max-w-7xl">
           <TabsTrigger value="campaigns" className="flex items-center gap-2">
             <Megaphone className="w-4 h-4" />Campanhas
           </TabsTrigger>
@@ -2178,6 +2179,9 @@ function MassSendingContent() {
           </TabsTrigger>
           <TabsTrigger value="webhook" className="flex items-center gap-2">
             <Link className="w-4 h-4" />Webhook
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <Bell className="w-4 h-4" />Notificação
           </TabsTrigger>
           <TabsTrigger value="birthday" className="flex items-center gap-2">
             <Gift className="w-4 h-4" />Aniversário
@@ -2635,6 +2639,10 @@ Content-Type: application/json
               </div>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="notifications" className="mt-6">
+          <TelegramNotifications connections={connections} />
         </TabsContent>
 
         <TabsContent value="birthday" className="mt-6">
