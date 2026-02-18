@@ -16,7 +16,8 @@ import { useFlows } from "@/hooks/useFlows";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
-import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2 } from "lucide-react";
+import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell } from "lucide-react";
+import { TelegramNotifications } from "@/components/mass-sending/TelegramNotifications";
 import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
 import { DeleteConnectionDialog } from "@/components/connections/DeleteConnectionDialog";
 import { Progress } from "@/components/ui/progress";
@@ -2237,6 +2238,13 @@ const Connections = () => {
             <Code className="w-4 h-4 mr-2" />
             API e Webhooks
           </TabsTrigger>
+          <TabsTrigger 
+            value="notificacao"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3"
+          >
+            <Bell className="w-4 h-4 mr-2" />
+            Notificação
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="conexao" className="mt-6">
@@ -2253,6 +2261,10 @@ const Connections = () => {
 
         <TabsContent value="api" className="mt-6">
           {renderApiTab()}
+        </TabsContent>
+
+        <TabsContent value="notificacao" className="mt-6">
+          <TelegramNotifications connections={connections.map(c => ({ id: c.id, name: c.name || c.instance_name || 'Sem nome' }))} />
         </TabsContent>
 
       </Tabs>
