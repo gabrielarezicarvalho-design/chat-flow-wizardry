@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import confetti from "canvas-confetti";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -197,7 +198,18 @@ const Connections = () => {
                 id: connection.id,
                 updates: { status: 'connected' }
               });
-              toast.success(`✅ ${connection.instance_name} está conectado!`);
+              
+              // 🎆 Fireworks!
+              const end = Date.now() + 3000;
+              const colors = ['#22c55e', '#3b82f6', '#a855f7', '#eab308', '#ef4444'];
+              const frame = () => {
+                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, colors });
+                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, colors });
+                if (Date.now() < end) requestAnimationFrame(frame);
+              };
+              frame();
+              
+              toast.success(`🎉 ${connection.instance_name} conectado com sucesso!`, { duration: 5000 });
             }
           } catch (err: any) {
             // Try to parse error message for instance deletion
@@ -599,7 +611,34 @@ const Connections = () => {
 
         await syncContactsAfterConnect(connectionId);
 
-        toast.success("✅ WhatsApp conectado com sucesso!");
+        // 🎆 Fireworks celebration!
+        const duration = 3000;
+        const end = Date.now() + duration;
+        const colors = ['#22c55e', '#3b82f6', '#a855f7', '#eab308', '#ef4444'];
+
+        const frame = () => {
+          confetti({
+            particleCount: 3,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0, y: 0.7 },
+            colors
+          });
+          confetti({
+            particleCount: 3,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1, y: 0.7 },
+            colors
+          });
+
+          if (Date.now() < end) {
+            requestAnimationFrame(frame);
+          }
+        };
+        frame();
+
+        toast.success("🎉 WhatsApp conectado com sucesso!", { duration: 5000 });
 
         if (statusCheckInterval) {
           clearInterval(statusCheckInterval);
