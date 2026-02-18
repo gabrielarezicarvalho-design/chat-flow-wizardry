@@ -37,39 +37,51 @@ import {
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
+import { useCompanyId } from "@/hooks/useCompanyId";
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 const CampaignReports = () => {
   const [period, setPeriod] = useState("7");
   const [selectedCampaign, setSelectedCampaign] = useState<string>("all");
+  const { companyId } = useCompanyId();
 
-  // Fetch campaigns
+  // Fetch campaigns filtered by company
   const { data: campaigns = [], isLoading: loadingCampaigns, refetch } = useQuery({
-    queryKey: ["campaigns-reports"],
+    queryKey: ["campaigns-reports", companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("campaigns")
         .select("*")
         .order("created_at", { ascending: false });
       
+      if (companyId) {
+        query = query.eq("company_id", companyId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
   });
 
-  // Fetch campaign responses
+  // Fetch campaign responses filtered by company campaigns
   const { data: responses = [] } = useQuery({
-    queryKey: ["campaign-responses-reports"],
+    queryKey: ["campaign-responses-reports", companyId, campaigns],
     queryFn: async () => {
+      if (campaigns.length === 0) return [];
+      
+      const campaignIds = campaigns.map(c => c.id);
       const { data, error } = await supabase
         .from("campaign_responses")
         .select("*")
+        .in("campaign_id", campaignIds)
         .order("created_at", { ascending: false });
       
       if (error) throw error;
       return data || [];
     },
+    enabled: campaigns.length > 0,
   });
 
   // Calculate stats
