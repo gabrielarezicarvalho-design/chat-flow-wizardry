@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.wa-contacts]
 verify_jwt = false
+
+[functions.wa-public-qrcode]
+verify_jwt = false

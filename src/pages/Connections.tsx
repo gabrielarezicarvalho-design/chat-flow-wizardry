@@ -15,7 +15,7 @@ import { useFlows } from "@/hooks/useFlows";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
-import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone } from "lucide-react";
+import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2 } from "lucide-react";
 import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
 import { DeleteConnectionDialog } from "@/components/connections/DeleteConnectionDialog";
 import { Progress } from "@/components/ui/progress";
@@ -1244,6 +1244,18 @@ const Connections = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const url = `${window.location.origin}/connect/${selectedConnection.id}`;
+                      navigator.clipboard.writeText(url);
+                      toast.success("Link copiado! Envie para o cliente conectar o WhatsApp.");
+                    }}
+                  >
+                    <Link2 className="w-4 h-4 mr-2" />
+                    Copiar Link
+                  </Button>
                   {selectedConnection.status !== 'connected' ? (
                     <Button onClick={() => handleReconnect(selectedConnection)}>
                       <QrCode className="w-4 h-4 mr-2" />
