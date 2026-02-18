@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useConnections } from "@/hooks/useConnections";
+import { useCompanyId } from "@/hooks/useCompanyId";
 
 interface Tag {
   id: string;
@@ -58,6 +59,7 @@ interface SegmentFilter {
 const Segmentation = () => {
   const queryClient = useQueryClient();
   const { connections } = useConnections();
+  const { companyId } = useCompanyId();
   const [searchTerm, setSearchTerm] = useState("");
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#10b981");
@@ -71,59 +73,73 @@ const Segmentation = () => {
 
   const activeConnection = connections.find(c => c.status === 'connected');
 
-  // Fetch tags
+  // Fetch tags filtered by company
   const { data: tags = [], isLoading: loadingTags } = useQuery({
-    queryKey: ["tags"],
+    queryKey: ["tags", companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("tags")
         .select("*")
         .order("name");
       
+      if (companyId) query = query.eq("company_id", companyId);
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data as Tag[];
     },
   });
 
-  // Fetch leads/contacts
+  // Fetch leads/contacts filtered by company
   const { data: contacts = [], isLoading: loadingContacts } = useQuery({
-    queryKey: ["leads-segmentation"],
+    queryKey: ["leads-segmentation", companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("leads")
         .select("*")
         .order("created_at", { ascending: false });
       
+      if (companyId) query = query.eq("company_id", companyId);
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
   });
 
-  // Fetch campaigns for history
+  // Fetch campaigns filtered by company
   const { data: campaigns = [] } = useQuery({
-    queryKey: ["campaigns-segmentation"],
+    queryKey: ["campaigns-segmentation", companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("campaigns")
         .select("*")
         .order("created_at", { ascending: false });
       
+      if (companyId) query = query.eq("company_id", companyId);
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
   });
 
-  // Fetch campaign responses
+  // Fetch campaign responses filtered by company campaigns
   const { data: responses = [] } = useQuery({
-    queryKey: ["responses-segmentation"],
+    queryKey: ["responses-segmentation", campaigns],
     queryFn: async () => {
+      if (campaigns.length === 0) return [];
+      
+      const campaignIds = campaigns.map(c => c.id);
       const { data, error } = await supabase
         .from("campaign_responses")
-        .select("*");
+        .select("*")
+        .in("campaign_id", campaignIds);
       
       if (error) throw error;
       return data || [];
     },
+    enabled: campaigns.length > 0,
   });
 
   // Sync labels from WhatsApp
@@ -193,7 +209,7 @@ const Segmentation = () => {
       // Create locally
       const { data, error } = await supabase
         .from("tags")
-        .insert({ name, color, user_id: user.id })
+        .insert({ name, color, user_id: user.id, company_id: companyId })
         .select()
         .single();
       
