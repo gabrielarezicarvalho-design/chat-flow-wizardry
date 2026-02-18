@@ -58,7 +58,9 @@ serve(async (req) => {
         errorMessage.includes("record not found") || 
         errorMessage.includes("not found") ||
         errorMessage.includes("instance not found") ||
-        response.status === 404;
+        errorMessage.includes("Invalid token") ||
+        response.status === 404 ||
+        response.status === 401;
       
       if (isAlreadyDeleted) {
         console.log("Instance already deleted or not found, treating as success");
