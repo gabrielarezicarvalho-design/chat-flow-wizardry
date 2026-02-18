@@ -259,10 +259,16 @@ function MassSendingContent() {
           });
 
           if (data?.progress) {
-            const { sent, failed, pending, total, completed } = data.progress;
+            const { sent, failed, pending, total, completed, folderGone } = data.progress;
             const updates: any = { sent_count: sent, failed_count: failed };
             
-            if (completed || (pending === 0 && total > 0)) {
+            // If folder is gone (404), UAZAPI already processed all messages
+            if (folderGone) {
+              updates.status = "completed";
+              updates.completed_at = new Date().toISOString();
+              // Use the campaign's total_contacts since folder no longer has data
+              updates.sent_count = campaign.total_contacts || 0;
+            } else if (completed || (pending === 0 && total > 0)) {
               updates.status = failed > 0 && sent === 0 ? "failed" : "completed";
               updates.completed_at = new Date().toISOString();
             }

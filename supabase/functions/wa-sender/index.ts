@@ -919,6 +919,17 @@ serve(async (req) => {
         let folderResult;
         try { folderResult = JSON.parse(folderText); } catch { folderResult = { raw: folderText }; }
         
+        // If UAZAPI returns 404, the folder was already processed and removed
+        // This means all messages were sent - treat as completed
+        if (folderResponse.status === 404 || folderResult?.code === 404) {
+          console.log(`[wa-sender] Folder ${folderId} returned 404 - treating as completed (messages already processed)`);
+          return new Response(JSON.stringify({
+            success: true,
+            data: folderResult,
+            progress: { sent: 0, failed: 0, pending: 0, total: 0, completed: true, folderGone: true }
+          }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+        
         // Calculate sent/failed/pending from folder data
         let sent = 0, failed = 0, pending = 0, total = 0;
         if (Array.isArray(folderResult)) {
@@ -938,7 +949,6 @@ serve(async (req) => {
             else pending++;
           }
         } else if (folderResult?.status) {
-          // Simple status response
           return new Response(JSON.stringify({
             success: true,
             data: folderResult,
