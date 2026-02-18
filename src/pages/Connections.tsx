@@ -686,6 +686,41 @@ const Connections = () => {
     }
   };
 
+  const handleDownloadQR = async (connection: any, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    try {
+      toast.info("Gerando QR Code...");
+      const { data, error } = await supabase.functions.invoke('wa-public-qrcode', {
+        body: { connection_id: connection.id, action: 'refresh' }
+      });
+      if (error) throw error;
+      if (data?.connected) {
+        toast.success("Esta conexão já está conectada!");
+        return;
+      }
+      if (!data?.qrcode) {
+        toast.error("Não foi possível gerar o QR Code. Tente reconectar a instância.");
+        return;
+      }
+      const qrSrc = data.qrcode.startsWith("data:") ? data.qrcode : `data:image/png;base64,${data.qrcode}`;
+      const link = document.createElement("a");
+      link.href = qrSrc;
+      link.download = `qrcode-${connection.name || connection.instance_name || "conexao"}.png`;
+      link.click();
+      toast.success("QR Code baixado com sucesso!");
+    } catch (err: any) {
+      console.error("Erro ao baixar QR:", err);
+      toast.error("Erro ao gerar QR Code para download.");
+    }
+  };
+
+  const handleCopyLink = (connection: any, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const url = `${window.location.origin}/connect/${connection.id}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Link copiado! Envie para o cliente conectar o WhatsApp.");
+  };
+
   const handleDeleteClick = (connection: any) => {
     setConnectionToDelete(connection);
     setDeleteDialogOpen(true);
@@ -1247,14 +1282,18 @@ const Connections = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      const url = `${window.location.origin}/connect/${selectedConnection.id}`;
-                      navigator.clipboard.writeText(url);
-                      toast.success("Link copiado! Envie para o cliente conectar o WhatsApp.");
-                    }}
+                    onClick={() => handleCopyLink(selectedConnection)}
                   >
                     <Link2 className="w-4 h-4 mr-2" />
                     Copiar Link
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDownloadQR(selectedConnection)}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Baixar QR
                   </Button>
                   {selectedConnection.status !== 'connected' ? (
                     <Button onClick={() => handleReconnect(selectedConnection)}>
@@ -1323,7 +1362,7 @@ const Connections = () => {
                   </Badge>
                 </div>
 
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-1.5 mt-3 flex-wrap">
                   {connection.status === 'connected' ? (
                     <Button
                       variant="outline"
@@ -1345,6 +1384,24 @@ const Connections = () => {
                       Reconectar
                     </Button>
                   )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => handleCopyLink(connection, e)}
+                    className="h-8 text-xs"
+                    title="Copiar link de conexão"
+                  >
+                    <Link2 className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => handleDownloadQR(connection, e)}
+                    className="h-8 text-xs"
+                    title="Baixar QR Code"
+                  >
+                    <Download className="w-3 h-3" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="sm"
