@@ -54,7 +54,6 @@ export function useFeatureAccess(): FeatureAccessResult {
     setError(null);
 
     try {
-      // Buscar o profile do usuário para obter o company_id
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("company_id")
@@ -62,7 +61,7 @@ export function useFeatureAccess(): FeatureAccessResult {
         .single();
 
       if (profileError || !profile?.company_id) {
-        // Usuário sem empresa - libera todas as features por padrão
+        // User without company - grant all features by default
         setPlan({
           id: 'free',
           name: 'Plano Livre',
@@ -74,25 +73,43 @@ export function useFeatureAccess(): FeatureAccessResult {
         return;
       }
 
-      // Buscar a empresa e seu plano
+      // Fetch company and its plan slug
       const { data: company, error: companyError } = await supabase
         .from("companies")
         .select('plan, max_users, max_connections')
         .eq("id", profile.company_id)
         .single();
 
-      if (companyError) {
-        throw companyError;
-      }
+      if (companyError) throw companyError;
 
-      // Usar o plano da empresa ou um plano padrão
-      setPlan({
-        id: company?.plan || 'basic',
-        name: company?.plan || 'Básico',
-        features: ['chat', 'flows_basic', 'ai_agents', 'mass_sending', 'smart_forms', 'reports', 'tags', 'departments', 'leads_management'],
-        max_users: company?.max_users || 10,
-        max_connections: company?.max_connections || 3
-      });
+      const planSlug = company?.plan || 'basic';
+
+      // Fetch real plan features from subscription_plans
+      const { data: subscriptionPlan } = await supabase
+        .from("subscription_plans")
+        .select('name, features, max_users, max_connections')
+        .eq("slug", planSlug)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (subscriptionPlan) {
+        setPlan({
+          id: planSlug,
+          name: subscriptionPlan.name,
+          features: subscriptionPlan.features || [],
+          max_users: company?.max_users || subscriptionPlan.max_users,
+          max_connections: company?.max_connections || subscriptionPlan.max_connections
+        });
+      } else {
+        // Fallback if plan not found in subscription_plans
+        setPlan({
+          id: planSlug,
+          name: planSlug,
+          features: ['chat', 'flows_basic', 'tags', 'departments'],
+          max_users: company?.max_users || 10,
+          max_connections: company?.max_connections || 3
+        });
+      }
     } catch (err) {
       console.error("Error fetching plan features:", err);
       setError("Erro ao carregar plano");
@@ -108,7 +125,7 @@ export function useFeatureAccess(): FeatureAccessResult {
 
   const hasAccess = useCallback(
     (featureId: FeatureId): boolean => {
-      if (!plan) return true; // Se não há plano, libera acesso
+      if (!plan) return true;
       return plan.features.includes(featureId);
     },
     [plan]
