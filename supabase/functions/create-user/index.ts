@@ -67,6 +67,32 @@ serve(async (req) => {
       );
     }
 
+    // Enforce user limit for the company
+    if (company_id) {
+      const { data: company } = await supabaseAdmin
+        .from('companies')
+        .select('max_users, name')
+        .eq('id', company_id)
+        .single();
+
+      if (company) {
+        const { count } = await supabaseAdmin
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('company_id', company_id);
+
+        if (count !== null && count >= company.max_users) {
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: `Limite de ${company.max_users} usuário(s) atingido para a empresa "${company.name}". Atualize o plano para adicionar mais usuários.`
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    }
+
     // Generate email from username (for internal use only)
     const email = `${username}@internal.marketflow.local`;
 

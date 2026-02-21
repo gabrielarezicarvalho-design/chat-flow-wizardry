@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { 
@@ -24,8 +25,20 @@ interface Company {
   created_at: string;
 }
 
+interface Plan {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  max_users: number;
+  max_connections: number;
+  features: string[];
+  is_active: boolean;
+}
+
 export function AdminEmpresas() {
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDialog, setShowDialog] = useState(false);
@@ -39,7 +52,6 @@ export function AdminEmpresas() {
     max_users: 10,
     max_connections: 3,
     plan: "basic",
-    // Admin user fields
     admin_username: "",
     admin_password: "",
     admin_full_name: ""
@@ -52,18 +64,33 @@ export function AdminEmpresas() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("companies")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const [companiesRes, plansRes] = await Promise.all([
+        supabase.from("companies").select("*").order("created_at", { ascending: false }),
+        supabase.from("subscription_plans").select("*").eq("is_active", true).order("price", { ascending: true }),
+      ]);
       
-      if (error) throw error;
-      setCompanies(data || []);
+      if (companiesRes.error) throw companiesRes.error;
+      setCompanies(companiesRes.data || []);
+      setPlans(plansRes.data || []);
     } catch (error) {
-      console.error("Error fetching companies:", error);
-      toast.error("Erro ao carregar empresas");
+      console.error("Error fetching data:", error);
+      toast.error("Erro ao carregar dados");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePlanChange = (planSlug: string) => {
+    const selectedPlan = plans.find(p => p.slug === planSlug);
+    if (selectedPlan) {
+      setForm(prev => ({
+        ...prev,
+        plan: planSlug,
+        max_users: selectedPlan.max_users,
+        max_connections: selectedPlan.max_connections,
+      }));
+    } else {
+      setForm(prev => ({ ...prev, plan: planSlug }));
     }
   };
 
@@ -73,7 +100,6 @@ export function AdminEmpresas() {
       return;
     }
 
-    // Validate admin user for new companies
     if (!editingCompany) {
       if (!form.admin_username) {
         toast.error("Usuário do administrador é obrigatório");
@@ -97,14 +123,10 @@ export function AdminEmpresas() {
       };
 
       if (editingCompany) {
-        const { error } = await supabase
-          .from("companies")
-          .update(data)
-          .eq("id", editingCompany.id);
+        const { error } = await supabase.from("companies").update(data).eq("id", editingCompany.id);
         if (error) throw error;
         toast.success("Empresa atualizada!");
       } else {
-        // Create company first
         const { data: newCompany, error: companyError } = await supabase
           .from("companies")
           .insert(data)
@@ -113,7 +135,6 @@ export function AdminEmpresas() {
         
         if (companyError) throw companyError;
 
-        // Create admin user for the company using edge function
         const { data: adminResult, error: adminError } = await supabase.functions.invoke('create-admin-user', {
           body: {
             secret_key: "MARKETFLOW_ADMIN_SETUP_2026",
@@ -126,8 +147,6 @@ export function AdminEmpresas() {
         });
 
         if (adminError) {
-          console.error("Error creating admin:", adminError);
-          // Delete the company if admin creation failed
           await supabase.from("companies").delete().eq("id", newCompany.id);
           throw new Error("Erro ao criar administrador: " + adminError.message);
         }
@@ -148,24 +167,19 @@ export function AdminEmpresas() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza? Esta ação não pode ser desfeita.")) return;
-    
     try {
       const { error } = await supabase.from("companies").delete().eq("id", id);
       if (error) throw error;
       toast.success("Empresa excluída!");
       fetchData();
     } catch (error) {
-      console.error("Error deleting:", error);
       toast.error("Erro ao excluir");
     }
   };
 
   const handleToggleActive = async (company: Company) => {
     try {
-      const { error } = await supabase
-        .from("companies")
-        .update({ is_active: !company.is_active })
-        .eq("id", company.id);
+      const { error } = await supabase.from("companies").update({ is_active: !company.is_active }).eq("id", company.id);
       if (error) throw error;
       toast.success(company.is_active ? "Empresa desativada!" : "Empresa ativada!");
       fetchData();
@@ -176,13 +190,14 @@ export function AdminEmpresas() {
 
   const resetForm = () => {
     setEditingCompany(null);
+    const defaultPlan = plans.length > 0 ? plans[0] : null;
     setForm({
       name: "",
       slug: "",
       is_active: true,
-      max_users: 10,
-      max_connections: 3,
-      plan: "basic",
+      max_users: defaultPlan?.max_users || 10,
+      max_connections: defaultPlan?.max_connections || 3,
+      plan: defaultPlan?.slug || "basic",
       admin_username: "",
       admin_password: "",
       admin_full_name: ""
@@ -211,6 +226,11 @@ export function AdminEmpresas() {
     c.slug?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const getPlanName = (slug: string) => {
+    const plan = plans.find(p => p.slug === slug);
+    return plan?.name || slug;
+  };
+
   return (
     <div className="p-6 lg:p-8">
       {/* Header */}
@@ -220,20 +240,11 @@ export function AdminEmpresas() {
           <p className="text-slate-400">Gerenciamento de empresas clientes</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={fetchData}
-            className="border-white/20 text-white hover:bg-white/10"
-            disabled={loading}
-          >
+          <Button variant="outline" size="sm" onClick={fetchData} className="border-white/20 text-white hover:bg-white/10" disabled={loading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
-          <Button 
-            onClick={() => { resetForm(); setShowDialog(true); }}
-            className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600"
-          >
+          <Button onClick={() => { resetForm(); setShowDialog(true); }} className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600">
             <Plus className="h-4 w-4 mr-2" />
             Nova Empresa
           </Button>
@@ -259,19 +270,12 @@ export function AdminEmpresas() {
       {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-        <Input
-          placeholder="Buscar empresa..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 bg-white/5 border-white/10 text-white max-w-md"
-        />
+        <Input placeholder="Buscar empresa..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-white/5 border-white/10 text-white max-w-md" />
       </div>
 
       {/* Companies List */}
       {loading ? (
-        <div className="p-8 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-emerald-500" />
-        </div>
+        <div className="p-8 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto text-emerald-500" /></div>
       ) : filteredCompanies.length === 0 ? (
         <div className="p-8 text-center text-slate-500 bg-white/5 rounded-xl border border-white/10">
           <Building2 className="h-12 w-12 mx-auto mb-4 text-slate-600" />
@@ -305,7 +309,7 @@ export function AdminEmpresas() {
                     </div>
                   </td>
                   <td className="p-4">
-                    <Badge className="bg-purple-500/20 text-purple-400">{company.plan}</Badge>
+                    <Badge className="bg-purple-500/20 text-purple-400">{getPlanName(company.plan)}</Badge>
                   </td>
                   <td className="p-4">
                     <p className="text-sm text-slate-300">{company.max_users} usuários</p>
@@ -313,45 +317,20 @@ export function AdminEmpresas() {
                   </td>
                   <td className="p-4">
                     {company.is_active ? (
-                      <Badge className="bg-emerald-500/20 text-emerald-400">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Ativa
-                      </Badge>
+                      <Badge className="bg-emerald-500/20 text-emerald-400"><CheckCircle className="h-3 w-3 mr-1" />Ativa</Badge>
                     ) : (
-                      <Badge className="bg-red-500/20 text-red-400">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Inativa
-                      </Badge>
+                      <Badge className="bg-red-500/20 text-red-400"><XCircle className="h-3 w-3 mr-1" />Inativa</Badge>
                     )}
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleToggleActive(company)}
-                        className="h-8 w-8"
-                      >
-                        {company.is_active ? (
-                          <Lock className="h-4 w-4 text-amber-400" />
-                        ) : (
-                          <Unlock className="h-4 w-4 text-emerald-400" />
-                        )}
+                      <Button size="icon" variant="ghost" onClick={() => handleToggleActive(company)} className="h-8 w-8">
+                        {company.is_active ? <Lock className="h-4 w-4 text-amber-400" /> : <Unlock className="h-4 w-4 text-emerald-400" />}
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => openEdit(company)}
-                        className="h-8 w-8"
-                      >
+                      <Button size="icon" variant="ghost" onClick={() => openEdit(company)} className="h-8 w-8">
                         <Pencil className="h-4 w-4 text-slate-400" />
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleDelete(company.id)}
-                        className="text-red-400 hover:text-red-300 h-8 w-8"
-                      >
+                      <Button size="icon" variant="ghost" onClick={() => handleDelete(company.id)} className="text-red-400 hover:text-red-300 h-8 w-8">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -372,102 +351,73 @@ export function AdminEmpresas() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Nome da Empresa *</Label>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="bg-white/5 border-white/10"
-                placeholder="Ex: Empresa XYZ"
-              />
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-white/5 border-white/10" placeholder="Ex: Empresa XYZ" />
             </div>
             
             <div className="space-y-2">
               <Label>Slug (URL)</Label>
-              <Input
-                value={form.slug}
-                onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                className="bg-white/5 border-white/10"
-                placeholder="empresa-xyz"
-              />
+              <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="bg-white/5 border-white/10" placeholder="empresa-xyz" />
+            </div>
+
+            {/* Plan Selector */}
+            <div className="space-y-2">
+              <Label>Plano *</Label>
+              <Select value={form.plan} onValueChange={handlePlanChange}>
+                <SelectTrigger className="bg-white/5 border-white/10">
+                  <SelectValue placeholder="Selecione um plano" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-white/10">
+                  {plans.map(plan => (
+                    <SelectItem key={plan.slug} value={plan.slug} className="text-white focus:bg-white/10 focus:text-white">
+                      <div className="flex items-center gap-2">
+                        <span>{plan.name}</span>
+                        <span className="text-xs text-slate-400">— R$ {plan.price}/mês • {plan.max_users} usuários • {plan.max_connections} conexões</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Máx. Usuários</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={form.max_users}
-                  onChange={(e) => setForm({ ...form, max_users: Number(e.target.value) })}
-                  className="bg-white/5 border-white/10"
-                />
+                <Input type="number" min={1} value={form.max_users} onChange={(e) => setForm({ ...form, max_users: Number(e.target.value) })} className="bg-white/5 border-white/10" />
+                <p className="text-xs text-slate-500">Preenchido pelo plano, pode customizar</p>
               </div>
               <div className="space-y-2">
                 <Label>Máx. Conexões</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={form.max_connections}
-                  onChange={(e) => setForm({ ...form, max_connections: Number(e.target.value) })}
-                  className="bg-white/5 border-white/10"
-                />
+                <Input type="number" min={1} value={form.max_connections} onChange={(e) => setForm({ ...form, max_connections: Number(e.target.value) })} className="bg-white/5 border-white/10" />
               </div>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-lg bg-white/5">
               <Label>Empresa Ativa</Label>
-              <Switch
-                checked={form.is_active}
-                onCheckedChange={(checked) => setForm({ ...form, is_active: checked })}
-              />
+              <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
             </div>
 
-            {/* Admin User Section - Only for new companies */}
+            {/* Admin User Section */}
             {!editingCompany && (
               <div className="pt-4 border-t border-white/10">
                 <div className="flex items-center gap-2 mb-4">
                   <User className="h-5 w-5 text-emerald-400" />
                   <h3 className="font-semibold text-white">Administrador da Empresa</h3>
                 </div>
-                
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Nome Completo</Label>
-                    <Input
-                      value={form.admin_full_name}
-                      onChange={(e) => setForm({ ...form, admin_full_name: e.target.value })}
-                      className="bg-white/5 border-white/10"
-                      placeholder="Nome do administrador"
-                    />
+                    <Input value={form.admin_full_name} onChange={(e) => setForm({ ...form, admin_full_name: e.target.value })} className="bg-white/5 border-white/10" placeholder="Nome do administrador" />
                   </div>
-
                   <div className="space-y-2">
                     <Label>Usuário de Login *</Label>
-                    <Input
-                      value={form.admin_username}
-                      onChange={(e) => setForm({ ...form, admin_username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
-                      className="bg-white/5 border-white/10"
-                      placeholder="admin_empresa"
-                    />
+                    <Input value={form.admin_username} onChange={(e) => setForm({ ...form, admin_username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })} className="bg-white/5 border-white/10" placeholder="admin_empresa" />
                     <p className="text-xs text-slate-500">Apenas letras minúsculas, números e underscore</p>
                   </div>
-
                   <div className="space-y-2">
                     <Label>Senha *</Label>
                     <div className="relative">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        value={form.admin_password}
-                        onChange={(e) => setForm({ ...form, admin_password: e.target.value })}
-                        className="bg-white/5 border-white/10 pr-10"
-                        placeholder="Mínimo 6 caracteres"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
+                      <Input type={showPassword ? "text" : "password"} value={form.admin_password} onChange={(e) => setForm({ ...form, admin_password: e.target.value })} className="bg-white/5 border-white/10 pr-10" placeholder="Mínimo 6 caracteres" />
+                      <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowPassword(!showPassword)}>
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                     </div>
@@ -477,10 +427,8 @@ export function AdminEmpresas() {
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDialog(false)} className="border-white/20 text-white">
-              Cancelar
-            </Button>
-            <Button 
+            <Button variant="outline" onClick={() => setShowDialog(false)} className="border-white/20 text-white">Cancelar</Button>
+            <Button
               onClick={handleSave}
               disabled={saving || !form.name || (!editingCompany && (!form.admin_username || form.admin_password.length < 6))}
               className="bg-gradient-to-r from-emerald-500 to-cyan-500"
