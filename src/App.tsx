@@ -50,6 +50,7 @@ const InternalChat = lazy(() => import("./pages/InternalChat"));
 const AutoProspecting = lazy(() => import("./pages/AutoProspecting"));
 const CampaignReports = lazy(() => import("./pages/CampaignReports"));
 const Segmentation = lazy(() => import("./pages/Segmentation"));
+const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -138,6 +139,7 @@ function App() {
                                 <Route path="/auto-prospecting" element={<AutoProspecting />} />
                                 <Route path="/campaign-reports" element={<CampaignReports />} />
                                 <Route path="/segmentation" element={<Segmentation />} />
+                                <Route path="/chatgpt-credits" element={<ChatGPTCredits />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
                                 <Route path="*" element={<NotFound />} />

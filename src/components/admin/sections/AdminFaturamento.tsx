@@ -45,6 +45,7 @@ const ALL_FEATURES = [
   { id: "internal_chat", label: "Chat Interno" },
   { id: "leads_management", label: "Gestão de Leads" },
   { id: "multi_connection", label: "Multi-Conexão" },
+  { id: "chatgpt_credits", label: "ChatGPT / Créditos OpenAI" },
 ];
 
 export function AdminFaturamento() {
