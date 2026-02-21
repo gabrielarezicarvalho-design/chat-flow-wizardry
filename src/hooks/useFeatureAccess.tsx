@@ -17,7 +17,8 @@ export type FeatureId =
   | "scheduled_messages"
   | "internal_chat"
   | "leads_management"
-  | "multi_connection";
+  | "multi_connection"
+  | "chatgpt_credits";
 
 interface PlanInfo {
   id: string;

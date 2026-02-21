@@ -42,7 +42,8 @@ const FEATURE_NAMES: Record<FeatureId, string> = {
   scheduled_messages: "Agendamento",
   internal_chat: "Chat Interno",
   leads_management: "Gestão de Leads",
-  multi_connection: "Múltiplas Conexões"
+  multi_connection: "Múltiplas Conexões",
+  chatgpt_credits: "ChatGPT / Créditos OpenAI"
 };
 
 function BlockedContent({ 

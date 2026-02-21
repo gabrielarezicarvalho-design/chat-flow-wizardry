@@ -20,7 +20,8 @@ import {
   ChevronRight,
   ChevronDown,
   BarChart3,
-  Tags
+  Tags,
+  Bot
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +60,7 @@ const adminNavItems: NavItem[] = [
   { to: "/campaign-reports", icon: BarChart3, label: "Relatórios" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
   { to: "/segmentation", icon: Tags, label: "Segmentação" },
+  { to: "/chatgpt-credits", icon: Bot, label: "ChatGPT", feature: "chatgpt_credits" },
   { to: "/connections", icon: LinkIcon, label: "Conexões" },
   { to: "/users", icon: UsersRound, label: "Usuários" },
   { to: "/settings", icon: Settings, label: "Configurações" },
