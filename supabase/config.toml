@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.wa-public-qrcode]
 verify_jwt = false
+
+[functions.check-openai-credits]
+verify_jwt = false
