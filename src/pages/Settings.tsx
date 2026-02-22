@@ -25,6 +25,8 @@ const Settings = () => {
   
   const { stats: storageStats, isLoading: storageLoading, refetch: refetchStorage, formatBytes } = useStorageStats();
   const [activeTab, setActiveTab] = useState("geral");
+  const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
+  const [showTermsDialog, setShowTermsDialog] = useState(false);
   
   // Form states
   const [companyName, setCompanyName] = useState(settings?.company_name || "");
@@ -574,44 +576,100 @@ const Settings = () => {
             <Card className="p-6">
               <h2 className="text-xl font-bold text-foreground mb-4">Política de Privacidade e Termos de Serviço</h2>
               <p className="text-muted-foreground text-sm mb-6">
-                Configure as URLs da Política de Privacidade e dos Termos de Serviço exibidas na caixa de diálogo de Login e Detalhes do aplicativo.
+                Visualize a Política de Privacidade e os Termos de Serviço do sistema.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="privacyPolicy">URL da Política de Privacidade</Label>
-                  <Input
-                    id="privacyPolicy"
-                    type="url"
-                    value={privacyPolicyUrl}
-                    onChange={(e) => setPrivacyPolicyUrl(e.target.value)}
-                    placeholder="Política de Privacidade da caixa de diálogo Login e Detalhes do aplicativo"
-                    className="mt-2"
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="border rounded-lg p-5 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Shield className="w-6 h-6 text-primary" />
+                    <h3 className="font-semibold text-foreground">Política de Privacidade</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Descreve como coletamos, usamos e protegemos suas informações pessoais.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(`${window.location.origin}/politica-de-privacidade`, '_blank')}
+                    >
+                      <LinkIcon className="w-4 h-4 mr-2" />
+                      Abrir em nova aba
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowPrivacyDialog(true)}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Visualizar
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="termsOfService">URL dos Termos de Serviço</Label>
-                  <Input
-                    id="termsOfService"
-                    type="url"
-                    value={termsOfServiceUrl}
-                    onChange={(e) => setTermsOfServiceUrl(e.target.value)}
-                    placeholder="Termos de Serviço da caixa de diálogo de login e detalhes do app"
-                    className="mt-2"
-                  />
+
+                <div className="border rounded-lg p-5 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-6 h-6 text-primary" />
+                    <h3 className="font-semibold text-foreground">Termos de Serviço</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Define as regras e condições de uso da plataforma.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(`${window.location.origin}/termos-de-servico`, '_blank')}
+                    >
+                      <LinkIcon className="w-4 h-4 mr-2" />
+                      Abrir em nova aba
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowTermsDialog(true)}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Visualizar
+                    </Button>
+                  </div>
                 </div>
               </div>
-              <Button
-                className="mt-4 bg-primary hover:bg-primary/90"
-                onClick={() => {
-                  updateSettings.mutate({
-                    privacy_policy_url: privacyPolicyUrl,
-                    terms_of_service_url: termsOfServiceUrl,
-                  });
-                }}
-              >
-                Salvar Políticas
-              </Button>
             </Card>
+          )}
+
+          {/* Privacy Policy Dialog */}
+          {showPrivacyDialog && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowPrivacyDialog(false)}>
+              <div className="bg-background border rounded-lg w-full max-w-4xl max-h-[85vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between p-4 border-b">
+                  <h3 className="font-semibold text-foreground">Política de Privacidade</h3>
+                  <Button variant="ghost" size="sm" onClick={() => setShowPrivacyDialog(false)}>✕</Button>
+                </div>
+                <iframe
+                  src="/politica-de-privacidade"
+                  className="w-full h-[75vh] border-0"
+                  title="Política de Privacidade"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Terms of Service Dialog */}
+          {showTermsDialog && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowTermsDialog(false)}>
+              <div className="bg-background border rounded-lg w-full max-w-4xl max-h-[85vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between p-4 border-b">
+                  <h3 className="font-semibold text-foreground">Termos de Serviço</h3>
+                  <Button variant="ghost" size="sm" onClick={() => setShowTermsDialog(false)}>✕</Button>
+                </div>
+                <iframe
+                  src="/termos-de-servico"
+                  className="w-full h-[75vh] border-0"
+                  title="Termos de Serviço"
+                />
+              </div>
+            </div>
           )}
 
           {activeTab === "plano" && (
