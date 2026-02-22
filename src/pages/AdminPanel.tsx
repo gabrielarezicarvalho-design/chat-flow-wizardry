@@ -15,6 +15,7 @@ import { AdminConfiguracoes } from "@/components/admin/sections/AdminConfiguraco
 import { AdminBeta } from "@/components/admin/sections/AdminBeta";
 import AdminFeedback from "@/components/admin/sections/AdminFeedback";
 import AdminWhiteLabel from "@/components/admin/sections/AdminWhiteLabel";
+import AdminWhatsAppMeta from "@/components/admin/sections/AdminWhatsAppMeta";
 
 export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -33,6 +34,8 @@ export default function AdminPanel() {
         return <AdminAgentes />;
       case "integracoes":
         return <AdminIntegracoes />;
+      case "whatsapp-meta":
+        return <AdminWhatsAppMeta />;
       case "armazenamento":
         return <AdminArmazenamento />;
       case "ia":
