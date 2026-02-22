@@ -1206,6 +1206,8 @@ export type Database = {
           last_error: string | null
           last_tested_at: string | null
           meta_access_token: string | null
+          meta_business_id: string | null
+          meta_connected_at: string | null
           meta_phone_number_id: string | null
           meta_verify_token: string | null
           meta_waba_id: string | null
@@ -1223,6 +1225,8 @@ export type Database = {
           last_error?: string | null
           last_tested_at?: string | null
           meta_access_token?: string | null
+          meta_business_id?: string | null
+          meta_connected_at?: string | null
           meta_phone_number_id?: string | null
           meta_verify_token?: string | null
           meta_waba_id?: string | null
@@ -1240,6 +1244,8 @@ export type Database = {
           last_error?: string | null
           last_tested_at?: string | null
           meta_access_token?: string | null
+          meta_business_id?: string | null
+          meta_connected_at?: string | null
           meta_phone_number_id?: string | null
           meta_verify_token?: string | null
           meta_waba_id?: string | null

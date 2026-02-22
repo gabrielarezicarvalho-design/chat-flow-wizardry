@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import {
   MessageSquare, Plug, CheckCircle, XCircle, AlertTriangle,
-  Loader2, RefreshCw, Send, QrCode, Copy, Eye, EyeOff, ArrowLeft, Trash2
+  Loader2, RefreshCw, Send, QrCode, Copy, Eye, EyeOff, ArrowLeft, Trash2, ExternalLink
 } from "lucide-react";
 
 interface WhatsAppConnection {
@@ -21,6 +21,8 @@ interface WhatsAppConnection {
   meta_waba_id: string | null;
   meta_access_token: string | null;
   meta_verify_token: string | null;
+  meta_business_id: string | null;
+  meta_connected_at: string | null;
   qr_api_url: string | null;
   qr_instance_id: string | null;
   qr_api_token: string | null;
@@ -47,23 +49,16 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
   const [showTokens, setShowTokens] = useState<Record<string, boolean>>({});
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [loadingQr, setLoadingQr] = useState(false);
+  const [connectingMeta, setConnectingMeta] = useState(false);
 
   const [provider, setProvider] = useState<"meta" | "qr">("meta");
   const [form, setForm] = useState({
-    meta_phone_number_id: "",
-    meta_waba_id: "",
-    meta_access_token: "",
-    meta_verify_token: crypto.randomUUID().replace(/-/g, "").slice(0, 16),
     qr_api_url: "",
     qr_instance_id: "",
     qr_api_token: "",
   });
 
-  useEffect(() => {
-    fetchConnection();
-  }, [companyId]);
-
-  const fetchConnection = async () => {
+  const fetchConnection = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -79,46 +74,83 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
     } finally {
       setLoading(false);
     }
-  };
+  }, [companyId]);
+
+  useEffect(() => {
+    fetchConnection();
+  }, [fetchConnection]);
+
+  // Listen for Meta callback popup messages
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "meta-connect-success") {
+        toast.success("WhatsApp Meta conectado com sucesso!");
+        setConnectingMeta(false);
+        fetchConnection();
+      } else if (event.data?.type === "meta-connect-error") {
+        toast.error("Erro na conexão: " + (event.data.message || "Falha"));
+        setConnectingMeta(false);
+        fetchConnection();
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [fetchConnection]);
 
   const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/whatsapp-webhook`;
 
-  const handleSave = async () => {
+  const handleConnectMeta = async () => {
+    setConnectingMeta(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("meta-start-connect", {
+        body: { company_id: companyId },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      if (data?.login_url) {
+        // Open popup for Meta Embedded Signup
+        const width = 600;
+        const height = 700;
+        const left = window.screenX + (window.innerWidth - width) / 2;
+        const top = window.screenY + (window.innerHeight - height) / 2;
+        window.open(
+          data.login_url,
+          "meta-connect",
+          `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
+        );
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      toast.error("Erro ao iniciar conexão: " + (error.message || "Falha"));
+      setConnectingMeta(false);
+    }
+  };
+
+  const handleSaveQr = async () => {
     setSaving(true);
     try {
+      if (!form.qr_api_url || !form.qr_instance_id || !form.qr_api_token) {
+        toast.error("Preencha todos os campos do provedor QR");
+        setSaving(false);
+        return;
+      }
+
       const payload: any = {
         company_id: companyId,
-        provider,
+        provider: "qr",
         status: "disconnected",
+        qr_api_url: form.qr_api_url,
+        qr_instance_id: form.qr_instance_id,
+        qr_api_token: form.qr_api_token,
+        meta_phone_number_id: null,
+        meta_waba_id: null,
+        meta_access_token: null,
+        meta_verify_token: null,
+        meta_business_id: null,
+        meta_connected_at: null,
       };
-
-      if (provider === "meta") {
-        if (!form.meta_phone_number_id || !form.meta_access_token) {
-          toast.error("Preencha Phone Number ID e Access Token");
-          setSaving(false);
-          return;
-        }
-        payload.meta_phone_number_id = form.meta_phone_number_id;
-        payload.meta_waba_id = form.meta_waba_id;
-        payload.meta_access_token = form.meta_access_token;
-        payload.meta_verify_token = form.meta_verify_token;
-        payload.qr_api_url = null;
-        payload.qr_instance_id = null;
-        payload.qr_api_token = null;
-      } else {
-        if (!form.qr_api_url || !form.qr_instance_id || !form.qr_api_token) {
-          toast.error("Preencha todos os campos do provedor QR");
-          setSaving(false);
-          return;
-        }
-        payload.qr_api_url = form.qr_api_url;
-        payload.qr_instance_id = form.qr_instance_id;
-        payload.qr_api_token = form.qr_api_token;
-        payload.meta_phone_number_id = null;
-        payload.meta_waba_id = null;
-        payload.meta_access_token = null;
-        payload.meta_verify_token = null;
-      }
 
       if (connection) {
         const { error } = await supabase
@@ -133,7 +165,7 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
         if (error) throw error;
       }
 
-      toast.success("Conexão salva com sucesso!");
+      toast.success("Conexão QR salva com sucesso!");
       setShowWizard(false);
       fetchConnection();
     } catch (error: any) {
@@ -159,7 +191,6 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      // Update status to connected
       await supabase
         .from("whatsapp_connections" as any)
         .update({ status: "connected", last_error: null, last_tested_at: new Date().toISOString() })
@@ -226,29 +257,17 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
     }
   };
 
-  const openEdit = () => {
-    if (connection) {
-      setProvider(connection.provider);
+  const openWizard = () => {
+    if (connection?.provider === "qr") {
+      setProvider("qr");
       setForm({
-        meta_phone_number_id: connection.meta_phone_number_id || "",
-        meta_waba_id: connection.meta_waba_id || "",
-        meta_access_token: connection.meta_access_token || "",
-        meta_verify_token: connection.meta_verify_token || crypto.randomUUID().replace(/-/g, "").slice(0, 16),
         qr_api_url: connection.qr_api_url || "",
         qr_instance_id: connection.qr_instance_id || "",
         qr_api_token: connection.qr_api_token || "",
       });
     } else {
       setProvider("meta");
-      setForm({
-        meta_phone_number_id: "",
-        meta_waba_id: "",
-        meta_access_token: "",
-        meta_verify_token: crypto.randomUUID().replace(/-/g, "").slice(0, 16),
-        qr_api_url: "",
-        qr_instance_id: "",
-        qr_api_token: "",
-      });
+      setForm({ qr_api_url: "", qr_instance_id: "", qr_api_token: "" });
     }
     setShowWizard(true);
   };
@@ -333,24 +352,15 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
             )}
 
             {/* Meta webhook info */}
-            {connection.provider === "meta" && (
+            {connection.provider === "meta" && connection.status === "connected" && (
               <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
-                <p className="text-sm font-medium text-amber-300 mb-2">⚠️ Configure o Webhook na Meta:</p>
+                <p className="text-sm font-medium text-amber-300 mb-2">⚠️ Para receber mensagens, configure o Webhook na Meta:</p>
                 <div className="space-y-2">
                   <div>
                     <Label className="text-xs text-slate-400">Callback URL</Label>
                     <div className="flex items-center gap-2">
                       <Input value={webhookUrl} readOnly className="bg-white/5 border-white/10 text-white text-xs" />
                       <Button size="icon" variant="ghost" onClick={() => copyToClipboard(webhookUrl)}>
-                        <Copy className="h-4 w-4 text-slate-400" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-slate-400">Verify Token</Label>
-                    <div className="flex items-center gap-2">
-                      <Input value={connection.meta_verify_token || ""} readOnly className="bg-white/5 border-white/10 text-white text-xs" />
-                      <Button size="icon" variant="ghost" onClick={() => copyToClipboard(connection.meta_verify_token || "")}>
                         <Copy className="h-4 w-4 text-slate-400" />
                       </Button>
                     </div>
@@ -376,7 +386,7 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
 
             {/* Actions */}
             <div className="flex items-center gap-3 pt-4 border-t border-white/10">
-              <Button onClick={openEdit} variant="outline" className="border-white/10 text-white">
+              <Button onClick={openWizard} variant="outline" className="border-white/10 text-white">
                 <Plug className="h-4 w-4 mr-2" />
                 Alterar
               </Button>
@@ -385,7 +395,7 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
                 Testar Envio
               </Button>
               <Button onClick={handleDisconnect} variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10">
-                Desativar
+                Desconectar
               </Button>
               <Button onClick={handleDelete} variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10">
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -394,15 +404,17 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
             </div>
           </div>
 
-          {/* Connection Details */}
+          {/* Connection Details (read-only) */}
           <div className="p-6 rounded-xl bg-white/5 border border-white/10">
             <h3 className="text-sm font-medium text-slate-300 mb-3">Detalhes da Conexão</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               {connection.provider === "meta" ? (
                 <>
-                  <div><span className="text-slate-500">Phone Number ID:</span> <span className="text-white ml-2">{connection.meta_phone_number_id}</span></div>
+                  <div><span className="text-slate-500">Phone Number ID:</span> <span className="text-white ml-2">{connection.meta_phone_number_id || "—"}</span></div>
                   <div><span className="text-slate-500">WABA ID:</span> <span className="text-white ml-2">{connection.meta_waba_id || "—"}</span></div>
-                  <div><span className="text-slate-500">Access Token:</span> <span className="text-white ml-2">••••••••</span></div>
+                  <div><span className="text-slate-500">Business ID:</span> <span className="text-white ml-2">{connection.meta_business_id || "—"}</span></div>
+                  <div><span className="text-slate-500">Conectado em:</span> <span className="text-white ml-2">{connection.meta_connected_at ? new Date(connection.meta_connected_at).toLocaleString("pt-BR") : "—"}</span></div>
+                  <div><span className="text-slate-500">Status:</span> <span className="text-white ml-2">{statusConfig[connection.status].label}</span></div>
                 </>
               ) : (
                 <>
@@ -425,7 +437,7 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
           <p className="text-slate-400 mb-6 max-w-md mx-auto">
             Configure a conexão WhatsApp desta empresa para começar a enviar e receber mensagens.
           </p>
-          <Button onClick={openEdit} className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600">
+          <Button onClick={openWizard} className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600">
             <Plug className="h-4 w-4 mr-2" />
             Conectar WhatsApp
           </Button>
@@ -460,38 +472,27 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
               </RadioGroup>
             </div>
 
-            {/* Meta Form */}
+            {/* Meta: Embedded Signup button (no manual fields) */}
             {provider === "meta" && (
               <div className="space-y-4 pt-2">
-                <div className="space-y-2">
-                  <Label>Phone Number ID *</Label>
-                  <Input value={form.meta_phone_number_id} onChange={(e) => setForm({ ...form, meta_phone_number_id: e.target.value })} className="bg-white/5 border-white/10" placeholder="Ex: 123456789012345" />
+                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
+                  <ExternalLink className="h-8 w-8 text-blue-400 mx-auto mb-3" />
+                  <p className="text-sm text-blue-200 mb-1 font-medium">Conectar via Meta Business</p>
+                  <p className="text-xs text-slate-400 mb-4">
+                    Você será redirecionado para o login da Meta e autorização do WhatsApp Business. Nenhum token precisa ser inserido manualmente.
+                  </p>
+                  <Button
+                    onClick={() => { setShowWizard(false); handleConnectMeta(); }}
+                    disabled={connectingMeta}
+                    className="bg-blue-600 hover:bg-blue-700 w-full"
+                  >
+                    {connectingMeta ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ExternalLink className="h-4 w-4 mr-2" />}
+                    Conectar com a Meta
+                  </Button>
                 </div>
-                <div className="space-y-2">
-                  <Label>WABA ID</Label>
-                  <Input value={form.meta_waba_id} onChange={(e) => setForm({ ...form, meta_waba_id: e.target.value })} className="bg-white/5 border-white/10" placeholder="Ex: 987654321098765" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Access Token *</Label>
-                  <div className="relative">
-                    <Input type={showTokens.meta_access_token ? "text" : "password"} value={form.meta_access_token} onChange={(e) => setForm({ ...form, meta_access_token: e.target.value })} className="bg-white/5 border-white/10 pr-10" placeholder="Token de acesso da Meta" />
-                    <button type="button" onClick={() => toggleTokenVisibility("meta_access_token")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                      {showTokens.meta_access_token ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Verify Token (gerado automaticamente)</Label>
-                  <div className="flex items-center gap-2">
-                    <Input value={form.meta_verify_token} readOnly className="bg-white/5 border-white/10" />
-                    <Button size="icon" variant="ghost" onClick={() => copyToClipboard(form.meta_verify_token)}>
-                      <Copy className="h-4 w-4 text-slate-400" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <p className="text-xs text-blue-300">
-                    💡 Após salvar, configure o Webhook na Meta com a Callback URL e o Verify Token exibidos na tela de detalhes.
+                <div className="p-3 rounded-lg bg-slate-800 border border-white/5">
+                  <p className="text-xs text-slate-400">
+                    💡 Após autorizar, os dados (Phone Number ID, WABA ID, Business ID) serão preenchidos automaticamente e exibidos somente leitura.
                   </p>
                 </div>
               </div>
@@ -520,15 +521,24 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
               </div>
             )}
           </div>
-          <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setShowWizard(false)} className="text-slate-400">
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-emerald-600 hover:bg-emerald-700">
-              {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-2" />}
-              Salvar Conexão
-            </Button>
-          </DialogFooter>
+          {provider === "qr" && (
+            <DialogFooter className="gap-2">
+              <Button variant="ghost" onClick={() => setShowWizard(false)} className="text-slate-400">
+                Cancelar
+              </Button>
+              <Button onClick={handleSaveQr} disabled={saving} className="bg-emerald-600 hover:bg-emerald-700">
+                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-2" />}
+                Salvar Conexão
+              </Button>
+            </DialogFooter>
+          )}
+          {provider === "meta" && (
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setShowWizard(false)} className="text-slate-400">
+                Fechar
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 
