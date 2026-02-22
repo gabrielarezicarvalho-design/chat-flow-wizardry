@@ -38,14 +38,15 @@ const Settings = () => {
 
   useEffect(() => {
     if (settings) {
+      const baseUrl = window.location.origin;
       setCompanyName(settings.company_name || "");
       setEmail(settings.email || "");
       setPhone(settings.phone || "");
       setWebsite(settings.website || "");
       setWhatsappInstanceId(settings.whatsapp_instance_id || "");
       setWhatsappToken(settings.whatsapp_token || "");
-      setPrivacyPolicyUrl(settings.privacy_policy_url || "");
-      setTermsOfServiceUrl(settings.terms_of_service_url || "");
+      setPrivacyPolicyUrl(settings.privacy_policy_url || `${baseUrl}/politica-de-privacidade`);
+      setTermsOfServiceUrl(settings.terms_of_service_url || `${baseUrl}/termos-de-servico`);
     }
   }, [settings]);
 
