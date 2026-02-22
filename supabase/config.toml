@@ -17,3 +17,15 @@ verify_jwt = false
 
 [functions.check-openai-credits]
 verify_jwt = false
+
+[functions.whatsapp-webhook]
+verify_jwt = false
+
+[functions.whatsapp-send]
+verify_jwt = false
+
+[functions.qr-send]
+verify_jwt = false
+
+[functions.qr-get-qrcode]
+verify_jwt = false

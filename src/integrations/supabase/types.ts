@@ -1198,6 +1198,128 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_connections: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          last_error: string | null
+          last_tested_at: string | null
+          meta_access_token: string | null
+          meta_phone_number_id: string | null
+          meta_verify_token: string | null
+          meta_waba_id: string | null
+          provider: string
+          qr_api_token: string | null
+          qr_api_url: string | null
+          qr_instance_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_tested_at?: string | null
+          meta_access_token?: string | null
+          meta_phone_number_id?: string | null
+          meta_verify_token?: string | null
+          meta_waba_id?: string | null
+          provider: string
+          qr_api_token?: string | null
+          qr_api_url?: string | null
+          qr_instance_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_tested_at?: string | null
+          meta_access_token?: string | null
+          meta_phone_number_id?: string | null
+          meta_verify_token?: string | null
+          meta_waba_id?: string | null
+          provider?: string
+          qr_api_token?: string | null
+          qr_api_url?: string | null
+          qr_instance_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_connections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_messages: {
+        Row: {
+          body: string | null
+          company_id: string
+          connection_id: string | null
+          created_at: string
+          direction: string
+          from_number: string | null
+          id: string
+          provider: string
+          raw: Json | null
+          status: string | null
+          to_number: string | null
+          wa_message_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          company_id: string
+          connection_id?: string | null
+          created_at?: string
+          direction: string
+          from_number?: string | null
+          id?: string
+          provider: string
+          raw?: Json | null
+          status?: string | null
+          to_number?: string | null
+          wa_message_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          company_id?: string
+          connection_id?: string | null
+          created_at?: string
+          direction?: string
+          from_number?: string | null
+          id?: string
+          provider?: string
+          raw?: Json | null
+          status?: string | null
+          to_number?: string | null
+          wa_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       white_label_partners: {
         Row: {
           accent_color: string | null
