@@ -52,6 +52,8 @@ const CampaignReports = lazy(() => import("./pages/CampaignReports"));
 const Segmentation = lazy(() => import("./pages/Segmentation"));
 const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfServicePage = lazy(() => import("./pages/TermsOfService"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -96,6 +98,9 @@ function App() {
                     {/* Beta landing page - no auth required */}
                     <Route path="/testar-beta" element={<BetaLanding />} />
                     <Route path="/beta-obrigado" element={<BetaThankYou />} />
+                    {/* Public policy pages - no auth required */}
+                    <Route path="/politica-de-privacidade" element={<Suspense fallback={<Loading />}><PrivacyPolicyPage /></Suspense>} />
+                    <Route path="/termos-de-servico" element={<Suspense fallback={<Loading />}><TermsOfServicePage /></Suspense>} />
                     {/* White Label login - no auth required */}
                     <Route path="/entrar-white-label" element={<WhiteLabelLogin />} />
                     <Route path="/white-label-config" element={<WhiteLabelConfig />} />
