@@ -16,7 +16,7 @@ import { useFlows } from "@/hooks/useFlows";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
-import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell } from "lucide-react";
+import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell, Globe, ArrowLeft } from "lucide-react";
 import { TelegramNotifications } from "@/components/mass-sending/TelegramNotifications";
 import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
 import { DeleteConnectionDialog } from "@/components/connections/DeleteConnectionDialog";
@@ -35,6 +35,7 @@ const Connections = () => {
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [pairCode, setPairCode] = useState<string | null>(null);
   const [connectMethod, setConnectMethod] = useState<'qrcode' | 'paircode'>('qrcode');
+  const [selectedProvider, setSelectedProvider] = useState<'uazapi' | 'meta' | null>(null);
   const [loadingQr, setLoadingQr] = useState(false);
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [pendingConnection, setPendingConnection] = useState<any>(null);
@@ -420,6 +421,7 @@ const Connections = () => {
       phone: '',
       environment: 'PROD'
     });
+    setSelectedProvider(null);
   };
 
   const handleCreateAndConnect = async (e: React.FormEvent) => {
@@ -2114,95 +2116,171 @@ const Connections = () => {
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Conectar WhatsApp</DialogTitle>
+              <DialogTitle>
+                {selectedProvider ? (
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setSelectedProvider(null)}>
+                      <ArrowLeft className="w-4 h-4" />
+                    </Button>
+                    Conectar WhatsApp
+                  </div>
+                ) : (
+                  'Conectar WhatsApp'
+                )}
+              </DialogTitle>
               <DialogDescription>
-                Preencha os dados e escolha como deseja conectar
+                {selectedProvider 
+                  ? 'Preencha os dados e escolha como deseja conectar'
+                  : 'Escolha o provedor de WhatsApp que deseja utilizar'
+                }
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleCreateAndConnect} className="space-y-4">
 
-              <div>
-                <Label htmlFor="name">Nome da Conexão</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Ex: WhatsApp Principal"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="phone">
-                  Telefone {connectMethod === 'paircode' && <span className="text-destructive">*</span>}
-                </Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="Ex: 5511999999999"
-                  required={connectMethod === 'paircode'}
-                  className={connectMethod === 'paircode' && !formData.phone ? 'border-destructive/50' : ''}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {connectMethod === 'paircode' 
-                    ? 'Obrigatório para conexão via código de pareamento'
-                    : 'Opcional - deixe em branco se não quiser vincular a um número específico'
-                  }
-                </p>
-              </div>
-
-              <div>
-                <Label className="mb-3 block">Método de Conexão</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div 
-                    onClick={() => setConnectMethod('qrcode')}
-                    className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
-                      connectMethod === 'qrcode' 
-                        ? 'border-primary bg-primary/10' 
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-2 text-center">
-                      <QrCode className={`w-8 h-8 ${connectMethod === 'qrcode' ? 'text-primary' : 'text-muted-foreground'}`} />
-                      <span className={`text-sm font-medium ${connectMethod === 'qrcode' ? 'text-primary' : ''}`}>
-                        QR Code
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        Escaneie com a câmera
-                      </span>
+            {!selectedProvider ? (
+              <div className="space-y-3 py-2">
+                <div 
+                  onClick={() => setSelectedProvider('meta')}
+                  className="cursor-pointer p-4 rounded-lg border-2 border-border hover:border-primary/50 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Globe className="w-6 h-6 text-primary" />
                     </div>
-                  </div>
-                  <div 
-                    onClick={() => setConnectMethod('paircode')}
-                    className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
-                      connectMethod === 'paircode' 
-                        ? 'border-primary bg-primary/10' 
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-2 text-center">
-                      <Smartphone className={`w-8 h-8 ${connectMethod === 'paircode' ? 'text-primary' : 'text-muted-foreground'}`} />
-                      <span className={`text-sm font-medium ${connectMethod === 'paircode' ? 'text-primary' : ''}`}>
-                        Código
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        Digite um código
-                      </span>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">API Oficial Meta</p>
+                      <p className="text-xs text-muted-foreground">WhatsApp Cloud API — conexão oficial via Meta Business</p>
                     </div>
                   </div>
                 </div>
+                <div 
+                  onClick={() => setSelectedProvider('uazapi')}
+                  className="cursor-pointer p-4 rounded-lg border-2 border-border hover:border-primary/50 transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <QrCode className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">UAZAPI</p>
+                      <p className="text-xs text-muted-foreground">Conexão via QR Code ou código de pareamento</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                </div>
               </div>
+            ) : selectedProvider === 'meta' ? (
+              <div className="space-y-4 py-2">
+                <p className="text-sm text-muted-foreground">
+                  Clique no botão abaixo para iniciar a conexão via Meta Embedded Signup. Você será redirecionado para autorizar o acesso.
+                </p>
+                <Button 
+                  className="w-full" 
+                  onClick={() => {
+                    toast.info("Para conectar via API Oficial Meta, acesse o painel Admin → Empresas → Conexões da empresa.");
+                    setDialogOpen(false);
+                  }}
+                >
+                  <Globe className="w-4 h-4 mr-2" />
+                  Conectar com a Meta
+                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setSelectedProvider(null)}>
+                    Voltar
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleCreateAndConnect} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Nome da Conexão</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Ex: WhatsApp Principal"
+                    required
+                  />
+                </div>
 
-              <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
-                  Cancelar
-                </Button>
-                <Button type="submit" className="flex-1">
-                  {connectMethod === 'qrcode' ? 'Gerar QR Code' : 'Gerar Código'}
-                </Button>
-              </div>
-            </form>
+                <div>
+                  <Label htmlFor="phone">
+                    Telefone {connectMethod === 'paircode' && <span className="text-destructive">*</span>}
+                  </Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="Ex: 5511999999999"
+                    required={connectMethod === 'paircode'}
+                    className={connectMethod === 'paircode' && !formData.phone ? 'border-destructive/50' : ''}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {connectMethod === 'paircode' 
+                      ? 'Obrigatório para conexão via código de pareamento'
+                      : 'Opcional - deixe em branco se não quiser vincular a um número específico'
+                    }
+                  </p>
+                </div>
+
+                <div>
+                  <Label className="mb-3 block">Método de Conexão</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div 
+                      onClick={() => setConnectMethod('qrcode')}
+                      className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                        connectMethod === 'qrcode' 
+                          ? 'border-primary bg-primary/10' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <QrCode className={`w-8 h-8 ${connectMethod === 'qrcode' ? 'text-primary' : 'text-muted-foreground'}`} />
+                        <span className={`text-sm font-medium ${connectMethod === 'qrcode' ? 'text-primary' : ''}`}>
+                          QR Code
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Escaneie com a câmera
+                        </span>
+                      </div>
+                    </div>
+                    <div 
+                      onClick={() => setConnectMethod('paircode')}
+                      className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
+                        connectMethod === 'paircode' 
+                          ? 'border-primary bg-primary/10' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <Smartphone className={`w-8 h-8 ${connectMethod === 'paircode' ? 'text-primary' : 'text-muted-foreground'}`} />
+                        <span className={`text-sm font-medium ${connectMethod === 'paircode' ? 'text-primary' : ''}`}>
+                          Código
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Digite um código
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="flex-1">
+                    {connectMethod === 'qrcode' ? 'Gerar QR Code' : 'Gerar Código'}
+                  </Button>
+                </div>
+              </form>
+            )}
           </DialogContent>
         </Dialog>
       </div>
