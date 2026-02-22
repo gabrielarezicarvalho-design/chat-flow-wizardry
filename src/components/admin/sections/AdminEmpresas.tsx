@@ -10,8 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { 
   Building2, Plus, Pencil, Trash2, Lock, Unlock, Search, 
-  RefreshCw, Loader2, CheckCircle, XCircle, User, Eye, EyeOff
+  RefreshCw, Loader2, CheckCircle, XCircle, User, Eye, EyeOff, MessageSquare
 } from "lucide-react";
+import { CompanyWhatsAppConnections } from "@/components/admin/CompanyWhatsAppConnections";
 
 interface Company {
   id: string;
@@ -42,6 +43,7 @@ export function AdminEmpresas() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDialog, setShowDialog] = useState(false);
+  const [selectedCompanyForWA, setSelectedCompanyForWA] = useState<Company | null>(null);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -231,6 +233,16 @@ export function AdminEmpresas() {
     return plan?.name || slug;
   };
 
+  if (selectedCompanyForWA) {
+    return (
+      <CompanyWhatsAppConnections
+        companyId={selectedCompanyForWA.id}
+        companyName={selectedCompanyForWA.name}
+        onBack={() => setSelectedCompanyForWA(null)}
+      />
+    );
+  }
+
   return (
     <div className="p-6 lg:p-8">
       {/* Header */}
@@ -324,6 +336,9 @@ export function AdminEmpresas() {
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
+                      <Button size="icon" variant="ghost" onClick={() => setSelectedCompanyForWA(company)} className="h-8 w-8" title="Conexões WhatsApp">
+                        <MessageSquare className="h-4 w-4 text-emerald-400" />
+                      </Button>
                       <Button size="icon" variant="ghost" onClick={() => handleToggleActive(company)} className="h-8 w-8">
                         {company.is_active ? <Lock className="h-4 w-4 text-amber-400" /> : <Unlock className="h-4 w-4 text-emerald-400" />}
                       </Button>
