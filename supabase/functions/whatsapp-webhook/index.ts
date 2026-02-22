@@ -9,7 +9,9 @@ serve(async (req) => {
 
   const url = new URL(req.url);
 
-  // GET: Meta webhook verification
+  // ============================================================
+  // GET: Meta webhook verification (NÃO ALTERADO)
+  // ============================================================
   if (req.method === "GET") {
     const mode = url.searchParams.get("hub.mode");
     const token = url.searchParams.get("hub.verify_token");
@@ -18,7 +20,6 @@ serve(async (req) => {
     console.log("📥 Webhook GET verification:", { mode, token: token ? "***" : "missing", challenge });
 
     if (mode === "subscribe" && token && challenge) {
-      // Read verify_token from app_settings table
       const { data: settings, error } = await supabaseAdmin
         .from("app_settings")
         .select("whatsapp_verify_token")
@@ -51,58 +52,116 @@ serve(async (req) => {
     return new Response("Forbidden", { status: 403 });
   }
 
-  // POST: Incoming events from Meta
+  // ============================================================
+  // POST: Incoming events from Meta (multiempresa)
+  // ============================================================
   if (req.method === "POST") {
     try {
       const body = await req.json();
-      console.log("📨 Webhook POST event:", JSON.stringify(body, null, 2));
+      console.log("📨 Webhook POST received");
 
-      // Process incoming messages and statuses
       const entries = body?.entry || [];
+
       for (const entry of entries) {
         const changes = entry?.changes || [];
+
         for (const change of changes) {
           const value = change?.value;
           if (!value) continue;
 
           const phoneNumberId = value?.metadata?.phone_number_id;
-          if (!phoneNumberId) continue;
+          if (!phoneNumberId) {
+            console.warn("⚠️ No phone_number_id in payload, skipping");
+            continue;
+          }
 
-          // Find company connection
-          const { data: conn } = await supabaseAdmin
+          // Identify company by phone_number_id
+          const { data: conn, error: connError } = await supabaseAdmin
             .from("whatsapp_connections")
             .select("id, company_id")
             .eq("meta_phone_number_id", phoneNumberId)
             .eq("provider", "meta")
             .maybeSingle();
 
-          if (!conn) continue;
-
-          // Process incoming messages
-          const messages = value?.messages || [];
-          for (const msg of messages) {
-            await supabaseAdmin.from("whatsapp_messages").insert({
-              company_id: conn.company_id,
-              connection_id: conn.id,
-              provider: "meta",
-              direction: "in",
-              wa_message_id: msg.id,
-              from_number: msg.from,
-              to_number: phoneNumberId,
-              body: msg.text?.body || msg.type || "",
-              status: "delivered",
-              raw: msg,
-            });
+          if (connError) {
+            console.error("❌ DB error finding connection:", connError.message);
+            continue;
           }
 
-          // Process status updates
+          if (!conn) {
+            console.warn(`⚠️ No company found for phone_number_id: ${phoneNumberId}, ignoring`);
+            continue;
+          }
+
+          const { company_id, id: connectionId } = conn;
+          console.log(`✅ Company identified: ${company_id} | Connection: ${connectionId}`);
+
+          // ---- Process incoming messages ----
+          const messages = value?.messages || [];
+          for (const msg of messages) {
+            let content = "";
+            const msgType = msg.type || "text";
+
+            if (msgType === "text") {
+              content = msg.text?.body || "";
+            } else if (msgType === "image") {
+              content = msg.image?.caption || "[image]";
+            } else if (msgType === "video") {
+              content = msg.video?.caption || "[video]";
+            } else if (msgType === "audio") {
+              content = "[audio]";
+            } else if (msgType === "document") {
+              content = msg.document?.filename || "[document]";
+            } else if (msgType === "location") {
+              content = `[location: ${msg.location?.latitude},${msg.location?.longitude}]`;
+            } else if (msgType === "contacts") {
+              content = "[contacts]";
+            } else if (msgType === "sticker") {
+              content = "[sticker]";
+            } else if (msgType === "reaction") {
+              content = msg.reaction?.emoji || "[reaction]";
+            } else {
+              content = `[${msgType}]`;
+            }
+
+            const { error: insertError } = await supabaseAdmin
+              .from("whatsapp_messages")
+              .insert({
+                company_id,
+                connection_id: connectionId,
+                provider: "meta",
+                direction: "in",
+                wa_message_id: msg.id,
+                from_number: msg.from,
+                to_number: phoneNumberId,
+                phone_number_id: phoneNumberId,
+                message_type: msgType,
+                body: content,
+                status: "received",
+                raw: msg,
+              });
+
+            if (insertError) {
+              console.error("❌ Error inserting message:", insertError.message);
+            } else {
+              console.log(`📩 Message saved: ${msg.id} from ${msg.from} (${msgType})`);
+            }
+          }
+
+          // ---- Process status updates ----
           const statuses = value?.statuses || [];
           for (const st of statuses) {
-            await supabaseAdmin
+            const { error: updateError } = await supabaseAdmin
               .from("whatsapp_messages")
               .update({ status: st.status })
               .eq("wa_message_id", st.id)
-              .eq("company_id", conn.company_id);
+              .eq("company_id", company_id);
+
+            if (updateError) {
+              console.error("❌ Error updating status:", updateError.message);
+            } else {
+              console.log(`🔄 Status updated: ${st.id} → ${st.status}`);
+            }
           }
         }
       }
@@ -113,6 +172,7 @@ serve(async (req) => {
       });
     } catch (error) {
       console.error("❌ Webhook POST error:", error);
+      // Never return 500 to Meta
       return new Response("EVENT_RECEIVED", {
         status: 200,
         headers: { "Content-Type": "text/plain" },

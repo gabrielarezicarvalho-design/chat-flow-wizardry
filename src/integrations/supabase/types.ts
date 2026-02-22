@@ -1305,6 +1305,8 @@ export type Database = {
           direction: string
           from_number: string | null
           id: string
+          message_type: string | null
+          phone_number_id: string | null
           provider: string
           raw: Json | null
           status: string | null
@@ -1319,6 +1321,8 @@ export type Database = {
           direction: string
           from_number?: string | null
           id?: string
+          message_type?: string | null
+          phone_number_id?: string | null
           provider: string
           raw?: Json | null
           status?: string | null
@@ -1333,6 +1337,8 @@ export type Database = {
           direction?: string
           from_number?: string | null
           id?: string
+          message_type?: string | null
+          phone_number_id?: string | null
           provider?: string
           raw?: Json | null
           status?: string | null
