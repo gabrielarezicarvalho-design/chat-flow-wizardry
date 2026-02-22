@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Building, User, Key, Webhook, Link as LinkIcon, CreditCard, Eye, EyeOff, Check, AlertCircle, Loader2, HardDrive, RefreshCw, FileText, Image, Database } from "lucide-react";
+import { Building, User, Key, Webhook, Link as LinkIcon, CreditCard, Eye, EyeOff, Check, AlertCircle, Loader2, HardDrive, RefreshCw, FileText, Image, Database, Shield } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -33,6 +33,8 @@ const Settings = () => {
   const [website, setWebsite] = useState(settings?.website || "");
   const [whatsappInstanceId, setWhatsappInstanceId] = useState(settings?.whatsapp_instance_id || "");
   const [whatsappToken, setWhatsappToken] = useState(settings?.whatsapp_token || "");
+  const [privacyPolicyUrl, setPrivacyPolicyUrl] = useState(settings?.privacy_policy_url || "");
+  const [termsOfServiceUrl, setTermsOfServiceUrl] = useState(settings?.terms_of_service_url || "");
 
   useEffect(() => {
     if (settings) {
@@ -42,6 +44,8 @@ const Settings = () => {
       setWebsite(settings.website || "");
       setWhatsappInstanceId(settings.whatsapp_instance_id || "");
       setWhatsappToken(settings.whatsapp_token || "");
+      setPrivacyPolicyUrl(settings.privacy_policy_url || "");
+      setTermsOfServiceUrl(settings.terms_of_service_url || "");
     }
   }, [settings]);
 
@@ -80,6 +84,7 @@ const Settings = () => {
     { id: "apikeys", icon: Key, label: "API Keys" },
     { id: "webhooks", icon: Webhook, label: "Webhooks" },
     { id: "integracoes", icon: LinkIcon, label: "Integrações" },
+    { id: "politicas", icon: Shield, label: "Políticas" },
     { id: "plano", icon: CreditCard, label: "Plano" },
   ];
 
@@ -563,6 +568,50 @@ const Settings = () => {
             </Card>
           )}
 
+
+          {activeTab === "politicas" && (
+            <Card className="p-6">
+              <h2 className="text-xl font-bold text-foreground mb-4">Política de Privacidade e Termos de Serviço</h2>
+              <p className="text-muted-foreground text-sm mb-6">
+                Configure as URLs da Política de Privacidade e dos Termos de Serviço exibidas na caixa de diálogo de Login e Detalhes do aplicativo.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="privacyPolicy">URL da Política de Privacidade</Label>
+                  <Input
+                    id="privacyPolicy"
+                    type="url"
+                    value={privacyPolicyUrl}
+                    onChange={(e) => setPrivacyPolicyUrl(e.target.value)}
+                    placeholder="Política de Privacidade da caixa de diálogo Login e Detalhes do aplicativo"
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="termsOfService">URL dos Termos de Serviço</Label>
+                  <Input
+                    id="termsOfService"
+                    type="url"
+                    value={termsOfServiceUrl}
+                    onChange={(e) => setTermsOfServiceUrl(e.target.value)}
+                    placeholder="Termos de Serviço da caixa de diálogo de login e detalhes do app"
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+              <Button
+                className="mt-4 bg-primary hover:bg-primary/90"
+                onClick={() => {
+                  updateSettings.mutate({
+                    privacy_policy_url: privacyPolicyUrl,
+                    terms_of_service_url: termsOfServiceUrl,
+                  });
+                }}
+              >
+                Salvar Políticas
+              </Button>
+            </Card>
+          )}
 
           {activeTab === "plano" && (
             <Card className="p-6">
