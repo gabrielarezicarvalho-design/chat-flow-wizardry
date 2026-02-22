@@ -26,6 +26,7 @@ const menuItems = [
   { id: "usuarios", icon: Users, label: "Usuários Internos", description: "Equipe MarketFlow" },
   { id: "agentes", icon: Bot, label: "Agentes", description: "Global" },
   { id: "integracoes", icon: Plug, label: "Integrações", description: "APIs & Webhooks" },
+  { id: "whatsapp-meta", icon: Menu, label: "WhatsApp Meta API", description: "Config Global", parent: "integracoes" },
   { id: "armazenamento", icon: HardDrive, label: "Armazenamento", description: "Drive & Storage" },
   { id: "ia", icon: Brain, label: "IA & Automação", description: "Modelos & Uso" },
   { id: "feedback", icon: Bug, label: "Bugs & Melhorias", description: "Feedbacks" },
@@ -121,6 +122,7 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
                 }}
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group relative",
+                  (item as any).parent && !collapsed && "ml-4",
                   activeSection === item.id 
                     ? "bg-gradient-to-r from-emerald-500/20 to-cyan-500/10 text-emerald-400" 
                     : "text-slate-400 hover:bg-white/5 hover:text-white"
@@ -128,15 +130,16 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
               >
                 <div className={cn(
                   "h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors",
+                  (item as any).parent && "h-7 w-7",
                   activeSection === item.id 
                     ? "bg-emerald-500/20" 
                     : "bg-white/5 group-hover:bg-white/10"
                 )}>
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className={cn("h-4 w-4", (item as any).parent && "h-3.5 w-3.5")} />
                 </div>
                 {!collapsed && (
                   <div className="flex-1 text-left">
-                    <p className="text-sm font-medium">{item.label}</p>
+                    <p className={cn("text-sm font-medium", (item as any).parent && "text-xs")}>{item.label}</p>
                     <p className="text-[10px] text-slate-500">{item.description}</p>
                   </div>
                 )}

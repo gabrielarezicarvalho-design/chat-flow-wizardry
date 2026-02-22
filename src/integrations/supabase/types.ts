@@ -64,6 +64,36 @@ export type Database = {
           },
         ]
       }
+      app_settings: {
+        Row: {
+          created_at: string
+          environment: string | null
+          id: number
+          meta_api_version: string | null
+          updated_at: string
+          whatsapp_verify_token: string | null
+          whatsapp_webhook_callback_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          environment?: string | null
+          id?: number
+          meta_api_version?: string | null
+          updated_at?: string
+          whatsapp_verify_token?: string | null
+          whatsapp_webhook_callback_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          environment?: string | null
+          id?: number
+          meta_api_version?: string | null
+          updated_at?: string
+          whatsapp_verify_token?: string | null
+          whatsapp_webhook_callback_url?: string | null
+        }
+        Relationships: []
+      }
       birthday_campaigns: {
         Row: {
           buttons: Json | null
