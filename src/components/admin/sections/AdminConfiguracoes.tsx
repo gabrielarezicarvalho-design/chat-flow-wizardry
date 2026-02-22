@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Settings, Save, Globe, Clock, MessageSquare, Palette } from "lucide-react";
+import { Settings, Save, Globe, Clock, MessageSquare, Palette, Shield } from "lucide-react";
 import { GoogleDriveBackup } from "@/components/settings/GoogleDriveBackup";
 
 export function AdminConfiguracoes() {
@@ -18,7 +18,9 @@ export function AdminConfiguracoes() {
     defaultClosingMessage: "Obrigado pelo contato! Até logo.",
     maxConnectionsPerCompany: 5,
     maxFlowsPerCompany: 20,
-    maxUsersPerCompany: 10
+    maxUsersPerCompany: 10,
+    privacyPolicyUrl: "",
+    termsOfServiceUrl: ""
   });
 
   const handleSave = () => {
@@ -165,6 +167,37 @@ export function AdminConfiguracoes() {
             <div className="p-4 rounded-xl bg-white/5">
               <p className="text-sm text-slate-300 mb-2">Versão do Sistema</p>
               <p className="text-lg font-mono text-white">v1.0.0-beta</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Meta / Políticas */}
+        <div className="lg:col-span-2 p-6 rounded-xl bg-white/5 border border-white/10">
+          <div className="flex items-center gap-2 mb-4">
+            <Shield className="h-5 w-5 text-blue-400" />
+            <h2 className="font-semibold text-white">Políticas e Termos (Meta Embedded Signup)</h2>
+          </div>
+          <p className="text-xs text-slate-400 mb-4">URLs exibidas na caixa de diálogo de Login e Detalhes do aplicativo Meta</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>URL da Política de Privacidade</Label>
+              <Input
+                type="url"
+                placeholder="Política de Privacidade da caixa de diálogo Login e Detalhes do aplicativo"
+                value={settings.privacyPolicyUrl}
+                onChange={(e) => setSettings({ ...settings, privacyPolicyUrl: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>URL dos Termos de Serviço</Label>
+              <Input
+                type="url"
+                placeholder="Termos de Serviço da caixa de diálogo de login e detalhes do app"
+                value={settings.termsOfServiceUrl}
+                onChange={(e) => setSettings({ ...settings, termsOfServiceUrl: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500"
+              />
             </div>
           </div>
         </div>
