@@ -1,16 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
   const supabaseAdmin = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -24,29 +15,50 @@ serve(async (req) => {
     const token = url.searchParams.get("hub.verify_token");
     const challenge = url.searchParams.get("hub.challenge");
 
-    if (mode === "subscribe" && token) {
-      // Find company by verify_token
-      const { data: conn } = await supabaseAdmin
-        .from("whatsapp_connections")
-        .select("id, company_id")
-        .eq("meta_verify_token", token)
-        .eq("provider", "meta")
+    console.log("📥 Webhook GET verification:", { mode, token: token ? "***" : "missing", challenge });
+
+    if (mode === "subscribe" && token && challenge) {
+      // Read verify_token from app_settings table
+      const { data: settings, error } = await supabaseAdmin
+        .from("app_settings")
+        .select("whatsapp_verify_token")
+        .eq("id", 1)
         .maybeSingle();
 
-      if (conn) {
-        return new Response(challenge, { status: 200, headers: corsHeaders });
+      if (error) {
+        console.error("❌ Error reading app_settings:", error.message);
+        return new Response("Internal error", { status: 403 });
       }
+
+      const storedToken = settings?.whatsapp_verify_token;
+
+      if (!storedToken) {
+        console.error("❌ No verify_token configured in app_settings");
+        return new Response("Forbidden", { status: 403 });
+      }
+
+      if (token === storedToken) {
+        console.log("✅ Webhook verified successfully");
+        return new Response(challenge, {
+          status: 200,
+          headers: { "Content-Type": "text/plain" },
+        });
+      }
+
+      console.warn("⚠️ Token mismatch");
     }
 
-    return new Response("Forbidden", { status: 403, headers: corsHeaders });
+    return new Response("Forbidden", { status: 403 });
   }
 
-  // POST: Incoming messages/statuses from Meta
+  // POST: Incoming events from Meta
   if (req.method === "POST") {
     try {
       const body = await req.json();
-      const entries = body?.entry || [];
+      console.log("📨 Webhook POST event:", JSON.stringify(body, null, 2));
 
+      // Process incoming messages and statuses
+      const entries = body?.entry || [];
       for (const entry of entries) {
         const changes = entry?.changes || [];
         for (const change of changes) {
@@ -95,17 +107,18 @@ serve(async (req) => {
         }
       }
 
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response("EVENT_RECEIVED", {
+        status: 200,
+        headers: { "Content-Type": "text/plain" },
       });
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Unknown error";
-      return new Response(JSON.stringify({ error: msg }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      console.error("❌ Webhook POST error:", error);
+      return new Response("EVENT_RECEIVED", {
+        status: 200,
+        headers: { "Content-Type": "text/plain" },
       });
     }
   }
 
-  return new Response("Method not allowed", { status: 405, headers: corsHeaders });
+  return new Response("Method not allowed", { status: 405 });
 });
