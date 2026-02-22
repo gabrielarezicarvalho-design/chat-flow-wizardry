@@ -115,6 +115,65 @@ serve(async (req) => {
           phoneNumberId = phonesData.data[0].id;
           displayPhoneNumber = phonesData.data[0].display_phone_number;
         }
+
+        // Auto-register webhook on the WABA via Graph API
+        try {
+          const webhookCallbackUrl = `${SUPABASE_URL}/functions/v1/whatsapp-webhook`;
+
+          // Subscribe the app to receive webhooks for this WABA
+          const subscribeResp = await fetch(
+            `https://graph.facebook.com/v21.0/${wabaId}/subscribed_apps`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                access_token: accessToken,
+              }),
+            }
+          );
+          const subscribeData = await subscribeResp.json();
+          console.log("WABA webhook subscription result:", JSON.stringify(subscribeData));
+
+          if (!subscribeData.success) {
+            console.warn("Failed to subscribe app to WABA webhooks:", JSON.stringify(subscribeData));
+          }
+
+          // Also configure the webhook callback URL on the Meta App level
+          // This sets the webhook endpoint for the WhatsApp Business Account
+          // Fetch the verify token from app_settings
+          const { data: appSettings } = await supabaseAdmin
+            .from("app_settings")
+            .select("whatsapp_verify_token")
+            .eq("id", 1)
+            .maybeSingle();
+
+          const verifyToken = appSettings?.whatsapp_verify_token || "marketflow_webhook_verify";
+
+          // Subscribe to the "messages" webhook field on the app
+          const appWebhookResp = await fetch(
+            `https://graph.facebook.com/v21.0/${META_APP_ID}/subscriptions`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                object: "whatsapp_business_account",
+                callback_url: webhookCallbackUrl,
+                verify_token: verifyToken,
+                fields: "messages",
+                access_token: `${META_APP_ID}|${META_APP_SECRET}`,
+              }),
+            }
+          );
+          const appWebhookData = await appWebhookResp.json();
+          console.log("App webhook subscription result:", JSON.stringify(appWebhookData));
+
+          if (!appWebhookData.success) {
+            console.warn("Failed to configure app webhook:", JSON.stringify(appWebhookData));
+          }
+        } catch (webhookErr) {
+          console.error("Error registering webhook:", webhookErr);
+          // Don't fail the connection over webhook registration
+        }
       }
 
       // Update the connection with the obtained data
