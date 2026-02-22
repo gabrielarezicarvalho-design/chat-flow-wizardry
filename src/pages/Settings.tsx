@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Building, User, Key, Webhook, Link as LinkIcon, CreditCard, Eye, EyeOff, Check, AlertCircle, Loader2, HardDrive, RefreshCw, FileText, Image, Database, Shield } from "lucide-react";
+import { Building, User, Key, Webhook, Link as LinkIcon, CreditCard, Eye, EyeOff, Check, AlertCircle, Loader2, HardDrive, RefreshCw, FileText, Image, Database, Shield, X } from "lucide-react";
+import PrivacyPolicyContent from "@/components/settings/PrivacyPolicyContent";
+import TermsOfServiceContent from "@/components/settings/TermsOfServiceContent";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -641,16 +644,19 @@ const Settings = () => {
           {/* Privacy Policy Dialog */}
           {showPrivacyDialog && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowPrivacyDialog(false)}>
-              <div className="bg-background border rounded-lg w-full max-w-4xl max-h-[85vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-background border rounded-lg w-full max-w-3xl max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between p-4 border-b">
-                  <h3 className="font-semibold text-foreground">Política de Privacidade</h3>
-                  <Button variant="ghost" size="sm" onClick={() => setShowPrivacyDialog(false)}>✕</Button>
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold text-foreground">Política de Privacidade</h3>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => setShowPrivacyDialog(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
-                <iframe
-                  src="/politica-de-privacidade"
-                  className="w-full h-[75vh] border-0"
-                  title="Política de Privacidade"
-                />
+                <ScrollArea className="h-[70vh] p-6">
+                  <PrivacyPolicyContent />
+                </ScrollArea>
               </div>
             </div>
           )}
@@ -658,16 +664,19 @@ const Settings = () => {
           {/* Terms of Service Dialog */}
           {showTermsDialog && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowTermsDialog(false)}>
-              <div className="bg-background border rounded-lg w-full max-w-4xl max-h-[85vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-background border rounded-lg w-full max-w-3xl max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between p-4 border-b">
-                  <h3 className="font-semibold text-foreground">Termos de Serviço</h3>
-                  <Button variant="ghost" size="sm" onClick={() => setShowTermsDialog(false)}>✕</Button>
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold text-foreground">Termos de Serviço</h3>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => setShowTermsDialog(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
-                <iframe
-                  src="/termos-de-servico"
-                  className="w-full h-[75vh] border-0"
-                  title="Termos de Serviço"
-                />
+                <ScrollArea className="h-[70vh] p-6">
+                  <TermsOfServiceContent />
+                </ScrollArea>
               </div>
             </div>
           )}
