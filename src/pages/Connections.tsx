@@ -2175,16 +2175,55 @@ const Connections = () => {
             ) : selectedProvider === 'meta' ? (
               <div className="space-y-4 py-2">
                 <p className="text-sm text-muted-foreground">
-                  Clique no botão abaixo para iniciar a conexão via Meta Embedded Signup. Você será redirecionado para autorizar o acesso.
+                  Clique no botão abaixo para iniciar a conexão via Meta Embedded Signup. Um popup do Facebook será aberto para autorizar o acesso.
                 </p>
                 <Button 
                   className="w-full" 
-                  onClick={() => {
-                    toast.info("Para conectar via API Oficial Meta, acesse o painel Admin → Empresas → Conexões da empresa.");
-                    setDialogOpen(false);
+                  disabled={loadingQr}
+                  onClick={async () => {
+                    setLoadingQr(true);
+                    try {
+                      // Get user's company_id
+                      const { data: { user } } = await supabase.auth.getUser();
+                      if (!user) throw new Error("Usuário não autenticado");
+                      
+                      const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('company_id')
+                        .eq('id', user.id)
+                        .maybeSingle();
+                      
+                      if (!profile?.company_id) throw new Error("Empresa não encontrada");
+                      
+                      const { data, error } = await supabase.functions.invoke("meta-start-connect", {
+                        body: { company_id: profile.company_id },
+                      });
+                      
+                      if (error) throw error;
+                      if (data?.error) throw new Error(data.error);
+                      
+                      if (data?.login_url) {
+                        const width = 600;
+                        const height = 700;
+                        const left = window.screenX + (window.innerWidth - width) / 2;
+                        const top = window.screenY + (window.innerHeight - height) / 2;
+                        window.open(
+                          data.login_url,
+                          "meta-connect",
+                          `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
+                        );
+                        toast.success("Popup do Facebook aberto. Complete a autorização na janela.");
+                        setDialogOpen(false);
+                      }
+                    } catch (err: any) {
+                      console.error("Meta connect error:", err);
+                      toast.error("Erro ao iniciar conexão: " + (err.message || "Falha"));
+                    } finally {
+                      setLoadingQr(false);
+                    }
                   }}
                 >
-                  <Globe className="w-4 h-4 mr-2" />
+                  {loadingQr ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Globe className="w-4 h-4 mr-2" />}
                   Conectar com a Meta
                 </Button>
                 <div className="flex gap-2">
