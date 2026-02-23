@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { 
   LayoutDashboard, Building2, Users, Bot, Plug, Brain, BarChart3, 
   CreditCard, Shield, Settings, LogOut, ChevronLeft,
-  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, Palette
+  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, Palette, BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +34,7 @@ const menuItems = [
   { id: "faturamento", icon: CreditCard, label: "Planos & Faturamento", description: "Assinaturas" },
   { id: "seguranca", icon: Shield, label: "Segurança", description: "Auditoria" },
   { id: "configuracoes", icon: Settings, label: "Configurações", description: "Gerais" },
+  { id: "documentacao", icon: BookOpen, label: "Documentação API", description: "Integração Externa" },
 ];
 
 export function AdminLayout({ children, activeSection, onSectionChange }: AdminLayoutProps) {
