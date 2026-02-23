@@ -31,6 +31,7 @@ const Connections = () => {
   const { agents } = useAgents();
   const { isAdmin } = useUserRole();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [metaConnections, setMetaConnections] = useState<any[]>([]);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [pairCode, setPairCode] = useState<string | null>(null);
@@ -55,6 +56,35 @@ const Connections = () => {
     phone: '',
     environment: 'PROD'
   });
+
+  // Fetch Meta connections from whatsapp_connections table
+  useEffect(() => {
+    const fetchMetaConnections = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!profile?.company_id) return;
+
+      const { data, error } = await supabase
+        .from('whatsapp_connections')
+        .select('*')
+        .eq('company_id', profile.company_id)
+        .eq('provider', 'meta')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setMetaConnections(data);
+      }
+    };
+
+    fetchMetaConnections();
+  }, [connections]); // Refresh when connections change
 
   // Fetch company max_connections limit
   useEffect(() => {
@@ -1502,6 +1532,61 @@ const Connections = () => {
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* Meta Cloud API Connections */}
+          {metaConnections.map((metaConn) => (
+            <Card 
+              key={metaConn.id} 
+              className="border-border"
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                      metaConn.status === 'connected' 
+                        ? 'bg-green-500/10' 
+                        : metaConn.status === 'error'
+                          ? 'bg-red-500/10'
+                          : 'bg-muted'
+                    }`}>
+                      <Globe className={`w-4 h-4 ${
+                        metaConn.status === 'connected' 
+                          ? 'text-green-500' 
+                          : metaConn.status === 'error'
+                            ? 'text-red-500'
+                            : 'text-muted-foreground'
+                      }`} />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground text-sm">Meta Cloud API</h4>
+                      <p className="text-xs text-muted-foreground">
+                        {metaConn.meta_phone_number_id ? `Phone: ${metaConn.meta_phone_number_id}` : 'Sem número'}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge 
+                    variant={metaConn.status === 'connected' ? 'default' : 'destructive'} 
+                    className="text-xs"
+                  >
+                    {metaConn.status === 'connected' 
+                      ? 'Conectado' 
+                      : metaConn.status === 'error'
+                        ? 'Erro'
+                        : metaConn.status}
+                  </Badge>
+                </div>
+
+                <div className="text-xs text-muted-foreground space-y-1 mt-2">
+                  {metaConn.meta_waba_id && (
+                    <p>WABA: {metaConn.meta_waba_id}</p>
+                  )}
+                  {metaConn.last_error && (
+                    <p className="text-destructive">{metaConn.last_error}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
