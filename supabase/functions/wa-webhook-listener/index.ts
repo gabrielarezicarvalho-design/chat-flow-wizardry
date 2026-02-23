@@ -3538,7 +3538,7 @@ ${mensagem}`;
             user_id: userId,
             phone: cleanPhone,
             name: contactName || cleanPhone,
-            origin: "WhatsApp",
+            source: "WhatsApp",
             status: "warm"
           })
           .select()
@@ -3559,7 +3559,7 @@ ${mensagem}`;
             user_id: userId,
             phone: cleanPhone,
             name: contactName || cleanPhone,
-            origin: "WhatsApp",
+            source: "WhatsApp",
             status: "new" // Mark as new for manual review
           })
           .select()
@@ -3584,27 +3584,24 @@ ${mensagem}`;
     if (leadData) {
       const { data: existingConv } = await supabase
         .from("conversations")
-        .select("id, flow_state, assigned_agent_id, status, department_id")
-        .eq("user_id", userId)
-        .eq("lead_id", leadData.id)
-        .eq("connection_id", connectionId)
-        .not("status", "eq", "closed") // Qualquer status exceto closed
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .single();
-      conversationData = existingConv;
-    } else {
-      // Se não temos lead (número inválido), buscar por user_phone
-      const { data: existingConv } = await supabase
-        .from("conversations")
-        .select("id, flow_state, assigned_agent_id, status, department_id")
-        .eq("user_id", userId)
-        .eq("user_phone", cleanPhone)
+        .select("id, status, department_id, assigned_to")
+        .eq("contact_phone", cleanPhone)
         .eq("connection_id", connectionId)
         .not("status", "eq", "closed")
         .order("updated_at", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
+      conversationData = existingConv;
+    } else {
+      const { data: existingConv } = await supabase
+        .from("conversations")
+        .select("id, status, department_id, assigned_to")
+        .eq("contact_phone", cleanPhone)
+        .eq("connection_id", connectionId)
+        .not("status", "eq", "closed")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
       conversationData = existingConv;
     }
 
@@ -3621,15 +3618,16 @@ ${mensagem}`;
         .from("conversations")
         .insert({
           user_id: userId,
-          lead_id: leadData?.id || null, // Pode ser null se número inválido
+          company_id: connection.company_id || null,
           connection_id: connectionId,
-          platform: "whatsapp",
-          user_phone: cleanPhone,
-          user_name: contactName || leadData?.name || cleanPhone,
-          status: "active", // Nova conversa começa como active (no fluxo)
-          last_message: mensagem
+          contact_phone: cleanPhone,
+          contact_name: contactName || cleanPhone,
+          contact_avatar: payload?.chat?.imagePreview || null,
+          status: "open",
+          last_message: mensagem,
+          last_message_at: new Date().toISOString()
         })
-        .select("id, flow_state, assigned_agent_id, status, department_id")
+        .select("id, status, department_id, assigned_to")
         .single();
 
       if (convError) {
@@ -3655,6 +3653,7 @@ ${mensagem}`;
         .from("conversations")
         .update({ 
           last_message: mensagem,
+          last_message_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
         .eq("id", conversationData.id);
@@ -3664,12 +3663,12 @@ ${mensagem}`;
     const { data: message, error: msgError } = await supabase
       .from("messages")
       .insert({
-        id_da_conversa: conversationData.id,
-        remetente: "usuario",
-        conteudo: mensagem,
-        tipo: tipo,
-        recebido: true,
-        uazapi_message_id: messageId
+        conversation_id: conversationData.id,
+        sender_type: "customer",
+        content: mensagem,
+        message_type: tipo || "text",
+        status: "received",
+        external_id: messageId || null
       })
       .select()
       .single();
