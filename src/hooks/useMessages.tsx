@@ -28,13 +28,13 @@ const initGlobalChannel = (getQueryClient: () => any) => {
         const qc = getQueryClient();
         if (!qc) return;
         
-        const conversationId = payload.new?.id_da_conversa || payload.old?.id_da_conversa;
+        const conversationId = payload.new?.conversation_id || payload.old?.conversation_id;
         if (!conversationId) return;
 
         if (payload.eventType === 'INSERT') {
           console.log('⚡ [Realtime] NOVA MENSAGEM:', payload.new?.id);
           
-          if (payload.new?.recebido === true) {
+          if (payload.new?.sender_type === 'contact') {
             try {
               const playSound = getGlobalNotificationSound();
               playSound();
@@ -47,18 +47,20 @@ const initGlobalChannel = (getQueryClient: () => any) => {
             if (!old) return [payload.new];
             if (old.some((m: any) => m.id === payload.new.id)) return old;
             return [...old, payload.new].sort((a, b) => 
-              new Date(a.criado_em).getTime() - new Date(b.criado_em).getTime()
+              new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
             );
           });
           
-          qc.setQueryData(['conversations'], (old: any[] = []) => {
-            if (!old) return old;
+          // Update ALL conversation query caches (with or without companyId)
+          qc.setQueriesData({ queryKey: ['conversations'] }, (old: any[] | undefined) => {
+            if (!old || !Array.isArray(old)) return old;
             return old.map((conv: any) => {
               if (conv.id === conversationId) {
                 return {
                   ...conv,
-                  last_message: payload.new.conteudo,
-                  updated_at: payload.new.criado_em
+                  last_message: payload.new.content,
+                  updated_at: payload.new.created_at,
+                  last_message_at: payload.new.created_at
                 };
               }
               return conv;
@@ -88,8 +90,8 @@ const initGlobalChannel = (getQueryClient: () => any) => {
           console.log('⚡ [Realtime] NOVA CONVERSA');
           qc.invalidateQueries({ queryKey: ['conversations'] });
         } else if (payload.eventType === 'UPDATE') {
-          qc.setQueryData(['conversations'], (old: any[] = []) => {
-            if (!old) return old;
+          qc.setQueriesData({ queryKey: ['conversations'] }, (old: any[] | undefined) => {
+            if (!old || !Array.isArray(old)) return old;
             return old.map((conv: any) => 
               conv.id === payload.new.id ? { ...conv, ...payload.new } : conv
             );
@@ -114,8 +116,8 @@ export const useMessages = (conversationId?: string) => {
       const { data, error } = await (supabase
         .from('messages')
         .select('*') as any)
-        .eq('id_da_conversa', conversationId)
-        .order('criado_em', { ascending: true });
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true });
       
       if (error) throw error;
       return data || [];
@@ -131,7 +133,7 @@ export const useMessages = (conversationId?: string) => {
     queryClient.setQueryData(['messages', conversationId], (old: any[] = []) => {
       if (old.some((m: any) => m.id === newMessage.id)) return old;
       return [...old, newMessage].sort((a, b) => 
-        new Date(a.criado_em).getTime() - new Date(b.criado_em).getTime()
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
     });
   }, [conversationId, queryClient]);
