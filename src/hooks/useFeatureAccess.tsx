@@ -93,11 +93,20 @@ export function useFeatureAccess(): FeatureAccessResult {
         .eq("is_active", true)
         .maybeSingle();
 
+      // Check for company-level feature overrides
+      const { data: companyFull } = await supabase
+        .from("companies")
+        .select('features')
+        .eq("id", profile.company_id)
+        .single();
+
+      const companyFeatures = (companyFull as any)?.features as string[] | null;
+
       if (subscriptionPlan) {
         setPlan({
           id: planSlug,
           name: subscriptionPlan.name,
-          features: subscriptionPlan.features || [],
+          features: companyFeatures || subscriptionPlan.features || [],
           max_users: company?.max_users || subscriptionPlan.max_users,
           max_connections: company?.max_connections || subscriptionPlan.max_connections
         });
@@ -106,7 +115,7 @@ export function useFeatureAccess(): FeatureAccessResult {
         setPlan({
           id: planSlug,
           name: planSlug,
-          features: ['chat', 'flows_basic', 'tags', 'departments'],
+          features: companyFeatures || ['chat', 'flows_basic', 'tags', 'departments'],
           max_users: company?.max_users || 10,
           max_connections: company?.max_connections || 3
         });
