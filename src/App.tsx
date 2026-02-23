@@ -54,6 +54,7 @@ const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfServicePage = lazy(() => import("./pages/TermsOfService"));
+const DataDeletionPage = lazy(() => import("./pages/DataDeletion"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -101,6 +102,7 @@ function App() {
                     {/* Public policy pages - no auth required */}
                     <Route path="/politica-de-privacidade" element={<Suspense fallback={<Loading />}><PrivacyPolicyPage /></Suspense>} />
                     <Route path="/termos-de-servico" element={<Suspense fallback={<Loading />}><TermsOfServicePage /></Suspense>} />
+                    <Route path="/exclusao-de-dados" element={<Suspense fallback={<Loading />}><DataDeletionPage /></Suspense>} />
                     {/* White Label login - no auth required */}
                     <Route path="/entrar-white-label" element={<WhiteLabelLogin />} />
                     <Route path="/white-label-config" element={<WhiteLabelConfig />} />
