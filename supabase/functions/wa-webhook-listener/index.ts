@@ -3712,17 +3712,19 @@ ${mensagem}`;
           try {
             const menuPayload = {
               number: cleanPhone,
-              buttonText: "",
+              type: "button",
               text: autoReply.autoReplyMessage,
               footerText: "",
-              buttons: [
+              choices: [
                 {
+                  buttonText: autoReply.autoReplyButtonText,
                   type: "url",
-                  text: autoReply.autoReplyButtonText,
                   url: autoReply.autoReplyButtonUrl
                 }
               ]
             };
+
+            console.log("📤 Enviando menu payload:", JSON.stringify(menuPayload));
 
             const menuResponse = await fetch(`${BASE_URL}/send/menu`, {
               method: 'POST',
