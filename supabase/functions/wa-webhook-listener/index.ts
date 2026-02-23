@@ -3690,6 +3690,97 @@ ${mensagem}`;
     console.log("=".repeat(80));
 
     // ========================================
+    // RESPOSTA AUTOMÁTICA (SE CONFIGURADA)
+    // ========================================
+    try {
+      const connCreds = connection?.credentials as any;
+      const autoReply = connCreds?.messages;
+      
+      if (autoReply?.autoReplyEnabled && autoReply?.autoReplyMessage) {
+        console.log("📩 Resposta automática habilitada - enviando...");
+        
+        let BASE_URL = connection.base_url;
+        if (!BASE_URL) {
+          const environment = connection.environment || "TESTE";
+          BASE_URL = environment === "PROD" 
+            ? "https://app.uazapi.com" 
+            : "https://free.uazapi.com";
+        }
+
+        // Se tem botão configurado, enviar como menu com botão URL
+        if (autoReply.autoReplyButtonText && autoReply.autoReplyButtonUrl) {
+          try {
+            const menuPayload = {
+              number: cleanPhone,
+              buttonText: "",
+              text: autoReply.autoReplyMessage,
+              footerText: "",
+              buttons: [
+                {
+                  type: "url",
+                  text: autoReply.autoReplyButtonText,
+                  url: autoReply.autoReplyButtonUrl
+                }
+              ]
+            };
+
+            const menuResponse = await fetch(`${BASE_URL}/send/menu`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'token': connection.token
+              },
+              body: JSON.stringify(menuPayload)
+            });
+
+            if (menuResponse.ok) {
+              console.log("✅ Resposta automática com botão enviada!");
+            } else {
+              const errText = await menuResponse.text();
+              console.error("❌ Erro ao enviar resposta automática com botão:", errText);
+              
+              // Fallback: enviar só texto
+              await fetch(`${BASE_URL}/send/text`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'token': connection.token
+                },
+                body: JSON.stringify({
+                  number: cleanPhone,
+                  text: `${autoReply.autoReplyMessage}\n\n🔗 ${autoReply.autoReplyButtonText}: ${autoReply.autoReplyButtonUrl}`
+                })
+              });
+              console.log("✅ Resposta automática enviada como texto (fallback)");
+            }
+          } catch (menuError: any) {
+            console.error("❌ Erro ao enviar menu:", menuError.message);
+          }
+        } else {
+          // Enviar apenas texto
+          try {
+            await fetch(`${BASE_URL}/send/text`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'token': connection.token
+              },
+              body: JSON.stringify({
+                number: cleanPhone,
+                text: autoReply.autoReplyMessage
+              })
+            });
+            console.log("✅ Resposta automática enviada!");
+          } catch (textError: any) {
+            console.error("❌ Erro ao enviar resposta automática:", textError.message);
+          }
+        }
+      }
+    } catch (autoReplyError: any) {
+      console.error("⚠️ Erro ao processar resposta automática:", autoReplyError.message);
+    }
+
+    // ========================================
     // VERIFICAR RESPOSTA DE PESQUISA DE SATISFAÇÃO
     // ========================================
     try {
