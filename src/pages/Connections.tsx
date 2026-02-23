@@ -34,6 +34,9 @@ const Connections = () => {
   const [metaConnections, setMetaConnections] = useState<any[]>([]);
   const [metaTestDialogOpen, setMetaTestDialogOpen] = useState(false);
   const [metaTestConnection, setMetaTestConnection] = useState<any>(null);
+  const [metaDetailsDialogOpen, setMetaDetailsDialogOpen] = useState(false);
+  const [metaDetailsConnection, setMetaDetailsConnection] = useState<any>(null);
+  const [metaDisconnecting, setMetaDisconnecting] = useState<string | null>(null);
   const [metaTestPhone, setMetaTestPhone] = useState('');
   const [metaTestType, setMetaTestType] = useState<'text' | 'template'>('text');
   const [metaTestMessage, setMetaTestMessage] = useState('');
@@ -1327,6 +1330,52 @@ const Connections = () => {
     }
   };
 
+  const handleMetaDisconnect = async (metaConn: any) => {
+    if (!confirm(`Deseja realmente desconectar a conexão Meta Cloud API (WABA: ${metaConn.meta_waba_id || 'N/A'})?`)) return;
+    
+    setMetaDisconnecting(metaConn.id);
+    try {
+      const { error } = await supabase
+        .from('whatsapp_connections')
+        .update({ status: 'disconnected', meta_access_token: null })
+        .eq('id', metaConn.id);
+
+      if (error) throw error;
+
+      setMetaConnections(prev => prev.map(c => 
+        c.id === metaConn.id ? { ...c, status: 'disconnected', meta_access_token: null } : c
+      ));
+      toast.success("Conexão Meta desconectada com sucesso");
+    } catch (err: any) {
+      console.error("Error disconnecting Meta:", err);
+      toast.error("Erro ao desconectar");
+    } finally {
+      setMetaDisconnecting(null);
+    }
+  };
+
+  const handleMetaDelete = async (metaConn: any) => {
+    if (!confirm(`Deseja realmente EXCLUIR a conexão Meta Cloud API? Esta ação não pode ser desfeita.`)) return;
+    
+    setMetaDisconnecting(metaConn.id);
+    try {
+      const { error } = await supabase
+        .from('whatsapp_connections')
+        .delete()
+        .eq('id', metaConn.id);
+
+      if (error) throw error;
+
+      setMetaConnections(prev => prev.filter(c => c.id !== metaConn.id));
+      toast.success("Conexão Meta excluída com sucesso");
+    } catch (err: any) {
+      console.error("Error deleting Meta:", err);
+      toast.error("Erro ao excluir conexão");
+    } finally {
+      setMetaDisconnecting(null);
+    }
+  };
+
   const handleMetaTestSend = async () => {
     if (!metaTestConnection || !metaTestPhone) {
       toast.error("Selecione uma conexão e digite o número");
@@ -1641,8 +1690,24 @@ const Connections = () => {
                   )}
                 </div>
 
-                {metaConn.status === 'connected' && (
-                  <div className="flex gap-1.5 mt-3">
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {/* View Details */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 h-8 text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMetaDetailsConnection(metaConn);
+                      setMetaDetailsDialogOpen(true);
+                    }}
+                  >
+                    <Settings className="w-3 h-3 mr-1" />
+                    Detalhes
+                  </Button>
+
+                  {/* Test Send - only when connected */}
+                  {metaConn.status === 'connected' && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -1654,10 +1719,44 @@ const Connections = () => {
                       }}
                     >
                       <Send className="w-3 h-3 mr-1" />
-                      Testar Envio
+                      Testar
                     </Button>
-                  </div>
-                )}
+                  )}
+
+                  {/* Disconnect */}
+                  {metaConn.status === 'connected' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs text-orange-500 hover:text-orange-600 border-orange-200 hover:border-orange-300"
+                      disabled={metaDisconnecting === metaConn.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMetaDisconnect(metaConn);
+                      }}
+                    >
+                      {metaDisconnecting === metaConn.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <WifiOff className="w-3 h-3" />
+                      )}
+                    </Button>
+                  )}
+
+                  {/* Delete */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs text-destructive hover:text-destructive border-destructive/30 hover:border-destructive/50"
+                    disabled={metaDisconnecting === metaConn.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMetaDelete(metaConn);
+                    }}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -2743,6 +2842,175 @@ const Connections = () => {
               )}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+      {/* Meta Details Dialog */}
+      <Dialog open={metaDetailsDialogOpen} onOpenChange={setMetaDetailsDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-primary" />
+              Detalhes da Conexão Meta
+            </DialogTitle>
+            <DialogDescription>
+              Informações completas da conexão Meta Cloud API
+            </DialogDescription>
+          </DialogHeader>
+          {metaDetailsConnection && (
+            <div className="space-y-4">
+              {/* Status */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <span className="text-sm font-medium">Status</span>
+                <Badge variant={metaDetailsConnection.status === 'connected' ? 'default' : 'destructive'}>
+                  {metaDetailsConnection.status === 'connected' ? 'Conectado' : metaDetailsConnection.status === 'error' ? 'Erro' : 'Desconectado'}
+                </Badge>
+              </div>
+
+              {/* Provider */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <span className="text-sm font-medium">Provedor</span>
+                <span className="text-sm text-muted-foreground">Meta Cloud API</span>
+              </div>
+
+              {/* WABA ID */}
+              {metaDetailsConnection.meta_waba_id && (
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <span className="text-sm font-medium">WABA ID</span>
+                  <div className="flex items-center gap-2">
+                    <code className="text-xs bg-background px-2 py-1 rounded">{metaDetailsConnection.meta_waba_id}</code>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => {
+                        navigator.clipboard.writeText(metaDetailsConnection.meta_waba_id);
+                        toast.success("WABA ID copiado!");
+                      }}
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Phone Number ID */}
+              {metaDetailsConnection.meta_phone_number_id && (
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <span className="text-sm font-medium">Phone Number ID</span>
+                  <div className="flex items-center gap-2">
+                    <code className="text-xs bg-background px-2 py-1 rounded">{metaDetailsConnection.meta_phone_number_id}</code>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => {
+                        navigator.clipboard.writeText(metaDetailsConnection.meta_phone_number_id);
+                        toast.success("Phone Number ID copiado!");
+                      }}
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Business ID */}
+              {metaDetailsConnection.meta_business_id && (
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <span className="text-sm font-medium">Business ID</span>
+                  <div className="flex items-center gap-2">
+                    <code className="text-xs bg-background px-2 py-1 rounded">{metaDetailsConnection.meta_business_id}</code>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => {
+                        navigator.clipboard.writeText(metaDetailsConnection.meta_business_id);
+                        toast.success("Business ID copiado!");
+                      }}
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Connected At */}
+              {metaDetailsConnection.meta_connected_at && (
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <span className="text-sm font-medium">Conectado em</span>
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(metaDetailsConnection.meta_connected_at).toLocaleString('pt-BR')}
+                  </span>
+                </div>
+              )}
+
+              {/* Last Error */}
+              {metaDetailsConnection.last_error && (
+                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                  <p className="text-sm font-medium text-destructive mb-1">Último Erro</p>
+                  <p className="text-xs text-muted-foreground">{metaDetailsConnection.last_error}</p>
+                </div>
+              )}
+
+              {/* Created At */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <span className="text-sm font-medium">Criado em</span>
+                <span className="text-sm text-muted-foreground">
+                  {new Date(metaDetailsConnection.created_at).toLocaleString('pt-BR')}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-2">
+                {metaDetailsConnection.status === 'connected' && (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setMetaTestConnection(metaDetailsConnection);
+                        setMetaDetailsDialogOpen(false);
+                        setMetaTestDialogOpen(true);
+                      }}
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      Testar Envio
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="text-orange-500 hover:text-orange-600 border-orange-200 hover:border-orange-300"
+                      disabled={metaDisconnecting === metaDetailsConnection.id}
+                      onClick={() => {
+                        handleMetaDisconnect(metaDetailsConnection);
+                        setMetaDetailsDialogOpen(false);
+                      }}
+                    >
+                      {metaDisconnecting === metaDetailsConnection.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <WifiOff className="w-4 h-4 mr-2" />
+                          Desconectar
+                        </>
+                      )}
+                    </Button>
+                  </>
+                )}
+                <Button
+                  variant="destructive"
+                  disabled={metaDisconnecting === metaDetailsConnection.id}
+                  onClick={() => {
+                    handleMetaDelete(metaDetailsConnection);
+                    setMetaDetailsDialogOpen(false);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Excluir
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
