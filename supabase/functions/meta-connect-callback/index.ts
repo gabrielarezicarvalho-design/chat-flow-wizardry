@@ -75,72 +75,127 @@ serve(async (req) => {
       }
 
       const accessToken = tokenData.access_token;
+      console.log("✅ Access token obtained successfully");
 
-      // Get WABA ID and phone number using the debug token / shared WABAs endpoint
-      // First get the user's business info
-      const wabaResp = await fetch(
-        `https://graph.facebook.com/v21.0/debug_token?input_token=${accessToken}`,
-        { headers: { Authorization: `Bearer ${META_APP_ID}|${META_APP_SECRET}` } }
-      );
-      const wabaData = await wabaResp.json();
-
-      // Get shared WABA IDs using the Business Integration System API
-      const sharedWabasResp = await fetch(
-        `https://graph.facebook.com/v21.0/me?fields=id,name&access_token=${accessToken}`
-      );
-      const userData = await sharedWabasResp.json();
-
-      // Fetch WABA(s) assigned to this system user via the app
-      const assignedWabasResp = await fetch(
-        `https://graph.facebook.com/v21.0/${META_APP_ID}/message_whatsapp_business_accounts?access_token=${accessToken}`
-      );
-      const assignedWabas = await assignedWabasResp.json();
-
+      // Try multiple approaches to find WABA and phone number
       let wabaId = null;
       let phoneNumberId = null;
       let displayPhoneNumber = null;
-      let businessId = userData?.id || null;
+      let businessId = null;
 
-      // Try to get the WABA from assigned list
-      if (assignedWabas?.data?.length > 0) {
-        wabaId = assignedWabas.data[0].id;
-
-        // Get phone numbers for this WABA
-        const phonesResp = await fetch(
-          `https://graph.facebook.com/v21.0/${wabaId}/phone_numbers?access_token=${accessToken}`
+      // Approach 1: Get shared WABAs via the business integration endpoint
+      try {
+        const sharedWabasResp = await fetch(
+          `https://graph.facebook.com/v21.0/debug_token?input_token=${accessToken}`,
+          { headers: { Authorization: `Bearer ${META_APP_ID}|${META_APP_SECRET}` } }
         );
-        const phonesData = await phonesResp.json();
-
-        if (phonesData?.data?.length > 0) {
-          phoneNumberId = phonesData.data[0].id;
-          displayPhoneNumber = phonesData.data[0].display_phone_number;
+        const debugData = await sharedWabasResp.json();
+        console.log("🔍 Debug token data:", JSON.stringify(debugData));
+        
+        // Extract granular scopes which contain WABA info
+        const granularScopes = debugData?.data?.granular_scopes || [];
+        for (const scope of granularScopes) {
+          if (scope.scope === "whatsapp_business_management" && scope.target_ids?.length > 0) {
+            wabaId = scope.target_ids[0];
+            console.log("📱 Found WABA ID from debug token:", wabaId);
+          }
         }
+      } catch (e) {
+        console.error("Debug token approach failed:", e);
+      }
 
-        // Auto-register webhook on the WABA via Graph API
+      // Approach 2: Try the app's message_whatsapp_business_accounts endpoint
+      if (!wabaId) {
+        try {
+          const assignedWabasResp = await fetch(
+            `https://graph.facebook.com/v21.0/${META_APP_ID}/message_whatsapp_business_accounts?access_token=${accessToken}`
+          );
+          const assignedWabas = await assignedWabasResp.json();
+          console.log("📋 Assigned WABAs:", JSON.stringify(assignedWabas));
+          
+          if (assignedWabas?.data?.length > 0) {
+            wabaId = assignedWabas.data[0].id;
+          }
+        } catch (e) {
+          console.error("Assigned WABAs approach failed:", e);
+        }
+      }
+
+      // Approach 3: Try listing businesses the user manages
+      if (!wabaId) {
+        try {
+          const businessesResp = await fetch(
+            `https://graph.facebook.com/v21.0/me/businesses?access_token=${accessToken}`
+          );
+          const businessesData = await businessesResp.json();
+          console.log("🏢 Businesses:", JSON.stringify(businessesData));
+
+          if (businessesData?.data?.length > 0) {
+            businessId = businessesData.data[0].id;
+            
+            // Get WABAs owned by this business
+            const bizWabasResp = await fetch(
+              `https://graph.facebook.com/v21.0/${businessId}/owned_whatsapp_business_accounts?access_token=${accessToken}`
+            );
+            const bizWabas = await bizWabasResp.json();
+            console.log("📱 Business WABAs:", JSON.stringify(bizWabas));
+            
+            if (bizWabas?.data?.length > 0) {
+              wabaId = bizWabas.data[0].id;
+            }
+          }
+        } catch (e) {
+          console.error("Business WABAs approach failed:", e);
+        }
+      }
+
+      // Get user info for business ID
+      if (!businessId) {
+        try {
+          const meResp = await fetch(`https://graph.facebook.com/v21.0/me?fields=id,name&access_token=${accessToken}`);
+          const meData = await meResp.json();
+          businessId = meData?.id || null;
+        } catch (e) {
+          console.error("Me endpoint failed:", e);
+        }
+      }
+
+      // If we found a WABA, get phone numbers
+      if (wabaId) {
+        try {
+          const phonesResp = await fetch(
+            `https://graph.facebook.com/v21.0/${wabaId}/phone_numbers?access_token=${accessToken}`
+          );
+          const phonesData = await phonesResp.json();
+          console.log("📞 Phone numbers:", JSON.stringify(phonesData));
+
+          if (phonesData?.data?.length > 0) {
+            phoneNumberId = phonesData.data[0].id;
+            displayPhoneNumber = phonesData.data[0].display_phone_number;
+          }
+        } catch (e) {
+          console.error("Phone numbers fetch failed:", e);
+        }
+      }
+
+      console.log("📊 Final result - WABA:", wabaId, "Phone:", phoneNumberId, "Business:", businessId);
+
+      // Auto-register webhook on the WABA via Graph API
+      if (wabaId) {
         try {
           const webhookCallbackUrl = `${SUPABASE_URL}/functions/v1/whatsapp-webhook`;
 
-          // Subscribe the app to receive webhooks for this WABA
           const subscribeResp = await fetch(
             `https://graph.facebook.com/v21.0/${wabaId}/subscribed_apps`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                access_token: accessToken,
-              }),
+              body: JSON.stringify({ access_token: accessToken }),
             }
           );
           const subscribeData = await subscribeResp.json();
           console.log("WABA webhook subscription result:", JSON.stringify(subscribeData));
 
-          if (!subscribeData.success) {
-            console.warn("Failed to subscribe app to WABA webhooks:", JSON.stringify(subscribeData));
-          }
-
-          // Also configure the webhook callback URL on the Meta App level
-          // This sets the webhook endpoint for the WhatsApp Business Account
-          // Fetch the verify token from app_settings
           const { data: appSettings } = await supabaseAdmin
             .from("app_settings")
             .select("whatsapp_verify_token")
@@ -149,7 +204,6 @@ serve(async (req) => {
 
           const verifyToken = appSettings?.whatsapp_verify_token || "marketflow_webhook_verify";
 
-          // Subscribe to the "messages" webhook field on the app
           const appWebhookResp = await fetch(
             `https://graph.facebook.com/v21.0/${META_APP_ID}/subscriptions`,
             {
@@ -166,13 +220,8 @@ serve(async (req) => {
           );
           const appWebhookData = await appWebhookResp.json();
           console.log("App webhook subscription result:", JSON.stringify(appWebhookData));
-
-          if (!appWebhookData.success) {
-            console.warn("Failed to configure app webhook:", JSON.stringify(appWebhookData));
-          }
         } catch (webhookErr) {
           console.error("Error registering webhook:", webhookErr);
-          // Don't fail the connection over webhook registration
         }
       }
 
