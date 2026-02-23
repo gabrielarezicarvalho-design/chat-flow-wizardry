@@ -154,7 +154,11 @@ const Connections = () => {
     welcomeMessage: '',
     closingMessage: '',
     absenceMessage: '',
-    transferMessage: ''
+    transferMessage: '',
+    autoReplyEnabled: false,
+    autoReplyMessage: '',
+    autoReplyButtonText: '',
+    autoReplyButtonUrl: ''
   });
 
   useEffect(() => {
@@ -447,7 +451,11 @@ const Connections = () => {
           welcomeMessage: '',
           closingMessage: '',
           absenceMessage: '',
-          transferMessage: ''
+          transferMessage: '',
+          autoReplyEnabled: false,
+          autoReplyMessage: '',
+          autoReplyButtonText: '',
+          autoReplyButtonUrl: ''
         });
       }
 
@@ -2234,6 +2242,7 @@ const Connections = () => {
   );
 
   const renderMessagesTab = () => (
+    <div className="space-y-6">
     <Card className="border-border">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">Mensagens Automáticas</CardTitle>
@@ -2285,6 +2294,76 @@ const Connections = () => {
         </div>
       </CardContent>
     </Card>
+
+    <Card className="border-border">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg font-semibold">📩 Resposta Automática</CardTitle>
+          <Switch 
+            checked={messageSettings.autoReplyEnabled}
+            onCheckedChange={(checked) => setMessageSettings({...messageSettings, autoReplyEnabled: checked})}
+          />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Envia automaticamente uma mensagem padrão com botão para toda pessoa que enviar qualquer mensagem nesta conexão.
+        </p>
+      </CardHeader>
+      {messageSettings.autoReplyEnabled && (
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-sm text-muted-foreground">Mensagem automática</Label>
+            <Textarea 
+              value={messageSettings.autoReplyMessage}
+              onChange={(e) => setMessageSettings({...messageSettings, autoReplyMessage: e.target.value})}
+              placeholder={`🤖 MENSAGEM AUTOMÁTICA\n\nEste WhatsApp é exclusivo para o envio de comunicados importantes.`}
+              rows={6}
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">Texto do botão</Label>
+              <Input 
+                value={messageSettings.autoReplyButtonText}
+                onChange={(e) => setMessageSettings({...messageSettings, autoReplyButtonText: e.target.value})}
+                placeholder="Ex: Falar com ComuNET"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">URL do botão (WhatsApp link)</Label>
+              <Input 
+                value={messageSettings.autoReplyButtonUrl}
+                onChange={(e) => setMessageSettings({...messageSettings, autoReplyButtonUrl: e.target.value})}
+                placeholder="Ex: https://wa.me/5551999999999"
+              />
+            </div>
+          </div>
+
+          {messageSettings.autoReplyMessage && (
+            <div className="border border-border rounded-lg p-4 bg-muted/30">
+              <Label className="text-sm text-muted-foreground mb-2 block">📱 Pré-visualização</Label>
+              <div className="bg-background rounded-lg p-3 text-sm whitespace-pre-wrap">
+                {messageSettings.autoReplyMessage}
+              </div>
+              {messageSettings.autoReplyButtonText && (
+                <div className="mt-2 flex justify-center">
+                  <span className="inline-block bg-primary/10 text-primary border border-primary/30 rounded-full px-4 py-1.5 text-sm font-medium">
+                    🔗 {messageSettings.autoReplyButtonText}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex justify-end pt-2">
+            <Button onClick={handleSaveMessages} disabled={savingMessages}>
+              {savingMessages ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              {savingMessages ? 'Salvando...' : 'Salvar Resposta Automática'}
+            </Button>
+          </div>
+        </CardContent>
+      )}
+    </Card>
+    </div>
   );
 
   const renderApiTab = () => (
