@@ -124,7 +124,7 @@ const Auth = () => {
   ];
 
   return (
-    <div className="min-h-screen flex overflow-hidden bg-slate-950">
+    <div className="h-screen flex overflow-hidden bg-slate-950">
       {/* Left Side - Stats & Features */}
       <motion.div 
         initial={{ x: -100, opacity: 0 }}
@@ -160,19 +160,19 @@ const Auth = () => {
         />
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center w-full p-12 xl:p-16">
+        <div className="relative z-10 flex flex-col justify-center w-full h-full p-8 xl:p-12">
           {/* Header with Robot */}
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-3 mb-6">
             <motion.img
               src={robotImage}
               alt="MarketFlow"
-              className="w-20 h-20 object-contain"
-              animate={{ y: [0, -8, 0] }}
+              className="w-16 h-16 object-contain"
+              animate={{ y: [0, -6, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
             <div>
-              <h1 className="text-4xl font-bold text-white tracking-tight">MarketFlow</h1>
-              <p className="text-slate-400 text-lg">Plataforma de IA & Disparos em Massa</p>
+              <h1 className="text-3xl font-bold text-white tracking-tight">MarketFlow</h1>
+              <p className="text-slate-400">Plataforma de IA & Disparos em Massa</p>
             </div>
           </div>
 
@@ -181,13 +181,13 @@ const Auth = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mb-10"
+            className="mb-6"
           >
-            <h2 className="text-xl font-semibold text-white/90 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-white/90 mb-3 flex items-center gap-2">
               <Zap className="w-5 h-5 text-primary" />
               Estatísticas da Plataforma
             </h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {statsCards.map((stat, index) => (
                 <motion.div
                   key={index}
@@ -197,14 +197,12 @@ const Auth = () => {
                   whileHover={{ scale: 1.03, y: -2 }}
                   className="relative group"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl blur-xl" 
-                    style={{ background: `linear-gradient(135deg, var(--tw-gradient-stops))` }} />
-                  <div className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-5 hover:border-slate-600/50 transition-all duration-300">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${stat.color} flex items-center justify-center mb-3 shadow-lg`}>
-                      <stat.icon className="w-6 h-6 text-white" />
+                  <div className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 hover:border-slate-600/50 transition-all duration-300">
+                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center mb-2 shadow-lg`}>
+                      <stat.icon className="w-5 h-5 text-white" />
                     </div>
-                    <p className="text-3xl font-bold text-white mb-1">{stat.value}</p>
-                    <p className="text-slate-400 text-sm">{stat.label}</p>
+                    <p className="text-2xl font-bold text-white mb-0.5">{stat.value}</p>
+                    <p className="text-slate-400 text-xs">{stat.label}</p>
                   </div>
                 </motion.div>
               ))}
@@ -217,8 +215,8 @@ const Auth = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <h2 className="text-xl font-semibold text-white/90 mb-4">Recursos Principais</h2>
-            <div className="space-y-3">
+            <h2 className="text-lg font-semibold text-white/90 mb-3">Recursos Principais</h2>
+            <div className="space-y-2">
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
@@ -226,14 +224,14 @@ const Auth = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.7 + index * 0.1 }}
                   whileHover={{ x: 5 }}
-                  className="flex items-center gap-4 bg-slate-800/30 backdrop-blur-sm rounded-xl px-5 py-4 border border-slate-700/30 hover:border-primary/30 transition-all duration-300"
+                  className="flex items-center gap-3 bg-slate-800/30 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/30 hover:border-primary/30 transition-all duration-300"
                 >
-                  <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="h-6 w-6 text-primary" />
+                  <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-white font-medium">{feature.text}</p>
-                    <p className="text-slate-400 text-sm">{feature.description}</p>
+                    <p className="text-white font-medium text-sm">{feature.text}</p>
+                    <p className="text-slate-400 text-xs">{feature.description}</p>
                   </div>
                 </motion.div>
               ))}
