@@ -3263,7 +3263,7 @@ serve(async (req) => {
     if (payloadInstanceId) {
       const { data: connByInstanceId, error: err1 } = await supabase
         .from("connections")
-        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts, company_id")
+        .select("user_id, id, token, environment, base_url, company_id")
         .eq("instance_id", payloadInstanceId)
         .maybeSingle();
       
@@ -3279,7 +3279,7 @@ serve(async (req) => {
     if (!connection && payloadInstanceName) {
       const { data: connByName, error: err2 } = await supabase
         .from("connections")
-        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts, company_id")
+        .select("user_id, id, token, environment, base_url, company_id")
         .eq("instance_name", payloadInstanceName)
         .maybeSingle();
       
@@ -3295,7 +3295,7 @@ serve(async (req) => {
     if (!connection && tokenToSearch) {
       const { data: connByToken, error: err3 } = await supabase
         .from("connections")
-        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts, company_id")
+        .select("user_id, id, token, environment, base_url, company_id")
         .eq("token", tokenToSearch)
         .maybeSingle();
       
@@ -3311,7 +3311,7 @@ serve(async (req) => {
       console.log("⚠️ Tentando fallback para conexão ativa...");
       const { data: activeConns, error: err4 } = await supabase
         .from("connections")
-        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts, company_id")
+        .select("user_id, id, token, environment, base_url, company_id")
         .eq("status", "connected");
       
       if (err4) console.error("❌ Erro busca fallback:", err4.message);
@@ -3334,7 +3334,7 @@ serve(async (req) => {
     }
 
     // Check if group messages should be filtered
-    if (isGroup && connection.filter_groups !== false) {
+    if (isGroup) {
       console.log("⚠️ Mensagem de grupo ignorada (filtro ativo)");
       return new Response(JSON.stringify({ 
         success: true, 
@@ -3515,7 +3515,7 @@ ${mensagem}`;
 
     // Buscar ou criar lead (respeitando configuração de auto_save_contacts)
     // IMPORTANTE: Só criar lead se for um número de telefone válido (não ID de Facebook/Instagram)
-    const shouldAutoSave = connection.auto_save_contacts !== false; // Default true
+    const shouldAutoSave = true; // Always auto-save contacts
     
     let leadData = null;
     
