@@ -12,6 +12,7 @@ import { MainLayout } from "./components/layout/MainLayout";
 import { Loading } from "./components/ui/loading";
 import { WelcomePopup } from "./components/WelcomePopup";
 import { MultiSessionAlert } from "./components/MultiSessionAlert";
+import { FeatureGate } from "./components/FeatureGate";
 
 // Eager load main pages for better UX
 import Home from "./pages/Home";
@@ -107,13 +108,15 @@ function App() {
                     <Route path="/entrar-white-label" element={<WhiteLabelLogin />} />
                     <Route path="/white-label-config" element={<WhiteLabelConfig />} />
                     <Route path="/preview/:slug" element={<WhiteLabelPreview />} />
-                    {/* Conversations with no padding */}
+                    {/* Conversations with no padding - gated by chat feature */}
                     <Route
                       path="/conversations"
                       element={
                         <ProtectedRoute>
                           <MainLayout noPadding>
-                            <Conversations />
+                            <FeatureGate feature="chat">
+                              <Conversations />
+                            </FeatureGate>
                           </MainLayout>
                         </ProtectedRoute>
                       }

@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { 
   Building2, Plus, Pencil, Trash2, Lock, Unlock, Search, 
-  RefreshCw, Loader2, CheckCircle, XCircle, User, Eye, EyeOff, MessageSquare
+  RefreshCw, Loader2, CheckCircle, XCircle, User, Eye, EyeOff, MessageSquare, Shield
 } from "lucide-react";
 import { CompanyWhatsAppConnections } from "@/components/admin/CompanyWhatsAppConnections";
 
@@ -56,7 +56,9 @@ export function AdminEmpresas() {
     plan: "basic",
     admin_username: "",
     admin_password: "",
-    admin_full_name: ""
+    admin_full_name: "",
+    features: null as string[] | null,
+    useCustomFeatures: false
   });
 
   useEffect(() => {
@@ -115,13 +117,14 @@ export function AdminEmpresas() {
 
     setSaving(true);
     try {
-      const data = {
+      const data: any = {
         name: form.name,
         slug: form.slug || form.name.toLowerCase().replace(/\s+/g, '-'),
         is_active: form.is_active,
         max_users: form.max_users,
         max_connections: form.max_connections,
-        plan: form.plan
+        plan: form.plan,
+        features: form.useCustomFeatures ? form.features : null
       };
 
       if (editingCompany) {
@@ -202,13 +205,26 @@ export function AdminEmpresas() {
       plan: defaultPlan?.slug || "basic",
       admin_username: "",
       admin_password: "",
-      admin_full_name: ""
+      admin_full_name: "",
+      features: null,
+      useCustomFeatures: false
     });
     setShowPassword(false);
   };
 
-  const openEdit = (company: Company) => {
+  const openEdit = async (company: Company) => {
     setEditingCompany(company);
+    
+    // Fetch company features override
+    const { data: companyFull } = await supabase
+      .from("companies")
+      .select("features")
+      .eq("id", company.id)
+      .single();
+    
+    const companyFeatures = (companyFull as any)?.features as string[] | null;
+    const selectedPlan = plans.find(p => p.slug === company.plan);
+    
     setForm({
       name: company.name,
       slug: company.slug || "",
@@ -218,7 +234,9 @@ export function AdminEmpresas() {
       plan: company.plan,
       admin_username: "",
       admin_password: "",
-      admin_full_name: ""
+      admin_full_name: "",
+      features: companyFeatures || selectedPlan?.features || [],
+      useCustomFeatures: !!companyFeatures
     });
     setShowDialog(true);
   };
@@ -409,6 +427,68 @@ export function AdminEmpresas() {
             <div className="flex items-center justify-between p-3 rounded-lg bg-white/5">
               <Label>Empresa Ativa</Label>
               <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
+            </div>
+
+            {/* Feature Permissions */}
+            <div className="pt-4 border-t border-white/10">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-amber-400" />
+                  <h3 className="font-semibold text-white">Permissões Customizadas</h3>
+                </div>
+                <Switch 
+                  checked={form.useCustomFeatures} 
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      const selectedPlan = plans.find(p => p.slug === form.plan);
+                      setForm({ ...form, useCustomFeatures: true, features: form.features?.length ? form.features : (selectedPlan?.features || []) });
+                    } else {
+                      setForm({ ...form, useCustomFeatures: false, features: null });
+                    }
+                  }} 
+                />
+              </div>
+              {!form.useCustomFeatures && (
+                <p className="text-xs text-slate-500 mb-2">Usando permissões do plano selecionado. Ative para customizar.</p>
+              )}
+              {form.useCustomFeatures && (
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { id: "chat", label: "💬 Chat / Conversas" },
+                    { id: "mass_sending", label: "📢 Disparos em Massa" },
+                    { id: "flows_basic", label: "🔄 Fluxos Básicos" },
+                    { id: "flows_advanced", label: "⚡ Fluxos Avançados" },
+                    { id: "ai_agents", label: "🤖 Agentes de IA" },
+                    { id: "smart_forms", label: "📝 Formulários" },
+                    { id: "reports", label: "📊 Relatórios" },
+                    { id: "tags", label: "🏷️ Tags" },
+                    { id: "departments", label: "🏢 Departamentos" },
+                    { id: "leads_management", label: "👥 Gestão de Leads" },
+                    { id: "internal_chat", label: "💬 Chat Interno" },
+                    { id: "multi_connection", label: "🔗 Multi Conexão" },
+                    { id: "chatgpt_credits", label: "🧠 ChatGPT" },
+                    { id: "google_drive", label: "☁️ Google Drive" },
+                    { id: "webhooks", label: "🔌 Webhooks/API" },
+                    { id: "scheduled_messages", label: "⏰ Agendamento" },
+                  ] as { id: string; label: string }[]).map(feat => (
+                    <div key={feat.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5">
+                      <span className="text-xs text-slate-300">{feat.label}</span>
+                      <Switch
+                        checked={form.features?.includes(feat.id) || false}
+                        onCheckedChange={(checked) => {
+                          const current = form.features || [];
+                          setForm({
+                            ...form,
+                            features: checked
+                              ? [...current, feat.id]
+                              : current.filter(f => f !== feat.id)
+                          });
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Admin User Section */}
