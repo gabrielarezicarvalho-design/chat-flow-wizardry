@@ -26,32 +26,32 @@ Deno.serve(async (req) => {
     // 1. Validate key by listing models
     const modelsRes = await fetch("https://api.openai.com/v1/models?limit=1", { headers });
     if (!modelsRes.ok) {
+      await modelsRes.text();
       return new Response(
         JSON.stringify({ error: "API Key inválida ou sem permissões. Verifique em platform.openai.com." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    await modelsRes.text();
 
-    // 2. Get usage costs for current month via the new Usage API
+    // 2. Try multiple approaches to get usage data
     const now = new Date();
     const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    // end_date is exclusive, so use first day of next month
     const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
     const startTs = Math.floor(startDate.getTime() / 1000);
     const endTs = Math.floor(endDate.getTime() / 1000);
 
     let totalUsed = 0;
+    let usageFound = false;
 
+    // Approach 1: Organization Costs API (requires api.usage.read scope)
     try {
       const costsRes = await fetch(
         `https://api.openai.com/v1/organization/costs?start_time=${startTs}&end_time=${endTs}`,
         { headers }
       );
-
       if (costsRes.ok) {
         const costsData = await costsRes.json();
-        // Sum up all cost buckets
         if (costsData.data && Array.isArray(costsData.data)) {
           for (const bucket of costsData.data) {
             if (bucket.results && Array.isArray(bucket.results)) {
@@ -61,24 +61,49 @@ Deno.serve(async (req) => {
             }
           }
         }
-        // Convert cents to dollars if needed (the costs API returns in USD cents)
-        totalUsed = totalUsed / 100;
+        usageFound = true;
+        console.log("Usage from costs API:", totalUsed);
       } else {
-        // Fallback: try the older usage endpoint
+        await costsRes.text();
+      }
+    } catch (e) {
+      console.error("Costs API error:", e);
+    }
+
+    // Approach 2: Completions usage endpoint (might work with project keys)
+    if (!usageFound) {
+      try {
         const usageRes = await fetch(
-          `https://api.openai.com/v1/dashboard/billing/usage?start_date=${startDate.toISOString().split("T")[0]}&end_date=${endDate.toISOString().split("T")[0]}`,
+          `https://api.openai.com/v1/organization/usage/completions?start_time=${startTs}&end_time=${endTs}&bucket_width=1d`,
           { headers }
         );
         if (usageRes.ok) {
           const usageData = await usageRes.json();
-          totalUsed = (usageData.total_usage || 0) / 100;
+          console.log("Completions usage response:", JSON.stringify(usageData).slice(0, 500));
+          // Sum up input/output costs from completions
+          if (usageData.data && Array.isArray(usageData.data)) {
+            for (const bucket of usageData.data) {
+              if (bucket.results && Array.isArray(bucket.results)) {
+                for (const result of bucket.results) {
+                  totalUsed += (result.input_cached_tokens || 0) * 0.0000001;
+                  totalUsed += (result.input_tokens || 0) * 0.000001;
+                  totalUsed += (result.output_tokens || 0) * 0.000002;
+                }
+              }
+            }
+          }
+          usageFound = true;
+          console.log("Usage from completions:", totalUsed);
+        } else {
+          const errText = await usageRes.text();
+          console.log("Completions usage error:", usageRes.status, errText);
         }
+      } catch (e) {
+        console.error("Completions usage error:", e);
       }
-    } catch (e) {
-      console.error("Error fetching usage:", e);
     }
 
-    // 3. Try to get subscription/limit info (may fail on newer accounts)
+    // 3. Try to get subscription/limit info
     let totalGranted = 0;
     let hasPaymentMethod = false;
 
@@ -88,15 +113,16 @@ Deno.serve(async (req) => {
         const subData = await subRes.json();
         totalGranted = subData.hard_limit_usd || subData.system_hard_limit_usd || 0;
         hasPaymentMethod = subData.has_payment_method || false;
+      } else {
+        await subRes.text();
       }
     } catch (_e) {
-      // Endpoint deprecated - expected to fail
+      // Expected to fail - deprecated endpoint
     }
 
-    // If we couldn't get a limit, provide a reasonable default
     if (totalGranted === 0) {
-      totalGranted = 120; // Default assumption
-      hasPaymentMethod = true; // Assume pay-as-you-go
+      totalGranted = 120;
+      hasPaymentMethod = true;
     }
 
     const totalAvailable = Math.max(0, totalGranted - totalUsed);
@@ -107,6 +133,7 @@ Deno.serve(async (req) => {
         total_used: totalUsed,
         total_available: totalAvailable,
         has_payment_method: hasPaymentMethod,
+        usage_available: usageFound,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
