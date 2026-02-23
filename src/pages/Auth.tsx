@@ -317,9 +317,18 @@ const Auth = () => {
               </motion.div>
             </form>
 
-            <p className="text-center text-sm text-slate-500 mt-6">
-              Problemas para acessar? Entre em contato com o administrador.
-            </p>
+            <div className="text-center text-sm text-slate-500 mt-6 space-y-1">
+              <p>Problemas para acessar? Entre em contato:</p>
+              <div className="flex items-center justify-center gap-3 flex-wrap">
+                <a href="mailto:contato@marketflowchat.com.br" className="text-primary hover:underline transition-colors">
+                  contato@marketflowchat.com.br
+                </a>
+                <span className="text-slate-600">•</span>
+                <a href="https://wa.me/5551992226536" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline transition-colors">
+                  WhatsApp
+                </a>
+              </div>
+            </div>
 
             <div className="flex items-center justify-center gap-3 mt-4 text-xs text-slate-500">
               <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Privacidade</a>
