@@ -84,18 +84,21 @@ serve(async (req) => {
 
     // Build the Facebook Login / Embedded Signup URL
     // See: https://developers.facebook.com/docs/whatsapp/embedded-signup
+    const META_CONFIG_ID = Deno.env.get("META_CONFIG_ID");
+    
     const params = new URLSearchParams({
       client_id: META_APP_ID,
       redirect_uri: callbackUrl,
       state: stateToken,
-      scope: "whatsapp_business_management,whatsapp_business_messaging",
       response_type: "code",
-      config_id: "", // Leave empty or set to your Embedded Signup config ID if you have one
     });
 
-    // Remove empty config_id if not set
-    if (!params.get("config_id")) {
-      params.delete("config_id");
+    // Add config_id if available (required for Embedded Signup)
+    if (META_CONFIG_ID) {
+      params.set("config_id", META_CONFIG_ID);
+    } else {
+      // Fallback to scope-based auth if no config_id
+      params.set("scope", "whatsapp_business_management,whatsapp_business_messaging");
     }
 
     const loginUrl = `https://www.facebook.com/v21.0/dialog/oauth?${params.toString()}`;
