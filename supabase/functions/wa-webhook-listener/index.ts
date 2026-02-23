@@ -3409,11 +3409,11 @@ serve(async (req) => {
       console.log("🔔 Verificando Telegram (envio imediato)...");
       
       const { data: telegramConfigs, error: telegramConfigError } = await supabase
-        .from("webhook_field_configs")
+        .from("telegram_notification_configs")
         .select("*")
         .eq("user_id", userId)
         .eq("is_active", true)
-        .eq("telegram_enabled", true);
+        .eq("notify_lead_response", true);
 
       if (telegramConfigError) {
         console.error("❌ Erro ao buscar configs Telegram:", telegramConfigError.message);
@@ -3433,8 +3433,8 @@ serve(async (req) => {
           }
 
           // Verificar filtro de palavras-chave
-          const keywords = config.telegram_filter_keywords || [];
-          const filterMode = config.telegram_filter_mode || 'contains';
+          const keywords = config.filter_keywords || [];
+          const filterMode = config.filter_mode || 'contains';
           
           if (keywords.length > 0) {
             const messageLower = mensagem.toLowerCase();
@@ -3442,6 +3442,9 @@ serve(async (req) => {
 
             switch (filterMode) {
               case 'contains':
+                shouldSend = keywords.some((kw: string) => messageLower.includes(kw.toLowerCase()));
+                break;
+              case 'all':
                 shouldSend = keywords.some((kw: string) => messageLower.includes(kw.toLowerCase()));
                 break;
               case 'exact':
@@ -3474,7 +3477,7 @@ serve(async (req) => {
 ${mensagem}`;
 
           // Enviar diretamente via API do Telegram
-          const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+          const TELEGRAM_BOT_TOKEN = config.telegram_bot_token || Deno.env.get("TELEGRAM_BOT_TOKEN");
           
           if (TELEGRAM_BOT_TOKEN) {
             try {
@@ -4167,11 +4170,11 @@ ${mensagem}`;
       console.log("🔍 Buscando configs de Telegram para user:", userId);
       
       const { data: telegramConfigs, error: telegramConfigError } = await supabase
-        .from("webhook_field_configs")
+        .from("telegram_notification_configs")
         .select("*")
         .eq("user_id", userId)
         .eq("is_active", true)
-        .eq("telegram_enabled", true);
+        .eq("notify_lead_response", true);
 
       if (telegramConfigError) {
         console.error("❌ Erro ao buscar configs Telegram:", telegramConfigError.message);
@@ -4193,8 +4196,8 @@ ${mensagem}`;
           }
 
           // Verificar filtro de palavras-chave
-          const keywords = config.telegram_filter_keywords || [];
-          const filterMode = config.telegram_filter_mode || 'contains';
+          const keywords = config.filter_keywords || [];
+          const filterMode = config.filter_mode || 'contains';
           
           if (keywords.length > 0) {
             const messageLower = mensagem.toLowerCase();
@@ -4202,6 +4205,9 @@ ${mensagem}`;
 
             switch (filterMode) {
               case 'contains':
+                shouldSend = keywords.some((kw: string) => messageLower.includes(kw.toLowerCase()));
+                break;
+              case 'all':
                 shouldSend = keywords.some((kw: string) => messageLower.includes(kw.toLowerCase()));
                 break;
               case 'exact':
@@ -4231,7 +4237,7 @@ ${mensagem}`;
 ${mensagem}`;
 
           // Enviar via edge function
-          const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+          const TELEGRAM_BOT_TOKEN = config.telegram_bot_token || Deno.env.get("TELEGRAM_BOT_TOKEN");
           
           if (TELEGRAM_BOT_TOKEN) {
             try {
