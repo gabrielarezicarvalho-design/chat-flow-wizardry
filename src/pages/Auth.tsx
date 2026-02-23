@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, Bot, Send, TrendingUp, Users, CheckCircle, Zap, Target, BarChart3 } from 'lucide-react';
+import { Eye, EyeOff, Send, Users, CheckCircle, Zap, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import robotImage from '@/assets/marketflow-robot.png';
@@ -117,11 +117,6 @@ const Auth = () => {
     },
   ];
 
-  const features = [
-    { icon: Bot, text: 'IA Avançada para Atendimento', description: 'Agentes inteligentes 24/7' },
-    { icon: Target, text: 'Disparos Segmentados', description: 'Alcance o público certo' },
-    { icon: TrendingUp, text: 'Análises em Tempo Real', description: 'Métricas detalhadas' },
-  ];
 
   return (
     <div className="h-screen flex overflow-hidden bg-slate-950">
@@ -209,34 +204,6 @@ const Auth = () => {
             </div>
           </motion.div>
 
-          {/* Features */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <h2 className="text-lg font-semibold text-white/90 mb-3">Recursos Principais</h2>
-            <div className="space-y-2">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.7 + index * 0.1 }}
-                  whileHover={{ x: 5 }}
-                  className="flex items-center gap-3 bg-slate-800/30 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/30 hover:border-primary/30 transition-all duration-300"
-                >
-                  <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-white font-medium text-sm">{feature.text}</p>
-                    <p className="text-slate-400 text-xs">{feature.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
         </div>
       </motion.div>
 
@@ -353,6 +320,14 @@ const Auth = () => {
             <p className="text-center text-sm text-slate-500 mt-6">
               Problemas para acessar? Entre em contato com o administrador.
             </p>
+
+            <div className="flex items-center justify-center gap-3 mt-4 text-xs text-slate-500">
+              <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Privacidade</a>
+              <span>•</span>
+              <a href="/termos-de-servico" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Termos</a>
+              <span>•</span>
+              <a href="/exclusao-de-dados" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Exclusão de Dados</a>
+            </div>
           </motion.div>
 
           {/* Mobile Stats Preview */}
