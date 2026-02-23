@@ -582,15 +582,15 @@ const Settings = () => {
                 Visualize a Política de Privacidade, os Termos de Serviço e a página de Exclusão de Dados.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="border rounded-lg p-5 space-y-4">
-                  <div className="flex items-center gap-3">
+                <div className="border rounded-lg p-5 flex flex-col">
+                  <div className="flex items-center gap-3 mb-3">
                     <Shield className="w-6 h-6 text-primary" />
                     <h3 className="font-semibold text-foreground">Política de Privacidade</h3>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground flex-1">
                     Descreve como coletamos, usamos e protegemos suas informações pessoais.
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2 mt-4">
                     <Button variant="outline" size="sm" onClick={() => window.open(`${window.location.origin}/politica-de-privacidade`, '_blank')}>
                       <LinkIcon className="w-4 h-4 mr-2" />
                       Abrir em nova aba
@@ -602,15 +602,15 @@ const Settings = () => {
                   </div>
                 </div>
 
-                <div className="border rounded-lg p-5 space-y-4">
-                  <div className="flex items-center gap-3">
+                <div className="border rounded-lg p-5 flex flex-col">
+                  <div className="flex items-center gap-3 mb-3">
                     <FileText className="w-6 h-6 text-primary" />
                     <h3 className="font-semibold text-foreground">Termos de Serviço</h3>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground flex-1">
                     Define as regras e condições de uso da plataforma.
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2 mt-4">
                     <Button variant="outline" size="sm" onClick={() => window.open(`${window.location.origin}/termos-de-servico`, '_blank')}>
                       <LinkIcon className="w-4 h-4 mr-2" />
                       Abrir em nova aba
@@ -622,15 +622,15 @@ const Settings = () => {
                   </div>
                 </div>
 
-                <div className="border rounded-lg p-5 space-y-4">
-                  <div className="flex items-center gap-3">
+                <div className="border rounded-lg p-5 flex flex-col">
+                  <div className="flex items-center gap-3 mb-3">
                     <Trash2 className="w-6 h-6 text-destructive" />
                     <h3 className="font-semibold text-foreground">Exclusão de Dados</h3>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground flex-1">
                     Página para usuários solicitarem a exclusão de seus dados pessoais (LGPD/Meta).
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2 mt-4">
                     <Button variant="outline" size="sm" onClick={() => window.open(`${window.location.origin}/exclusao-de-dados`, '_blank')}>
                       <LinkIcon className="w-4 h-4 mr-2" />
                       Abrir em nova aba
