@@ -43,6 +43,8 @@ const Connections = () => {
   const [metaTestTemplateName, setMetaTestTemplateName] = useState('');
   const [metaTestTemplateLang, setMetaTestTemplateLang] = useState('pt_BR');
   const [metaTestSending, setMetaTestSending] = useState(false);
+  const [metaTemplates, setMetaTemplates] = useState<any[]>([]);
+  const [metaTemplatesLoading, setMetaTemplatesLoading] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [pairCode, setPairCode] = useState<string | null>(null);
@@ -1373,6 +1375,25 @@ const Connections = () => {
       toast.error("Erro ao excluir conexão");
     } finally {
       setMetaDisconnecting(null);
+    }
+  };
+
+  const fetchMetaTemplates = async (connectionId: string) => {
+    setMetaTemplatesLoading(true);
+    setMetaTemplates([]);
+    try {
+      const { data, error } = await supabase.functions.invoke('meta-list-templates', {
+        body: { connectionId }
+      });
+      if (error) throw error;
+      if (data?.templates) {
+        setMetaTemplates(data.templates);
+      }
+    } catch (err: any) {
+      console.error("Error fetching templates:", err);
+      toast.error("Erro ao buscar templates da Meta");
+    } finally {
+      setMetaTemplatesLoading(false);
     }
   };
 
@@ -2774,7 +2795,12 @@ const Connections = () => {
 
             <div className="space-y-2">
               <Label>Tipo de envio</Label>
-              <Select value={metaTestType} onValueChange={(v: 'text' | 'template') => setMetaTestType(v)}>
+              <Select value={metaTestType} onValueChange={(v: 'text' | 'template') => {
+                setMetaTestType(v);
+                if (v === 'template' && metaTestConnection && metaTemplates.length === 0) {
+                  fetchMetaTemplates(metaTestConnection.id);
+                }
+              }}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -2798,16 +2824,79 @@ const Connections = () => {
             ) : (
               <div className="space-y-3">
                 <div className="space-y-2">
-                  <Label>Nome do Template</Label>
-                  <Input
-                    placeholder="hello_world"
-                    value={metaTestTemplateName}
-                    onChange={(e) => setMetaTestTemplateName(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Nome exato do template aprovado na Meta Business
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <Label>Template</Label>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs"
+                      disabled={metaTemplatesLoading || !metaTestConnection}
+                      onClick={() => metaTestConnection && fetchMetaTemplates(metaTestConnection.id)}
+                    >
+                      {metaTemplatesLoading ? (
+                        <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                      ) : (
+                        <RefreshCw className="w-3 h-3 mr-1" />
+                      )}
+                      Atualizar
+                    </Button>
+                  </div>
+
+                  {metaTemplatesLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      <span className="ml-2 text-sm text-muted-foreground">Buscando templates...</span>
+                    </div>
+                  ) : metaTemplates.length > 0 ? (
+                    <Select 
+                      value={metaTestTemplateName} 
+                      onValueChange={(v) => {
+                        setMetaTestTemplateName(v);
+                        // Auto-set language from template
+                        const tpl = metaTemplates.find((t: any) => t.name === v);
+                        if (tpl?.language) {
+                          setMetaTestTemplateLang(tpl.language);
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um template..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {/* Group by unique name */}
+                        {Array.from(new Set(metaTemplates.map((t: any) => t.name))).map((name: string) => {
+                          const tpl = metaTemplates.find((t: any) => t.name === name);
+                          return (
+                            <SelectItem key={name} value={name}>
+                              <div className="flex items-center gap-2">
+                                <span>{name}</span>
+                                <Badge 
+                                  variant={tpl?.status === 'APPROVED' ? 'default' : 'secondary'} 
+                                  className="text-[10px] h-4 px-1"
+                                >
+                                  {tpl?.status === 'APPROVED' ? '✓' : tpl?.status}
+                                </Badge>
+                                <span className="text-muted-foreground text-xs">{tpl?.language}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <div className="space-y-2">
+                      <Input
+                        placeholder="hello_world"
+                        value={metaTestTemplateName}
+                        onChange={(e) => setMetaTestTemplateName(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Nenhum template encontrado. Digite o nome manualmente ou clique em Atualizar.
+                      </p>
+                    </div>
+                  )}
                 </div>
+
                 <div className="space-y-2">
                   <Label>Idioma do Template</Label>
                   <Select value={metaTestTemplateLang} onValueChange={setMetaTestTemplateLang}>
@@ -2818,6 +2907,7 @@ const Connections = () => {
                       <SelectItem value="pt_BR">Português (BR)</SelectItem>
                       <SelectItem value="en_US">English (US)</SelectItem>
                       <SelectItem value="es">Español</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
