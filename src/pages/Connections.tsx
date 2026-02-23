@@ -16,7 +16,7 @@ import { useFlows } from "@/hooks/useFlows";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
-import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell, Globe, ArrowLeft } from "lucide-react";
+import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell, Globe, ArrowLeft, Send } from "lucide-react";
 import { TelegramNotifications } from "@/components/mass-sending/TelegramNotifications";
 import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
 import { DeleteConnectionDialog } from "@/components/connections/DeleteConnectionDialog";
@@ -32,6 +32,14 @@ const Connections = () => {
   const { isAdmin } = useUserRole();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [metaConnections, setMetaConnections] = useState<any[]>([]);
+  const [metaTestDialogOpen, setMetaTestDialogOpen] = useState(false);
+  const [metaTestConnection, setMetaTestConnection] = useState<any>(null);
+  const [metaTestPhone, setMetaTestPhone] = useState('');
+  const [metaTestType, setMetaTestType] = useState<'text' | 'template'>('text');
+  const [metaTestMessage, setMetaTestMessage] = useState('');
+  const [metaTestTemplateName, setMetaTestTemplateName] = useState('');
+  const [metaTestTemplateLang, setMetaTestTemplateLang] = useState('pt_BR');
+  const [metaTestSending, setMetaTestSending] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [pairCode, setPairCode] = useState<string | null>(null);
@@ -1319,6 +1327,50 @@ const Connections = () => {
     }
   };
 
+  const handleMetaTestSend = async () => {
+    if (!metaTestConnection || !metaTestPhone) {
+      toast.error("Selecione uma conexão e digite o número");
+      return;
+    }
+
+    if (metaTestType === 'template' && !metaTestTemplateName) {
+      toast.error("Digite o nome do template");
+      return;
+    }
+
+    if (metaTestType === 'text' && !metaTestMessage) {
+      toast.error("Digite a mensagem");
+      return;
+    }
+
+    setMetaTestSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('meta-send-test', {
+        body: {
+          connectionId: metaTestConnection.id,
+          to: metaTestPhone,
+          ...(metaTestType === 'template' 
+            ? { templateName: metaTestTemplateName, templateLanguage: metaTestTemplateLang }
+            : { message: metaTestMessage }
+          ),
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast.success(`✅ ${data.message}`);
+        setMetaTestDialogOpen(false);
+      } else {
+        toast.error(data?.error || "Erro ao enviar");
+      }
+    } catch (err: any) {
+      console.error("Meta test send error:", err);
+      toast.error("Erro ao enviar mensagem de teste");
+    } finally {
+      setMetaTestSending(false);
+    }
+  };
 
   const renderConnectionTab = () => {
     // Calculate active instances
@@ -1588,6 +1640,24 @@ const Connections = () => {
                     <p className="text-destructive">{metaConn.last_error}</p>
                   )}
                 </div>
+
+                {metaConn.status === 'connected' && (
+                  <div className="flex gap-1.5 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 h-8 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMetaTestConnection(metaConn);
+                        setMetaTestDialogOpen(true);
+                      }}
+                    >
+                      <Send className="w-3 h-3 mr-1" />
+                      Testar Envio
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -2576,6 +2646,105 @@ const Connections = () => {
         connectionName={connectionToDelete?.name || connectionToDelete?.instance_name || "Conexão"}
         onConfirm={handleDeleteConfirm}
       />
+
+      {/* Meta Test Send Dialog */}
+      <Dialog open={metaTestDialogOpen} onOpenChange={setMetaTestDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5" />
+              Testar Envio - Meta Cloud API
+            </DialogTitle>
+            <DialogDescription>
+              Envie uma mensagem de teste ou template via Meta WhatsApp Cloud API
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Número de destino</Label>
+              <Input
+                placeholder="5511999999999"
+                value={metaTestPhone}
+                onChange={(e) => setMetaTestPhone(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Formato: código do país + DDD + número (ex: 5511999999999)
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Tipo de envio</Label>
+              <Select value={metaTestType} onValueChange={(v: 'text' | 'template') => setMetaTestType(v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="text">Mensagem de Texto</SelectItem>
+                  <SelectItem value="template">Template Aprovado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {metaTestType === 'text' ? (
+              <div className="space-y-2">
+                <Label>Mensagem</Label>
+                <Textarea
+                  placeholder="Digite sua mensagem de teste..."
+                  value={metaTestMessage}
+                  onChange={(e) => setMetaTestMessage(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label>Nome do Template</Label>
+                  <Input
+                    placeholder="hello_world"
+                    value={metaTestTemplateName}
+                    onChange={(e) => setMetaTestTemplateName(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Nome exato do template aprovado na Meta Business
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Idioma do Template</Label>
+                  <Select value={metaTestTemplateLang} onValueChange={setMetaTestTemplateLang}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pt_BR">Português (BR)</SelectItem>
+                      <SelectItem value="en_US">English (US)</SelectItem>
+                      <SelectItem value="es">Español</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            <Button
+              onClick={handleMetaTestSend}
+              disabled={metaTestSending}
+              className="w-full"
+            >
+              {metaTestSending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Enviar Mensagem de Teste
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
