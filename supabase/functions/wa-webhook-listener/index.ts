@@ -3716,11 +3716,7 @@ ${mensagem}`;
               text: autoReply.autoReplyMessage,
               footerText: "",
               choices: [
-                {
-                  buttonText: autoReply.autoReplyButtonText,
-                  type: "url",
-                  url: autoReply.autoReplyButtonUrl
-                }
+                `${autoReply.autoReplyButtonText}|url:${autoReply.autoReplyButtonUrl}`
               ]
             };
 
