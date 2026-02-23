@@ -4270,6 +4270,54 @@ ${mensagem}`;
       console.error("⚠️ Erro geral ao processar Telegram:", telegramError.message);
     }
 
+    // ==================== WEBHOOK RELAY - Enviar para sistemas externos ====================
+    try {
+      const { data: externalKeys } = await supabaseAdmin
+        .from('external_api_keys')
+        .select('id, webhook_url, webhook_events, company_id')
+        .eq('is_active', true)
+        .not('webhook_url', 'is', null)
+
+      if (externalKeys && externalKeys.length > 0) {
+        // Find keys matching this company
+        const companyKeys = externalKeys.filter(k => k.company_id === connection?.company_id)
+        
+        for (const key of companyKeys) {
+          if (!key.webhook_url) continue
+          if (!key.webhook_events?.includes('message.received')) continue
+
+          const webhookPayload = {
+            event: 'message.received',
+            timestamp: new Date().toISOString(),
+            data: {
+              message_id: message.id,
+              conversation_id: conversationData.id,
+              contact_phone: telefone,
+              contact_name: contactName,
+              content: mensagem,
+              message_type: tipo,
+              media_url: mediaUrl || null,
+              connection_id: connection?.id,
+            }
+          }
+
+          try {
+            console.log(`📤 [Webhook Relay] Enviando para: ${key.webhook_url}`)
+            await fetch(key.webhook_url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(webhookPayload),
+            })
+            console.log(`✅ [Webhook Relay] Enviado com sucesso`)
+          } catch (relayError: any) {
+            console.error(`❌ [Webhook Relay] Erro: ${relayError.message}`)
+          }
+        }
+      }
+    } catch (relayError: any) {
+      console.error('⚠️ Erro geral no webhook relay:', relayError.message)
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
       message_id: message.id,
