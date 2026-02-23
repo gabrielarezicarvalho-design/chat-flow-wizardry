@@ -667,6 +667,110 @@ export type Database = {
           },
         ]
       }
+      external_api_keys: {
+        Row: {
+          api_key: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          name: string
+          permissions: string[]
+          updated_at: string
+          webhook_events: string[] | null
+          webhook_url: string | null
+        }
+        Insert: {
+          api_key?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name: string
+          permissions?: string[]
+          updated_at?: string
+          webhook_events?: string[] | null
+          webhook_url?: string | null
+        }
+        Update: {
+          api_key?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          permissions?: string[]
+          updated_at?: string
+          webhook_events?: string[] | null
+          webhook_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_api_keys_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_api_logs: {
+        Row: {
+          api_key_id: string | null
+          company_id: string
+          created_at: string
+          endpoint: string
+          id: string
+          ip_address: string | null
+          method: string
+          request_body: Json | null
+          response_body: Json | null
+          status_code: number | null
+        }
+        Insert: {
+          api_key_id?: string | null
+          company_id: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          ip_address?: string | null
+          method: string
+          request_body?: Json | null
+          response_body?: Json | null
+          status_code?: number | null
+        }
+        Update: {
+          api_key_id?: string | null
+          company_id?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          ip_address?: string | null
+          method?: string
+          request_body?: Json | null
+          response_body?: Json | null
+          status_code?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_api_logs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "external_api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_api_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       flows: {
         Row: {
           company_id: string | null

@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.meta-connect-callback]
 verify_jwt = false
+
+[functions.external-api]
+verify_jwt = false
