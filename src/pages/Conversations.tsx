@@ -22,18 +22,21 @@ import {
   Clock,
   User,
   Image as ImageIcon,
+  XCircle,
 } from "lucide-react";
 import { formatDistanceToNow, format, isToday, isYesterday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { CloseConversationDialog } from "@/components/conversations/CloseConversationDialog";
 
 const Conversations = () => {
-  const { conversations, isLoading } = useConversations();
+  const { conversations, isLoading, deleteConversation } = useConversations();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -273,6 +276,18 @@ const Conversations = () => {
                 >
                   {selectedConversation.status === "open" ? "Aberto" : "Fechado"}
                 </Badge>
+                {selectedConversation.status === "open" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => setCloseDialogOpen(true)}
+                    title="Encerrar conversa"
+                  >
+                    <XCircle className="w-4 h-4 mr-1" />
+                    <span className="text-xs hidden sm:inline">Encerrar</span>
+                  </Button>
+                )}
                 <Button variant="ghost" size="icon" className="h-8 w-8">
                   <Phone className="w-4 h-4" />
                 </Button>
@@ -397,6 +412,18 @@ const Conversations = () => {
           </div>
         )}
       </div>
+
+      <CloseConversationDialog
+        open={closeDialogOpen}
+        onOpenChange={setCloseDialogOpen}
+        conversationId={selectedConversationId || ""}
+        protocolNumber={selectedConversation?.protocol || undefined}
+        onClose={() => {
+          deleteConversation.mutate(selectedConversationId!);
+          setSelectedConversationId(null);
+          setCloseDialogOpen(false);
+        }}
+      />
     </div>
   );
 };
