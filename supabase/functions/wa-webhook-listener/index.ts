@@ -3255,51 +3255,71 @@ serve(async (req) => {
     const isGroup = telefone.includes("@g.us") || payload.message?.isGroup === true || payload.chat?.wa_isGroup === true;
     console.log("👥 É grupo:", isGroup);
 
-    // Buscar conexão pelo instance_id, token ou fallback para qualquer ativa
+    // Buscar conexão pelo instance_id, instanceName, token ou fallback
     let connection = null;
     
-    // Primeiro: tentar pelo instance_id do payload (mais confiável)
+    // Primeiro: tentar pelo instance_id do payload
     const payloadInstanceId = payload.instance_id || payload.instanceId;
     if (payloadInstanceId) {
-      const { data: connByInstanceId } = await supabase
+      const { data: connByInstanceId, error: err1 } = await supabase
         .from("connections")
-        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts")
+        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts, company_id")
         .eq("instance_id", payloadInstanceId)
-        .single();
+        .maybeSingle();
       
+      if (err1) console.error("❌ Erro busca instance_id:", err1.message);
       if (connByInstanceId) {
         connection = connByInstanceId;
         console.log("✅ Conexão encontrada pelo instance_id:", payloadInstanceId);
       }
     }
-    
-    // Segundo: tentar pelo token do header
-    if (!connection && instanceToken) {
-      const { data: connByToken } = await supabase
+
+    // Segundo: tentar pelo instanceName do payload
+    const payloadInstanceName = payload.instanceName || payload.instance_name;
+    if (!connection && payloadInstanceName) {
+      const { data: connByName, error: err2 } = await supabase
         .from("connections")
-        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts")
-        .eq("token", instanceToken)
-        .single();
+        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts, company_id")
+        .eq("instance_name", payloadInstanceName)
+        .maybeSingle();
       
+      if (err2) console.error("❌ Erro busca instanceName:", err2.message);
+      if (connByName) {
+        connection = connByName;
+        console.log("✅ Conexão encontrada pelo instanceName:", payloadInstanceName);
+      }
+    }
+    
+    // Terceiro: tentar pelo token (payload.token ou instanceToken)
+    const tokenToSearch = payload.token || instanceToken;
+    if (!connection && tokenToSearch) {
+      const { data: connByToken, error: err3 } = await supabase
+        .from("connections")
+        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts, company_id")
+        .eq("token", tokenToSearch)
+        .maybeSingle();
+      
+      if (err3) console.error("❌ Erro busca token:", err3.message);
       if (connByToken) {
         connection = connByToken;
         console.log("✅ Conexão encontrada pelo token");
       }
     }
 
-    // Terceiro: fallback para qualquer conexão ativa (menos seguro)
+    // Quarto: fallback para qualquer conexão ativa
     if (!connection) {
       console.log("⚠️ Tentando fallback para conexão ativa...");
-      const { data: activeConn } = await supabase
+      const { data: activeConns, error: err4 } = await supabase
         .from("connections")
-        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts")
-        .eq("status", "connected")
-        .limit(1)
-        .single();
+        .select("user_id, id, filter_groups, token, environment, base_url, auto_save_contacts, company_id")
+        .eq("status", "connected");
       
-      if (activeConn) {
-        connection = activeConn;
-        console.log("✅ Conexão encontrada (fallback ativa)");
+      if (err4) console.error("❌ Erro busca fallback:", err4.message);
+      if (activeConns && activeConns.length > 0) {
+        connection = activeConns[0];
+        console.log("✅ Conexão encontrada (fallback ativa), total:", activeConns.length);
+      } else {
+        console.error("❌ Nenhuma conexão ativa encontrada. Total retornado:", activeConns?.length);
       }
     }
 
