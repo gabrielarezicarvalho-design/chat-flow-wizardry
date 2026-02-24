@@ -1166,7 +1166,32 @@ function MassSendingContent() {
         selected_tags: selectedTags.length > 0 ? selectedTags : null
       };
       
-      console.log("[MassSending] Saving template:", templateData);
+      // Convert base64 media to storage URL if needed
+      let finalMediaUrl = templateData.media_url;
+      if (finalMediaUrl && finalMediaUrl.startsWith("data:")) {
+        try {
+          const mimeMatch = finalMediaUrl.match(/data:([^;]+);/);
+          const ext = mimeMatch ? mimeMatch[1].split("/")[1] : "bin";
+          const fileName = `templates/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+          const base64Data = finalMediaUrl.split(",")[1];
+          const byteChars = atob(base64Data);
+          const byteArray = new Uint8Array(byteChars.length);
+          for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+          const blob = new Blob([byteArray], { type: mimeMatch ? mimeMatch[1] : "application/octet-stream" });
+          const { error: uploadErr } = await supabase.storage.from("campaign-media").upload(fileName, blob);
+          if (!uploadErr) {
+            const { data: pubUrl } = supabase.storage.from("campaign-media").getPublicUrl(fileName);
+            finalMediaUrl = pubUrl.publicUrl;
+          } else {
+            console.error("[MassSending] Upload error:", uploadErr);
+          }
+        } catch (uploadEx) {
+          console.error("[MassSending] Base64 conversion error:", uploadEx);
+        }
+      }
+      templateData.media_url = finalMediaUrl;
+
+      console.log("[MassSending] Saving template:", { ...templateData, media_url: templateData.media_url?.substring(0, 100) });
       
       const { error: insertError } = await (supabase.from("campaign_templates") as any).insert(templateData);
       
