@@ -22,7 +22,17 @@ import {
   BarChart3,
   Tags,
   Bot,
-  MessageSquare
+  MessageSquare,
+  Workflow,
+  Building2,
+  Phone,
+  Target,
+  Zap,
+  Webhook,
+  ClipboardList,
+  MessageCircle,
+  Ticket,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,27 +64,38 @@ interface NavItem {
   children?: NavItem[];
 }
 
-// Admin-only navigation items - focused on Mass Sending and Marketing
+// Admin-only navigation items - complete system
 const adminNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/conversations", icon: MessageSquare, label: "Conversas", feature: "chat" },
+  { to: "/attendance", icon: Headphones, label: "Atendimentos" },
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
   { to: "/campaign-reports", icon: BarChart3, label: "Relatórios" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
+  { to: "/leads", icon: Users, label: "Leads" },
   { to: "/segmentation", icon: Tags, label: "Segmentação" },
-  { to: "/chatgpt-credits", icon: Bot, label: "ChatGPT", feature: "chatgpt_credits" },
+  { to: "/auto-prospecting", icon: Target, label: "Prospecção" },
+  { to: "/agents", icon: Bot, label: "Assistentes IA" },
+  { to: "/ai-tickets", icon: Ticket, label: "Tickets IA" },
+  { to: "/flows", icon: Workflow, label: "Fluxos" },
+  { to: "/departments", icon: Building2, label: "Departamentos" },
   { to: "/connections", icon: LinkIcon, label: "Conexões" },
+  { to: "/internal-chat", icon: MessageCircle, label: "Chat Interno" },
+  { to: "/automations", icon: Zap, label: "Automações" },
+  { to: "/triggers", icon: Webhook, label: "Gatilhos" },
+  { to: "/chatgpt-credits", icon: Bot, label: "ChatGPT", feature: "chatgpt_credits" },
   { to: "/users", icon: UsersRound, label: "Usuários" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
 
-// Agent-only navigation items - focused on Mass Sending and Marketing
+// Agent-only navigation items
 const agentNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Painel" },
   { to: "/conversations", icon: MessageSquare, label: "Conversas", feature: "chat" },
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
   { to: "/campaign-reports", icon: BarChart3, label: "Relatórios" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
+  { to: "/internal-chat", icon: MessageCircle, label: "Chat Interno" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
 
