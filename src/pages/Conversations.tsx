@@ -98,14 +98,13 @@ const Conversations = () => {
         return;
       }
 
-      // Save message to DB
       const { error } = await supabase.from("messages").insert({
         conversation_id: selectedConversationId,
         content: text,
         sender_type: "agent",
         sender_id: user.id,
         message_type: "text",
-        status: "sending",
+        status: "sent",
       });
 
       if (error) throw error;
@@ -118,25 +117,6 @@ const Conversations = () => {
           last_message_at: new Date().toISOString(),
         })
         .eq("id", selectedConversationId);
-
-      // Try to send via WhatsApp if conversation has a connection and phone
-      if (selectedConversation?.contact_phone && selectedConversation?.company_id) {
-        try {
-          const { data: sendResult, error: sendError } = await supabase.functions.invoke("whatsapp-send", {
-            body: {
-              company_id: selectedConversation.company_id,
-              to: selectedConversation.contact_phone,
-              text: text,
-            },
-          });
-
-          if (sendError) {
-            console.warn("WhatsApp send failed, message saved locally:", sendError);
-          }
-        } catch (waError) {
-          console.warn("WhatsApp API unavailable, message saved locally:", waError);
-        }
-      }
     } catch (error: any) {
       toast.error("Erro ao enviar mensagem");
       setMessageText(text);

@@ -22,17 +22,7 @@ import {
   BarChart3,
   Tags,
   Bot,
-  MessageSquare,
-  Workflow,
-  Building2,
-  Phone,
-  Target,
-  Zap,
-  Webhook,
-  ClipboardList,
-  MessageCircle,
-  Ticket,
-  Users
+  MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,38 +54,27 @@ interface NavItem {
   children?: NavItem[];
 }
 
-// Admin-only navigation items - complete system
+// Admin-only navigation items - focused on Mass Sending and Marketing
 const adminNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/conversations", icon: MessageSquare, label: "Conversas", feature: "chat" },
-  { to: "/attendance", icon: Headphones, label: "Atendimentos", feature: "chat" },
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
-  { to: "/campaign-reports", icon: BarChart3, label: "Relatórios", feature: "reports" },
+  { to: "/campaign-reports", icon: BarChart3, label: "Relatórios" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
-  { to: "/leads", icon: Users, label: "Leads", feature: "leads_management" },
-  { to: "/segmentation", icon: Tags, label: "Segmentação", feature: "tags" },
-  { to: "/auto-prospecting", icon: Target, label: "Prospecção", feature: "leads_management" },
-  { to: "/agents", icon: Bot, label: "Assistentes IA", feature: "ai_agents" },
-  { to: "/ai-tickets", icon: Ticket, label: "Tickets IA", feature: "ai_agents" },
-  { to: "/flows", icon: Workflow, label: "Fluxos", feature: "flows_basic" },
-  { to: "/departments", icon: Building2, label: "Departamentos", feature: "departments" },
-  { to: "/connections", icon: LinkIcon, label: "Conexões", feature: "multi_connection" },
-  { to: "/internal-chat", icon: MessageCircle, label: "Chat Interno", feature: "internal_chat" },
-  { to: "/automations", icon: Zap, label: "Automações", feature: "flows_advanced" },
-  { to: "/triggers", icon: Webhook, label: "Gatilhos", feature: "webhooks" },
+  { to: "/segmentation", icon: Tags, label: "Segmentação" },
   { to: "/chatgpt-credits", icon: Bot, label: "ChatGPT", feature: "chatgpt_credits" },
+  { to: "/connections", icon: LinkIcon, label: "Conexões" },
   { to: "/users", icon: UsersRound, label: "Usuários" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
 
-// Agent-only navigation items
+// Agent-only navigation items - focused on Mass Sending and Marketing
 const agentNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Painel" },
   { to: "/conversations", icon: MessageSquare, label: "Conversas", feature: "chat" },
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
   { to: "/campaign-reports", icon: BarChart3, label: "Relatórios" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
-  { to: "/internal-chat", icon: MessageCircle, label: "Chat Interno" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
 
@@ -274,7 +253,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
             )}
             {!collapsed && (
               <div>
-                <h1 className="text-xl font-bold">{partnerBranding?.name || 'AYSIS BRASIL'}</h1>
+                <h1 className="text-xl font-bold">{partnerBranding?.name || 'MARKETFLOW'}</h1>
                 <p className="text-xs text-white/70">{partnerBranding ? 'Plataforma de IA' : 'Automação Inteligente'}</p>
               </div>
             )}

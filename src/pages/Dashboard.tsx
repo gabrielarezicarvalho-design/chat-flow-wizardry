@@ -4,8 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Send, Sparkles, Zap, ArrowRight, Rocket, Target, BarChart3, Users, Calendar, FileText, TrendingUp, MessageSquare, FlaskConical, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import robotImage from "@/assets/aysis-robot.png";
-import robotVideo from "@/assets/aysis-robot-waving.mp4";
+import robotImage from "@/assets/marketflow-robot.png";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
@@ -47,9 +46,6 @@ interface Stats {
   messagesSent: number;
   totalContacts: number;
   deliveryRate: number;
-  openConversations: number;
-  activeConnections: number;
-  totalFlows: number;
 }
 
 const Dashboard = () => {
@@ -60,9 +56,6 @@ const Dashboard = () => {
     messagesSent: 0,
     totalContacts: 0,
     deliveryRate: 0,
-    openConversations: 0,
-    activeConnections: 0,
-    totalFlows: 0,
   });
 
   useEffect(() => {
@@ -71,28 +64,21 @@ const Dashboard = () => {
         const { data: userData } = await supabase.auth.getUser();
         if (!userData.user) return;
 
-        const [campaignsRes, leadsRes, conversationsRes, connectionsRes, flowsRes] = await Promise.all([
+        const [campaignsRes, leadsRes] = await Promise.all([
           supabase.from("campaigns").select("*").eq("user_id", userData.user.id),
           supabase.from("leads").select("id").eq("user_id", userData.user.id),
-          supabase.from("conversations").select("id", { count: "exact", head: true }).eq("status", "open"),
-          supabase.from("connections").select("id", { count: "exact", head: true }).eq("status", "connected"),
-          supabase.from("flows").select("id", { count: "exact", head: true }),
         ]);
 
         const campaigns = campaignsRes.data || [];
         const totalSent = campaigns.reduce((acc, c) => acc + (c.sent_count || 0), 0);
         const totalFailed = campaigns.reduce((acc, c) => acc + (c.failed_count || 0), 0);
-        const totalAttempted = totalSent + totalFailed;
-        const deliveryRate = totalAttempted > 0 ? (totalSent / totalAttempted) * 100 : 0;
+        const deliveryRate = totalSent > 0 ? ((totalSent - totalFailed) / totalSent) * 100 : 0;
 
         setStats({
           totalCampaigns: campaigns.length,
           messagesSent: totalSent,
           totalContacts: leadsRes.data?.length || 0,
           deliveryRate: Math.round(deliveryRate),
-          openConversations: conversationsRes.count || 0,
-          activeConnections: connectionsRes.count || 0,
-          totalFlows: flowsRes.count || 0,
         });
       } catch (err) {
         console.error("Error fetching stats:", err);
@@ -155,8 +141,6 @@ const Dashboard = () => {
   const statsCards = [
     { label: "Campanhas", value: stats.totalCampaigns, icon: Rocket, color: "text-primary" },
     { label: "Mensagens Enviadas", value: stats.messagesSent.toLocaleString(), icon: MessageSquare, color: "text-primary/80" },
-    { label: "Conversas Abertas", value: stats.openConversations, icon: Activity, color: "text-primary/70" },
-    { label: "Conexões Ativas", value: stats.activeConnections, icon: Zap, color: "text-primary/90" },
     { label: "Taxa de Entrega", value: `${stats.deliveryRate}%`, icon: TrendingUp, color: "text-primary/70" },
     { label: "Contatos", value: stats.totalContacts.toLocaleString(), icon: Users, color: "text-primary/60" },
   ];
@@ -243,17 +227,16 @@ const Dashboard = () => {
           {!partnerBranding && (
             <motion.div 
               className="flex-shrink-0"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
+              animate={floatAnimation}
             >
-              <video 
-                src={robotVideo} 
-                autoPlay 
-                loop 
-                muted 
-                playsInline
-                className="w-64 h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl rounded-2xl"
+              <motion.img 
+                src={robotImage} 
+                alt="MarketFlow Robot"
+                className="w-64 h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
+                whileHover={{ scale: 1.05, rotate: 2 }}
               />
             </motion.div>
           )}
@@ -262,7 +245,7 @@ const Dashboard = () => {
 
       {/* Stats Grid */}
       <motion.div variants={itemVariants}>
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {statsCards.map((stat, index) => (
             <motion.div
               key={stat.label}

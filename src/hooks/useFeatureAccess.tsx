@@ -135,11 +135,10 @@ export function useFeatureAccess(): FeatureAccessResult {
 
   const hasAccess = useCallback(
     (featureId: FeatureId): boolean => {
-      if (isLoading) return false;
-      if (!plan) return false;
+      if (!plan) return true;
       return plan.features.includes(featureId);
     },
-    [plan, isLoading]
+    [plan]
   );
 
   const hasAnyAccess = useCallback(
