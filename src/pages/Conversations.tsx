@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useConversations } from "@/hooks/useConversations";
 import { useMessages } from "@/hooks/useMessages";
 import { useAuth } from "@/hooks/useAuth";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ import { EditContactDialog } from "@/components/conversations/EditContactDialog"
 const Conversations = () => {
   const { conversations, isLoading, deleteConversation, updateConversation } = useConversations();
   const { user } = useAuth();
+  const { companyId } = useCompanyId();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"agent" | "ai" | "ura">("agent");
   const [showOnlyMine, setShowOnlyMine] = useState(false);
@@ -57,9 +59,13 @@ const Conversations = () => {
 
   // Load profiles to map assigned_to → name
   const { data: profilesMap } = useQuery({
-    queryKey: ['profiles-map'],
+    queryKey: ['profiles-map', companyId],
     queryFn: async () => {
-      const { data } = await supabase.from('profiles').select('id, full_name');
+      let query = supabase.from('profiles').select('id, full_name');
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+      const { data } = await query;
       const map: Record<string, string> = {};
       data?.forEach(p => { map[p.id] = p.full_name || 'Sem nome'; });
       return map;
