@@ -1662,7 +1662,7 @@ const Connections = () => {
                             </div>
                           </td>
                         </tr>
-                        {/* Expanded config panel */}
+                        {/* Expanded config panel - UAZAPI */}
                         {isExpanded && connection.provider !== 'meta' && (
                           <tr>
                             <td colSpan={8} className="p-0">
@@ -1750,6 +1750,128 @@ const Connections = () => {
                                     </TabsContent>
                                   </div>
                                 </Tabs>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        {/* Expanded config panel - Meta Cloud API */}
+                        {isExpanded && connection.provider === 'meta' && (
+                          <tr>
+                            <td colSpan={8} className="p-0">
+                              <div className="bg-muted/30 border-t border-border">
+                                {/* Meta connection quick actions bar */}
+                                <div className="flex items-center justify-between px-6 py-3 border-b border-border">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-lg ${
+                                      connection.status === 'connected' ? 'bg-emerald-500/10' : 'bg-muted'
+                                    }`}>
+                                      {connection.status === 'connected' ? (
+                                        <Wifi className="w-4 h-4 text-emerald-500" />
+                                      ) : (
+                                        <WifiOff className="w-4 h-4 text-muted-foreground" />
+                                      )}
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-semibold text-foreground">Meta Cloud API</p>
+                                      <p className="text-xs text-muted-foreground">
+                                        {connection.status === 'connected' ? 'Conectado' : connection.status === 'error' ? 'Erro' : 'Desconectado'} • Meta WhatsApp Cloud API
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    {connection.status === 'connected' && (
+                                      <Button variant="outline" size="sm" onClick={(e) => {
+                                        e.stopPropagation();
+                                        setMetaTestConnection(connection);
+                                        setMetaTestDialogOpen(true);
+                                      }}>
+                                        <Send className="w-4 h-4 mr-1.5" />
+                                        Testar Envio
+                                      </Button>
+                                    )}
+                                    {connection.status === 'connected' && (
+                                      <Button variant="outline" size="sm" onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleMetaDisconnect(connection);
+                                      }} disabled={metaDisconnecting === connection.id}>
+                                        {metaDisconnecting === connection.id ? (
+                                          <Loader2 className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                          <>
+                                            <WifiOff className="w-4 h-4 mr-1.5" />
+                                            Desconectar
+                                          </>
+                                        )}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Meta details content */}
+                                <div className="p-6 space-y-4">
+                                  <h3 className="text-sm font-semibold text-foreground mb-3">Detalhes da Conexão</h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {connAny.meta_waba_id && (
+                                      <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">WABA ID</Label>
+                                        <div className="flex gap-2">
+                                          <Input value={connAny.meta_waba_id} readOnly className="font-mono text-sm h-9" />
+                                          <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(connAny.meta_waba_id); toast.success("WABA ID copiado!"); }}>
+                                            <Copy className="w-3.5 h-3.5" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    )}
+                                    {connAny.meta_phone_number_id && (
+                                      <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Phone Number ID</Label>
+                                        <div className="flex gap-2">
+                                          <Input value={connAny.meta_phone_number_id} readOnly className="font-mono text-sm h-9" />
+                                          <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(connAny.meta_phone_number_id); toast.success("Phone Number ID copiado!"); }}>
+                                            <Copy className="w-3.5 h-3.5" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    )}
+                                    {connAny.meta_business_id && (
+                                      <div className="space-y-1.5">
+                                        <Label className="text-xs text-muted-foreground">Business ID</Label>
+                                        <div className="flex gap-2">
+                                          <Input value={connAny.meta_business_id} readOnly className="font-mono text-sm h-9" />
+                                          <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(connAny.meta_business_id); toast.success("Business ID copiado!"); }}>
+                                            <Copy className="w-3.5 h-3.5" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Status info */}
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+                                    <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+                                      <span className="text-xs text-muted-foreground">Provedor</span>
+                                      <span className="text-sm font-medium">Meta Cloud API</span>
+                                    </div>
+                                    {connAny.meta_connected_at && (
+                                      <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+                                        <span className="text-xs text-muted-foreground">Conectado em</span>
+                                        <span className="text-sm font-medium">{new Date(connAny.meta_connected_at).toLocaleString('pt-BR')}</span>
+                                      </div>
+                                    )}
+                                    <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+                                      <span className="text-xs text-muted-foreground">Criado em</span>
+                                      <span className="text-sm font-medium">{new Date(connection.created_at).toLocaleString('pt-BR')}</span>
+                                    </div>
+                                  </div>
+
+                                  {/* Last error */}
+                                  {connAny.last_error && (
+                                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                                      <p className="text-sm font-medium text-destructive mb-1">Último Erro</p>
+                                      <p className="text-xs text-muted-foreground">{connAny.last_error}</p>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </td>
                           </tr>
