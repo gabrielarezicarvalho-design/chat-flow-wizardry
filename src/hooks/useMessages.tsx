@@ -125,7 +125,7 @@ export const useMessages = (conversationId?: string) => {
     enabled: !!conversationId,
     staleTime: 0,
     gcTime: 0,
-    refetchInterval: 5000,
+    refetchInterval: 1000,
     refetchOnWindowFocus: true,
     refetchOnMount: true
   });
