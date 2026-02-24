@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.external-api]
 verify_jwt = false
+
+[functions.scheduled-campaigns]
+verify_jwt = false

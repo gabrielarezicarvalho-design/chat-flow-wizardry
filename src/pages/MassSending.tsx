@@ -57,6 +57,9 @@ interface Campaign {
   started_at: string | null;
   completed_at: string | null;
   scheduled_at: string | null;
+  connection_id: string | null;
+  folder_id: string | null;
+  contacts: string[] | null;
 }
 
 interface TagItem {
@@ -241,12 +244,12 @@ function MassSendingContent() {
 
   // Poll UAZAPI folder status for queued campaigns
   useEffect(() => {
-    const queuedCampaigns = campaigns.filter(c => c.status === "queued" && (c as any).folder_id);
+    const queuedCampaigns = campaigns.filter(c => c.status === "queued" && c.folder_id);
     if (queuedCampaigns.length === 0) return;
 
     const checkFolderStatus = async () => {
       for (const campaign of queuedCampaigns) {
-        const folderId = (campaign as any).folder_id;
+        const folderId = campaign.folder_id;
         if (!folderId) continue;
         
         // Find connection for this campaign
@@ -331,10 +334,7 @@ function MassSendingContent() {
         })) as Connection[];
         setConnections(mappedConnections);
         // Map campaigns without started_at
-        const mappedCampaigns = (campaignsRes.data || []).map((c: any) => ({
-          ...c,
-          started_at: null
-        })) as Campaign[];
+        const mappedCampaigns = (campaignsRes.data || []) as Campaign[];
         setCampaigns(mappedCampaigns);
         setTags((tagsRes.data as TagItem[]) || []);
         setLeads((leadsRes.data as Lead[]) || []);
@@ -1050,7 +1050,7 @@ function MassSendingContent() {
         .update({ status: "sending", started_at: new Date().toISOString() })
         .eq("id", campaignId);
       
-      const campaignContacts = (campaign as any).contacts || [];
+      const campaignContacts: string[] = (campaign as any).contacts || [];
       if (!Array.isArray(campaignContacts) || campaignContacts.length === 0) {
         throw new Error("Nenhum contato na campanha");
       }
