@@ -1814,10 +1814,6 @@ const Connections = () => {
                                       <Settings className="w-3.5 h-3.5 mr-1.5" />
                                       Configurações
                                     </TabsTrigger>
-                                    <TabsTrigger value="mensagens" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
-                                      <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
-                                      Mensagens
-                                    </TabsTrigger>
                                     <TabsTrigger value="api" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
                                       <Code className="w-3.5 h-3.5 mr-1.5" />
                                       API e Webhooks
@@ -1834,9 +1830,6 @@ const Connections = () => {
                                   <div className="p-6">
                                     <TabsContent value="configuracoes" className="mt-0">
                                       {renderSettingsTab()}
-                                    </TabsContent>
-                                    <TabsContent value="mensagens" className="mt-0">
-                                      {renderMessagesTab()}
                                     </TabsContent>
                                     <TabsContent value="api" className="mt-0">
                                       {renderApiTab()}
