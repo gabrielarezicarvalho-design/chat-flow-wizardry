@@ -113,6 +113,7 @@ const Conversations = () => {
         return;
       }
 
+      // Save message to DB
       const { error } = await supabase.from("messages").insert({
         conversation_id: selectedConversationId,
         content: text,
@@ -132,6 +133,22 @@ const Conversations = () => {
           last_message_at: new Date().toISOString(),
         })
         .eq("id", selectedConversationId);
+
+      // Send via WhatsApp if conversation has phone and company
+      if (selectedConversation?.contact_phone && (selectedConversation as any)?.company_id) {
+        const { error: sendError } = await supabase.functions.invoke("whatsapp-send", {
+          body: {
+            company_id: (selectedConversation as any).company_id,
+            to: selectedConversation.contact_phone,
+            text: text,
+          },
+        });
+
+        if (sendError) {
+          console.error("Erro ao enviar via WhatsApp:", sendError);
+          toast.warning("Mensagem salva, mas falha ao enviar via WhatsApp");
+        }
+      }
     } catch (error: any) {
       toast.error("Erro ao enviar mensagem");
       setMessageText(text);
