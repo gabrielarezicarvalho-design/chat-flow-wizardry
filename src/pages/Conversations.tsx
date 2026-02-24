@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useConversations } from "@/hooks/useConversations";
 import { useMessages } from "@/hooks/useMessages";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,8 +38,10 @@ import { TransferDialog } from "@/components/conversations/TransferDialog";
 
 const Conversations = () => {
   const { conversations, isLoading, deleteConversation, updateConversation } = useConversations();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"agent" | "ai" | "ura">("agent");
+  const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
@@ -46,6 +50,18 @@ const Conversations = () => {
   const [transferring, setTransferring] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load profiles to map assigned_to → name
+  const { data: profilesMap } = useQuery({
+    queryKey: ['profiles-map'],
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('id, full_name');
+      const map: Record<string, string> = {};
+      data?.forEach(p => { map[p.id] = p.full_name || 'Sem nome'; });
+      return map;
+    },
+    staleTime: 60000,
+  });
 
   const selectedConversation = conversations.find((c) => c.id === selectedConversationId);
   const { messages, isLoading: messagesLoading } = useMessages(selectedConversationId || undefined);
@@ -59,7 +75,8 @@ const Conversations = () => {
         conv.contact_phone?.includes(searchTerm);
       const matchesTab = (conv as any).attendance_type === activeTab || 
         (!((conv as any).attendance_type) && activeTab === "ura");
-      return matchesSearch && matchesTab;
+      const matchesMine = !showOnlyMine || activeTab !== "agent" || conv.assigned_to === user?.id;
+      return matchesSearch && matchesTab && matchesMine;
     }
   );
 
@@ -297,6 +314,28 @@ const Conversations = () => {
           </button>
         </div>
 
+        {/* Filter: Meus / Todos (only on agent tab) */}
+        {activeTab === "agent" && (
+          <div className="flex items-center gap-1 px-3 py-2 border-b border-border">
+            <Button
+              variant={showOnlyMine ? "default" : "ghost"}
+              size="sm"
+              className="h-7 text-xs px-3"
+              onClick={() => setShowOnlyMine(true)}
+            >
+              Meus
+            </Button>
+            <Button
+              variant={!showOnlyMine ? "default" : "ghost"}
+              size="sm"
+              className="h-7 text-xs px-3"
+              onClick={() => setShowOnlyMine(false)}
+            >
+              Todos
+            </Button>
+          </div>
+        )}
+
         {/* Conversations list */}
         <ScrollArea className="flex-1">
           {filteredConversations.length === 0 ? (
@@ -337,15 +376,25 @@ const Conversations = () => {
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-2 mt-0.5">
-                      <p className="text-xs text-muted-foreground truncate">
-                        {conv.last_message || "Nenhuma mensagem"}
-                      </p>
+                      <div className="flex items-center gap-1 min-w-0">
+                        <p className="text-xs text-muted-foreground truncate">
+                          {conv.last_message || "Nenhuma mensagem"}
+                        </p>
+                      </div>
                       {conv.unread_count && conv.unread_count > 0 ? (
                         <Badge className="rounded-full h-5 min-w-5 px-1.5 text-[10px] bg-emerald-500 hover:bg-emerald-500 text-white shrink-0">
                           {conv.unread_count}
                         </Badge>
                       ) : null}
                     </div>
+                    {conv.assigned_to && profilesMap?.[conv.assigned_to] && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <User className="w-3 h-3 text-primary/60" />
+                        <span className="text-[10px] text-primary/80 truncate">
+                          {profilesMap[conv.assigned_to]}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -384,9 +433,17 @@ const Conversations = () => {
                 <h3 className="font-semibold text-sm text-foreground truncate">
                   {selectedConversation.contact_name || selectedConversation.contact_phone}
                 </h3>
-                <p className="text-xs text-muted-foreground">
-                  {selectedConversation.contact_phone}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    {selectedConversation.contact_phone}
+                  </p>
+                  {selectedConversation.assigned_to && profilesMap?.[selectedConversation.assigned_to] && (
+                    <span className="text-[10px] text-primary/80 flex items-center gap-0.5">
+                      <User className="w-3 h-3" />
+                      {profilesMap[selectedConversation.assigned_to]}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center gap-1">
