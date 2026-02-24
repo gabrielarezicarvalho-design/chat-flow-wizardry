@@ -774,7 +774,7 @@ const WhiteLabelConfig = () => {
                               <Badge variant="outline" className="text-slate-400 border-slate-600">TXT</Badge>
                             )}
                             <span className="text-slate-400">_lovable →</span>
-                            <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">lovable_verify=...</code>
+                            <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">lovable_verify={'{seu_token}'}</code>
                             {dnsStatus.result && !dnsStatus.result.txtRecord && <span className="text-red-400 text-xs">Não encontrado</span>}
                             {dnsStatus.result?.txtRecord && <span className="text-emerald-400 text-xs">OK</span>}
                           </div>
@@ -828,7 +828,7 @@ const WhiteLabelConfig = () => {
                               <ul className="mt-1 text-xs text-slate-500 space-y-1 ml-2">
                                 <li>• Registro <strong>A</strong> com nome <code className="bg-slate-800 px-1 rounded">@</code> apontando para <code className="bg-slate-800 px-1 rounded text-emerald-400">185.158.133.1</code></li>
                                 <li>• Registro <strong>A</strong> com nome <code className="bg-slate-800 px-1 rounded">www</code> apontando para <code className="bg-slate-800 px-1 rounded text-emerald-400">185.158.133.1</code></li>
-                                <li>• Registro <strong>TXT</strong> com nome <code className="bg-slate-800 px-1 rounded">_lovable</code> com o valor de verificação</li>
+                                <li>• Registro <strong>TXT</strong> com nome <code className="bg-slate-800 px-1 rounded">_lovable</code> com o valor <code className="bg-slate-800 px-1 rounded text-emerald-400">lovable_verify=SEU_TOKEN</code> (obtido ao conectar o domínio no painel Lovable → Settings → Domains)</li>
                               </ul>
                             </div>
                           </li>
