@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Send, Users, CheckCircle, Zap, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import robotImage from '@/assets/marketflow-robot.png';
+import robotImage from '@/assets/aysis-robot.png';
+import aysisLogo from '@/assets/aysis-brasil-logo.png';
 
 interface CampaignStats {
   totalCampaigns: number;
@@ -91,21 +92,21 @@ const Auth = () => {
       icon: Send, 
       label: 'Mensagens Enviadas', 
       value: formatNumber(stats.totalMessagesSent),
-      color: 'from-blue-500 to-cyan-500',
+      color: 'from-orange-500 to-amber-500',
       delay: 0.2
     },
     { 
       icon: CheckCircle, 
       label: 'Taxa de Entrega', 
       value: `${stats.deliveryRate.toFixed(1)}%`,
-      color: 'from-emerald-500 to-green-500',
+      color: 'from-amber-500 to-yellow-500',
       delay: 0.3
     },
     { 
       icon: Users, 
       label: 'Contatos Alcançados', 
       value: formatNumber(stats.totalContacts),
-      color: 'from-purple-500 to-pink-500',
+      color: 'from-orange-600 to-red-500',
       delay: 0.4
     },
     { 
@@ -119,7 +120,7 @@ const Auth = () => {
 
 
   return (
-    <div className="h-screen flex overflow-hidden bg-slate-950">
+    <div className="h-screen flex overflow-hidden bg-black">
       {/* Left Side - Stats & Features */}
       <motion.div 
         initial={{ x: -100, opacity: 0 }}
@@ -128,9 +129,9 @@ const Auth = () => {
         className="hidden lg:flex lg:w-3/5 relative overflow-hidden"
       >
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-primary/20">
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-primary/20">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-amber-500/10 via-transparent to-transparent" />
         </div>
         
         {/* Grid Pattern */}
@@ -151,7 +152,7 @@ const Auth = () => {
             opacity: [0.2, 0.4, 0.2],
           }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-cyan-500/15 rounded-full blur-[80px]"
+          className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-amber-500/15 rounded-full blur-[80px]"
         />
 
         {/* Content */}
@@ -159,16 +160,12 @@ const Auth = () => {
           {/* Header with Robot */}
           <div className="flex items-center gap-3 mb-6">
             <motion.img
-              src={robotImage}
-              alt="MarketFlow"
-              className="w-16 h-16 object-contain"
+              src={aysisLogo}
+              alt="Aysis Brasil"
+              className="h-16 object-contain"
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
-            <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">MarketFlow</h1>
-              <p className="text-slate-400">Plataforma de IA & Disparos em Massa</p>
-            </div>
           </div>
 
           {/* Stats Grid */}
@@ -208,9 +205,9 @@ const Auth = () => {
       </motion.div>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-2/5 flex items-center justify-center bg-slate-900 p-8 relative">
+      <div className="w-full lg:w-2/5 flex items-center justify-center bg-neutral-950 p-8 relative">
         {/* Subtle gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950" />
+        <div className="absolute inset-0 bg-gradient-to-b from-neutral-950 via-neutral-950 to-black" />
         
         <motion.div 
           initial={{ x: 100, opacity: 0 }}
@@ -227,15 +224,14 @@ const Auth = () => {
           >
             <div className="flex justify-center mb-4">
               <motion.img
-                src={robotImage}
-                alt="MarketFlow"
-                className="w-24 h-24 object-contain"
+                src={aysisLogo}
+                alt="Aysis Brasil"
+                className="h-20 object-contain"
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               />
             </div>
-            <h1 className="text-3xl font-bold text-white">MarketFlow</h1>
-            <p className="text-slate-400 mt-1">IA & Disparos em Massa</p>
+          
           </motion.div>
 
           {/* Login Card */}
@@ -243,7 +239,7 @@ const Auth = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8"
+            className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-700/50 rounded-2xl p-8"
           >
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-white mb-2">Bem-vindo de volta!</h2>
@@ -320,8 +316,8 @@ const Auth = () => {
             <div className="text-center text-sm text-slate-500 mt-6 space-y-1">
               <p>Problemas para acessar? Entre em contato:</p>
               <div className="flex items-center justify-center gap-3 flex-wrap">
-                <a href="mailto:contato@marketflowchat.com.br" className="text-primary hover:underline transition-colors">
-                  contato@marketflowchat.com.br
+                <a href="mailto:contato@aysisbrasil.com.br" className="text-primary hover:underline transition-colors">
+                  contato@aysisbrasil.com.br
                 </a>
                 <span className="text-slate-600">•</span>
                 <a href="https://wa.me/5551992226536" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline transition-colors">

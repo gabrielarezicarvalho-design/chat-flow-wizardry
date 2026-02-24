@@ -274,7 +274,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
             )}
             {!collapsed && (
               <div>
-                <h1 className="text-xl font-bold">{partnerBranding?.name || 'MARKETFLOW'}</h1>
+                <h1 className="text-xl font-bold">{partnerBranding?.name || 'AYSIS BRASIL'}</h1>
                 <p className="text-xs text-white/70">{partnerBranding ? 'Plataforma de IA' : 'Automação Inteligente'}</p>
               </div>
             )}
