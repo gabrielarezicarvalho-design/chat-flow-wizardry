@@ -68,7 +68,7 @@ const adminNavItems: NavItem[] = [
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
   { to: "/campaign-reports", icon: BarChart3, label: "Relatórios", feature: "reports" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
-  { to: "/segmentation", icon: Tags, label: "Segmentação", feature: "tags" },
+  
   { to: "/flows", icon: Workflow, label: "Fluxos", feature: "flows_basic" },
   { to: "/agents", icon: Bot, label: "Agentes IA", feature: "ai_agents" },
   { to: "/departments", icon: Building2, label: "Departamentos", feature: "departments" },
