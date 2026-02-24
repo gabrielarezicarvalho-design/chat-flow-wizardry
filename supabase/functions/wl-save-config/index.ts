@@ -12,10 +12,27 @@ serve(async (req) => {
   }
 
   try {
-    const { partner_id, partner_password, section, data } = await req.json();
+    const body = await req.json();
+    const { partner_id, partner_password, section, data } = body;
+
+    console.log("Received fields:", { 
+      has_partner_id: !!partner_id, 
+      has_partner_password: !!partner_password, 
+      has_section: !!section, 
+      has_data: !!data,
+      section_value: section 
+    });
 
     if (!partner_id || !partner_password || !section || !data) {
-      return new Response(JSON.stringify({ error: "Dados incompletos" }), {
+      return new Response(JSON.stringify({ 
+        error: "Dados incompletos",
+        missing: {
+          partner_id: !partner_id,
+          partner_password: !partner_password,
+          section: !section,
+          data: !data,
+        }
+      }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

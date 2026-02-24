@@ -205,6 +205,14 @@ const WhiteLabelConfig = () => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     
+    const partnerPassword = stored.partner_password || stored.password;
+    if (!partnerPassword) {
+      toast.error('Sessão expirada. Faça login novamente.');
+      sessionStorage.removeItem('white_label_config_access');
+      navigate('/white-label-login');
+      throw new Error('Sessão expirada');
+    }
+
     const response = await fetch(`${supabaseUrl}/functions/v1/wl-save-config`, {
       method: 'POST',
       headers: {
@@ -213,7 +221,7 @@ const WhiteLabelConfig = () => {
       },
       body: JSON.stringify({
         partner_id: partner!.id,
-        partner_password: stored.partner_password || stored.password,
+        partner_password: partnerPassword,
         section,
         data,
       }),
