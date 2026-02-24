@@ -893,6 +893,42 @@ export type Database = {
           },
         ]
       }
+      message_templates: {
+        Row: {
+          category: string
+          company_id: string | null
+          content: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+          variables: string[] | null
+        }
+        Insert: {
+          category?: string
+          company_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+          variables?: string[] | null
+        }
+        Update: {
+          category?: string
+          company_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+          variables?: string[] | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string | null
