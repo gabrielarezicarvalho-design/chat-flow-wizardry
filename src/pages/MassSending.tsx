@@ -752,36 +752,34 @@ function MassSendingContent() {
       }
       
       if (useMenuEndpoint) {
-        addLog("info", `Enviando menu interativo (tipo: ${uzapiMenuType})...`);
-        
-        // Build the payload based on interactive type
-        const menuPayload: any = {
-          action: "menu",
-          connectionId: connId,
-          numbers: nums,
-          menuType: uzapiMenuType,
-          text: finalMessage,
-          delayMin: delayInterval,
-          delayMax: delayInterval + 5,
-          pauseEveryX: pauseEveryX,
-          pauseDuration: pauseDuration,
-          campaignId: campaignId, // Pass campaign ID for tracking
-        };
-        
-        // Add media URL for buttons with image/video
-        if ((interactiveType === "buttons") && finalMediaUrl) {
-          menuPayload.mediaUrl = finalMediaUrl;
-          addLog("info", `Adicionando mídia aos botões: ${finalMediaUrl}`);
-        }
-        
-        if (interactiveType === "carousel") {
-          // Format carousel cards for UZAPI /send/carousel endpoint
-          // UZAPI expects: { text: "Title\nDescription", image: "url", buttons: [{id, text, type}] }
-          menuPayload.carousel = carouselCards.filter(c => c.title.trim()).map(card => ({
+        const isCarousel = interactiveType === "carousel";
+        addLog("info", isCarousel
+          ? `Enviando menu interativo (tipo: ${uzapiMenuType})...`
+          : `Enviando campanha interativa em modo fila (tipo: ${interactiveType})...`
+        );
+
+        let invokePayload: any;
+
+        if (isCarousel) {
+          // Carousel ainda usa endpoint dedicado
+          invokePayload = {
+            action: "menu",
+            connectionId: connId,
+            numbers: nums,
+            menuType: uzapiMenuType,
+            text: finalMessage,
+            delayMin: delayInterval,
+            delayMax: delayInterval + 5,
+            pauseEveryX: pauseEveryX,
+            pauseDuration: pauseDuration,
+            campaignId: campaignId,
+            sendImmediately: sendImmediately,
+          };
+
+          invokePayload.carousel = carouselCards.filter(c => c.title.trim()).map(card => ({
             text: card.description ? `${card.title}\n${card.description}` : card.title,
             image: card.imageUrl || "",
             buttons: card.buttons.filter(b => b.label.trim()).map(btn => {
-              // Determine button type and id based on action
               const isUrl = btn.action && (btn.action.startsWith("http://") || btn.action.startsWith("https://"));
               return {
                 id: isUrl ? btn.action : btn.label.toLowerCase().replace(/\s+/g, "_"),
@@ -790,29 +788,54 @@ function MassSendingContent() {
               };
             })
           }));
-          addLog("info", `Carousel payload: ${JSON.stringify(menuPayload.carousel)}`);
-        } else if (interactiveType === "poll") {
-          menuPayload.choices = menuChoices;
-          menuPayload.selectableCount = pollMultiSelect ? pollOptions.filter(o => o.text.trim()).length : 1;
+          addLog("info", `Carousel payload: ${JSON.stringify(invokePayload.carousel)}`);
         } else {
-          menuPayload.choices = menuChoices;
+          const normalizedType = interactiveType === "buttons" ? "button" : interactiveType;
+
+          // Botões/lista/enquete usando sender/advanced (evita timeout em campanhas grandes)
+          invokePayload = {
+            action: "simple",
+            connectionId: connId,
+            numbers: nums,
+            type: normalizedType,
+            text: finalMessage,
+            delayMin: delayInterval,
+            delayMax: delayInterval + 5,
+            sendImmediately: sendImmediately,
+            info: name
+          };
+
+          if (menuChoices.length > 0) {
+            invokePayload.choices = menuChoices;
+          }
+
+          if (interactiveType === "buttons" && finalMediaUrl) {
+            invokePayload.imageButton = finalMediaUrl;
+            addLog("info", `Adicionando mídia aos botões: ${finalMediaUrl}`);
+          }
+
+          if (interactiveType === "list") {
+            invokePayload.listButton = "Ver opções";
+          }
+
+          if (interactiveType === "poll") {
+            invokePayload.selectableCount = pollMultiSelect ? menuChoices.length : 1;
+          }
         }
-        
-        addLog("info", `Payload: ${JSON.stringify(menuPayload)}`);
-        
-        // Use menu endpoint for interactive messages
+
+        addLog("info", `Payload: ${JSON.stringify(invokePayload)}`);
+
         const { data, error } = await supabase.functions.invoke("wa-sender", {
-          body: menuPayload
+          body: invokePayload
         });
-        
+
         if (error) {
           addLog("error", `Erro na função: ${error.message}`);
           throw new Error(error.message || "Erro ao enviar campanha");
         }
-        
+
         addLog("info", `Resposta: ${JSON.stringify(data)}`);
-        
-        // Check for disconnection
+
         if (data?.disconnected) {
           addLog("error", "WhatsApp desconectado durante o envio! Campanha pausada.");
           toast.error("WhatsApp desconectado! A campanha foi pausada. Reconecte o WhatsApp e retome o envio.", {
@@ -822,63 +845,120 @@ function MassSendingContent() {
             },
             duration: 10000
           });
-          
+
           loadData();
           resetForm();
           setSending(false);
           return;
         }
-        
+
         if (data && !data.success) {
-          addLog("error", `Erro UZAPI: ${data.error || JSON.stringify(data)}`);
+          if (data.details?.error === "No session" || data.needsReconnection) {
+            addLog("error", "Instância WhatsApp desconectada");
+            toast.error("Instancia WhatsApp desconectada. Reconecte na pagina de Conexoes.", {
+              action: {
+                label: "Ir para Conexoes",
+                onClick: () => window.location.href = "/connections"
+              },
+              duration: 8000
+            });
+            setSending(false);
+            return;
+          }
+
+          addLog("error", `Erro UAZAPI: ${data.error || JSON.stringify(data)}`);
           throw new Error(data.error || "Erro ao enviar campanha");
         }
-        
-        // Log individual results and count
-        let sentCount = 0;
-        let failedCount = 0;
-        
-        if (data?.data?.results) {
-          data.data.results.forEach((r: any) => {
-            if (r.success) {
-              sentCount++;
-              addLog("success", `✓ Enviado para ${r.number}`);
-            } else {
-              failedCount++;
-              addLog("error", `✗ Falha ${r.number}: ${r.result?.error || r.error || 'Erro desconhecido'}`);
-            }
-          });
-        } else {
-          // Fallback to data counts
-          sentCount = data?.data?.sent || 0;
-          failedCount = data?.data?.failed || 0;
-        }
-        
-        // Update campaign status to completed
-        await supabase.from("campaigns").update({
-          status: failedCount === nums.length ? "failed" : "completed",
-          sent_count: sentCount,
-          failed_count: failedCount,
-          completed_at: new Date().toISOString()
-        }).eq("id", campaignId);
-        
-        // Update individual contact statuses based on results
-        if (campaignId && data?.data?.results) {
-          for (const r of data.data.results) {
-            const phone = (r.number || "").replace("@s.whatsapp.net", "").replace(/\D/g, "");
-            if (r.success) {
-              await supabase.from("campaign_contacts").update({ status: "sent", sent_at: new Date().toISOString() }).eq("campaign_id", campaignId).ilike("phone", `%${phone}%`);
-            } else {
-              await supabase.from("campaign_contacts").update({ status: "failed", error_message: r.error || r.result?.error || "Erro" }).eq("campaign_id", campaignId).ilike("phone", `%${phone}%`);
-            }
+
+        const responseData = data?.data;
+        const isQueued = responseData?.status === "queued";
+
+        if (isQueued) {
+          const folderId = responseData?.folder_id;
+          const queuedCount = responseData?.count || nums.length;
+
+          addLog("info", `Campanha adicionada à fila: ${queuedCount} mensagens aguardando envio`);
+          if (folderId) {
+            addLog("info", `Folder ID: ${folderId}`);
           }
-        } else if (campaignId && sentCount > 0) {
-          // No individual results - mark all as sent
-          await supabase.from("campaign_contacts").update({ status: "sent", sent_at: new Date().toISOString() }).eq("campaign_id", campaignId).eq("status", "pending");
+
+          await supabase.from("campaigns").update({
+            status: "queued",
+            sent_count: 0,
+            failed_count: 0,
+            total_contacts: queuedCount,
+            folder_id: folderId || null
+          }).eq("id", campaignId);
+
+          toast.info(`Campanha na fila! ${queuedCount} mensagens aguardando envio. As mensagens serão enviadas gradualmente.`, {
+            duration: 8000
+          });
+          addLog("success", `Campanha "${name}" adicionada à fila com ${queuedCount} mensagens`);
+        } else if (isCarousel) {
+          // Mantém leitura de resultados detalhada para carousel
+          let sentCount = 0;
+          let failedCount = 0;
+
+          if (responseData?.results) {
+            responseData.results.forEach((r: any) => {
+              if (r.success) {
+                sentCount++;
+                addLog("success", `✓ Enviado para ${r.number}`);
+              } else {
+                failedCount++;
+                addLog("error", `✗ Falha ${r.number}: ${r.result?.error || r.error || 'Erro desconhecido'}`);
+              }
+            });
+          } else {
+            sentCount = responseData?.sent || 0;
+            failedCount = responseData?.failed || 0;
+          }
+
+          await supabase.from("campaigns").update({
+            status: failedCount === nums.length ? "failed" : "completed",
+            sent_count: sentCount,
+            failed_count: failedCount,
+            completed_at: new Date().toISOString()
+          }).eq("id", campaignId);
+
+          if (campaignId && responseData?.results) {
+            for (const r of responseData.results) {
+              const phone = (r.number || "").replace("@s.whatsapp.net", "").replace(/\D/g, "");
+              if (r.success) {
+                await supabase.from("campaign_contacts").update({ status: "sent", sent_at: new Date().toISOString() }).eq("campaign_id", campaignId).ilike("phone", `%${phone}%`);
+              } else {
+                await supabase.from("campaign_contacts").update({ status: "failed", error_message: r.error || r.result?.error || "Erro" }).eq("campaign_id", campaignId).ilike("phone", `%${phone}%`);
+              }
+            }
+          } else if (campaignId && sentCount > 0) {
+            await supabase.from("campaign_contacts").update({ status: "sent", sent_at: new Date().toISOString() }).eq("campaign_id", campaignId).eq("status", "pending");
+          }
+
+          toast.success(`Campanha enviada! ${sentCount} enviados, ${failedCount} falhas`);
+          addLog("success", `Campanha finalizada: ${sentCount} enviados, ${failedCount} falhas`);
+        } else {
+          // Botões/lista/enquete via sender/advanced (resposta imediata ou enfileirada)
+          let sentCount = Number(responseData?.sent ?? 0);
+          let failedCount = Number(responseData?.failed ?? 0);
+
+          if (sentCount === 0 && failedCount === 0) {
+            sentCount = nums.length;
+          }
+
+          await supabase.from("campaigns").update({
+            status: failedCount === nums.length ? "failed" : "completed",
+            sent_count: sentCount,
+            failed_count: failedCount,
+            completed_at: new Date().toISOString()
+          }).eq("id", campaignId);
+
+          if (campaignId) {
+            await supabase.from("campaign_contacts").update({ status: "sent", sent_at: new Date().toISOString() }).eq("campaign_id", campaignId).eq("status", "pending");
+          }
+
+          toast.success(`Campanha enviada! ${sentCount} enviados, ${failedCount} falhas`);
+          addLog("success", `Campanha finalizada: ${sentCount} enviados, ${failedCount} falhas`);
         }
-        
-        toast.success(`Campanha enviada! ${sentCount} enviados, ${failedCount} falhas`);
-        addLog("success", `Campanha finalizada: ${sentCount} enviados, ${failedCount} falhas`);
       } else {
         addLog("info", "Enviando mensagem simples via UZAPI...");
         addLog("info", `ViewOnce ativo: ${viewOnce}`);
