@@ -200,23 +200,40 @@ const WhiteLabelConfig = () => {
     }
   };
 
+  const savePartnerConfig = async (section: string, data: Record<string, any>) => {
+    const stored = JSON.parse(localStorage.getItem('white_label_partner') || '{}');
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/wl-save-config`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
+      },
+      body: JSON.stringify({
+        partner_id: partner!.id,
+        partner_password: stored.partner_password || stored.password,
+        section,
+        data,
+      }),
+    });
+    
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Erro ao salvar');
+    return result;
+  };
+
   const handleSaveAppearance = async () => {
     if (!partner) return;
     setSaving(true);
     try {
-      const { error } = await (supabase.from('white_label_partners' as any).update({
-        logo_url: appearanceData.logo_url || null,
-        primary_color: appearanceData.primary_color,
-        secondary_color: appearanceData.secondary_color,
-        accent_color: appearanceData.accent_color,
-        background_color: appearanceData.background_color,
-      }).eq('id', partner.id) as any);
-      if (error) throw error;
+      await savePartnerConfig('appearance', appearanceData);
       const stored = JSON.parse(localStorage.getItem('white_label_partner') || '{}');
       localStorage.setItem('white_label_partner', JSON.stringify({ ...stored, ...appearanceData }));
       toast.success('Aparência atualizada!');
     } catch (error: any) {
-      toast.error('Erro ao salvar aparência');
+      toast.error('Erro ao salvar aparência: ' + error.message);
     } finally {
       setSaving(false);
     }
@@ -226,19 +243,14 @@ const WhiteLabelConfig = () => {
     if (!partner) return;
     setSaving(true);
     try {
-      const { error } = await (supabase.from('white_label_partners' as any).update({
-        supabase_url: supabaseData.supabase_url || null,
-        supabase_anon_key: supabaseData.supabase_anon_key || null,
-        supabase_service_role_key: supabaseData.supabase_service_role_key || null,
-      }).eq('id', partner.id) as any);
-      if (error) throw error;
+      await savePartnerConfig('supabase', supabaseData);
       const stored = JSON.parse(localStorage.getItem('white_label_partner') || '{}');
       localStorage.setItem('white_label_partner', JSON.stringify({
         ...stored, supabase_url: supabaseData.supabase_url, supabase_anon_key: supabaseData.supabase_anon_key,
       }));
       toast.success('Supabase configurado!');
     } catch (error: any) {
-      toast.error('Erro ao salvar Supabase');
+      toast.error('Erro ao salvar Supabase: ' + error.message);
     } finally {
       setSaving(false);
     }
@@ -248,15 +260,10 @@ const WhiteLabelConfig = () => {
     if (!partner) return;
     setSaving(true);
     try {
-      const { error } = await (supabase.from('white_label_partners' as any).update({
-        uazapi_base_url: uazapiData.uazapi_base_url || null,
-        uazapi_admin_token: uazapiData.uazapi_admin_token || null,
-        uazapi_environment: uazapiData.uazapi_environment,
-      }).eq('id', partner.id) as any);
-      if (error) throw error;
+      await savePartnerConfig('uazapi', uazapiData);
       toast.success('UAZAPI configurado!');
     } catch (error: any) {
-      toast.error('Erro ao salvar UAZAPI');
+      toast.error('Erro ao salvar UAZAPI: ' + error.message);
     } finally {
       setSaving(false);
     }
@@ -266,13 +273,10 @@ const WhiteLabelConfig = () => {
     if (!partner) return;
     setSaving(true);
     try {
-      const { error } = await (supabase.from('white_label_partners' as any).update({
-        custom_domain: domainData.custom_domain || null,
-      }).eq('id', partner.id) as any);
-      if (error) throw error;
+      await savePartnerConfig('domain', domainData);
       toast.success('Domínio salvo!');
     } catch (error: any) {
-      toast.error('Erro ao salvar domínio');
+      toast.error('Erro ao salvar domínio: ' + error.message);
     } finally {
       setSaving(false);
     }
