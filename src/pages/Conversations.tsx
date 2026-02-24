@@ -32,6 +32,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { CloseConversationDialog } from "@/components/conversations/CloseConversationDialog";
+import { TransferDialog } from "@/components/conversations/TransferDialog";
 
 const Conversations = () => {
   const { conversations, isLoading, deleteConversation, updateConversation } = useConversations();
@@ -41,6 +42,7 @@ const Conversations = () => {
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const [transferring, setTransferring] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -161,15 +163,19 @@ const Conversations = () => {
     }
   };
 
-  const handleTransferToAgent = async () => {
+  const handleTransferFromURA = async (_agentId?: string, departmentId?: string, humanAgentId?: string) => {
     if (!selectedConversationId || transferring) return;
     setTransferring(true);
     try {
+      const updates: any = { attendance_type: "agent" };
+      if (humanAgentId) updates.assigned_to = humanAgentId;
+      if (departmentId) updates.department_id = departmentId;
+      
       await updateConversation.mutateAsync({
         id: selectedConversationId,
-        updates: { attendance_type: "agent" },
+        updates,
       });
-      toast.success("Conversa transferida para Atendente!");
+      toast.success("Conversa transferida com sucesso!");
       setActiveTab("agent");
     } catch {
       toast.error("Erro ao transferir conversa");
@@ -492,12 +498,12 @@ const Conversations = () => {
                   </div>
                   <Button 
                     size="sm" 
-                    onClick={handleTransferToAgent}
+                    onClick={() => setTransferDialogOpen(true)}
                     disabled={transferring}
                     className="shrink-0"
                   >
                     <Headphones className="w-4 h-4 mr-1" />
-                    {transferring ? "Transferindo..." : "Transferir para Atendente"}
+                    {transferring ? "Transferindo..." : "Transferir"}
                   </Button>
                 </div>
               ) : (
@@ -555,6 +561,13 @@ const Conversations = () => {
           setSelectedConversationId(null);
           setCloseDialogOpen(false);
         }}
+      />
+
+      <TransferDialog
+        open={transferDialogOpen}
+        onOpenChange={setTransferDialogOpen}
+        onTransfer={handleTransferFromURA}
+        showSelfOption
       />
     </div>
   );
