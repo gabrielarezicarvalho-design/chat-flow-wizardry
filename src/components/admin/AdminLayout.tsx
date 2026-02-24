@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { 
   LayoutDashboard, Building2, Users, Bot, Plug, Brain, BarChart3, 
   CreditCard, Shield, Settings, LogOut, ChevronLeft,
-  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, Palette, BookOpen
+  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ const menuItems = [
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", description: "Visão geral" },
   { id: "contrato", icon: FileText, label: "Contrato UZAPI", description: "Conexões WhatsApp" },
   { id: "empresas", icon: Building2, label: "Empresas", description: "Clientes" },
-  { id: "whitelabel", icon: Palette, label: "White Label", description: "Parceiros" },
+  
   { id: "usuarios", icon: Users, label: "Usuários Internos", description: "Equipe MarketFlow" },
   { id: "agentes", icon: Bot, label: "Agentes", description: "Global" },
   { id: "integracoes", icon: Plug, label: "Integrações", description: "APIs & Webhooks" },

@@ -14,7 +14,7 @@ import { AdminSeguranca } from "@/components/admin/sections/AdminSeguranca";
 import { AdminConfiguracoes } from "@/components/admin/sections/AdminConfiguracoes";
 import { AdminBeta } from "@/components/admin/sections/AdminBeta";
 import AdminFeedback from "@/components/admin/sections/AdminFeedback";
-import AdminWhiteLabel from "@/components/admin/sections/AdminWhiteLabel";
+
 import AdminWhatsAppMeta from "@/components/admin/sections/AdminWhatsAppMeta";
 import AdminDocumentacao from "@/components/admin/sections/AdminDocumentacao";
 
@@ -53,8 +53,6 @@ export default function AdminPanel() {
         return <AdminConfiguracoes />;
       case "beta":
         return <AdminBeta />;
-      case "whitelabel":
-        return <AdminWhiteLabel />;
       case "documentacao":
         return <AdminDocumentacao />;
       default:

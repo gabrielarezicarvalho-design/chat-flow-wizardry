@@ -326,6 +326,8 @@ export type Database = {
         Row: {
           company_id: string | null
           completed_at: string | null
+          connection_id: string | null
+          contacts: Json | null
           created_at: string
           failed_count: number | null
           folder_id: string | null
@@ -336,6 +338,7 @@ export type Database = {
           name: string
           scheduled_at: string | null
           sent_count: number | null
+          started_at: string | null
           status: string | null
           total_contacts: number | null
           updated_at: string
@@ -344,6 +347,8 @@ export type Database = {
         Insert: {
           company_id?: string | null
           completed_at?: string | null
+          connection_id?: string | null
+          contacts?: Json | null
           created_at?: string
           failed_count?: number | null
           folder_id?: string | null
@@ -354,6 +359,7 @@ export type Database = {
           name: string
           scheduled_at?: string | null
           sent_count?: number | null
+          started_at?: string | null
           status?: string | null
           total_contacts?: number | null
           updated_at?: string
@@ -362,6 +368,8 @@ export type Database = {
         Update: {
           company_id?: string | null
           completed_at?: string | null
+          connection_id?: string | null
+          contacts?: Json | null
           created_at?: string
           failed_count?: number | null
           folder_id?: string | null
@@ -372,6 +380,7 @@ export type Database = {
           name?: string
           scheduled_at?: string | null
           sent_count?: number | null
+          started_at?: string | null
           status?: string | null
           total_contacts?: number | null
           updated_at?: string
@@ -383,6 +392,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaigns_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
             referencedColumns: ["id"]
           },
         ]
