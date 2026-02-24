@@ -180,7 +180,8 @@ serve(async (req) => {
         endpoint = `${base_url}/sender/advanced`;
         
         const simpleNumbers = params.numbers || [];
-        const simpleType = params.type || "text";
+        const simpleTypeRaw = params.type || "text";
+        const simpleType = simpleTypeRaw === "buttons" ? "button" : simpleTypeRaw;
         const simpleMedia = params.media || params.file;
         const requestedDelayMin = params.delayMin || 10;
         const requestedDelayMax = params.delayMax || 30;
