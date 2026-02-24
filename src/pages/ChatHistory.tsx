@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ import {
   Download,
   FileSpreadsheet,
   FileText,
+  RotateCcw,
 } from "lucide-react";
 import { format, isToday, isYesterday, startOfDay, endOfDay, startOfMonth, endOfMonth, subMonths, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -56,6 +57,7 @@ import autoTable from "jspdf-autotable";
 type DateFilter = "today" | "yesterday" | "last7" | "last30" | "this_month" | "last_month" | "custom";
 
 const ChatHistory = () => {
+  const queryClient = useQueryClient();
   const { companyId, isLoadingCompany } = useCompanyId();
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState<DateFilter>("this_month");
@@ -63,6 +65,24 @@ const ChatHistory = () => {
   const [customEnd, setCustomEnd] = useState("");
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [messagesDialogOpen, setMessagesDialogOpen] = useState(false);
+
+  const reopenConversation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("conversations")
+        .update({ status: "open" })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat-history"] });
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      toast.success("Atendimento reaberto com sucesso!");
+    },
+    onError: () => {
+      toast.error("Erro ao reabrir atendimento");
+    },
+  });
 
   const dateRange = useMemo(() => {
     const now = new Date();
@@ -573,14 +593,27 @@ const ChatHistory = () => {
                     <Badge variant="secondary" className="text-[10px]">
                       Encerrado
                     </Badge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Eye className="w-3.5 h-3.5 mr-1" />
-                      Ver chat
-                    </Button>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={(e) => { e.stopPropagation(); handleViewMessages(conv); }}
+                      >
+                        <Eye className="w-3.5 h-3.5 mr-1" />
+                        Ver
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs text-primary hover:text-primary"
+                        onClick={(e) => { e.stopPropagation(); reopenConversation.mutate(conv.id); }}
+                        disabled={reopenConversation.isPending}
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                        Reabrir
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
