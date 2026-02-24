@@ -81,7 +81,8 @@ const Dashboard = () => {
         const campaigns = campaignsRes.data || [];
         const totalSent = campaigns.reduce((acc, c) => acc + (c.sent_count || 0), 0);
         const totalFailed = campaigns.reduce((acc, c) => acc + (c.failed_count || 0), 0);
-        const deliveryRate = totalSent > 0 ? ((totalSent - totalFailed) / totalSent) * 100 : 0;
+        const totalAttempted = totalSent + totalFailed;
+        const deliveryRate = totalAttempted > 0 ? (totalSent / totalAttempted) * 100 : 0;
 
         setStats({
           totalCampaigns: campaigns.length,
