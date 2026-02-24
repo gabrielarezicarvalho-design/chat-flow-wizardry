@@ -1807,71 +1807,118 @@ const Connections = () => {
                                   </div>
                                 </div>
 
-                                {/* Meta details content */}
-                                <div className="p-6 space-y-4">
-                                  <h3 className="text-sm font-semibold text-foreground mb-3">Detalhes da Conexão</h3>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {connAny.meta_waba_id && (
-                                      <div className="space-y-1.5">
-                                        <Label className="text-xs text-muted-foreground">WABA ID</Label>
-                                        <div className="flex gap-2">
-                                          <Input value={connAny.meta_waba_id} readOnly className="font-mono text-sm h-9" />
-                                          <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(connAny.meta_waba_id); toast.success("WABA ID copiado!"); }}>
-                                            <Copy className="w-3.5 h-3.5" />
-                                          </Button>
+                                {/* Config tabs inside expanded row - same as UAZAPI */}
+                                <Tabs defaultValue="configuracoes" className="w-full">
+                                  <TabsList className="w-full justify-start border-b border-border bg-transparent p-0 h-auto px-6">
+                                    <TabsTrigger value="configuracoes" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <Settings className="w-3.5 h-3.5 mr-1.5" />
+                                      Configurações
+                                    </TabsTrigger>
+                                    <TabsTrigger value="mensagens" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
+                                      Mensagens
+                                    </TabsTrigger>
+                                    <TabsTrigger value="contatos" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <Users className="w-3.5 h-3.5 mr-1.5" />
+                                      Contatos
+                                    </TabsTrigger>
+                                    <TabsTrigger value="api" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <Code className="w-3.5 h-3.5 mr-1.5" />
+                                      API e Webhooks
+                                    </TabsTrigger>
+                                    <TabsTrigger value="notificacao" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <Bell className="w-3.5 h-3.5 mr-1.5" />
+                                      Notificação
+                                    </TabsTrigger>
+                                    <TabsTrigger value="detalhes" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <Globe className="w-3.5 h-3.5 mr-1.5" />
+                                      Detalhes Meta
+                                    </TabsTrigger>
+                                  </TabsList>
+                                  <div className="p-6">
+                                    <TabsContent value="configuracoes" className="mt-0">
+                                      {renderSettingsTab()}
+                                    </TabsContent>
+                                    <TabsContent value="mensagens" className="mt-0">
+                                      {renderMessagesTab()}
+                                    </TabsContent>
+                                    <TabsContent value="contatos" className="mt-0">
+                                      {renderContactsTab()}
+                                    </TabsContent>
+                                    <TabsContent value="api" className="mt-0">
+                                      {renderApiTab()}
+                                    </TabsContent>
+                                    <TabsContent value="notificacao" className="mt-0">
+                                      <TelegramNotifications connections={[...connections.map(c => ({ id: c.id, name: c.name || c.instance_name || 'Sem nome' })), ...metaConnections.map((c: any) => ({ id: c.id, name: 'Meta Cloud API' }))]} />
+                                    </TabsContent>
+                                    <TabsContent value="detalhes" className="mt-0">
+                                      <div className="space-y-4">
+                                        <h3 className="text-sm font-semibold text-foreground mb-3">Detalhes da Conexão Meta</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                          {connAny.meta_waba_id && (
+                                            <div className="space-y-1.5">
+                                              <Label className="text-xs text-muted-foreground">WABA ID</Label>
+                                              <div className="flex gap-2">
+                                                <Input value={connAny.meta_waba_id} readOnly className="font-mono text-sm h-9" />
+                                                <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(connAny.meta_waba_id); toast.success("WABA ID copiado!"); }}>
+                                                  <Copy className="w-3.5 h-3.5" />
+                                                </Button>
+                                              </div>
+                                            </div>
+                                          )}
+                                          {connAny.meta_phone_number_id && (
+                                            <div className="space-y-1.5">
+                                              <Label className="text-xs text-muted-foreground">Phone Number ID</Label>
+                                              <div className="flex gap-2">
+                                                <Input value={connAny.meta_phone_number_id} readOnly className="font-mono text-sm h-9" />
+                                                <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(connAny.meta_phone_number_id); toast.success("Phone Number ID copiado!"); }}>
+                                                  <Copy className="w-3.5 h-3.5" />
+                                                </Button>
+                                              </div>
+                                            </div>
+                                          )}
+                                          {connAny.meta_business_id && (
+                                            <div className="space-y-1.5">
+                                              <Label className="text-xs text-muted-foreground">Business ID</Label>
+                                              <div className="flex gap-2">
+                                                <Input value={connAny.meta_business_id} readOnly className="font-mono text-sm h-9" />
+                                                <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(connAny.meta_business_id); toast.success("Business ID copiado!"); }}>
+                                                  <Copy className="w-3.5 h-3.5" />
+                                                </Button>
+                                              </div>
+                                            </div>
+                                          )}
                                         </div>
-                                      </div>
-                                    )}
-                                    {connAny.meta_phone_number_id && (
-                                      <div className="space-y-1.5">
-                                        <Label className="text-xs text-muted-foreground">Phone Number ID</Label>
-                                        <div className="flex gap-2">
-                                          <Input value={connAny.meta_phone_number_id} readOnly className="font-mono text-sm h-9" />
-                                          <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(connAny.meta_phone_number_id); toast.success("Phone Number ID copiado!"); }}>
-                                            <Copy className="w-3.5 h-3.5" />
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    )}
-                                    {connAny.meta_business_id && (
-                                      <div className="space-y-1.5">
-                                        <Label className="text-xs text-muted-foreground">Business ID</Label>
-                                        <div className="flex gap-2">
-                                          <Input value={connAny.meta_business_id} readOnly className="font-mono text-sm h-9" />
-                                          <Button variant="outline" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => { navigator.clipboard.writeText(connAny.meta_business_id); toast.success("Business ID copiado!"); }}>
-                                            <Copy className="w-3.5 h-3.5" />
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
 
-                                  {/* Status info */}
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
-                                    <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
-                                      <span className="text-xs text-muted-foreground">Provedor</span>
-                                      <span className="text-sm font-medium">Meta Cloud API</span>
-                                    </div>
-                                    {connAny.meta_connected_at && (
-                                      <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
-                                        <span className="text-xs text-muted-foreground">Conectado em</span>
-                                        <span className="text-sm font-medium">{new Date(connAny.meta_connected_at).toLocaleString('pt-BR')}</span>
-                                      </div>
-                                    )}
-                                    <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
-                                      <span className="text-xs text-muted-foreground">Criado em</span>
-                                      <span className="text-sm font-medium">{new Date(connection.created_at).toLocaleString('pt-BR')}</span>
-                                    </div>
-                                  </div>
+                                        {/* Status info */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+                                          <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+                                            <span className="text-xs text-muted-foreground">Provedor</span>
+                                            <span className="text-sm font-medium">Meta Cloud API</span>
+                                          </div>
+                                          {connAny.meta_connected_at && (
+                                            <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+                                              <span className="text-xs text-muted-foreground">Conectado em</span>
+                                              <span className="text-sm font-medium">{new Date(connAny.meta_connected_at).toLocaleString('pt-BR')}</span>
+                                            </div>
+                                          )}
+                                          <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+                                            <span className="text-xs text-muted-foreground">Criado em</span>
+                                            <span className="text-sm font-medium">{new Date(connection.created_at).toLocaleString('pt-BR')}</span>
+                                          </div>
+                                        </div>
 
-                                  {/* Last error */}
-                                  {connAny.last_error && (
-                                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                                      <p className="text-sm font-medium text-destructive mb-1">Último Erro</p>
-                                      <p className="text-xs text-muted-foreground">{connAny.last_error}</p>
-                                    </div>
-                                  )}
-                                </div>
+                                        {/* Last error */}
+                                        {connAny.last_error && (
+                                          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                                            <p className="text-sm font-medium text-destructive mb-1">Último Erro</p>
+                                            <p className="text-xs text-muted-foreground">{connAny.last_error}</p>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </TabsContent>
+                                  </div>
+                                </Tabs>
                               </div>
                             </td>
                           </tr>
