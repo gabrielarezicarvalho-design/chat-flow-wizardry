@@ -802,7 +802,8 @@ function MassSendingContent() {
             delayMin: delayInterval,
             delayMax: delayInterval + 5,
             sendImmediately: sendImmediately,
-            info: name
+            info: name,
+            campaignId: campaignId
           };
 
           if (menuChoices.length > 0) {
@@ -977,7 +978,8 @@ function MassSendingContent() {
             pauseEveryX: pauseEveryX,
             pauseDuration: pauseDuration,
             sendImmediately: sendImmediately,
-            info: name
+            info: name,
+            campaignId: campaignId
           }
         });
         

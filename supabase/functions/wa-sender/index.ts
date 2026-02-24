@@ -6,6 +6,101 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
 
+const sendCampaignStartTelegramNotification = async ({
+  supabase,
+  connection,
+  params,
+  result,
+}: {
+  supabase: any;
+  connection: any;
+  params: any;
+  result: any;
+}) => {
+  try {
+    const userId = connection?.user_id;
+    if (!userId) {
+      console.log("[wa-sender] Telegram notification skipped: missing user_id");
+      return;
+    }
+
+    const { data: telegramConfigs, error: telegramConfigError } = await supabase
+      .from("telegram_notification_configs")
+      .select("id, name, telegram_chat_id, telegram_bot_token, connection_id")
+      .eq("user_id", userId)
+      .eq("is_active", true)
+      .eq("notify_campaign_start", true);
+
+    if (telegramConfigError) {
+      console.error("[wa-sender] Telegram config error:", telegramConfigError.message);
+      return;
+    }
+
+    if (!telegramConfigs || telegramConfigs.length === 0) {
+      console.log("[wa-sender] Telegram notification skipped: no active configs");
+      return;
+    }
+
+    const campaignName = params?.info || "Campanha";
+    const campaignType = params?.type || params?.menuType || "text";
+    const totalContacts = Number(
+      result?.count ||
+      params?.numbers?.length ||
+      params?.messages?.length ||
+      0
+    );
+
+    const statusText = result?.status || "started";
+    const folderId = result?.folder_id || null;
+    const nowBr = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+
+    const telegramMessage = [
+      "📢 Campanha iniciada",
+      "",
+      `Nome: ${campaignName}`,
+      `Tipo: ${campaignType}`,
+      `Contatos: ${totalContacts}`,
+      `Status: ${statusText}`,
+      folderId ? `Fila: ${folderId}` : null,
+      `Horário: ${nowBr}`
+    ].filter(Boolean).join("\n");
+
+    for (const config of telegramConfigs) {
+      if (!config?.telegram_chat_id) continue;
+      if (config.connection_id && config.connection_id !== connection.id) continue;
+
+      const botToken = config.telegram_bot_token || Deno.env.get("TELEGRAM_BOT_TOKEN");
+      if (!botToken) {
+        console.log(`[wa-sender] Telegram config ${config.id} skipped: missing bot token`);
+        continue;
+      }
+
+      try {
+        const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+        const telegramResponse = await fetch(telegramUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: config.telegram_chat_id,
+            text: telegramMessage,
+          }),
+        });
+
+        const telegramResult = await telegramResponse.json();
+        if (!telegramResponse.ok) {
+          console.error("[wa-sender] Telegram send error:", JSON.stringify(telegramResult));
+        } else {
+          console.log(`[wa-sender] Telegram campaign-start notification sent (config: ${config.id})`);
+        }
+      } catch (telegramErr: any) {
+        console.error("[wa-sender] Telegram send exception:", telegramErr?.message || telegramErr);
+      }
+    }
+  } catch (err: any) {
+    console.error("[wa-sender] Telegram campaign-start notification failed:", err?.message || err);
+  }
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -608,6 +703,19 @@ serve(async (req) => {
             console.error(`[wa-sender] Failed to update campaign status:`, updateErr);
           }
         }
+
+        if ((campaignId || params.info) && sentCount > 0) {
+          await sendCampaignStartTelegramNotification({
+            supabase,
+            connection,
+            params: { ...params, menuType },
+            result: {
+              count: sentCount + failedCount,
+              status: disconnectionDetected ? "paused_disconnected" : "started",
+              folder_id: null,
+            },
+          });
+        }
         
         return new Response(JSON.stringify({
           success: sentCount > 0,
@@ -1014,6 +1122,15 @@ serve(async (req) => {
       }), {
         status: response.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    if (action === "simple" && (params.campaignId || params.info)) {
+      await sendCampaignStartTelegramNotification({
+        supabase,
+        connection,
+        params,
+        result,
       });
     }
 
