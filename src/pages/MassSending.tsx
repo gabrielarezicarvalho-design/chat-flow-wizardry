@@ -20,7 +20,7 @@ import { WhatsAppPreview, InteractiveType } from "@/components/mass-sending/What
 import { CampaignTemplates } from "@/components/mass-sending/CampaignTemplates";
 import { ApiTester } from "@/components/mass-sending/ApiTester";
 import { CampaignTester } from "@/components/mass-sending/CampaignTester";
-import { CampaignResponses } from "@/components/mass-sending/CampaignResponses";
+
 import { BirthdayCampaigns } from "@/components/mass-sending/BirthdayCampaigns";
 import { SatisfactionSurveys } from "@/components/mass-sending/SatisfactionSurveys";
 import { CampaignActionsStep } from "@/components/mass-sending/CampaignActionsStep";
@@ -2293,9 +2293,6 @@ function MassSendingContent() {
           <TabsTrigger value="reports" className="flex items-center gap-2">
             <BarChart className="w-4 h-4" />Relatórios
           </TabsTrigger>
-          <TabsTrigger value="responses" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />Respostas
-          </TabsTrigger>
           <TabsTrigger value="message-templates" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />Templates
           </TabsTrigger>
@@ -2693,9 +2690,6 @@ function MassSendingContent() {
           </div>
         </TabsContent>
 
-        <TabsContent value="responses" className="mt-6">
-          <CampaignResponses campaigns={campaigns} />
-        </TabsContent>
 
         <TabsContent value="webhook" className="mt-6">
           <div className="grid lg:grid-cols-2 gap-6">
