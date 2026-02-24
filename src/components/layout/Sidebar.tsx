@@ -22,7 +22,14 @@ import {
   BarChart3,
   Tags,
   Bot,
-  MessageSquare
+  MessageSquare,
+  Workflow,
+  Building2,
+  FileText,
+  MessageCircle,
+  Webhook,
+  CalendarClock,
+  HardDrive
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,21 +66,25 @@ const adminNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/conversations", icon: MessageSquare, label: "Conversas", feature: "chat" },
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
-  { to: "/campaign-reports", icon: BarChart3, label: "Relatórios" },
+  { to: "/campaign-reports", icon: BarChart3, label: "Relatórios", feature: "reports" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
-  { to: "/segmentation", icon: Tags, label: "Segmentação" },
+  { to: "/segmentation", icon: Tags, label: "Segmentação", feature: "tags" },
+  { to: "/flows", icon: Workflow, label: "Fluxos", feature: "flows_basic" },
+  { to: "/agents", icon: Bot, label: "Agentes IA", feature: "ai_agents" },
+  { to: "/departments", icon: Building2, label: "Departamentos", feature: "departments" },
+  { to: "/internal-chat", icon: MessageCircle, label: "Chat Interno", feature: "internal_chat" },
   { to: "/chatgpt-credits", icon: Bot, label: "ChatGPT", feature: "chatgpt_credits" },
   { to: "/connections", icon: LinkIcon, label: "Conexões" },
   { to: "/users", icon: UsersRound, label: "Usuários" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
 
-// Agent-only navigation items - focused on Mass Sending and Marketing
+// Agent-only navigation items
 const agentNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Painel" },
   { to: "/conversations", icon: MessageSquare, label: "Conversas", feature: "chat" },
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
-  { to: "/campaign-reports", icon: BarChart3, label: "Relatórios" },
+  { to: "/campaign-reports", icon: BarChart3, label: "Relatórios", feature: "reports" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
