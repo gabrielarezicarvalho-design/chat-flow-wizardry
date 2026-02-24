@@ -28,6 +28,7 @@ import {
   Bot,
   Headphones,
   GitBranch,
+  ArrowRightLeft,
 } from "lucide-react";
 import { formatDistanceToNow, format, isToday, isYesterday } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -35,6 +36,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { CloseConversationDialog } from "@/components/conversations/CloseConversationDialog";
 import { TransferDialog } from "@/components/conversations/TransferDialog";
+import { EditContactDialog } from "@/components/conversations/EditContactDialog";
 
 const Conversations = () => {
   const { conversations, isLoading, deleteConversation, updateConversation } = useConversations();
@@ -47,6 +49,8 @@ const Conversations = () => {
   const [sending, setSending] = useState(false);
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [headerTransferDialogOpen, setHeaderTransferDialogOpen] = useState(false);
+  const [editContactDialogOpen, setEditContactDialogOpen] = useState(false);
   const [transferring, setTransferring] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -92,10 +96,22 @@ const Conversations = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Focus input when conversation selected
+  // Focus input and reset unread count when conversation selected
   useEffect(() => {
     if (selectedConversationId) {
       setTimeout(() => inputRef.current?.focus(), 100);
+      // Reset unread count
+      supabase
+        .from("conversations")
+        .update({ unread_count: 0 })
+        .eq("id", selectedConversationId)
+        .then(() => {
+          // Also update local cache
+          updateConversation.mutate({
+            id: selectedConversationId,
+            updates: { unread_count: 0 },
+          });
+        });
     }
   }, [selectedConversationId]);
 
@@ -194,6 +210,26 @@ const Conversations = () => {
       });
       toast.success("Conversa transferida com sucesso!");
       setActiveTab("agent");
+    } catch {
+      toast.error("Erro ao transferir conversa");
+    } finally {
+      setTransferring(false);
+    }
+  };
+
+  const handleHeaderTransfer = async (_agentId?: string, departmentId?: string, humanAgentId?: string) => {
+    if (!selectedConversationId || transferring) return;
+    setTransferring(true);
+    try {
+      const updates: any = {};
+      if (humanAgentId) updates.assigned_to = humanAgentId;
+      if (departmentId) updates.department_id = departmentId;
+      
+      await updateConversation.mutateAsync({
+        id: selectedConversationId,
+        updates,
+      });
+      toast.success("Conversa transferida com sucesso!");
     } catch {
       toast.error("Erro ao transferir conversa");
     } finally {
@@ -429,7 +465,11 @@ const Conversations = () => {
                 </AvatarFallback>
               </Avatar>
 
-              <div className="flex-1 min-w-0">
+              <div 
+                className="flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setEditContactDialogOpen(true)}
+                title="Clique para editar dados do contato"
+              >
                 <h3 className="font-semibold text-sm text-foreground truncate">
                   {selectedConversation.contact_name || selectedConversation.contact_phone}
                 </h3>
@@ -454,16 +494,28 @@ const Conversations = () => {
                   {selectedConversation.status === "open" ? "Aberto" : "Fechado"}
                 </Badge>
                 {selectedConversation.status === "open" && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => setCloseDialogOpen(true)}
-                    title="Encerrar conversa"
-                  >
-                    <XCircle className="w-4 h-4 mr-1" />
-                    <span className="text-xs hidden sm:inline">Encerrar</span>
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10"
+                      onClick={() => setHeaderTransferDialogOpen(true)}
+                      title="Transferir conversa"
+                    >
+                      <ArrowRightLeft className="w-4 h-4 mr-1" />
+                      <span className="text-xs hidden sm:inline">Transferir</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => setCloseDialogOpen(true)}
+                      title="Encerrar conversa"
+                    >
+                      <XCircle className="w-4 h-4 mr-1" />
+                      <span className="text-xs hidden sm:inline">Encerrar</span>
+                    </Button>
+                  </>
                 )}
                 <Button variant="ghost" size="icon" className="h-8 w-8">
                   <Phone className="w-4 h-4" />
@@ -626,6 +678,35 @@ const Conversations = () => {
         onTransfer={handleTransferFromURA}
         showSelfOption
       />
+
+      <TransferDialog
+        open={headerTransferDialogOpen}
+        onOpenChange={setHeaderTransferDialogOpen}
+        onTransfer={handleHeaderTransfer}
+        showSelfOption
+      />
+
+      {selectedConversation && (
+        <EditContactDialog
+          open={editContactDialogOpen}
+          onOpenChange={setEditContactDialogOpen}
+          contact={{
+            id: selectedConversation.id,
+            name: selectedConversation.contact_name,
+            phone: selectedConversation.contact_phone,
+          }}
+          onUpdated={(updates) => {
+            if (selectedConversationId) {
+              updateConversation.mutate({
+                id: selectedConversationId,
+                updates: {
+                  contact_name: updates.name,
+                },
+              });
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
