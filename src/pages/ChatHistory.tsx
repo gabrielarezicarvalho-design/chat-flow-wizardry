@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
@@ -22,6 +22,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Search,
   MessageSquare,
   Calendar,
@@ -36,10 +42,16 @@ import {
   BarChart3,
   Star,
   TrendingUp,
+  Download,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
 import { format, isToday, isYesterday, startOfDay, endOfDay, startOfMonth, endOfMonth, subMonths, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 type DateFilter = "today" | "yesterday" | "last7" | "last30" | "this_month" | "last_month" | "custom";
 
@@ -208,6 +220,145 @@ const ChatHistory = () => {
     }
   };
 
+  const exportToCSV = useCallback(() => {
+    if (!filteredConversations.length) {
+      toast.error("Nenhum atendimento para exportar");
+      return;
+    }
+
+    const headers = ["Nome", "Telefone", "Protocolo", "Tipo", "Atendente", "Última mensagem", "Criado em", "Encerrado em"];
+    const rows = filteredConversations.map((c) => [
+      c.contact_name || "Desconhecido",
+      c.contact_phone,
+      c.protocol || "-",
+      c.attendance_type || "-",
+      (c.assigned_to && profilesMap?.[c.assigned_to]) || "-",
+      (c.last_message || "").replace(/"/g, '""'),
+      format(new Date(c.created_at), "dd/MM/yyyy HH:mm"),
+      format(new Date(c.updated_at), "dd/MM/yyyy HH:mm"),
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((r) => r.map((v) => `"${v}"`).join(",")),
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `historico-atendimentos-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exportado com sucesso!");
+  }, [filteredConversations, profilesMap]);
+
+  const exportToPDF = useCallback(() => {
+    if (!filteredConversations.length) {
+      toast.error("Nenhum atendimento para exportar");
+      return;
+    }
+
+    const doc = new jsPDF({ orientation: "landscape" });
+
+    // Header with branding
+    doc.setFillColor(15, 23, 42); // dark bg
+    doc.rect(0, 0, doc.internal.pageSize.width, 40, "F");
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("Histórico de Atendimentos", 14, 18);
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Exportado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, 28);
+    doc.text(`Período: ${getFilterLabel(dateFilter)}`, 14, 34);
+
+    // Metrics summary
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    const metricsY = 50;
+    
+    const metricsData = [
+      { label: "Total encerrados", value: String(metrics.total) },
+      { label: "Tempo médio", value: metrics.avgTimeLabel },
+      { label: "Atend. humano", value: String(metrics.byType.humano) },
+      { label: "IA + URA", value: String(metrics.byType.ia + metrics.byType.ura) },
+    ];
+
+    const cardWidth = 60;
+    const cardGap = 8;
+    const startX = 14;
+    
+    metricsData.forEach((m, i) => {
+      const x = startX + i * (cardWidth + cardGap);
+      doc.setFillColor(241, 245, 249); // light card bg
+      doc.roundedRect(x, metricsY, cardWidth, 22, 3, 3, "F");
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(15, 23, 42);
+      doc.text(m.value, x + 5, metricsY + 10);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 116, 139);
+      doc.text(m.label, x + 5, metricsY + 18);
+    });
+
+    // Table
+    const tableData = filteredConversations.map((c) => [
+      c.contact_name || "Desconhecido",
+      c.contact_phone,
+      c.protocol || "-",
+      c.attendance_type === "humano" ? "Humano" : c.attendance_type === "ia" ? "IA" : "URA",
+      (c.assigned_to && profilesMap?.[c.assigned_to]) || "-",
+      (c.last_message || "-").substring(0, 60) + ((c.last_message?.length || 0) > 60 ? "..." : ""),
+      format(new Date(c.created_at), "dd/MM/yy HH:mm"),
+      format(new Date(c.updated_at), "dd/MM/yy HH:mm"),
+    ]);
+
+    autoTable(doc, {
+      startY: metricsY + 30,
+      head: [["Nome", "Telefone", "Protocolo", "Tipo", "Atendente", "Última msg", "Criado", "Encerrado"]],
+      body: tableData,
+      styles: {
+        fontSize: 8,
+        cellPadding: 3,
+        lineColor: [226, 232, 240],
+        lineWidth: 0.1,
+      },
+      headStyles: {
+        fillColor: [15, 23, 42],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        fontSize: 8,
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+      columnStyles: {
+        0: { cellWidth: 35 },
+        5: { cellWidth: 55 },
+      },
+      didDrawPage: (data: any) => {
+        // Footer
+        const pageHeight = doc.internal.pageSize.height;
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184);
+        doc.text(
+          `Página ${doc.getCurrentPageInfo().pageNumber} • MarketFlow`,
+          doc.internal.pageSize.width / 2,
+          pageHeight - 8,
+          { align: "center" }
+        );
+      },
+    });
+
+    doc.save(`historico-atendimentos-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+    toast.success("PDF exportado com sucesso!");
+  }, [filteredConversations, profilesMap, dateFilter, metrics]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -218,9 +369,29 @@ const ChatHistory = () => {
             Visualize todos os atendimentos encerrados
           </p>
         </div>
-        <Badge variant="secondary" className="text-sm px-3 py-1">
-          {filteredConversations.length} atendimento{filteredConversations.length !== 1 ? "s" : ""}
-        </Badge>
+        <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Download className="w-4 h-4" />
+                Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportToCSV} className="gap-2 cursor-pointer">
+                <FileSpreadsheet className="w-4 h-4" />
+                Exportar CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportToPDF} className="gap-2 cursor-pointer">
+                <FileText className="w-4 h-4" />
+                Exportar PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Badge variant="secondary" className="text-sm px-3 py-1">
+            {filteredConversations.length} atendimento{filteredConversations.length !== 1 ? "s" : ""}
+          </Badge>
+        </div>
       </div>
 
       {/* Metrics */}
