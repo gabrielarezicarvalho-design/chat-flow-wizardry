@@ -103,8 +103,8 @@ serve(async (req) => {
             continue;
           }
 
-          const { company_id, id: connectionId } = conn;
-          console.log(`✅ Company identified: ${company_id} | Connection: ${connectionId}`);
+          const { company_id, id: whatsappConnectionId } = conn;
+          console.log(`✅ Company identified: ${company_id} | WhatsApp Connection: ${whatsappConnectionId}`);
 
           // Find a user_id associated with this company (for conversation ownership)
           let userId: string | null = null;
@@ -117,6 +117,21 @@ serve(async (req) => {
           
           if (companyProfile) {
             userId = companyProfile.id;
+          }
+
+          // conversations.connection_id references public.connections (not whatsapp_connections)
+          let conversationConnectionId: string | null = null;
+          const { data: appConnection } = await supabaseAdmin
+            .from("connections")
+            .select("id")
+            .eq("company_id", company_id)
+            .eq("platform", "whatsapp")
+            .order("updated_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (appConnection?.id) {
+            conversationConnectionId = appConnection.id;
           }
 
           // Get contact info from Meta payload
@@ -160,7 +175,7 @@ serve(async (req) => {
               .from("whatsapp_messages")
               .insert({
                 company_id,
-                connection_id: connectionId,
+                connection_id: whatsappConnectionId,
                 provider: "meta",
                 direction: "in",
                 wa_message_id: msg.id,
@@ -215,7 +230,7 @@ serve(async (req) => {
                     .insert({
                       user_id: userId,
                       company_id,
-                      connection_id: connectionId,
+                      connection_id: conversationConnectionId,
                       contact_phone: cleanPhone,
                       contact_name: contactName || cleanPhone,
                       status: "open",
