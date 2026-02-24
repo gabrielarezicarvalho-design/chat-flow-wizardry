@@ -18,21 +18,18 @@ serve(async (req) => {
   try {
     console.log("[scheduled-campaigns] Checking for scheduled campaigns...");
     
-    // Find campaigns that are scheduled and their time has come
     const now = new Date().toISOString();
     
+    // Find campaigns that are scheduled and their time has come
     const { data: campaigns, error: fetchError } = await supabase
       .from("campaigns")
-      .select("*, connections(token, base_url)")
+      .select("*, connections:connection_id(id, token, base_url)")
       .eq("status", "scheduled")
       .lte("scheduled_at", now);
     
     if (fetchError) {
       console.error("[scheduled-campaigns] Error fetching campaigns:", fetchError);
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: fetchError.message 
-      }), {
+      return new Response(JSON.stringify({ success: false, error: fetchError.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
@@ -40,17 +37,12 @@ serve(async (req) => {
 
     if (!campaigns || campaigns.length === 0) {
       console.log("[scheduled-campaigns] No campaigns to process");
-      return new Response(JSON.stringify({ 
-        success: true, 
-        message: "No campaigns to process",
-        processed: 0
-      }), {
+      return new Response(JSON.stringify({ success: true, message: "No campaigns to process", processed: 0 }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
     console.log(`[scheduled-campaigns] Found ${campaigns.length} campaigns to process`);
-
     const results: any[] = [];
 
     for (const campaign of campaigns) {
@@ -66,124 +58,128 @@ serve(async (req) => {
       
       if (!connection?.token || !connection?.base_url) {
         console.error(`[scheduled-campaigns] Campaign ${campaign.id} has no valid connection`);
-        await supabase
-          .from("campaigns")
-          .update({ status: "failed" })
-          .eq("id", campaign.id);
+        await supabase.from("campaigns").update({ status: "failed" }).eq("id", campaign.id);
         results.push({ id: campaign.id, success: false, error: "No valid connection" });
         continue;
       }
 
-      const contacts = campaign.contacts || [];
+      // Get contacts from the campaign's contacts jsonb column
+      const contacts: string[] = campaign.contacts || [];
       if (!Array.isArray(contacts) || contacts.length === 0) {
-        console.error(`[scheduled-campaigns] Campaign ${campaign.id} has no contacts`);
-        await supabase
-          .from("campaigns")
-          .update({ status: "failed" })
-          .eq("id", campaign.id);
-        results.push({ id: campaign.id, success: false, error: "No contacts" });
+        // Fallback: try to get contacts from campaign_contacts table
+        const { data: contactRows } = await supabase
+          .from("campaign_contacts")
+          .select("phone")
+          .eq("campaign_id", campaign.id)
+          .eq("status", "pending");
+        
+        if (!contactRows || contactRows.length === 0) {
+          console.error(`[scheduled-campaigns] Campaign ${campaign.id} has no contacts`);
+          await supabase.from("campaigns").update({ status: "failed" }).eq("id", campaign.id);
+          results.push({ id: campaign.id, success: false, error: "No contacts" });
+          continue;
+        }
+        
+        // Use phones from campaign_contacts
+        const fallbackContacts = contactRows.map((r: any) => r.phone);
+        await processContacts(supabase, campaign, connection, fallbackContacts, results);
         continue;
       }
 
-      try {
-        // Determine message type and build messages
-        const messageType = campaign.message_type || "text";
-        const isInteractive = messageType.startsWith("interactive_");
-        const interactiveType = isInteractive ? messageType.replace("interactive_", "") : null;
-        
-        // Build messages array for UZAPI /sender/advanced
-        const messages = contacts.map((contact: string) => {
-          const cleanNumber = contact.replace("@s.whatsapp.net", "").replace(/\D/g, "");
-          
-          if (isInteractive && interactiveType) {
-            return {
-              number: cleanNumber,
-              type: interactiveType, // button, list, carousel
-              text: campaign.message_content || ""
-            };
-          }
-          
-          return {
-            number: cleanNumber,
-            type: messageType === "text" ? "text" : messageType,
-            text: campaign.message_content || "",
-            file: messageType !== "text" ? campaign.media_url : undefined
-          };
-        });
-
-        // Call UZAPI /sender/advanced
-        const body = {
-          delayMin: 10,
-          delayMax: 30,
-          info: campaign.name,
-          messages: messages
-        };
-
-        console.log(`[scheduled-campaigns] Sending ${messages.length} messages for campaign ${campaign.id}`);
-
-        const response = await fetch(`${connection.base_url}/sender/advanced`, {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "token": connection.token
-          },
-          body: JSON.stringify(body)
-        });
-
-        const responseData = await response.json();
-        console.log(`[scheduled-campaigns] UZAPI response:`, JSON.stringify(responseData));
-
-        if (!response.ok || responseData.error) {
-          await supabase
-            .from("campaigns")
-            .update({ 
-              status: "failed",
-              results: responseData 
-            })
-            .eq("id", campaign.id);
-          results.push({ id: campaign.id, success: false, error: responseData.error || "UZAPI error" });
-        } else {
-          await supabase
-            .from("campaigns")
-            .update({ 
-              status: "sent",
-              sent_count: messages.length,
-              completed_at: new Date().toISOString(),
-              results: responseData
-            })
-            .eq("id", campaign.id);
-          results.push({ id: campaign.id, success: true, sent: messages.length });
-        }
-
-      } catch (err) {
-        console.error(`[scheduled-campaigns] Error processing campaign ${campaign.id}:`, err);
-        await supabase
-          .from("campaigns")
-          .update({ status: "failed" })
-          .eq("id", campaign.id);
-        results.push({ id: campaign.id, success: false, error: String(err) });
-      }
+      await processContacts(supabase, campaign, connection, contacts, results);
     }
 
     console.log(`[scheduled-campaigns] Processed ${campaigns.length} campaigns`);
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      processed: campaigns.length,
-      results
-    }), {
+    return new Response(JSON.stringify({ success: true, processed: campaigns.length, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
 
   } catch (error) {
     console.error("[scheduled-campaigns] Error:", error);
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: String(error) 
-    }), {
+    return new Response(JSON.stringify({ success: false, error: String(error) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 });
+
+async function processContacts(
+  supabase: any,
+  campaign: any,
+  connection: any,
+  contacts: string[],
+  results: any[]
+) {
+  try {
+    const messageType = campaign.message_type || "text";
+    const isInteractive = messageType.startsWith("interactive_");
+    
+    // Build messages array for UZAPI /sender/advanced
+    const messages = contacts.map((contact: string) => {
+      const cleanNumber = contact.replace("@s.whatsapp.net", "").replace(/\D/g, "");
+      
+      return {
+        number: cleanNumber,
+        type: isInteractive ? messageType.replace("interactive_", "") : (messageType === "text" ? "text" : messageType),
+        text: campaign.message_content || "",
+        file: messageType !== "text" && !isInteractive ? campaign.media_url : undefined
+      };
+    });
+
+    const body = {
+      delayMin: 10,
+      delayMax: 30,
+      info: campaign.name,
+      messages
+    };
+
+    console.log(`[scheduled-campaigns] Sending ${messages.length} messages for campaign ${campaign.id}`);
+
+    const response = await fetch(`${connection.base_url}/sender/advanced`, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "token": connection.token
+      },
+      body: JSON.stringify(body)
+    });
+
+    const responseData = await response.json();
+    console.log(`[scheduled-campaigns] UZAPI response:`, JSON.stringify(responseData));
+
+    if (!response.ok || responseData.error) {
+      await supabase.from("campaigns").update({ status: "failed", results: responseData }).eq("id", campaign.id);
+      results.push({ id: campaign.id, success: false, error: responseData.error || "UZAPI error" });
+    } else {
+      // Check if queued
+      if (responseData?.status === "queued") {
+        await supabase.from("campaigns").update({
+          status: "queued",
+          folder_id: responseData.folder_id || null,
+          total_contacts: messages.length
+        }).eq("id", campaign.id);
+        results.push({ id: campaign.id, success: true, queued: true, count: messages.length });
+      } else {
+        await supabase.from("campaigns").update({
+          status: "sent",
+          sent_count: messages.length,
+          completed_at: new Date().toISOString()
+        }).eq("id", campaign.id);
+        
+        // Mark campaign_contacts as sent
+        await supabase.from("campaign_contacts")
+          .update({ status: "sent", sent_at: new Date().toISOString() })
+          .eq("campaign_id", campaign.id)
+          .eq("status", "pending");
+        
+        results.push({ id: campaign.id, success: true, sent: messages.length });
+      }
+    }
+  } catch (err) {
+    console.error(`[scheduled-campaigns] Error processing campaign ${campaign.id}:`, err);
+    await supabase.from("campaigns").update({ status: "failed" }).eq("id", campaign.id);
+    results.push({ id: campaign.id, success: false, error: String(err) });
+  }
+}
