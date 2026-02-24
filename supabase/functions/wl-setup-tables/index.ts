@@ -26,25 +26,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN null;
 END $$;
 
--- Função has_role
-CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role app_role)
-RETURNS boolean
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = _role
-  )
-$$;
-
--- Função get_user_company_id
-CREATE OR REPLACE FUNCTION public.get_user_company_id(_user_id uuid)
-RETURNS uuid
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
-AS $$
-  SELECT company_id FROM public.profiles WHERE id = _user_id LIMIT 1
-$$;
-
--- ============ TABELAS ============
+-- ============ TABELAS (criadas antes das funções que dependem delas) ============
 
 -- Companies
 CREATE TABLE IF NOT EXISTS public.companies (
@@ -79,13 +61,33 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at timestamptz DEFAULT now()
 );
 
--- User Roles
+-- User Roles (DEVE ser criada antes da função has_role)
 CREATE TABLE IF NOT EXISTS public.user_roles (
   id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id uuid NOT NULL,
   role app_role NOT NULL,
   created_at timestamptz DEFAULT now()
 );
+
+-- Função has_role (agora após user_roles existir)
+CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role app_role)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = _role
+  )
+$$;
+
+-- Função get_user_company_id
+CREATE OR REPLACE FUNCTION public.get_user_company_id(_user_id uuid)
+RETURNS uuid
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
+AS $$
+  SELECT company_id FROM public.profiles WHERE id = _user_id LIMIT 1
+$$;
+
+-- ============ DEMAIS TABELAS ============
 
 -- Connections
 CREATE TABLE IF NOT EXISTS public.connections (
