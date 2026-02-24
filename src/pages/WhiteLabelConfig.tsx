@@ -102,7 +102,7 @@ const WhiteLabelConfig = () => {
   });
 
   const [domainData, setDomainData] = useState({ custom_domain: '' });
-  const [dnsStatus, setDnsStatus] = useState<{ checking: boolean; result: null | { aRecord: boolean; txtRecord: boolean; wwwRecord: boolean } }>({ checking: false, result: null });
+  const [dnsStatus, setDnsStatus] = useState<{ checking: boolean; result: null | { aRecord: boolean; wwwRecord: boolean; txtRecord: boolean; aIp?: string | null; wwwIp?: string | null } }>({ checking: false, result: null });
 
   useEffect(() => {
     const storedPartner = localStorage.getItem('white_label_partner');
@@ -296,19 +296,19 @@ const WhiteLabelConfig = () => {
     if (!domain) { toast.error('Informe um domínio primeiro'); return; }
     setDnsStatus({ checking: true, result: null });
     try {
-      const [aRes, txtRes, wwwRes] = await Promise.all([
+      const [aRes, wwwRes] = await Promise.all([
         fetch(`https://dns.google/resolve?name=${domain}&type=A`).then(r => r.json()),
-        fetch(`https://dns.google/resolve?name=_lovable.${domain}&type=TXT`).then(r => r.json()),
         fetch(`https://dns.google/resolve?name=www.${domain}&type=A`).then(r => r.json()),
       ]);
-      const aRecord = !!(aRes.Answer && aRes.Answer.some((a: any) => a.data === '185.158.133.1'));
-      const wwwRecord = !!(wwwRes.Answer && wwwRes.Answer.some((a: any) => a.data === '185.158.133.1'));
-      const txtRecord = !!(txtRes.Answer && txtRes.Answer.some((a: any) => a.data?.includes('lovable_verify')));
-      setDnsStatus({ checking: false, result: { aRecord, txtRecord, wwwRecord } });
-      if (aRecord && wwwRecord && txtRecord) {
-        toast.success('DNS configurado corretamente! ✅');
+      const aRecord = !!(aRes.Answer && aRes.Answer.length > 0);
+      const wwwRecord = !!(wwwRes.Answer && wwwRes.Answer.length > 0);
+      const aIp = aRes.Answer?.[0]?.data || null;
+      const wwwIp = wwwRes.Answer?.[0]?.data || null;
+      setDnsStatus({ checking: false, result: { aRecord, txtRecord: true, wwwRecord, aIp, wwwIp } });
+      if (aRecord) {
+        toast.success(`DNS configurado! Domínio aponta para ${aIp} ✅`);
       } else {
-        toast.warning('Alguns registros DNS ainda não estão configurados');
+        toast.warning('O domínio ainda não está apontando para nenhum servidor');
       }
     } catch (err) {
       toast.error('Erro ao verificar DNS. Tente novamente.');
@@ -714,7 +714,7 @@ const WhiteLabelConfig = () => {
                   <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
                     <p className="text-sm text-blue-300">
                       <strong>Como funciona:</strong> Configure um domínio customizado para que seus clientes 
-                      acessem o sistema com sua marca. Ex: <code className="bg-slate-800 px-1 rounded">app.suaempresa.com</code>
+                      acessem o sistema hospedado no seu servidor (VPS). Ex: <code className="bg-slate-800 px-1 rounded">app.suaempresa.com</code>
                     </p>
                   </div>
 
@@ -728,11 +728,11 @@ const WhiteLabelConfig = () => {
                     />
                   </div>
 
-                   {domainData.custom_domain && (
+                  {domainData.custom_domain && (
                     <>
                       <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 space-y-3">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-slate-300">Configuração DNS necessária:</p>
+                          <p className="text-sm font-medium text-slate-300">Verificação de DNS:</p>
                           <Button 
                             variant="outline" 
                             size="sm" 
@@ -751,8 +751,12 @@ const WhiteLabelConfig = () => {
                             ) : (
                               <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
                             )}
-                            <span className="text-slate-400">@ →</span>
-                            <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">185.158.133.1</code>
+                            <span className="text-slate-400">{domainData.custom_domain} →</span>
+                            {dnsStatus.result?.aIp ? (
+                              <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">{dnsStatus.result.aIp}</code>
+                            ) : (
+                              <code className="text-slate-500 bg-slate-800 px-2 py-0.5 rounded">IP do seu VPS</code>
+                            )}
                             {dnsStatus.result && !dnsStatus.result.aRecord && <span className="text-red-400 text-xs">Não encontrado</span>}
                             {dnsStatus.result?.aRecord && <span className="text-emerald-400 text-xs">OK</span>}
                           </div>
@@ -762,39 +766,32 @@ const WhiteLabelConfig = () => {
                             ) : (
                               <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
                             )}
-                            <span className="text-slate-400">www →</span>
-                            <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">185.158.133.1</code>
-                            {dnsStatus.result && !dnsStatus.result.wwwRecord && <span className="text-red-400 text-xs">Não encontrado</span>}
-                            {dnsStatus.result?.wwwRecord && <span className="text-emerald-400 text-xs">OK</span>}
-                          </div>
-                          <div className="flex items-center gap-3 text-xs">
-                            {dnsStatus.result ? (
-                              dnsStatus.result.txtRecord ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <XCircle className="h-4 w-4 text-red-400" />
+                            <span className="text-slate-400">www.{domainData.custom_domain} →</span>
+                            {dnsStatus.result?.wwwIp ? (
+                              <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">{dnsStatus.result.wwwIp}</code>
                             ) : (
-                              <Badge variant="outline" className="text-slate-400 border-slate-600">TXT</Badge>
+                              <code className="text-slate-500 bg-slate-800 px-2 py-0.5 rounded">IP do seu VPS</code>
                             )}
-                            <span className="text-slate-400">_lovable →</span>
-                            <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">lovable_verify={'{seu_token}'}</code>
-                            {dnsStatus.result && !dnsStatus.result.txtRecord && <span className="text-red-400 text-xs">Não encontrado</span>}
-                            {dnsStatus.result?.txtRecord && <span className="text-emerald-400 text-xs">OK</span>}
+                            {dnsStatus.result && !dnsStatus.result.wwwRecord && <span className="text-amber-400 text-xs">Opcional</span>}
+                            {dnsStatus.result?.wwwRecord && <span className="text-emerald-400 text-xs">OK</span>}
                           </div>
                         </div>
                         
                         {dnsStatus.result && (
                           <div className={`mt-3 p-3 rounded-lg text-xs ${
-                            dnsStatus.result.aRecord && dnsStatus.result.wwwRecord && dnsStatus.result.txtRecord
+                            dnsStatus.result.aRecord
                               ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
                               : 'bg-amber-500/10 border border-amber-500/30 text-amber-300'
                           }`}>
-                            {dnsStatus.result.aRecord && dnsStatus.result.wwwRecord && dnsStatus.result.txtRecord ? (
+                            {dnsStatus.result.aRecord ? (
                               <div className="flex items-center gap-2">
                                 <CheckCircle2 className="h-4 w-4" />
-                                <span>Todos os registros DNS estão configurados corretamente! O SSL será provisionado automaticamente.</span>
+                                <span>O domínio está apontando para <strong>{dnsStatus.result.aIp}</strong>. Certifique-se de que esse é o IP do seu VPS.</span>
                               </div>
                             ) : (
                               <div className="flex items-start gap-2">
                                 <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                                <span>Alguns registros ainda não foram detectados. Verifique se foram adicionados corretamente no seu provedor de domínio. A propagação pode levar até 72 horas.</span>
+                                <span>O domínio ainda não está apontando para nenhum servidor. Configure o registro A no seu provedor de domínio.</span>
                               </div>
                             )}
                           </div>
@@ -802,7 +799,7 @@ const WhiteLabelConfig = () => {
                       </div>
 
                       <div className="bg-slate-900 border border-slate-700 rounded-lg p-5 space-y-4">
-                        <p className="text-sm font-semibold text-white">📋 Passo a passo para configurar o acesso</p>
+                        <p className="text-sm font-semibold text-white">📋 Passo a passo para configurar</p>
                         <ol className="space-y-3 text-sm text-slate-300 list-none">
                           <li className="flex gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">1</span>
@@ -814,39 +811,47 @@ const WhiteLabelConfig = () => {
                           <li className="flex gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">2</span>
                             <div>
-                              <p className="font-medium text-white">Acesse o painel do seu provedor de domínio</p>
-                              <p className="text-xs text-slate-400">Entre no site onde você registrou o domínio (ex: Registro.br, GoDaddy, Cloudflare, Hostinger).</p>
+                              <p className="font-medium text-white">Gere o pacote de implantação</p>
+                              <p className="text-xs text-slate-400">No painel Admin, gere o pacote ZIP com Docker + Nginx para instalar no seu VPS.</p>
                             </div>
                           </li>
                           <li className="flex gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">3</span>
                             <div>
-                              <p className="font-medium text-white">Configure os registros DNS</p>
+                              <p className="font-medium text-white">Configure o DNS no seu provedor</p>
                               <p className="text-xs text-slate-400">
-                                Vá na seção de <strong>DNS</strong> ou <strong>Zona DNS</strong> e adicione os registros mostrados acima:
+                                Acesse o painel onde registrou o domínio (Registro.br, GoDaddy, Cloudflare, Hostinger) e configure:
                               </p>
                               <ul className="mt-1 text-xs text-slate-500 space-y-1 ml-2">
-                                <li>• Registro <strong>A</strong> com nome <code className="bg-slate-800 px-1 rounded">@</code> apontando para <code className="bg-slate-800 px-1 rounded text-emerald-400">185.158.133.1</code></li>
-                                <li>• Registro <strong>A</strong> com nome <code className="bg-slate-800 px-1 rounded">www</code> apontando para <code className="bg-slate-800 px-1 rounded text-emerald-400">185.158.133.1</code></li>
-                                <li>• Registro <strong>TXT</strong> com nome <code className="bg-slate-800 px-1 rounded">_lovable</code> com o valor <code className="bg-slate-800 px-1 rounded text-emerald-400">lovable_verify=SEU_TOKEN</code> (obtido ao conectar o domínio no painel Lovable → Settings → Domains)</li>
+                                <li>• Registro <strong>A</strong> com nome <code className="bg-slate-800 px-1 rounded">@</code> apontando para o <code className="bg-slate-800 px-1 rounded text-emerald-400">IP do seu VPS</code></li>
+                                <li>• Registro <strong>A</strong> com nome <code className="bg-slate-800 px-1 rounded">www</code> apontando para o <code className="bg-slate-800 px-1 rounded text-emerald-400">IP do seu VPS</code> (opcional)</li>
                               </ul>
                             </div>
                           </li>
                           <li className="flex gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">4</span>
                             <div>
-                              <p className="font-medium text-white">Verifique a propagação</p>
+                              <p className="font-medium text-white">Configure o SSL no servidor</p>
                               <p className="text-xs text-slate-400">
-                                Use o botão <strong>"Verificar DNS"</strong> acima ou acesse <a href="https://dnschecker.org" target="_blank" rel="noopener noreferrer" className="text-primary underline">dnschecker.org</a> para confirmar. A propagação pode levar de minutos até 72 horas.
+                                Use <strong>Certbot</strong> (Let's Encrypt) ou configure o SSL via <strong>Cloudflare</strong> para habilitar HTTPS no seu domínio.
                               </p>
                             </div>
                           </li>
                           <li className="flex gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">5</span>
                             <div>
-                              <p className="font-medium text-white">Acesse pelo domínio configurado</p>
+                              <p className="font-medium text-white">Verifique a propagação</p>
                               <p className="text-xs text-slate-400">
-                                Após a propagação, seus clientes poderão acessar o sistema diretamente pelo domínio <strong className="text-emerald-400">{domainData.custom_domain}</strong>. O certificado SSL (https) será provisionado automaticamente.
+                                Clique em <strong>"Verificar DNS"</strong> acima ou acesse <a href="https://dnschecker.org" target="_blank" rel="noopener noreferrer" className="text-primary underline">dnschecker.org</a> para confirmar que o domínio aponta para o IP correto.
+                              </p>
+                            </div>
+                          </li>
+                          <li className="flex gap-3">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">6</span>
+                            <div>
+                              <p className="font-medium text-white">Pronto!</p>
+                              <p className="text-xs text-slate-400">
+                                Seus clientes poderão acessar o sistema em <strong className="text-emerald-400">https://{domainData.custom_domain}</strong>
                               </p>
                             </div>
                           </li>
