@@ -2,6 +2,7 @@ import { ReactNode, useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 import { useSupabaseStatusNotifications } from "@/hooks/useSupabaseStatusNotifications";
+import { useGlobalMessages } from "@/hooks/useMessages";
 import { cn } from "@/lib/utils";
 
 interface MainLayoutProps {
@@ -12,6 +13,9 @@ interface MainLayoutProps {
 export const MainLayout = ({ children, noPadding = false }: MainLayoutProps) => {
   // Enable real-time Supabase status notifications
   useSupabaseStatusNotifications();
+  
+  // Enable global realtime for messages & conversations
+  useGlobalMessages();
   
   // Get saved sidebar state from localStorage
   const [collapsed, setCollapsed] = useState(() => {
