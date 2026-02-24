@@ -1485,6 +1485,7 @@ export type Database = {
           secondary_color: string | null
           slug: string
           supabase_anon_key: string | null
+          supabase_service_role_key: string | null
           supabase_url: string | null
           updated_at: string | null
         }
@@ -1503,6 +1504,7 @@ export type Database = {
           secondary_color?: string | null
           slug: string
           supabase_anon_key?: string | null
+          supabase_service_role_key?: string | null
           supabase_url?: string | null
           updated_at?: string | null
         }
@@ -1521,6 +1523,7 @@ export type Database = {
           secondary_color?: string | null
           slug?: string
           supabase_anon_key?: string | null
+          supabase_service_role_key?: string | null
           supabase_url?: string | null
           updated_at?: string | null
         }

@@ -1,0 +1,1 @@
+ALTER TABLE public.white_label_partners ADD COLUMN IF NOT EXISTS supabase_service_role_key text;
