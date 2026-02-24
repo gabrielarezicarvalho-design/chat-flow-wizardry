@@ -7,17 +7,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  BarChart3, 
+  MessageSquare, 
   TrendingUp, 
-  Send, 
-  CheckCircle2, 
-  XCircle, 
+  Headphones, 
+  Bot, 
+  GitBranch,
   Clock,
-  MessageSquare,
   Users,
   Calendar,
   Download,
-  RefreshCw
+  RefreshCw,
+  CheckCircle2
 } from "lucide-react";
 import { 
   AreaChart, 
@@ -43,16 +43,16 @@ const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 
 const CampaignReports = () => {
   const [period, setPeriod] = useState("7");
-  const [selectedCampaign, setSelectedCampaign] = useState<string>("all");
   const { companyId } = useCompanyId();
 
-  // Fetch campaigns filtered by company
-  const { data: campaigns = [], isLoading: loadingCampaigns, refetch } = useQuery({
-    queryKey: ["campaigns-reports", companyId],
+  const { data: conversations = [], isLoading, refetch } = useQuery({
+    queryKey: ["conversations-reports", companyId, period],
     queryFn: async () => {
+      const startDate = subDays(new Date(), parseInt(period)).toISOString();
       let query = supabase
-        .from("campaigns")
+        .from("conversations")
         .select("*")
+        .gte("created_at", startDate)
         .order("created_at", { ascending: false });
       
       if (companyId) {
@@ -65,109 +65,81 @@ const CampaignReports = () => {
     },
   });
 
-  // Fetch campaign responses filtered by company campaigns
-  const { data: responses = [] } = useQuery({
-    queryKey: ["campaign-responses-reports", companyId, campaigns],
+  const { data: allConversations = [] } = useQuery({
+    queryKey: ["conversations-all-reports", companyId],
     queryFn: async () => {
-      if (campaigns.length === 0) return [];
-      
-      const campaignIds = campaigns.map(c => c.id);
-      const { data, error } = await supabase
-        .from("campaign_responses")
-        .select("*")
-        .in("campaign_id", campaignIds)
+      let query = supabase
+        .from("conversations")
+        .select("id, status, attendance_type, created_at, updated_at")
         .order("created_at", { ascending: false });
       
+      if (companyId) {
+        query = query.eq("company_id", companyId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
-    enabled: campaigns.length > 0,
   });
 
-  // Calculate stats
-  const filteredCampaigns = selectedCampaign === "all" 
-    ? campaigns 
-    : campaigns.filter(c => c.id === selectedCampaign);
+  // Stats
+  const totalConversations = conversations.length;
+  const agentConversations = conversations.filter(c => c.attendance_type === "agent").length;
+  const aiConversations = conversations.filter(c => c.attendance_type === "ai").length;
+  const uraConversations = conversations.filter(c => c.attendance_type === "ura").length;
+  const openConversations = conversations.filter(c => c.status === "open").length;
+  const closedConversations = conversations.filter(c => c.status === "closed").length;
 
-  const totalCampaigns = filteredCampaigns.length;
-  const totalSent = filteredCampaigns.reduce((acc, c) => acc + (c.sent_count || 0), 0);
-  const totalFailed = filteredCampaigns.reduce((acc, c) => acc + (c.failed_count || 0), 0);
-  const totalContacts = filteredCampaigns.reduce((acc, c) => acc + (c.total_contacts || 0), 0);
-  const deliveryRate = totalContacts > 0 ? ((totalSent / totalContacts) * 100).toFixed(1) : "0";
-  const totalResponses = responses.length;
-  const engagementRate = totalSent > 0 ? ((totalResponses / totalSent) * 100).toFixed(1) : "0";
-
-  // Chart data - campaigns over time
+  // Chart data - conversations over time
   const chartData = Array.from({ length: parseInt(period) }, (_, i) => {
     const date = subDays(new Date(), parseInt(period) - 1 - i);
     const dayStart = startOfDay(date);
     const dayEnd = endOfDay(date);
     
-    const dayCampaigns = campaigns.filter(c => {
+    const dayConversations = conversations.filter(c => {
       const createdAt = new Date(c.created_at);
-      return createdAt >= dayStart && createdAt <= dayEnd;
-    });
-    
-    const dayResponses = responses.filter(r => {
-      const createdAt = new Date(r.created_at);
       return createdAt >= dayStart && createdAt <= dayEnd;
     });
 
     return {
       date: format(date, "dd/MM", { locale: ptBR }),
-      enviados: dayCampaigns.reduce((acc, c) => acc + (c.sent_count || 0), 0),
-      respostas: dayResponses.length,
-      falhas: dayCampaigns.reduce((acc, c) => acc + (c.failed_count || 0), 0),
+      total: dayConversations.length,
+      atendente: dayConversations.filter(c => c.attendance_type === "agent").length,
+      ia: dayConversations.filter(c => c.attendance_type === "ai").length,
+      ura: dayConversations.filter(c => c.attendance_type === "ura").length,
     };
   });
 
-  // Status distribution for pie chart
-  const statusData = [
-    { name: "Concluídas", value: campaigns.filter(c => c.status === "completed").length, color: "#10b981" },
-    { name: "Em Andamento", value: campaigns.filter(c => c.status === "sending").length, color: "#3b82f6" },
-    { name: "Pendentes", value: campaigns.filter(c => c.status === "pending").length, color: "#f59e0b" },
-    { name: "Agendadas", value: campaigns.filter(c => c.status === "scheduled").length, color: "#8b5cf6" },
-    { name: "Falhas", value: campaigns.filter(c => c.status === "failed").length, color: "#ef4444" },
+  // Attendance type distribution
+  const typeData = [
+    { name: "Atendente", value: agentConversations, color: "#10b981" },
+    { name: "IA", value: aiConversations, color: "#3b82f6" },
+    { name: "URA", value: uraConversations, color: "#f59e0b" },
   ].filter(s => s.value > 0);
 
-  // Response type distribution
-  const responseTypeData = [
-    { name: "Positivas", value: responses.filter(r => r.response_type === "positive").length },
-    { name: "Negativas", value: responses.filter(r => r.response_type === "negative").length },
-    { name: "Neutras", value: responses.filter(r => r.response_type === "neutral" || !r.response_type).length },
-  ].filter(r => r.value > 0);
+  // Status distribution
+  const statusData = [
+    { name: "Abertas", value: openConversations, color: "#3b82f6" },
+    { name: "Fechadas", value: closedConversations, color: "#10b981" },
+    { name: "Outras", value: conversations.filter(c => c.status !== "open" && c.status !== "closed").length, color: "#8b5cf6" },
+  ].filter(s => s.value > 0);
 
-  // Top campaigns by engagement
-  const topCampaigns = [...campaigns]
-    .map(c => ({
-      ...c,
-      engagement: c.sent_count && c.sent_count > 0 
-        ? (responses.filter(r => r.campaign_id === c.id).length / c.sent_count) * 100 
-        : 0
-    }))
-    .sort((a, b) => b.engagement - a.engagement)
-    .slice(0, 5);
+  // Hourly distribution (what hours have most conversations)
+  const hourlyData = Array.from({ length: 24 }, (_, hour) => {
+    const count = conversations.filter(c => {
+      const h = new Date(c.created_at).getHours();
+      return h === hour;
+    }).length;
+    return { hora: `${hour.toString().padStart(2, "0")}h`, conversas: count };
+  });
 
   const StatCard = ({ 
-    title, 
-    value, 
-    subtitle, 
-    icon: Icon, 
-    trend, 
-    color = "primary" 
+    title, value, subtitle, icon: Icon, trend, color = "primary" 
   }: { 
-    title: string; 
-    value: string | number; 
-    subtitle?: string; 
-    icon: any; 
-    trend?: string;
-    color?: string;
+    title: string; value: string | number; subtitle?: string; icon: any; trend?: string; color?: string;
   }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
       <Card className="relative overflow-hidden">
         <CardContent className="p-6">
           <div className="flex items-start justify-between">
@@ -196,12 +168,12 @@ const CampaignReports = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Relatórios de Campanhas</h1>
-          <p className="text-muted-foreground">Análise detalhada de desempenho e engajamento</p>
+          <h1 className="text-3xl font-bold">Relatórios de Conversas</h1>
+          <p className="text-muted-foreground">Análise detalhada dos atendimentos</p>
         </div>
         <div className="flex items-center gap-3">
           <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[160px]">
               <Calendar className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
@@ -210,17 +182,6 @@ const CampaignReports = () => {
               <SelectItem value="14">Últimos 14 dias</SelectItem>
               <SelectItem value="30">Últimos 30 dias</SelectItem>
               <SelectItem value="60">Últimos 60 dias</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Todas as campanhas" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as campanhas</SelectItem>
-              {campaigns.map(c => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-              ))}
             </SelectContent>
           </Select>
           <Button variant="outline" size="icon" onClick={() => refetch()}>
@@ -236,33 +197,32 @@ const CampaignReports = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total de Campanhas"
-          value={totalCampaigns}
-          subtitle="Campanhas criadas"
-          icon={BarChart3}
+          title="Total de Conversas"
+          value={totalConversations}
+          subtitle={`${openConversations} abertas`}
+          icon={MessageSquare}
           color="primary"
         />
         <StatCard
-          title="Mensagens Enviadas"
-          value={totalSent.toLocaleString()}
-          subtitle={`${totalFailed} falhas`}
-          icon={Send}
+          title="Com Atendente"
+          value={agentConversations}
+          subtitle="Atendimento humano"
+          icon={Headphones}
           color="green-500"
         />
         <StatCard
-          title="Taxa de Entrega"
-          value={`${deliveryRate}%`}
-          subtitle="Mensagens entregues"
-          icon={CheckCircle2}
-          trend="+5.2%"
+          title="Com IA"
+          value={aiConversations}
+          subtitle="Atendimento automático"
+          icon={Bot}
           color="blue-500"
         />
         <StatCard
-          title="Taxa de Engajamento"
-          value={`${engagementRate}%`}
-          subtitle={`${totalResponses} respostas`}
-          icon={MessageSquare}
-          color="purple-500"
+          title="Na URA"
+          value={uraConversations}
+          subtitle="Em fluxo/formulário"
+          icon={GitBranch}
+          color="yellow-500"
         />
       </div>
 
@@ -270,30 +230,25 @@ const CampaignReports = () => {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="engagement">Engajamento</TabsTrigger>
-          <TabsTrigger value="campaigns">Por Campanha</TabsTrigger>
+          <TabsTrigger value="types">Por Tipo</TabsTrigger>
+          <TabsTrigger value="hours">Por Horário</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Area Chart */}
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle>Evolução de Envios</CardTitle>
-                <CardDescription>Mensagens enviadas e respostas recebidas</CardDescription>
+                <CardTitle>Evolução de Conversas</CardTitle>
+                <CardDescription>Novas conversas por dia</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
                       <defs>
-                        <linearGradient id="colorEnviados" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
                           <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="colorRespostas" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -305,48 +260,84 @@ const CampaignReports = () => {
                           border: '1px solid hsl(var(--border))' 
                         }}
                       />
-                      <Area
-                        type="monotone"
-                        dataKey="enviados"
-                        stroke="#10b981"
-                        fillOpacity={1}
-                        fill="url(#colorEnviados)"
-                        name="Enviados"
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="respostas"
-                        stroke="#3b82f6"
-                        fillOpacity={1}
-                        fill="url(#colorRespostas)"
-                        name="Respostas"
-                      />
+                      <Area type="monotone" dataKey="total" stroke="#10b981" fillOpacity={1} fill="url(#colorTotal)" name="Total" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Pie Chart - Status */}
             <Card>
               <CardHeader>
-                <CardTitle>Status das Campanhas</CardTitle>
-                <CardDescription>Distribuição por status</CardDescription>
+                <CardTitle>Tipo de Atendimento</CardTitle>
+                <CardDescription>Distribuição por tipo</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  {typeData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={typeData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                          {typeData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-muted-foreground">
+                      Nenhuma conversa encontrada
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="types" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Conversas por Tipo</CardTitle>
+                <CardDescription>Atendente vs IA vs URA ao longo do tempo</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="date" className="text-xs" />
+                      <YAxis className="text-xs" />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--background))', 
+                          border: '1px solid hsl(var(--border))' 
+                        }}
+                      />
+                      <Legend />
+                      <Bar dataKey="atendente" fill="#10b981" radius={[4, 4, 0, 0]} name="Atendente" />
+                      <Bar dataKey="ia" fill="#3b82f6" radius={[4, 4, 0, 0]} name="IA" />
+                      <Bar dataKey="ura" fill="#f59e0b" radius={[4, 4, 0, 0]} name="URA" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Status das Conversas</CardTitle>
+                <CardDescription>Abertas vs Fechadas</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
                   {statusData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie
-                          data={statusData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
+                        <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
                           {statusData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
@@ -357,7 +348,7 @@ const CampaignReports = () => {
                     </ResponsiveContainer>
                   ) : (
                     <div className="h-full flex items-center justify-center text-muted-foreground">
-                      Nenhuma campanha encontrada
+                      Nenhuma conversa encontrada
                     </div>
                   )}
                 </div>
@@ -366,112 +357,28 @@ const CampaignReports = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="engagement" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Bar Chart - Response Types */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Tipos de Resposta</CardTitle>
-                <CardDescription>Classificação das respostas recebidas</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  {responseTypeData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={responseTypeData}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis dataKey="name" className="text-xs" />
-                        <YAxis className="text-xs" />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--background))', 
-                            border: '1px solid hsl(var(--border))' 
-                          }}
-                        />
-                        <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-muted-foreground">
-                      Nenhuma resposta encontrada
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Top Campaigns */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Top Campanhas</CardTitle>
-                <CardDescription>Campanhas com maior engajamento</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {topCampaigns.length > 0 ? topCampaigns.map((campaign, index) => (
-                    <div key={campaign.id} className="flex items-center gap-4">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{campaign.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {campaign.sent_count || 0} enviados
-                        </p>
-                      </div>
-                      <Badge variant="secondary" className="bg-green-100 text-green-700">
-                        {campaign.engagement.toFixed(1)}%
-                      </Badge>
-                    </div>
-                  )) : (
-                    <div className="text-center text-muted-foreground py-8">
-                      Nenhuma campanha com engajamento
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="campaigns" className="space-y-4">
+        <TabsContent value="hours" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Desempenho por Campanha</CardTitle>
-              <CardDescription>Comparativo de todas as campanhas</CardDescription>
+              <CardTitle>Conversas por Horário</CardTitle>
+              <CardDescription>Distribuição ao longo do dia (últimos {period} dias)</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-[400px]">
-                {campaigns.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart 
-                      data={campaigns.slice(0, 10).map(c => ({
-                        name: c.name.length > 15 ? c.name.substring(0, 15) + "..." : c.name,
-                        enviados: c.sent_count || 0,
-                        falhas: c.failed_count || 0,
-                        total: c.total_contacts || 0,
-                      }))}
-                      layout="vertical"
-                    >
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis type="number" className="text-xs" />
-                      <YAxis type="category" dataKey="name" width={120} className="text-xs" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: 'hsl(var(--background))', 
-                          border: '1px solid hsl(var(--border))' 
-                        }}
-                      />
-                      <Legend />
-                      <Bar dataKey="enviados" fill="#10b981" name="Enviados" radius={[0, 4, 4, 0]} />
-                      <Bar dataKey="falhas" fill="#ef4444" name="Falhas" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-full flex items-center justify-center text-muted-foreground">
-                    Nenhuma campanha encontrada
-                  </div>
-                )}
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={hourlyData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="hora" className="text-xs" />
+                    <YAxis className="text-xs" />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--background))', 
+                        border: '1px solid hsl(var(--border))' 
+                      }}
+                    />
+                    <Bar dataKey="conversas" fill="#10b981" radius={[4, 4, 0, 0]} name="Conversas" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
