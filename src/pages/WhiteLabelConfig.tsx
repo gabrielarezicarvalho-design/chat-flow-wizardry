@@ -6,7 +6,7 @@ import {
   LogOut, Check, X, Eye, EyeOff, Building2, Users, 
   Plus, Settings, MessageSquare, BarChart3, Home,
   Trash2, Edit, Search, Lock, Upload, Globe, HardDrive,
-  TableProperties, Copy, CheckCircle2, XCircle, FileText, Image, File
+  TableProperties, Copy, CheckCircle2, XCircle, FileText, Image, File, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -102,6 +102,7 @@ const WhiteLabelConfig = () => {
   });
 
   const [domainData, setDomainData] = useState({ custom_domain: '' });
+  const [dnsStatus, setDnsStatus] = useState<{ checking: boolean; result: null | { aRecord: boolean; txtRecord: boolean; wwwRecord: boolean } }>({ checking: false, result: null });
 
   useEffect(() => {
     const storedPartner = localStorage.getItem('white_label_partner');
@@ -287,6 +288,31 @@ const WhiteLabelConfig = () => {
       toast.error('Erro ao salvar domínio: ' + error.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCheckDns = async () => {
+    const domain = domainData.custom_domain?.trim();
+    if (!domain) { toast.error('Informe um domínio primeiro'); return; }
+    setDnsStatus({ checking: true, result: null });
+    try {
+      const [aRes, txtRes, wwwRes] = await Promise.all([
+        fetch(`https://dns.google/resolve?name=${domain}&type=A`).then(r => r.json()),
+        fetch(`https://dns.google/resolve?name=_lovable.${domain}&type=TXT`).then(r => r.json()),
+        fetch(`https://dns.google/resolve?name=www.${domain}&type=A`).then(r => r.json()),
+      ]);
+      const aRecord = !!(aRes.Answer && aRes.Answer.some((a: any) => a.data === '185.158.133.1'));
+      const wwwRecord = !!(wwwRes.Answer && wwwRes.Answer.some((a: any) => a.data === '185.158.133.1'));
+      const txtRecord = !!(txtRes.Answer && txtRes.Answer.some((a: any) => a.data?.includes('lovable_verify')));
+      setDnsStatus({ checking: false, result: { aRecord, txtRecord, wwwRecord } });
+      if (aRecord && wwwRecord && txtRecord) {
+        toast.success('DNS configurado corretamente! ✅');
+      } else {
+        toast.warning('Alguns registros DNS ainda não estão configurados');
+      }
+    } catch (err) {
+      toast.error('Erro ao verificar DNS. Tente novamente.');
+      setDnsStatus({ checking: false, result: null });
     }
   };
 
@@ -702,30 +728,77 @@ const WhiteLabelConfig = () => {
                     />
                   </div>
 
-                  {domainData.custom_domain && (
+                   {domainData.custom_domain && (
                     <>
                       <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 space-y-3">
-                        <p className="text-sm font-medium text-slate-300">Configuração DNS necessária:</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium text-slate-300">Configuração DNS necessária:</p>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleCheckDns} 
+                            disabled={dnsStatus.checking}
+                            className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                          >
+                            {dnsStatus.checking ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <RefreshCw className="h-3 w-3 mr-1" />}
+                            Verificar DNS
+                          </Button>
+                        </div>
                         <div className="space-y-2">
                           <div className="flex items-center gap-3 text-xs">
-                            <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
+                            {dnsStatus.result ? (
+                              dnsStatus.result.aRecord ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <XCircle className="h-4 w-4 text-red-400" />
+                            ) : (
+                              <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
+                            )}
                             <span className="text-slate-400">@ →</span>
                             <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">185.158.133.1</code>
+                            {dnsStatus.result && !dnsStatus.result.aRecord && <span className="text-red-400 text-xs">Não encontrado</span>}
+                            {dnsStatus.result?.aRecord && <span className="text-emerald-400 text-xs">OK</span>}
                           </div>
                           <div className="flex items-center gap-3 text-xs">
-                            <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
+                            {dnsStatus.result ? (
+                              dnsStatus.result.wwwRecord ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <XCircle className="h-4 w-4 text-red-400" />
+                            ) : (
+                              <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
+                            )}
                             <span className="text-slate-400">www →</span>
                             <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">185.158.133.1</code>
+                            {dnsStatus.result && !dnsStatus.result.wwwRecord && <span className="text-red-400 text-xs">Não encontrado</span>}
+                            {dnsStatus.result?.wwwRecord && <span className="text-emerald-400 text-xs">OK</span>}
                           </div>
                           <div className="flex items-center gap-3 text-xs">
-                            <Badge variant="outline" className="text-slate-400 border-slate-600">TXT</Badge>
+                            {dnsStatus.result ? (
+                              dnsStatus.result.txtRecord ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <XCircle className="h-4 w-4 text-red-400" />
+                            ) : (
+                              <Badge variant="outline" className="text-slate-400 border-slate-600">TXT</Badge>
+                            )}
                             <span className="text-slate-400">_lovable →</span>
                             <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">lovable_verify=...</code>
+                            {dnsStatus.result && !dnsStatus.result.txtRecord && <span className="text-red-400 text-xs">Não encontrado</span>}
+                            {dnsStatus.result?.txtRecord && <span className="text-emerald-400 text-xs">OK</span>}
                           </div>
                         </div>
-                        <p className="text-xs text-slate-500 mt-2">
-                          Após configurar o DNS, a propagação pode levar até 72 horas. O SSL será provisionado automaticamente.
-                        </p>
+                        
+                        {dnsStatus.result && (
+                          <div className={`mt-3 p-3 rounded-lg text-xs ${
+                            dnsStatus.result.aRecord && dnsStatus.result.wwwRecord && dnsStatus.result.txtRecord
+                              ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
+                              : 'bg-amber-500/10 border border-amber-500/30 text-amber-300'
+                          }`}>
+                            {dnsStatus.result.aRecord && dnsStatus.result.wwwRecord && dnsStatus.result.txtRecord ? (
+                              <div className="flex items-center gap-2">
+                                <CheckCircle2 className="h-4 w-4" />
+                                <span>Todos os registros DNS estão configurados corretamente! O SSL será provisionado automaticamente.</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-start gap-2">
+                                <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                <span>Alguns registros ainda não foram detectados. Verifique se foram adicionados corretamente no seu provedor de domínio. A propagação pode levar até 72 horas.</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div className="bg-slate-900 border border-slate-700 rounded-lg p-5 space-y-4">
@@ -762,8 +835,10 @@ const WhiteLabelConfig = () => {
                           <li className="flex gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">4</span>
                             <div>
-                              <p className="font-medium text-white">Aguarde a propagação do DNS</p>
-                              <p className="text-xs text-slate-400">A propagação pode levar de alguns minutos até 72 horas. Você pode verificar em <a href="https://dnschecker.org" target="_blank" rel="noopener noreferrer" className="text-primary underline">dnschecker.org</a>.</p>
+                              <p className="font-medium text-white">Verifique a propagação</p>
+                              <p className="text-xs text-slate-400">
+                                Use o botão <strong>"Verificar DNS"</strong> acima ou acesse <a href="https://dnschecker.org" target="_blank" rel="noopener noreferrer" className="text-primary underline">dnschecker.org</a> para confirmar. A propagação pode levar de minutos até 72 horas.
+                              </p>
                             </div>
                           </li>
                           <li className="flex gap-3">
