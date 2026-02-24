@@ -6,8 +6,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Copy, Edit, Trash2, FileText, Gift, Sparkles, Tag, User, Calendar } from "lucide-react";
+import { Plus, Copy, Trash2, FileText, Gift, Sparkles, Tag, User, Calendar, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useCompanyId } from "@/hooks/useCompanyId";
 
 interface MessageTemplate {
   id: string;
@@ -15,50 +18,57 @@ interface MessageTemplate {
   content: string;
   category: string;
   variables: string[];
+  is_default?: boolean;
 }
 
 const defaultTemplates: MessageTemplate[] = [
   {
-    id: "1",
+    id: "default-1",
     name: "Boas-vindas",
     content: "Olá {nome}! 👋\n\nSeja bem-vindo(a) à nossa comunidade! Estamos muito felizes em ter você conosco.\n\nQualquer dúvida, estamos à disposição!",
     category: "Boas-vindas",
     variables: ["nome"],
+    is_default: true,
   },
   {
-    id: "2",
+    id: "default-2",
     name: "Aniversário",
     content: "🎂 Feliz Aniversário, {nome}! 🎉\n\nNeste dia especial, {data_aniversario}, queremos desejar muitas felicidades!\n\nComo presente, preparamos uma surpresa especial para você! 🎁",
     category: "Aniversário",
     variables: ["nome", "data_aniversario"],
+    is_default: true,
   },
   {
-    id: "3",
+    id: "default-3",
     name: "Promoção Especial",
     content: "🔥 {nome}, temos uma oferta exclusiva para você!\n\nApenas até {data_limite}:\n✅ Desconto especial\n✅ Frete grátis\n✅ Brindes exclusivos\n\nAproveite! 🛒",
     category: "Promoção",
     variables: ["nome", "data_limite"],
+    is_default: true,
   },
   {
-    id: "4",
+    id: "default-4",
     name: "Lembrete",
     content: "Olá {nome}! 📢\n\nEste é um lembrete sobre {assunto}.\n\nData: {data}\nHorário: {horario}\n\nNão esqueça! ⏰",
     category: "Lembrete",
     variables: ["nome", "assunto", "data", "horario"],
+    is_default: true,
   },
   {
-    id: "5",
+    id: "default-5",
     name: "Agradecimento",
     content: "Olá {nome}! 💚\n\nAgradecemos por escolher nossos serviços!\n\nSua satisfação é nossa prioridade. Se precisar de algo, estamos aqui!\n\nAté breve! 👋",
     category: "Agradecimento",
     variables: ["nome"],
+    is_default: true,
   },
   {
-    id: "6",
+    id: "default-6",
     name: "Black Friday",
     content: "🖤 BLACK FRIDAY, {nome}! 🖤\n\nOs melhores descontos do ano estão aqui!\n\n⚡ Até 70% OFF\n⚡ Frete Grátis\n⚡ Parcelamento especial\n\nVálido até {data_limite}! Corra! 🏃",
     category: "Promoção",
     variables: ["nome", "data_limite"],
+    is_default: true,
   },
 ];
 
@@ -83,10 +93,73 @@ interface MessageTemplatesProps {
 }
 
 export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) => {
-  const [templates, setTemplates] = useState<MessageTemplate[]>(defaultTemplates);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newTemplate, setNewTemplate] = useState({ name: "", content: "", category: "Outros" });
   const [searchQuery, setSearchQuery] = useState("");
+  const queryClient = useQueryClient();
+  const { companyId } = useCompanyId();
+
+  const { data: dbTemplates = [], isLoading } = useQuery({
+    queryKey: ['message-templates'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('message_templates')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []).map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        content: t.content,
+        category: t.category,
+        variables: t.variables || [],
+        is_default: false,
+      })) as MessageTemplate[];
+    },
+  });
+
+  const allTemplates = [...dbTemplates, ...defaultTemplates];
+
+  const createMutation = useMutation({
+    mutationFn: async (template: { name: string; content: string; category: string; variables: string[] }) => {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+      if (!userId) throw new Error("Não autenticado");
+
+      const insertData: any = {
+        user_id: userId,
+        name: template.name,
+        content: template.content,
+        category: template.category,
+        variables: template.variables,
+      };
+      if (companyId) insertData.company_id = companyId;
+
+      const { error } = await supabase.from('message_templates').insert([insertData]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['message-templates'] });
+      toast.success("Template criado e salvo!");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Erro ao salvar template");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('message_templates').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['message-templates'] });
+      toast.success("Template removido!");
+    },
+    onError: () => {
+      toast.error("Erro ao remover template");
+    },
+  });
 
   const handleCopy = (content: string) => {
     navigator.clipboard.writeText(content);
@@ -108,26 +181,18 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
       v.replace(/[{}]/g, "")
     );
 
-    const template: MessageTemplate = {
-      id: Date.now().toString(),
+    createMutation.mutate({
       name: newTemplate.name,
       content: newTemplate.content,
       category: newTemplate.category,
       variables,
-    };
+    });
 
-    setTemplates([...templates, template]);
     setNewTemplate({ name: "", content: "", category: "Outros" });
     setShowCreateDialog(false);
-    toast.success("Template criado!");
   };
 
-  const handleDeleteTemplate = (id: string) => {
-    setTemplates(templates.filter((t) => t.id !== id));
-    toast.success("Template removido!");
-  };
-
-  const filteredTemplates = templates.filter(
+  const filteredTemplates = allTemplates.filter(
     (t) =>
       t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -192,7 +257,10 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                 <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleCreateTemplate}>Criar Template</Button>
+                <Button onClick={handleCreateTemplate} disabled={createMutation.isPending}>
+                  {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Criar Template
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -206,72 +274,79 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
         className="max-w-md"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredTemplates.map((template) => (
-          <Card key={template.id} className="p-4 hover:shadow-lg transition-all">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  {categoryIcons[template.category] || <FileText className="w-4 h-4" />}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">{template.name}</h3>
-                  <Badge
-                    variant="outline"
-                    className={categoryColors[template.category] || "bg-muted"}
-                  >
-                    {template.category}
-                  </Badge>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredTemplates.map((template) => (
+            <Card key={template.id} className="p-4 hover:shadow-lg transition-all">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    {categoryIcons[template.category] || <FileText className="w-4 h-4" />}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">{template.name}</h3>
+                    <Badge
+                      variant="outline"
+                      className={categoryColors[template.category] || "bg-muted"}
+                    >
+                      {template.category}
+                    </Badge>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="bg-muted/50 rounded-lg p-3 mb-3 max-h-32 overflow-y-auto">
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {template.content}
-              </p>
-            </div>
-
-            {template.variables.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-3">
-                {template.variables.map((v) => (
-                  <Badge key={v} variant="secondary" className="text-xs">
-                    {"{" + v + "}"}
-                  </Badge>
-                ))}
+              <div className="bg-muted/50 rounded-lg p-3 mb-3 max-h-32 overflow-y-auto">
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {template.content}
+                </p>
               </div>
-            )}
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => handleCopy(template.content)}
-              >
-                <Copy className="w-4 h-4 mr-1" />
-                Copiar
-              </Button>
-              <Button
-                size="sm"
-                className="flex-1"
-                onClick={() => handleUseTemplate(template.content)}
-              >
-                Usar Template
-              </Button>
-              {!defaultTemplates.find((t) => t.id === template.id) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteTemplate(template.id)}
-                >
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
+              {template.variables.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {template.variables.map((v) => (
+                    <Badge key={v} variant="secondary" className="text-xs">
+                      {"{" + v + "}"}
+                    </Badge>
+                  ))}
+                </div>
               )}
-            </div>
-          </Card>
-        ))}
-      </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => handleCopy(template.content)}
+                >
+                  <Copy className="w-4 h-4 mr-1" />
+                  Copiar
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => handleUseTemplate(template.content)}
+                >
+                  Usar Template
+                </Button>
+                {!template.is_default && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteMutation.mutate(template.id)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
