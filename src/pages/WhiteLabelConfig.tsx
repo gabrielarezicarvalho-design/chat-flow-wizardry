@@ -598,7 +598,10 @@ const WhiteLabelConfig = () => {
           </nav>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-slate-700/50">
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-slate-700/50 space-y-2">
+          <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-800" onClick={() => navigate('/admin-parceiro')}>
+            <BarChart3 className="h-5 w-5 mr-3" /> Admin do Sistema
+          </Button>
           <Button variant="ghost" className="w-full justify-start text-slate-400 hover:text-white hover:bg-slate-800" onClick={handleLogout}>
             <LogOut className="h-5 w-5 mr-3" /> Sair
           </Button>
