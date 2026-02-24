@@ -16,7 +16,7 @@ import { useFlows } from "@/hooks/useFlows";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
-import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell, Globe, ArrowLeft, Send } from "lucide-react";
+import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell, Globe, ArrowLeft, Send, Search, MoreHorizontal, Eye, Calendar } from "lucide-react";
 import { TelegramNotifications } from "@/components/mass-sending/TelegramNotifications";
 import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
 import { DeleteConnectionDialog } from "@/components/connections/DeleteConnectionDialog";
@@ -63,6 +63,7 @@ const Connections = () => {
   const [labelsStats, setLabelsStats] = useState({ synced: 0, lastSync: '' });
   const [instanceLimit, setInstanceLimit] = useState<number>(2);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [connectionToDelete, setConnectionToDelete] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -1451,109 +1452,265 @@ const Connections = () => {
   };
 
   const renderConnectionTab = () => {
-    // Calculate active instances
     const activeConnections = connections.filter(c => c.status === 'connected' || c.status === 'connecting').length;
-    const totalConnections = connections.length;
-    const usagePercentage = instanceLimit > 0 ? (activeConnections / instanceLimit) * 100 : 0;
     const isAtLimit = activeConnections >= instanceLimit;
 
-    return (
-      <div className="space-y-6">
-        {/* Instance Usage Indicator */}
-        <Card className={`border-border ${isAtLimit ? 'border-orange-500/50 bg-orange-500/5' : ''}`}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Uso de Instâncias UAZAPI</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {isAtLimit && (
-                  <Badge variant="outline" className="text-orange-600 border-orange-500 bg-orange-500/10">
-                    <AlertTriangle className="w-3 h-3 mr-1" />
-                    Limite atingido
-                  </Badge>
-                )}
-                <Badge variant="secondary">
-                  {activeConnections} / {instanceLimit} ativas
-                </Badge>
-              </div>
-            </div>
-            <Progress 
-              value={usagePercentage} 
-              className={`h-2 ${isAtLimit ? '[&>div]:bg-orange-500' : '[&>div]:bg-green-500'}`}
-            />
-            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-              <span>{totalConnections} conexão(ões) cadastrada(s)</span>
-              <span>{instanceLimit - activeConnections} instância(s) disponível(is)</span>
-            </div>
-            {isAtLimit && (
-              <p className="text-xs text-orange-600 mt-2">
-                Para criar novas conexões, desconecte uma existente ou faça upgrade do seu plano UAZAPI.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+    // Combine UAZAPI + Meta connections for unified table
+    const allConnections = [
+      ...connections.map(c => ({ ...c, provider: 'uazapi' as const })),
+      ...metaConnections.map(c => ({ ...c, provider: 'meta' as const, instance_name: 'Meta Cloud API', name: 'Meta Cloud API' }))
+    ];
 
-        {/* Orphaned Instances Alert */}
+    const filtered = allConnections.filter(c => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      const name = (c.name || c.instance_name || '').toLowerCase();
+      const phone = ((c as any).phone_number || (c as any).meta_phone_number_id || '').toLowerCase();
+      return name.includes(q) || phone.includes(q);
+    });
+
+    const getStatusBadge = (status: string) => {
+      switch (status) {
+        case 'connected':
+          return <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white border-0 font-medium px-3">Conectado</Badge>;
+        case 'disconnected':
+          return <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30 font-medium px-3">Desconectado</Badge>;
+        case 'connecting':
+          return <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-0 font-medium px-3">Conectando</Badge>;
+        case 'deleted':
+          return <Badge variant="destructive" className="font-medium px-3">Removido</Badge>;
+        case 'error':
+          return <Badge variant="destructive" className="font-medium px-3">Erro</Badge>;
+        default:
+          return <Badge variant="secondary" className="font-medium px-3">{status}</Badge>;
+      }
+    };
+
+    const getProviderBadge = (provider: string) => {
+      if (provider === 'meta') {
+        return (
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-blue-600 text-white text-xs font-bold">
+            FB
+          </span>
+        );
+      }
+      return (
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-emerald-600 text-white text-xs font-bold">
+          WA
+        </span>
+      );
+    };
+
+    return (
+      <div className="space-y-4">
+        {/* Instance limit warning */}
+        {isAtLimit && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-sm">
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            <span>Limite de {instanceLimit} instância(s) atingido. Desconecte uma existente para criar novas.</span>
+          </div>
+        )}
+
         <OrphanedInstancesAlert />
 
-        {/* Connection Status Header */}
+        {/* Table Card */}
+        <Card className="border-border overflow-hidden">
+          {/* Search bar */}
+          <div className="flex items-center justify-end p-4 pb-2">
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border text-left">
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider w-12">#</th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Nome</th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Telefone</th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider text-center w-20">Tipo</th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider text-center">Status</th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Última modificação</th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider text-center w-32">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                      {searchQuery ? 'Nenhuma conexão encontrada' : 'Nenhuma conexão cadastrada'}
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((connection, index) => {
+                    const connAny = connection as any;
+                    const isSelected = selectedConnection?.id === connection.id;
+                    const phone = connAny.phone_number || connAny.meta_phone_number_id || '—';
+                    const updatedAt = connection.updated_at 
+                      ? new Date(connection.updated_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                      : '—';
+
+                    return (
+                      <tr 
+                        key={connection.id}
+                        className={`hover:bg-muted/50 transition-colors cursor-pointer ${isSelected ? 'bg-primary/5' : ''}`}
+                        onClick={() => {
+                          if (connection.provider !== 'meta') {
+                            setSelectedConnection(connection);
+                          }
+                        }}
+                      >
+                        <td className="px-4 py-3 text-sm text-muted-foreground font-mono">{index + 1}</td>
+                        <td className="px-4 py-3">
+                          <span className="text-sm font-medium text-foreground">
+                            {(connection.name || connection.instance_name || 'Sem nome').toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground">{phone}</td>
+                        <td className="px-4 py-3 text-center">{getProviderBadge(connection.provider)}</td>
+                        <td className="px-4 py-3 text-center">{getStatusBadge(connection.status || 'disconnected')}</td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground">{updatedAt}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-center gap-1">
+                            {connection.provider === 'meta' ? (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  title="Detalhes"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMetaDetailsConnection(connection);
+                                    setMetaDetailsDialogOpen(true);
+                                  }}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive hover:text-destructive"
+                                  title="Excluir"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMetaDelete(connection);
+                                  }}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                {connection.status === 'connected' ? (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-orange-500 hover:text-orange-600"
+                                    title="Desconectar"
+                                    onClick={(e) => { e.stopPropagation(); handleDisconnect(connection); }}
+                                  >
+                                    <WifiOff className="w-4 h-4" />
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-emerald-500 hover:text-emerald-600"
+                                    title="Reconectar"
+                                    onClick={(e) => { e.stopPropagation(); handleReconnect(connection); }}
+                                  >
+                                    <QrCode className="w-4 h-4" />
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  title="Copiar link"
+                                  onClick={(e) => handleCopyLink(connection, e)}
+                                >
+                                  <Link2 className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive hover:text-destructive"
+                                  title="Excluir"
+                                  onClick={(e) => { e.stopPropagation(); handleDeleteClick(connection); }}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Footer info */}
+          <div className="px-4 py-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+            <span>{filtered.length} conexão(ões) • {activeConnections}/{instanceLimit} ativa(s)</span>
+            {selectedConnection && (
+              <span className="flex items-center gap-1.5">
+                <div className={`w-2 h-2 rounded-full ${selectedConnection.status === 'connected' ? 'bg-emerald-500' : 'bg-muted-foreground/50'}`} />
+                Selecionada: {selectedConnection.name || selectedConnection.instance_name}
+              </span>
+            )}
+          </div>
+        </Card>
+
+        {/* Selected connection details */}
         {selectedConnection && (
           <Card className="border-border">
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-full ${
-                    selectedConnection.status === 'connected' 
-                      ? 'bg-green-500/10' 
-                      : selectedConnection.status === 'disconnected'
-                        ? 'bg-red-500/10'
-                        : 'bg-muted'
+                <div className="flex items-center gap-3">
+                  <div className={`p-2.5 rounded-lg ${
+                    selectedConnection.status === 'connected' ? 'bg-emerald-500/10' : 'bg-muted'
                   }`}>
                     {selectedConnection.status === 'connected' ? (
-                      <Wifi className="w-6 h-6 text-green-500" />
+                      <Wifi className="w-5 h-5 text-emerald-500" />
                     ) : (
-                      <WifiOff className={`w-6 h-6 ${selectedConnection.status === 'disconnected' ? 'text-red-500' : 'text-muted-foreground'}`} />
+                      <WifiOff className="w-5 h-5 text-muted-foreground" />
                     )}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-foreground">{selectedConnection.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedConnection.status === 'connected' 
-                        ? 'Conectado' 
-                        : selectedConnection.status === 'disconnected' 
-                          ? 'Desconectado' 
-                          : selectedConnection.status === 'connecting'
-                            ? 'Conectando...'
-                            : 'Offline'} • {selectedConnection.environment}
+                    <h3 className="font-semibold text-foreground">{selectedConnection.name || selectedConnection.instance_name}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedConnection.status === 'connected' ? 'Conectado' : 'Desconectado'} • {(selectedConnection as any).environment || 'PROD'}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCopyLink(selectedConnection)}
-                  >
-                    <Link2 className="w-4 h-4 mr-2" />
-                    Copiar Link
+                  <Button variant="outline" size="sm" onClick={() => handleCopyLink(selectedConnection)}>
+                    <Link2 className="w-4 h-4 mr-1.5" />
+                    Link
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDownloadQR(selectedConnection)}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Baixar QR
+                  <Button variant="outline" size="sm" onClick={() => handleDownloadQR(selectedConnection)}>
+                    <Download className="w-4 h-4 mr-1.5" />
+                    QR
                   </Button>
                   {selectedConnection.status !== 'connected' ? (
-                    <Button onClick={() => handleReconnect(selectedConnection)}>
-                      <QrCode className="w-4 h-4 mr-2" />
+                    <Button size="sm" onClick={() => handleReconnect(selectedConnection)}>
+                      <QrCode className="w-4 h-4 mr-1.5" />
                       Conectar
                     </Button>
                   ) : (
-                    <Button variant="outline" onClick={() => handleDisconnect(selectedConnection)}>
+                    <Button variant="outline" size="sm" onClick={() => handleDisconnect(selectedConnection)}>
                       Desconectar
                     </Button>
                   )}
@@ -1562,245 +1719,6 @@ const Connections = () => {
             </CardContent>
           </Card>
         )}
-
-        {/* Connection List */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {connections.map((connection) => (
-            <Card 
-              key={connection.id} 
-              className={`cursor-pointer transition-all hover:border-primary/50 ${selectedConnection?.id === connection.id ? 'border-primary ring-1 ring-primary/20' : 'border-border'}`}
-              onClick={() => setSelectedConnection(connection)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      connection.status === 'connected' 
-                        ? 'bg-green-500/10' 
-                        : connection.status === 'disconnected'
-                          ? 'bg-red-500/10'
-                          : 'bg-muted'
-                    }`}>
-                      <MessageSquare className={`w-4 h-4 ${
-                        connection.status === 'connected' 
-                          ? 'text-green-500' 
-                          : connection.status === 'disconnected'
-                            ? 'text-red-500'
-                            : 'text-muted-foreground'
-                      }`} />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-foreground text-sm">{connection.instance_name}</h4>
-                      <p className="text-xs text-muted-foreground">{connection.status}</p>
-                    </div>
-                  </div>
-                  <Badge 
-                    variant={connection.status === 'connected' ? 'default' : 'destructive'} 
-                    className={`text-xs ${
-                      connection.status === 'connected' 
-                        ? '' 
-                        : connection.status === 'disconnected'
-                          ? 'bg-red-500'
-                          : ''
-                    }`}
-                  >
-                    {connection.status === 'connected' 
-                      ? 'Conectado' 
-                      : connection.status === 'disconnected' 
-                        ? 'Desconectado' 
-                        : connection.status === 'connecting'
-                          ? 'Conectando...'
-                          : 'Offline'}
-                  </Badge>
-                </div>
-
-                <div className="flex gap-1.5 mt-3 flex-wrap">
-                  {connection.status === 'connected' ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => { e.stopPropagation(); handleDisconnect(connection); }}
-                      className="flex-1 h-8 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
-                    >
-                      <WifiOff className="w-3 h-3 mr-1" />
-                      Desconectar
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => { e.stopPropagation(); handleReconnect(connection); }}
-                      className="flex-1 h-8 text-xs text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
-                    >
-                      <QrCode className="w-3 h-3 mr-1" />
-                      Reconectar
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => handleCopyLink(connection, e)}
-                    className="h-8 text-xs"
-                    title="Copiar link de conexão"
-                  >
-                    <Link2 className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => handleDownloadQR(connection, e)}
-                    className="h-8 text-xs"
-                    title="Baixar QR Code"
-                  >
-                    <Download className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => { e.stopPropagation(); handleDeleteClick(connection); }}
-                    className="h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {/* Meta Cloud API Connections */}
-          {metaConnections.map((metaConn) => (
-            <Card 
-              key={metaConn.id} 
-              className="border-border"
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      metaConn.status === 'connected' 
-                        ? 'bg-green-500/10' 
-                        : metaConn.status === 'error'
-                          ? 'bg-red-500/10'
-                          : 'bg-muted'
-                    }`}>
-                      <Globe className={`w-4 h-4 ${
-                        metaConn.status === 'connected' 
-                          ? 'text-green-500' 
-                          : metaConn.status === 'error'
-                            ? 'text-red-500'
-                            : 'text-muted-foreground'
-                      }`} />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-foreground text-sm">Meta Cloud API</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {metaConn.meta_phone_number_id ? `Phone: ${metaConn.meta_phone_number_id}` : 'Sem número'}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge 
-                    variant={metaConn.status === 'connected' ? 'default' : 'destructive'} 
-                    className="text-xs"
-                  >
-                    {metaConn.status === 'connected' 
-                      ? 'Conectado' 
-                      : metaConn.status === 'error'
-                        ? 'Erro'
-                        : metaConn.status}
-                  </Badge>
-                </div>
-
-                <div className="text-xs text-muted-foreground space-y-1 mt-2">
-                  {metaConn.meta_waba_id && (
-                    <p>WABA: {metaConn.meta_waba_id}</p>
-                  )}
-                  {metaConn.last_error && (
-                    <p className="text-destructive">{metaConn.last_error}</p>
-                  )}
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 mt-3">
-                  {/* View Details */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 h-8 text-xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMetaDetailsConnection(metaConn);
-                      setMetaDetailsDialogOpen(true);
-                    }}
-                  >
-                    <Settings className="w-3 h-3 mr-1" />
-                    Detalhes
-                  </Button>
-
-                  {/* Test Send - only when connected */}
-                  {metaConn.status === 'connected' && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 h-8 text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setMetaTestConnection(metaConn);
-                        setMetaTestDialogOpen(true);
-                      }}
-                    >
-                      <Send className="w-3 h-3 mr-1" />
-                      Testar
-                    </Button>
-                  )}
-
-                  {/* Disconnect */}
-                  {metaConn.status === 'connected' && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 text-xs text-orange-500 hover:text-orange-600 border-orange-200 hover:border-orange-300"
-                      disabled={metaDisconnecting === metaConn.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleMetaDisconnect(metaConn);
-                      }}
-                    >
-                      {metaDisconnecting === metaConn.id ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <WifiOff className="w-3 h-3" />
-                      )}
-                    </Button>
-                  )}
-
-                  {/* Delete */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 text-xs text-destructive hover:text-destructive border-destructive/30 hover:border-destructive/50"
-                    disabled={metaDisconnecting === metaConn.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMetaDelete(metaConn);
-                    }}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {/* Add New Connection Card */}
-          <Card 
-            className="cursor-pointer border-dashed border-2 border-muted-foreground/25 hover:border-primary/50 transition-all"
-            onClick={() => setDialogOpen(true)}
-          >
-            <CardContent className="p-4 flex flex-col items-center justify-center h-full min-h-[120px]">
-              <Plus className="w-8 h-8 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">Nova Conexão</p>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     );
   };
@@ -2455,17 +2373,17 @@ const Connections = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Conexões</h1>
-          <p className="text-muted-foreground mt-1">Gerencie suas conexões WhatsApp</p>
+          <h1 className="text-2xl font-bold text-foreground">Conexões</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Gerencie suas conexões WhatsApp</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
           if (!open) resetForm();
         }}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Conexão
+            <Button className="gap-2 font-semibold">
+              <Plus className="w-4 h-4" />
+              Adicionar
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
