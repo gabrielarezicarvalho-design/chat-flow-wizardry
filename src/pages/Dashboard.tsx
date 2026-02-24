@@ -46,6 +46,9 @@ interface Stats {
   messagesSent: number;
   totalContacts: number;
   deliveryRate: number;
+  openConversations: number;
+  activeConnections: number;
+  totalFlows: number;
 }
 
 const Dashboard = () => {
@@ -56,6 +59,9 @@ const Dashboard = () => {
     messagesSent: 0,
     totalContacts: 0,
     deliveryRate: 0,
+    openConversations: 0,
+    activeConnections: 0,
+    totalFlows: 0,
   });
 
   useEffect(() => {
@@ -64,9 +70,12 @@ const Dashboard = () => {
         const { data: userData } = await supabase.auth.getUser();
         if (!userData.user) return;
 
-        const [campaignsRes, leadsRes] = await Promise.all([
+        const [campaignsRes, leadsRes, conversationsRes, connectionsRes, flowsRes] = await Promise.all([
           supabase.from("campaigns").select("*").eq("user_id", userData.user.id),
           supabase.from("leads").select("id").eq("user_id", userData.user.id),
+          supabase.from("conversations").select("id", { count: "exact", head: true }).eq("status", "open"),
+          supabase.from("connections").select("id", { count: "exact", head: true }).eq("status", "connected"),
+          supabase.from("flows").select("id", { count: "exact", head: true }),
         ]);
 
         const campaigns = campaignsRes.data || [];
@@ -79,6 +88,9 @@ const Dashboard = () => {
           messagesSent: totalSent,
           totalContacts: leadsRes.data?.length || 0,
           deliveryRate: Math.round(deliveryRate),
+          openConversations: conversationsRes.count || 0,
+          activeConnections: connectionsRes.count || 0,
+          totalFlows: flowsRes.count || 0,
         });
       } catch (err) {
         console.error("Error fetching stats:", err);
@@ -141,6 +153,8 @@ const Dashboard = () => {
   const statsCards = [
     { label: "Campanhas", value: stats.totalCampaigns, icon: Rocket, color: "text-primary" },
     { label: "Mensagens Enviadas", value: stats.messagesSent.toLocaleString(), icon: MessageSquare, color: "text-primary/80" },
+    { label: "Conversas Abertas", value: stats.openConversations, icon: Activity, color: "text-primary/70" },
+    { label: "Conexões Ativas", value: stats.activeConnections, icon: Zap, color: "text-primary/90" },
     { label: "Taxa de Entrega", value: `${stats.deliveryRate}%`, icon: TrendingUp, color: "text-primary/70" },
     { label: "Contatos", value: stats.totalContacts.toLocaleString(), icon: Users, color: "text-primary/60" },
   ];
@@ -245,7 +259,7 @@ const Dashboard = () => {
 
       {/* Stats Grid */}
       <motion.div variants={itemVariants}>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {statsCards.map((stat, index) => (
             <motion.div
               key={stat.label}
