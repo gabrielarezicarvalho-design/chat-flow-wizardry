@@ -692,14 +692,46 @@ function MassSendingContent() {
         }
       }
       
+      // If mediaUrl is base64, upload to storage first
+      let finalMediaUrl = mediaUrl || null;
+      if (finalMediaUrl && finalMediaUrl.startsWith("data:")) {
+        addLog("info", "Convertendo mídia base64 para URL pública...");
+        try {
+          const mimeMatch = finalMediaUrl.match(/^data:([^;]+);base64,/);
+          const mimeType = mimeMatch?.[1] || "image/jpeg";
+          const ext = mimeType.split("/")[1] || "jpg";
+          const base64Data = finalMediaUrl.split(",")[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: mimeType });
+          const fileName = `${userData.user.id}/${Date.now()}_campaign.${ext}`;
+          const { error: uploadErr } = await supabase.storage.from("campaign-media").upload(fileName, blob);
+          if (!uploadErr) {
+            const { data: pubUrl } = supabase.storage.from("campaign-media").getPublicUrl(fileName);
+            finalMediaUrl = pubUrl.publicUrl;
+            addLog("success", `Mídia convertida: ${finalMediaUrl}`);
+          } else {
+            addLog("warning", `Falha ao converter mídia: ${uploadErr.message}. Usando base64.`);
+          }
+        } catch (convErr: any) {
+          addLog("warning", `Erro ao converter mídia: ${convErr.message}`);
+        }
+      }
+
       addLog("info", "Salvando campanha no banco de dados...");
       const { data: campaignData, error: campaignError } = await supabase.from("campaigns").insert({
         user_id: userData.user.id,
         name: name,
         message_type: useMenuEndpoint ? `interactive_${interactiveType}` : messageType,
         message_content: finalMessage,
-        media_url: mediaUrl || null,
+        media_url: finalMediaUrl,
         total_contacts: nums.length,
+        connection_id: connId || null,
+        contacts: nums,
         scheduled_at: schedule && date ? new Date(date).toISOString() : null,
         status: schedule ? "scheduled" : "sending"
       }).select().single();
@@ -737,9 +769,9 @@ function MassSendingContent() {
         };
         
         // Add media URL for buttons with image/video
-        if ((interactiveType === "buttons") && mediaUrl) {
-          menuPayload.mediaUrl = mediaUrl;
-          addLog("info", `Adicionando mídia aos botões: ${mediaUrl}`);
+        if ((interactiveType === "buttons") && finalMediaUrl) {
+          menuPayload.mediaUrl = finalMediaUrl;
+          addLog("info", `Adicionando mídia aos botões: ${finalMediaUrl}`);
         }
         
         if (interactiveType === "carousel") {
@@ -858,7 +890,7 @@ function MassSendingContent() {
             numbers: nums,
             type: messageType,
             text: finalMessage,
-            media: mediaUrl || undefined,
+            media: finalMediaUrl || undefined,
             viewOnce: viewOnce === true,
             delayMin: delayInterval,
             delayMax: delayInterval + 5,
