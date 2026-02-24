@@ -32,6 +32,10 @@ import {
   Filter,
   Eye,
   X,
+  Timer,
+  BarChart3,
+  Star,
+  TrendingUp,
 } from "lucide-react";
 import { format, isToday, isYesterday, startOfDay, endOfDay, startOfMonth, endOfMonth, subMonths, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -138,6 +142,42 @@ const ChatHistory = () => {
     );
   }, [closedConversations, searchTerm]);
 
+  // Compute metrics from closed conversations
+  const metrics = useMemo(() => {
+    const convs = closedConversations || [];
+    const total = convs.length;
+
+    // Average attendance time (updated_at - created_at)
+    let totalMinutes = 0;
+    let validCount = 0;
+    convs.forEach((c) => {
+      const created = new Date(c.created_at).getTime();
+      const closed = new Date(c.updated_at).getTime();
+      const diff = (closed - created) / 60000; // minutes
+      if (diff > 0 && diff < 43200) { // ignore outliers > 30 days
+        totalMinutes += diff;
+        validCount++;
+      }
+    });
+    const avgMinutes = validCount > 0 ? Math.round(totalMinutes / validCount) : 0;
+    const avgHours = Math.floor(avgMinutes / 60);
+    const avgMins = avgMinutes % 60;
+    const avgTimeLabel = avgHours > 0 ? `${avgHours}h ${avgMins}m` : `${avgMins}m`;
+
+    // Attendance by type
+    const byType = { ura: 0, humano: 0, ia: 0 };
+    convs.forEach((c) => {
+      const t = c.attendance_type as string;
+      if (t === "ura") byType.ura++;
+      else if (t === "humano") byType.humano++;
+      else if (t === "ia") byType.ia++;
+    });
+
+    // Resolution rate (all are closed, so 100% of fetched)
+    // But we show ratio vs total conversations in range
+    return { total, avgTimeLabel, avgMinutes, byType };
+  }, [closedConversations]);
+
   const getInitials = (name: string | null) => {
     if (!name) return "??";
     return name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
@@ -181,6 +221,65 @@ const ChatHistory = () => {
         <Badge variant="secondary" className="text-sm px-3 py-1">
           {filteredConversations.length} atendimento{filteredConversations.length !== 1 ? "s" : ""}
         </Badge>
+      </div>
+
+      {/* Metrics */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-5 pb-4 px-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-primary/10">
+                <MessageSquare className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{metrics.total}</p>
+                <p className="text-xs text-muted-foreground">Total encerrados</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-5 pb-4 px-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-accent/50">
+                <Timer className="w-5 h-5 text-accent-foreground" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{metrics.avgTimeLabel}</p>
+                <p className="text-xs text-muted-foreground">Tempo médio</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-5 pb-4 px-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-primary/10">
+                <User className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{metrics.byType.humano}</p>
+                <p className="text-xs text-muted-foreground">Atend. humano</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-5 pb-4 px-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-accent/50">
+                <TrendingUp className="w-5 h-5 text-accent-foreground" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{metrics.byType.ia + metrics.byType.ura}</p>
+                <p className="text-xs text-muted-foreground">IA + URA</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
