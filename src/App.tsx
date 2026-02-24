@@ -23,6 +23,7 @@ import PublicForm from "./pages/PublicForm";
 import FlowForm from "./pages/FlowForm";
 import BetaLanding from "./pages/BetaLanding";
 import Users from "./pages/Users";
+import Leads from "./pages/Leads";
 import WhiteLabelLogin from "./pages/WhiteLabelLogin";
 import WhiteLabelConfig from "./pages/WhiteLabelConfig";
 import WhiteLabelPreview from "./pages/WhiteLabelPreview";
@@ -43,6 +44,8 @@ const Connections = lazy(() => import("./pages/Connections"));
 const Contacts = lazy(() => import("./pages/Contacts"));
 const Settings = lazy(() => import("./pages/Settings"));
 const TestWebhook = lazy(() => import("./pages/TestWebhook"));
+const Automations = lazy(() => import("./pages/Automations"));
+const Triggers = lazy(() => import("./pages/Triggers"));
 
 const AttendancePanel = lazy(() => import("./pages/AttendancePanel"));
 const AgentDashboard = lazy(() => import("./pages/AgentDashboard"));
@@ -110,7 +113,6 @@ function App() {
                     <Route path="/white-label-config" element={<WhiteLabelConfig />} />
                     <Route path="/admin-parceiro" element={<PartnerAdmin />} />
                     <Route path="/preview/:slug" element={<WhiteLabelPreview />} />
-                    <Route path="/preview/:slug" element={<WhiteLabelPreview />} />
                     {/* Conversations with no padding - gated by chat feature */}
                     <Route
                       path="/conversations"
@@ -142,6 +144,7 @@ function App() {
                                 <Route path="/flow-builder/:id" element={<FlowBuilder />} />
                                 <Route path="/connections" element={<Connections />} />
                                 <Route path="/contacts" element={<Contacts />} />
+                                <Route path="/leads" element={<Leads />} />
                                 <Route path="/mass-sending" element={<MassSending />} />
                                 <Route path="/users" element={<Users />} />
                                 <Route path="/attendance" element={<AttendancePanel />} />
@@ -155,8 +158,8 @@ function App() {
                                 <Route path="/chatgpt-credits" element={<ChatGPTCredits />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
-                                <Route path="*" element={<NotFound />} />
-                                <Route path="/test-webhook" element={<TestWebhook />} />
+                                <Route path="/automations" element={<Automations />} />
+                                <Route path="/triggers" element={<Triggers />} />
                                 <Route path="*" element={<NotFound />} />
                               </Routes>
                             </Suspense>
