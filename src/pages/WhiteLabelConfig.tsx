@@ -714,7 +714,7 @@ const WhiteLabelConfig = () => {
                   <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
                     <p className="text-sm text-blue-300">
                       <strong>Como funciona:</strong> Configure um domínio customizado para que seus clientes 
-                      acessem o sistema hospedado no seu servidor (VPS). Ex: <code className="bg-slate-800 px-1 rounded">app.suaempresa.com</code>
+                      acessem o sistema via <strong>Cloudflare Pages</strong>. Sem necessidade de VPS — o deploy é automático via GitHub. Ex: <code className="bg-slate-800 px-1 rounded">app.suaempresa.com</code>
                     </p>
                   </div>
 
@@ -749,31 +749,16 @@ const WhiteLabelConfig = () => {
                             {dnsStatus.result ? (
                               dnsStatus.result.aRecord ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <XCircle className="h-4 w-4 text-red-400" />
                             ) : (
-                              <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
+                              <Badge variant="outline" className="text-slate-400 border-slate-600">DNS</Badge>
                             )}
                             <span className="text-slate-400">{domainData.custom_domain} →</span>
                             {dnsStatus.result?.aIp ? (
                               <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">{dnsStatus.result.aIp}</code>
                             ) : (
-                              <code className="text-slate-500 bg-slate-800 px-2 py-0.5 rounded">IP do seu VPS</code>
+                              <code className="text-slate-500 bg-slate-800 px-2 py-0.5 rounded">Cloudflare Pages</code>
                             )}
                             {dnsStatus.result && !dnsStatus.result.aRecord && <span className="text-red-400 text-xs">Não encontrado</span>}
                             {dnsStatus.result?.aRecord && <span className="text-emerald-400 text-xs">OK</span>}
-                          </div>
-                          <div className="flex items-center gap-3 text-xs">
-                            {dnsStatus.result ? (
-                              dnsStatus.result.wwwRecord ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <XCircle className="h-4 w-4 text-red-400" />
-                            ) : (
-                              <Badge variant="outline" className="text-slate-400 border-slate-600">A</Badge>
-                            )}
-                            <span className="text-slate-400">www.{domainData.custom_domain} →</span>
-                            {dnsStatus.result?.wwwIp ? (
-                              <code className="text-emerald-400 bg-slate-800 px-2 py-0.5 rounded">{dnsStatus.result.wwwIp}</code>
-                            ) : (
-                              <code className="text-slate-500 bg-slate-800 px-2 py-0.5 rounded">IP do seu VPS</code>
-                            )}
-                            {dnsStatus.result && !dnsStatus.result.wwwRecord && <span className="text-amber-400 text-xs">Opcional</span>}
-                            {dnsStatus.result?.wwwRecord && <span className="text-emerald-400 text-xs">OK</span>}
                           </div>
                         </div>
                         
@@ -786,12 +771,12 @@ const WhiteLabelConfig = () => {
                             {dnsStatus.result.aRecord ? (
                               <div className="flex items-center gap-2">
                                 <CheckCircle2 className="h-4 w-4" />
-                                <span>O domínio está apontando para <strong>{dnsStatus.result.aIp}</strong>. Certifique-se de que esse é o IP do seu VPS.</span>
+                                <span>O domínio está resolvendo corretamente para <strong>{dnsStatus.result.aIp}</strong>.</span>
                               </div>
                             ) : (
                               <div className="flex items-start gap-2">
                                 <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                                <span>O domínio ainda não está apontando para nenhum servidor. Configure o registro A no seu provedor de domínio.</span>
+                                <span>O domínio ainda não está configurado. Siga o passo a passo abaixo.</span>
                               </div>
                             )}
                           </div>
@@ -805,57 +790,61 @@ const WhiteLabelConfig = () => {
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">1</span>
                             <div>
                               <p className="font-medium text-white">Salve o domínio acima</p>
-                              <p className="text-xs text-slate-400">Clique em "Salvar Domínio" para registrar o domínio desejado no sistema.</p>
+                              <p className="text-xs text-slate-400">Clique em "Salvar Domínio" para registrar o domínio no sistema.</p>
                             </div>
                           </li>
                           <li className="flex gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">2</span>
                             <div>
-                              <p className="font-medium text-white">Gere o pacote de implantação</p>
-                              <p className="text-xs text-slate-400">No painel Admin, gere o pacote ZIP com Docker + Nginx para instalar no seu VPS.</p>
+                              <p className="font-medium text-white">Crie um projeto no Cloudflare Pages</p>
+                              <p className="text-xs text-slate-400">
+                                Acesse <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">dash.cloudflare.com</a> → Pages → Create a project → Conecte o repositório GitHub.
+                              </p>
+                              <ul className="mt-1 text-xs text-slate-500 space-y-1 ml-2">
+                                <li>• Build command: <code className="bg-slate-800 px-1 rounded text-emerald-400">npm run build</code></li>
+                                <li>• Output directory: <code className="bg-slate-800 px-1 rounded text-emerald-400">dist</code></li>
+                              </ul>
                             </div>
                           </li>
                           <li className="flex gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">3</span>
                             <div>
-                              <p className="font-medium text-white">Configure o DNS no seu provedor</p>
+                              <p className="font-medium text-white">Configure as variáveis de ambiente</p>
                               <p className="text-xs text-slate-400">
-                                Acesse o painel onde registrou o domínio (Registro.br, GoDaddy, Cloudflare, Hostinger) e configure:
+                                No Cloudflare Pages → Settings → Environment Variables:
                               </p>
                               <ul className="mt-1 text-xs text-slate-500 space-y-1 ml-2">
-                                <li>• Registro <strong>A</strong> com nome <code className="bg-slate-800 px-1 rounded">@</code> apontando para o <code className="bg-slate-800 px-1 rounded text-emerald-400">IP do seu VPS</code></li>
-                                <li>• Registro <strong>A</strong> com nome <code className="bg-slate-800 px-1 rounded">www</code> apontando para o <code className="bg-slate-800 px-1 rounded text-emerald-400">IP do seu VPS</code> (opcional)</li>
+                                <li>• <code className="bg-slate-800 px-1 rounded">VITE_SUPABASE_URL</code> → URL do Supabase do parceiro</li>
+                                <li>• <code className="bg-slate-800 px-1 rounded">VITE_SUPABASE_PUBLISHABLE_KEY</code> → Anon Key do Supabase</li>
+                                <li>• <code className="bg-slate-800 px-1 rounded">NODE_VERSION</code> → <code className="text-emerald-400">18</code></li>
                               </ul>
                             </div>
                           </li>
                           <li className="flex gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">4</span>
                             <div>
-                              <p className="font-medium text-white">Configure o SSL no servidor</p>
+                              <p className="font-medium text-white">Conecte o domínio customizado</p>
                               <p className="text-xs text-slate-400">
-                                Use <strong>Certbot</strong> (Let's Encrypt) ou configure o SSL via <strong>Cloudflare</strong> para habilitar HTTPS no seu domínio.
+                                No Cloudflare Pages → Custom domains → Add custom domain → Insira <strong className="text-emerald-400">{domainData.custom_domain}</strong>. O Cloudflare configura DNS e SSL automaticamente.
                               </p>
                             </div>
                           </li>
                           <li className="flex gap-3">
                             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">5</span>
                             <div>
-                              <p className="font-medium text-white">Verifique a propagação</p>
+                              <p className="font-medium text-white">Verifique o acesso</p>
                               <p className="text-xs text-slate-400">
-                                Clique em <strong>"Verificar DNS"</strong> acima ou acesse <a href="https://dnschecker.org" target="_blank" rel="noopener noreferrer" className="text-primary underline">dnschecker.org</a> para confirmar que o domínio aponta para o IP correto.
-                              </p>
-                            </div>
-                          </li>
-                          <li className="flex gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">6</span>
-                            <div>
-                              <p className="font-medium text-white">Pronto!</p>
-                              <p className="text-xs text-slate-400">
-                                Seus clientes poderão acessar o sistema em <strong className="text-emerald-400">https://{domainData.custom_domain}</strong>
+                                Clique em <strong>"Verificar DNS"</strong> acima para confirmar. Seus clientes acessarão em <strong className="text-emerald-400">https://{domainData.custom_domain}</strong>
                               </p>
                             </div>
                           </li>
                         </ol>
+                      </div>
+
+                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+                        <p className="text-xs text-amber-300">
+                          <strong>💡 Dica:</strong> Se o domínio já está no Cloudflare, basta adicionar como Custom Domain no Pages — o DNS é configurado automaticamente. Se está em outro provedor (Registro.br, GoDaddy), adicione um <strong>CNAME</strong> apontando para o endereço <code className="bg-slate-800 px-1 rounded">.pages.dev</code> fornecido pelo Cloudflare Pages.
+                        </p>
                       </div>
                     </>
                   )}
