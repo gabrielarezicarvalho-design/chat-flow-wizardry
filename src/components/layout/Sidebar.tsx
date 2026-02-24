@@ -29,7 +29,8 @@ import {
   MessageCircle,
   Webhook,
   CalendarClock,
-  HardDrive
+  HardDrive,
+  History
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -65,6 +66,7 @@ interface NavItem {
 const adminNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/conversations", icon: MessageSquare, label: "Conversas", feature: "chat" },
+  { to: "/chat-history", icon: History, label: "Histórico", feature: "chat" },
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
   { to: "/campaign-reports", icon: BarChart3, label: "Relatórios", feature: "reports" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
@@ -83,6 +85,7 @@ const adminNavItems: NavItem[] = [
 const agentNavItems: NavItem[] = [
   { to: "/", icon: LayoutDashboard, label: "Painel" },
   { to: "/conversations", icon: MessageSquare, label: "Conversas", feature: "chat" },
+  { to: "/chat-history", icon: History, label: "Histórico", feature: "chat" },
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
   { to: "/campaign-reports", icon: BarChart3, label: "Relatórios", feature: "reports" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
