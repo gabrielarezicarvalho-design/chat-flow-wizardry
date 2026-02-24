@@ -61,6 +61,7 @@ const WhiteLabelLogin = () => {
         background_color: partner.background_color,
         supabase_url: partner.supabase_url,
         supabase_anon_key: partner.supabase_anon_key,
+        partner_password: password,
       }));
 
       toast.success('Login realizado com sucesso!');
