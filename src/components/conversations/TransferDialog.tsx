@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAgents } from "@/hooks/useAgents";
 import { useDepartments } from "@/hooks/useDepartments";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Users, Bot, UserCheck } from "lucide-react";
 
@@ -19,6 +20,7 @@ interface TransferDialogProps {
 export const TransferDialog = ({ open, onOpenChange, onTransfer, showSelfOption = false }: TransferDialogProps) => {
   const { agents } = useAgents();
   const { departments } = useDepartments();
+  const { companyId } = useCompanyId();
   const [selectedAgent, setSelectedAgent] = useState('');
   const [selectedHumanAgent, setSelectedHumanAgent] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
@@ -37,9 +39,15 @@ export const TransferDialog = ({ open, onOpenChange, onTransfer, showSelfOption 
 
   useEffect(() => {
     const loadHumanAgents = async () => {
-      const { data } = await supabase
+      let query = supabase
         .from('profiles')
         .select('id, full_name, is_online');
+      
+      if (companyId) {
+        query = query.eq('company_id', companyId);
+      }
+      
+      const { data } = await query;
       
       if (data) {
         setHumanAgents(data.filter(a => a.id !== currentUserId));
@@ -49,7 +57,7 @@ export const TransferDialog = ({ open, onOpenChange, onTransfer, showSelfOption 
     if (open) {
       loadHumanAgents();
     }
-  }, [open, currentUserId]);
+  }, [open, currentUserId, companyId]);
 
   const activeAgents = agents.filter((a: any) => a.status === 'active');
 
