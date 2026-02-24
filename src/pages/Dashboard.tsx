@@ -5,6 +5,7 @@ import { Send, Sparkles, Zap, ArrowRight, Rocket, Target, BarChart3, Users, Cale
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import robotImage from "@/assets/aysis-robot.png";
+import robotVideo from "@/assets/aysis-robot-waving.mp4";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
@@ -242,16 +243,17 @@ const Dashboard = () => {
           {!partnerBranding && (
             <motion.div 
               className="flex-shrink-0"
-              animate={floatAnimation}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
             >
-              <motion.img 
-                src={robotImage} 
-                alt="Aysis Brasil Robot"
-                className="w-64 h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
-                whileHover={{ scale: 1.05, rotate: 2 }}
+              <video 
+                src={robotVideo} 
+                autoPlay 
+                loop 
+                muted 
+                playsInline
+                className="w-64 h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl rounded-2xl"
               />
             </motion.div>
           )}
