@@ -47,6 +47,7 @@ const AITickets = lazy(() => import("./pages/AITickets"));
 const InternalChat = lazy(() => import("./pages/InternalChat"));
 const AutoProspecting = lazy(() => import("./pages/AutoProspecting"));
 const CampaignReports = lazy(() => import("./pages/CampaignReports"));
+const ChatHistory = lazy(() => import("./pages/ChatHistory"));
 
 const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -141,7 +142,7 @@ function App() {
                                 <Route path="/internal-chat" element={<InternalChat />} />
                                 <Route path="/auto-prospecting" element={<AutoProspecting />} />
                                 <Route path="/campaign-reports" element={<CampaignReports />} />
-                                
+                                <Route path="/chat-history" element={<ChatHistory />} />
                                 <Route path="/chatgpt-credits" element={<ChatGPTCredits />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
