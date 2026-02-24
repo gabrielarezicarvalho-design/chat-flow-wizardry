@@ -38,3 +38,9 @@ verify_jwt = false
 
 [functions.external-api]
 verify_jwt = false
+
+[functions.instagram-start-connect]
+verify_jwt = false
+
+[functions.instagram-connect-callback]
+verify_jwt = false
