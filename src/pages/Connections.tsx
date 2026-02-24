@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import confetti from "canvas-confetti";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { useFlows } from "@/hooks/useFlows";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
-import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell, Globe, ArrowLeft, Send, Search, MoreHorizontal, Eye, Calendar } from "lucide-react";
+import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell, Globe, ArrowLeft, Send, Search, MoreHorizontal, Eye, Calendar, ChevronDown, ChevronRight } from "lucide-react";
 import { TelegramNotifications } from "@/components/mass-sending/TelegramNotifications";
 import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
 import { DeleteConnectionDialog } from "@/components/connections/DeleteConnectionDialog";
@@ -54,7 +54,7 @@ const Connections = () => {
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [pendingConnection, setPendingConnection] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("conexao");
+  const [_activeTab, _setActiveTab] = useState("conexao"); // kept for compatibility
   const [savingSettings, setSavingSettings] = useState(false);
   const [savingMessages, setSavingMessages] = useState(false);
   const [syncingContacts, setSyncingContacts] = useState(false);
@@ -64,6 +64,7 @@ const Connections = () => {
   const [instanceLimit, setInstanceLimit] = useState<number>(2);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedConnectionId, setExpandedConnectionId] = useState<string | null>(null);
   const [connectionToDelete, setConnectionToDelete] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -1533,6 +1534,7 @@ const Connections = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border text-left">
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider w-10"></th>
                   <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider w-12">#</th>
                   <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Nome</th>
                   <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Telefone</th>
@@ -1545,115 +1547,214 @@ const Connections = () => {
               <tbody className="divide-y divide-border">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                    <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
                       {searchQuery ? 'Nenhuma conexão encontrada' : 'Nenhuma conexão cadastrada'}
                     </td>
                   </tr>
                 ) : (
                   filtered.map((connection, index) => {
                     const connAny = connection as any;
-                    const isSelected = selectedConnection?.id === connection.id;
+                    const isExpanded = expandedConnectionId === connection.id;
                     const phone = connAny.phone_number || connAny.meta_phone_number_id || '—';
                     const updatedAt = connection.updated_at 
                       ? new Date(connection.updated_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
                       : '—';
 
                     return (
-                      <tr 
-                        key={connection.id}
-                        className={`hover:bg-muted/50 transition-colors cursor-pointer ${isSelected ? 'bg-primary/5' : ''}`}
-                        onClick={() => {
-                          if (connection.provider !== 'meta') {
+                      <React.Fragment key={connection.id}>
+                        <tr 
+                          className={`hover:bg-muted/50 transition-colors cursor-pointer ${isExpanded ? 'bg-primary/5' : ''}`}
+                          onClick={() => {
                             setSelectedConnection(connection);
-                          }
-                        }}
-                      >
-                        <td className="px-4 py-3 text-sm text-muted-foreground font-mono">{index + 1}</td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm font-medium text-foreground">
-                            {(connection.name || connection.instance_name || 'Sem nome').toUpperCase()}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-muted-foreground">{phone}</td>
-                        <td className="px-4 py-3 text-center">{getProviderBadge(connection.provider)}</td>
-                        <td className="px-4 py-3 text-center">{getStatusBadge(connection.status || 'disconnected')}</td>
-                        <td className="px-4 py-3 text-sm text-muted-foreground">{updatedAt}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-center gap-1">
-                            {connection.provider === 'meta' ? (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  title="Detalhes"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setMetaDetailsConnection(connection);
-                                    setMetaDetailsDialogOpen(true);
-                                  }}
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-destructive hover:text-destructive"
-                                  title="Excluir"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleMetaDelete(connection);
-                                  }}
-                                >
-                                  <X className="w-4 h-4" />
-                                </Button>
-                              </>
+                            setExpandedConnectionId(isExpanded ? null : connection.id);
+                          }}
+                        >
+                          <td className="px-4 py-3 text-muted-foreground">
+                            {isExpanded ? (
+                              <ChevronDown className="w-4 h-4" />
                             ) : (
-                              <>
-                                {connection.status === 'connected' ? (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-orange-500 hover:text-orange-600"
-                                    title="Desconectar"
-                                    onClick={(e) => { e.stopPropagation(); handleDisconnect(connection); }}
-                                  >
-                                    <WifiOff className="w-4 h-4" />
-                                  </Button>
-                                ) : (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-emerald-500 hover:text-emerald-600"
-                                    title="Reconectar"
-                                    onClick={(e) => { e.stopPropagation(); handleReconnect(connection); }}
-                                  >
-                                    <QrCode className="w-4 h-4" />
-                                  </Button>
-                                )}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  title="Copiar link"
-                                  onClick={(e) => handleCopyLink(connection, e)}
-                                >
-                                  <Link2 className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-destructive hover:text-destructive"
-                                  title="Excluir"
-                                  onClick={(e) => { e.stopPropagation(); handleDeleteClick(connection); }}
-                                >
-                                  <X className="w-4 h-4" />
-                                </Button>
-                              </>
+                              <ChevronRight className="w-4 h-4" />
                             )}
-                          </div>
-                        </td>
-                      </tr>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground font-mono">{index + 1}</td>
+                          <td className="px-4 py-3">
+                            <span className="text-sm font-medium text-foreground">
+                              {(connection.name || connection.instance_name || 'Sem nome').toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{phone}</td>
+                          <td className="px-4 py-3 text-center">{getProviderBadge(connection.provider)}</td>
+                          <td className="px-4 py-3 text-center">{getStatusBadge(connection.status || 'disconnected')}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{updatedAt}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-center gap-1">
+                              {connection.provider === 'meta' ? (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    title="Detalhes"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setMetaDetailsConnection(connection);
+                                      setMetaDetailsDialogOpen(true);
+                                    }}
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-destructive hover:text-destructive"
+                                    title="Excluir"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleMetaDelete(connection);
+                                    }}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  {connection.status === 'connected' ? (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-orange-500 hover:text-orange-600"
+                                      title="Desconectar"
+                                      onClick={(e) => { e.stopPropagation(); handleDisconnect(connection); }}
+                                    >
+                                      <WifiOff className="w-4 h-4" />
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-emerald-500 hover:text-emerald-600"
+                                      title="Reconectar"
+                                      onClick={(e) => { e.stopPropagation(); handleReconnect(connection); }}
+                                    >
+                                      <QrCode className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    title="Copiar link"
+                                    onClick={(e) => handleCopyLink(connection, e)}
+                                  >
+                                    <Link2 className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-destructive hover:text-destructive"
+                                    title="Excluir"
+                                    onClick={(e) => { e.stopPropagation(); handleDeleteClick(connection); }}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                        {/* Expanded config panel */}
+                        {isExpanded && connection.provider !== 'meta' && (
+                          <tr>
+                            <td colSpan={8} className="p-0">
+                              <div className="bg-muted/30 border-t border-border">
+                                {/* Connection quick actions bar */}
+                                <div className="flex items-center justify-between px-6 py-3 border-b border-border">
+                                  <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-lg ${
+                                      connection.status === 'connected' ? 'bg-emerald-500/10' : 'bg-muted'
+                                    }`}>
+                                      {connection.status === 'connected' ? (
+                                        <Wifi className="w-4 h-4 text-emerald-500" />
+                                      ) : (
+                                        <WifiOff className="w-4 h-4 text-muted-foreground" />
+                                      )}
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-semibold text-foreground">{connection.name || connection.instance_name}</p>
+                                      <p className="text-xs text-muted-foreground">
+                                        {connection.status === 'connected' ? 'Conectado' : 'Desconectado'} • {connAny.environment || 'PROD'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleCopyLink(connection); }}>
+                                      <Link2 className="w-4 h-4 mr-1.5" />
+                                      Link
+                                    </Button>
+                                    <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleDownloadQR(connection); }}>
+                                      <Download className="w-4 h-4 mr-1.5" />
+                                      QR
+                                    </Button>
+                                    {connection.status !== 'connected' ? (
+                                      <Button size="sm" onClick={(e) => { e.stopPropagation(); handleReconnect(connection); }}>
+                                        <QrCode className="w-4 h-4 mr-1.5" />
+                                        Conectar
+                                      </Button>
+                                    ) : (
+                                      <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleDisconnect(connection); }}>
+                                        Desconectar
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Config tabs inside expanded row */}
+                                <Tabs defaultValue="configuracoes" className="w-full">
+                                  <TabsList className="w-full justify-start border-b border-border bg-transparent p-0 h-auto px-6">
+                                    <TabsTrigger value="configuracoes" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <Settings className="w-3.5 h-3.5 mr-1.5" />
+                                      Configurações
+                                    </TabsTrigger>
+                                    <TabsTrigger value="mensagens" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
+                                      Mensagens
+                                    </TabsTrigger>
+                                    <TabsTrigger value="contatos" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <Users className="w-3.5 h-3.5 mr-1.5" />
+                                      Contatos
+                                    </TabsTrigger>
+                                    <TabsTrigger value="api" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <Code className="w-3.5 h-3.5 mr-1.5" />
+                                      API e Webhooks
+                                    </TabsTrigger>
+                                    <TabsTrigger value="notificacao" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
+                                      <Bell className="w-3.5 h-3.5 mr-1.5" />
+                                      Notificação
+                                    </TabsTrigger>
+                                  </TabsList>
+                                  <div className="p-6">
+                                    <TabsContent value="configuracoes" className="mt-0">
+                                      {renderSettingsTab()}
+                                    </TabsContent>
+                                    <TabsContent value="mensagens" className="mt-0">
+                                      {renderMessagesTab()}
+                                    </TabsContent>
+                                    <TabsContent value="contatos" className="mt-0">
+                                      {renderContactsTab()}
+                                    </TabsContent>
+                                    <TabsContent value="api" className="mt-0">
+                                      {renderApiTab()}
+                                    </TabsContent>
+                                    <TabsContent value="notificacao" className="mt-0">
+                                      <TelegramNotifications connections={connections.map(c => ({ id: c.id, name: c.name || c.instance_name || 'Sem nome' }))} />
+                                    </TabsContent>
+                                  </div>
+                                </Tabs>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     );
                   })
                 )}
@@ -1673,52 +1774,6 @@ const Connections = () => {
           </div>
         </Card>
 
-        {/* Selected connection details */}
-        {selectedConnection && (
-          <Card className="border-border">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-lg ${
-                    selectedConnection.status === 'connected' ? 'bg-emerald-500/10' : 'bg-muted'
-                  }`}>
-                    {selectedConnection.status === 'connected' ? (
-                      <Wifi className="w-5 h-5 text-emerald-500" />
-                    ) : (
-                      <WifiOff className="w-5 h-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">{selectedConnection.name || selectedConnection.instance_name}</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedConnection.status === 'connected' ? 'Conectado' : 'Desconectado'} • {(selectedConnection as any).environment || 'PROD'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleCopyLink(selectedConnection)}>
-                    <Link2 className="w-4 h-4 mr-1.5" />
-                    Link
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDownloadQR(selectedConnection)}>
-                    <Download className="w-4 h-4 mr-1.5" />
-                    QR
-                  </Button>
-                  {selectedConnection.status !== 'connected' ? (
-                    <Button size="sm" onClick={() => handleReconnect(selectedConnection)}>
-                      <QrCode className="w-4 h-4 mr-1.5" />
-                      Conectar
-                    </Button>
-                  ) : (
-                    <Button variant="outline" size="sm" onClick={() => handleDisconnect(selectedConnection)}>
-                      Desconectar
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     );
   };
@@ -2596,67 +2651,8 @@ const Connections = () => {
         </Dialog>
       </div>
 
-      {/* Tabs Navigation */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full justify-start border-b border-border bg-transparent p-0 h-auto">
-          <TabsTrigger 
-            value="conexao" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3"
-          >
-            <Wifi className="w-4 h-4 mr-2" />
-            Conexão
-          </TabsTrigger>
-          <TabsTrigger 
-            value="contatos"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3"
-          >
-            <Users className="w-4 h-4 mr-2" />
-            Contatos
-          </TabsTrigger>
-          <TabsTrigger 
-            value="mensagens"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3"
-          >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Mensagens
-          </TabsTrigger>
-          <TabsTrigger 
-            value="api"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3"
-          >
-            <Code className="w-4 h-4 mr-2" />
-            API e Webhooks
-          </TabsTrigger>
-          <TabsTrigger 
-            value="notificacao"
-            className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3"
-          >
-            <Bell className="w-4 h-4 mr-2" />
-            Notificação
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="conexao" className="mt-6">
-          {renderConnectionTab()}
-        </TabsContent>
-
-        <TabsContent value="contatos" className="mt-6">
-          {renderContactsTab()}
-        </TabsContent>
-
-        <TabsContent value="mensagens" className="mt-6">
-          {renderMessagesTab()}
-        </TabsContent>
-
-        <TabsContent value="api" className="mt-6">
-          {renderApiTab()}
-        </TabsContent>
-
-        <TabsContent value="notificacao" className="mt-6">
-          <TelegramNotifications connections={connections.map(c => ({ id: c.id, name: c.name || c.instance_name || 'Sem nome' }))} />
-        </TabsContent>
-
-      </Tabs>
+      {/* Connection Table */}
+      {renderConnectionTab()}
 
       {/* QR Code Dialog */}
       <Dialog open={qrDialogOpen} onOpenChange={(open) => {
