@@ -603,34 +603,62 @@ serve(async (req) => {
       const { data: buckets, error } = await partnerClient.storage.listBuckets();
       
       if (error) {
+        console.error("Storage error:", error);
         return new Response(
           JSON.stringify({ error: error.message }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
+      console.log("Found buckets:", buckets?.length);
+
       const bucketDetails = [];
       for (const bucket of buckets || []) {
         try {
-          const { data: files } = await partnerClient.storage.from(bucket.name).list('', { limit: 100 });
+          // List root files
+          const { data: rootFiles } = await partnerClient.storage.from(bucket.name).list('', { limit: 1000 });
+          
+          let allFiles: any[] = [];
           let totalSize = 0;
-          const fileList = (files || []).filter(f => f.name !== '.emptyFolderPlaceholder').map(f => {
-            totalSize += f.metadata?.size || 0;
-            return {
-              name: f.name,
-              size: f.metadata?.size || 0,
-              type: f.metadata?.mimetype || 'unknown',
-              created_at: f.created_at,
-            };
-          });
+
+          // Process root items and recurse into folders
+          const processItems = async (items: any[], prefix: string) => {
+            for (const item of items || []) {
+              if (item.name === '.emptyFolderPlaceholder') continue;
+              
+              // If it's a folder (no metadata), list its contents
+              if (!item.metadata || item.id === null) {
+                const folderPath = prefix ? `${prefix}/${item.name}` : item.name;
+                const { data: subFiles } = await partnerClient.storage.from(bucket.name).list(folderPath, { limit: 1000 });
+                if (subFiles) {
+                  await processItems(subFiles, folderPath);
+                }
+              } else {
+                const size = item.metadata?.size || 0;
+                totalSize += size;
+                allFiles.push({
+                  name: prefix ? `${prefix}/${item.name}` : item.name,
+                  size,
+                  type: item.metadata?.mimetype || 'unknown',
+                  created_at: item.created_at,
+                });
+              }
+            }
+          };
+
+          await processItems(rootFiles || [], '');
+
+          console.log(`Bucket ${bucket.name}: ${allFiles.length} files, ${totalSize} bytes`);
+
           bucketDetails.push({
             name: bucket.name,
             public: bucket.public,
-            files: fileList,
+            files: allFiles,
             totalSize,
-            fileCount: fileList.length,
+            fileCount: allFiles.length,
           });
-        } catch {
+        } catch (e: any) {
+          console.error(`Error listing bucket ${bucket.name}:`, e.message);
           bucketDetails.push({
             name: bucket.name,
             public: bucket.public,
