@@ -14,6 +14,7 @@ export const useConversations = () => {
       let query = supabase
         .from('conversations')
         .select('*')
+        .neq('status', 'closed')
         .order('updated_at', { ascending: false });
       
       // If user belongs to a company, only show that company's conversations
@@ -46,11 +47,8 @@ export const useConversations = () => {
       return data;
     },
     onSuccess: (data) => {
-      if (data) {
-        queryClient.setQueryData(['conversations'], (old: any[] = []) => {
-          return old.map((c: any) => c.id === data.id ? { ...c, ...data } : c);
-        });
-      }
+      queryClient.invalidateQueries({ queryKey: ['conversations', companyId] });
+      queryClient.invalidateQueries({ queryKey: ['chat-history'] });
     },
     onError: (error: any) => {
       toast.error(error.message || 'Erro ao atualizar conversa');

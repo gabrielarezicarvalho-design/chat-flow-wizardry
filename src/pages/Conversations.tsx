@@ -672,7 +672,7 @@ const Conversations = () => {
         conversationId={selectedConversationId || ""}
         protocolNumber={selectedConversation?.protocol || undefined}
         onClose={() => {
-          deleteConversation.mutate(selectedConversationId!);
+          updateConversation.mutate({ id: selectedConversationId!, updates: { status: 'closed' } });
           setSelectedConversationId(null);
           setCloseDialogOpen(false);
         }}
