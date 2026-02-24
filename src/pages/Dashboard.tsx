@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
 import { ABTesting } from "@/components/mass-sending/ABTesting";
-import { useTheme } from "@/hooks/useTheme";
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -50,7 +50,7 @@ interface Stats {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { partnerBranding } = useTheme();
+  
   const [stats, setStats] = useState<Stats>({
     totalCampaigns: 0,
     messagesSent: 0,
@@ -223,9 +223,8 @@ const Dashboard = () => {
             </motion.div>
           </div>
 
-          {/* Robot Image - only show for main MarketFlow */}
-          {!partnerBranding && (
-            <motion.div 
+          {/* Robot Image */}
+          <motion.div 
               className="flex-shrink-0"
               animate={floatAnimation}
             >
@@ -239,7 +238,6 @@ const Dashboard = () => {
                 whileHover={{ scale: 1.05, rotate: 2 }}
               />
             </motion.div>
-          )}
         </div>
       </motion.div>
 

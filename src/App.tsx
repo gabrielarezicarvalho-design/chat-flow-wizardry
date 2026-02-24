@@ -23,9 +23,6 @@ import PublicForm from "./pages/PublicForm";
 import FlowForm from "./pages/FlowForm";
 import BetaLanding from "./pages/BetaLanding";
 import Users from "./pages/Users";
-import WhiteLabelLogin from "./pages/WhiteLabelLogin";
-import WhiteLabelConfig from "./pages/WhiteLabelConfig";
-import WhiteLabelPreview from "./pages/WhiteLabelPreview";
 
 // Admin pages - separate login flow
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
@@ -104,10 +101,6 @@ function App() {
                     <Route path="/politica-de-privacidade" element={<Suspense fallback={<Loading />}><PrivacyPolicyPage /></Suspense>} />
                     <Route path="/termos-de-servico" element={<Suspense fallback={<Loading />}><TermsOfServicePage /></Suspense>} />
                     <Route path="/exclusao-de-dados" element={<Suspense fallback={<Loading />}><DataDeletionPage /></Suspense>} />
-                    {/* White Label login - no auth required */}
-                    <Route path="/entrar-white-label" element={<WhiteLabelLogin />} />
-                    <Route path="/white-label-config" element={<WhiteLabelConfig />} />
-                    <Route path="/preview/:slug" element={<WhiteLabelPreview />} />
                     {/* Conversations with no padding - gated by chat feature */}
                     <Route
                       path="/conversations"
