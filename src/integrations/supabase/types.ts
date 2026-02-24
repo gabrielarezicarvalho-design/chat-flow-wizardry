@@ -1487,6 +1487,9 @@ export type Database = {
           supabase_anon_key: string | null
           supabase_service_role_key: string | null
           supabase_url: string | null
+          uazapi_admin_token: string | null
+          uazapi_base_url: string | null
+          uazapi_environment: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1506,6 +1509,9 @@ export type Database = {
           supabase_anon_key?: string | null
           supabase_service_role_key?: string | null
           supabase_url?: string | null
+          uazapi_admin_token?: string | null
+          uazapi_base_url?: string | null
+          uazapi_environment?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1525,6 +1531,9 @@ export type Database = {
           supabase_anon_key?: string | null
           supabase_service_role_key?: string | null
           supabase_url?: string | null
+          uazapi_admin_token?: string | null
+          uazapi_base_url?: string | null
+          uazapi_environment?: string | null
           updated_at?: string | null
         }
         Relationships: [
