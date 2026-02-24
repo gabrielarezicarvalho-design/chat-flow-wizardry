@@ -20,7 +20,7 @@ serve(async (req) => {
   const url = new URL(req.url);
 
   // ============================================================
-  // GET: Meta webhook verification (NÃO ALTERADO)
+  // GET: Meta webhook verification
   // ============================================================
   if (req.method === "GET") {
     const mode = url.searchParams.get("hub.mode");
@@ -106,6 +106,24 @@ serve(async (req) => {
           const { company_id, id: connectionId } = conn;
           console.log(`✅ Company identified: ${company_id} | Connection: ${connectionId}`);
 
+          // Find a user_id associated with this company (for conversation ownership)
+          let userId: string | null = null;
+          const { data: companyProfile } = await supabaseAdmin
+            .from("profiles")
+            .select("id")
+            .eq("company_id", company_id)
+            .limit(1)
+            .maybeSingle();
+          
+          if (companyProfile) {
+            userId = companyProfile.id;
+          }
+
+          // Get contact info from Meta payload
+          const contacts = value?.contacts || [];
+          const contactInfo = contacts[0] || {};
+          const contactName = contactInfo?.profile?.name || null;
+
           // ---- Process incoming messages ----
           const messages = value?.messages || [];
           for (const msg of messages) {
@@ -115,25 +133,29 @@ serve(async (req) => {
             if (msgType === "text") {
               content = msg.text?.body || "";
             } else if (msgType === "image") {
-              content = msg.image?.caption || "[image]";
+              content = msg.image?.caption || "[Imagem recebida]";
             } else if (msgType === "video") {
-              content = msg.video?.caption || "[video]";
+              content = msg.video?.caption || "[Vídeo recebido]";
             } else if (msgType === "audio") {
-              content = "[audio]";
+              content = "[Áudio recebido]";
             } else if (msgType === "document") {
-              content = msg.document?.filename || "[document]";
+              content = msg.document?.filename || "[Documento recebido]";
             } else if (msgType === "location") {
-              content = `[location: ${msg.location?.latitude},${msg.location?.longitude}]`;
+              content = `[Localização: ${msg.location?.latitude},${msg.location?.longitude}]`;
             } else if (msgType === "contacts") {
-              content = "[contacts]";
+              content = "[Contato recebido]";
             } else if (msgType === "sticker") {
-              content = "[sticker]";
+              content = "[Figurinha recebida]";
             } else if (msgType === "reaction") {
-              content = msg.reaction?.emoji || "[reaction]";
+              content = msg.reaction?.emoji || "[Reação]";
             } else {
               content = `[${msgType}]`;
             }
 
+            const fromNumber = msg.from || "";
+            const cleanPhone = fromNumber.replace(/\D/g, "");
+
+            // 1. Save to whatsapp_messages (raw log)
             const { error: insertError } = await supabaseAdmin
               .from("whatsapp_messages")
               .insert({
@@ -142,7 +164,7 @@ serve(async (req) => {
                 provider: "meta",
                 direction: "in",
                 wa_message_id: msg.id,
-                from_number: msg.from,
+                from_number: fromNumber,
                 to_number: phoneNumberId,
                 phone_number_id: phoneNumberId,
                 message_type: msgType,
@@ -152,25 +174,134 @@ serve(async (req) => {
               });
 
             if (insertError) {
-              console.error("❌ Error inserting message:", insertError.message);
+              console.error("❌ Error inserting whatsapp_message:", insertError.message);
             } else {
-              console.log(`📩 Message saved: ${msg.id} from ${msg.from} (${msgType})`);
+              console.log(`📩 WhatsApp message saved: ${msg.id} from ${fromNumber} (${msgType})`);
+            }
+
+            // 2. Create or update conversation in conversations table
+            if (userId && cleanPhone) {
+              try {
+                // Find existing open conversation
+                const { data: existingConv } = await supabaseAdmin
+                  .from("conversations")
+                  .select("id, status")
+                  .eq("contact_phone", cleanPhone)
+                  .eq("company_id", company_id)
+                  .not("status", "eq", "closed")
+                  .order("updated_at", { ascending: false })
+                  .limit(1)
+                  .maybeSingle();
+
+                let conversationId: string;
+
+                if (existingConv) {
+                  conversationId = existingConv.id;
+                  // Update existing conversation
+                  await supabaseAdmin
+                    .from("conversations")
+                    .update({
+                      last_message: content,
+                      last_message_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                      unread_count: 1, // Increment would be better but this works
+                    })
+                    .eq("id", conversationId);
+                  console.log(`💬 Conversation updated: ${conversationId}`);
+                } else {
+                  // Create new conversation
+                  const { data: newConv, error: convError } = await supabaseAdmin
+                    .from("conversations")
+                    .insert({
+                      user_id: userId,
+                      company_id,
+                      connection_id: connectionId,
+                      contact_phone: cleanPhone,
+                      contact_name: contactName || cleanPhone,
+                      status: "open",
+                      attendance_type: "ura",
+                      last_message: content,
+                      last_message_at: new Date().toISOString(),
+                      unread_count: 1,
+                    })
+                    .select("id")
+                    .single();
+
+                  if (convError) {
+                    console.error("❌ Error creating conversation:", convError.message);
+                    continue;
+                  }
+                  conversationId = newConv.id;
+                  console.log(`💬 New conversation created: ${conversationId}`);
+                }
+
+                // 3. Insert message into messages table (for chat UI)
+                const { error: msgError } = await supabaseAdmin
+                  .from("messages")
+                  .insert({
+                    conversation_id: conversationId,
+                    sender_type: "customer",
+                    content: content,
+                    message_type: msgType,
+                    status: "received",
+                    external_id: msg.id,
+                  });
+
+                if (msgError) {
+                  console.error("❌ Error inserting message:", msgError.message);
+                } else {
+                  console.log(`📝 Message saved to conversation: ${conversationId}`);
+                }
+
+                // 4. Auto-save contact as lead
+                const { data: existingLead } = await supabaseAdmin
+                  .from("leads")
+                  .select("id")
+                  .eq("phone", cleanPhone)
+                  .eq("user_id", userId)
+                  .maybeSingle();
+
+                if (!existingLead) {
+                  await supabaseAdmin
+                    .from("leads")
+                    .insert({
+                      user_id: userId,
+                      phone: cleanPhone,
+                      name: contactName || cleanPhone,
+                      source: "WhatsApp Meta",
+                      status: "warm",
+                    });
+                  console.log(`📇 Lead created for ${cleanPhone}`);
+                }
+              } catch (convErr: any) {
+                console.error("❌ Error processing conversation:", convErr.message);
+              }
+            } else {
+              console.warn("⚠️ No userId found for company, skipping conversation creation");
             }
           }
 
           // ---- Process status updates ----
           const statuses = value?.statuses || [];
           for (const st of statuses) {
+            const newStatus = st.status;
+            // Only update with valid statuses
+            const validStatuses = ['sent', 'delivered', 'read', 'failed'];
+            if (!validStatuses.includes(newStatus)) {
+              console.log(`⚠️ Skipping unknown status: ${newStatus}`);
+              continue;
+            }
+
             const { error: updateError } = await supabaseAdmin
               .from("whatsapp_messages")
-              .update({ status: st.status })
+              .update({ status: newStatus })
               .eq("wa_message_id", st.id)
               .eq("company_id", company_id);
 
             if (updateError) {
               console.error("❌ Error updating status:", updateError.message);
             } else {
-              console.log(`🔄 Status updated: ${st.id} → ${st.status}`);
+              console.log(`🔄 Status updated: ${st.id} → ${newStatus}`);
             }
           }
         }
