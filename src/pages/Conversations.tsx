@@ -34,18 +34,22 @@ import { cn } from "@/lib/utils";
 import { CloseConversationDialog } from "@/components/conversations/CloseConversationDialog";
 
 const Conversations = () => {
-  const { conversations, isLoading, deleteConversation } = useConversations();
+  const { conversations, isLoading, deleteConversation, updateConversation } = useConversations();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"agent" | "ai" | "ura">("agent");
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [transferring, setTransferring] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const selectedConversation = conversations.find((c) => c.id === selectedConversationId);
   const { messages, isLoading: messagesLoading } = useMessages(selectedConversationId || undefined);
+  
+  const isURA = (selectedConversation as any)?.attendance_type === "ura" || 
+    (!(selectedConversation as any)?.attendance_type);
 
   const filteredConversations = conversations.filter(
     (conv) => {
@@ -154,6 +158,23 @@ const Conversations = () => {
       setMessageText(text);
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleTransferToAgent = async () => {
+    if (!selectedConversationId || transferring) return;
+    setTransferring(true);
+    try {
+      await updateConversation.mutateAsync({
+        id: selectedConversationId,
+        updates: { attendance_type: "agent" },
+      });
+      toast.success("Conversa transferida para Atendente!");
+      setActiveTab("agent");
+    } catch {
+      toast.error("Erro ao transferir conversa");
+    } finally {
+      setTransferring(false);
     }
   };
 
@@ -463,31 +484,49 @@ const Conversations = () => {
 
             {/* Message input */}
             <div className="px-4 py-3 border-t border-border bg-card">
-              <div className="flex items-center gap-2 max-w-3xl mx-auto">
-                <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9 text-muted-foreground">
-                  <Smile className="w-5 h-5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9 text-muted-foreground">
-                  <Paperclip className="w-5 h-5" />
-                </Button>
-                <Input
-                  ref={inputRef}
-                  placeholder="Digite uma mensagem..."
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="flex-1 h-10 bg-muted/50 border-0 focus-visible:ring-1"
-                  disabled={sending}
-                />
-                <Button
-                  size="icon"
-                  className="shrink-0 h-9 w-9 rounded-full"
-                  onClick={handleSendMessage}
-                  disabled={!messageText.trim() || sending}
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
+              {isURA ? (
+                <div className="flex items-center justify-between gap-3 max-w-3xl mx-auto bg-muted/50 rounded-lg px-4 py-3">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <GitBranch className="w-4 h-4 shrink-0" />
+                    <span className="text-sm">Cliente em fluxo URA. Transfira para atender manualmente.</span>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    onClick={handleTransferToAgent}
+                    disabled={transferring}
+                    className="shrink-0"
+                  >
+                    <Headphones className="w-4 h-4 mr-1" />
+                    {transferring ? "Transferindo..." : "Transferir para Atendente"}
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 max-w-3xl mx-auto">
+                  <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9 text-muted-foreground">
+                    <Smile className="w-5 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9 text-muted-foreground">
+                    <Paperclip className="w-5 h-5" />
+                  </Button>
+                  <Input
+                    ref={inputRef}
+                    placeholder="Digite uma mensagem..."
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="flex-1 h-10 bg-muted/50 border-0 focus-visible:ring-1"
+                    disabled={sending}
+                  />
+                  <Button
+                    size="icon"
+                    className="shrink-0 h-9 w-9 rounded-full"
+                    onClick={handleSendMessage}
+                    disabled={!messageText.trim() || sending}
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </>
         ) : (
