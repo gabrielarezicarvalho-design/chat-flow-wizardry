@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Send, Sparkles, Zap, ArrowRight, Rocket, Target, BarChart3, Users, Calendar, FileText, TrendingUp, MessageSquare, FlaskConical, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import robotImage from "@/assets/marketflow-robot.png";
+import robotImage from "@/assets/aysis-robot.png";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
@@ -246,7 +246,7 @@ const Dashboard = () => {
             >
               <motion.img 
                 src={robotImage} 
-                alt="MarketFlow Robot"
+                alt="Aysis Brasil Robot"
                 className="w-64 h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
