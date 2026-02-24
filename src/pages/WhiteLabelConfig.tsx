@@ -5,7 +5,8 @@ import {
   Loader2, Database, Server, Palette, Save, 
   LogOut, Check, X, Eye, EyeOff, Building2, Users, 
   Plus, Settings, MessageSquare, BarChart3, Home,
-  Trash2, Edit, Search, Lock, Upload, Globe
+  Trash2, Edit, Search, Lock, Upload, Globe, HardDrive,
+  TableProperties, Copy, CheckCircle2, XCircle, FileText, Image, File
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,6 +71,18 @@ const WhiteLabelConfig = () => {
     name: '', email: '', phone: '', max_users: 5, max_connections: 2,
   });
   const [searchCompany, setSearchCompany] = useState('');
+
+  // Tables check state
+  const [checkingTables, setCheckingTables] = useState(false);
+  const [tableStatus, setTableStatus] = useState<Record<string, boolean> | null>(null);
+  const [showSqlDialog, setShowSqlDialog] = useState(false);
+  const [sqlScript, setSqlScript] = useState('');
+  const [loadingSql, setLoadingSql] = useState(false);
+  const [sqlCopied, setSqlCopied] = useState(false);
+
+  // Storage state
+  const [storageBuckets, setStorageBuckets] = useState<any[]>([]);
+  const [loadingStorage, setLoadingStorage] = useState(false);
 
   // Form states
   const [appearanceData, setAppearanceData] = useState({
@@ -330,6 +343,103 @@ const WhiteLabelConfig = () => {
     setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
   };
 
+  const handleCheckTables = async () => {
+    if (!supabaseData.supabase_url || !supabaseData.supabase_service_role_key) {
+      toast.error('Configure URL e Service Role Key primeiro');
+      return;
+    }
+    setCheckingTables(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('wl-setup-tables', {
+        body: { supabase_url: supabaseData.supabase_url, supabase_service_role_key: supabaseData.supabase_service_role_key, action: 'check_tables' },
+      });
+      if (error) throw error;
+      setTableStatus(data.tables);
+      const total = Object.keys(data.tables).length;
+      const found = Object.values(data.tables).filter(Boolean).length;
+      toast.success(`${found}/${total} tabelas encontradas`);
+    } catch (err: any) {
+      toast.error('Erro ao verificar tabelas: ' + err.message);
+    } finally {
+      setCheckingTables(false);
+    }
+  };
+
+  const handleGetSql = async () => {
+    setLoadingSql(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('wl-setup-tables', {
+        body: { supabase_url: 'x', supabase_service_role_key: 'x', action: 'get_sql' },
+      });
+      if (error) throw error;
+      setSqlScript(data.sql);
+      setShowSqlDialog(true);
+    } catch (err: any) {
+      toast.error('Erro ao gerar SQL');
+    } finally {
+      setLoadingSql(false);
+    }
+  };
+
+  const handleCopySql = () => {
+    navigator.clipboard.writeText(sqlScript);
+    setSqlCopied(true);
+    toast.success('SQL copiado para a área de transferência!');
+    setTimeout(() => setSqlCopied(false), 3000);
+  };
+
+  const handleFetchStorage = async () => {
+    if (!supabaseData.supabase_url || !supabaseData.supabase_service_role_key) {
+      toast.error('Configure o Supabase primeiro');
+      return;
+    }
+    setLoadingStorage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('wl-setup-tables', {
+        body: { supabase_url: supabaseData.supabase_url, supabase_service_role_key: supabaseData.supabase_service_role_key, action: 'check_storage' },
+      });
+      if (error) throw error;
+      setStorageBuckets(data.buckets || []);
+    } catch (err: any) {
+      toast.error('Erro ao carregar armazenamento');
+    } finally {
+      setLoadingStorage(false);
+    }
+  };
+
+  const handleDeleteStorageFile = async (bucketName: string, filePath: string) => {
+    if (!confirm(`Excluir "${filePath}"?`)) return;
+    try {
+      const partnerClient = createClient(supabaseData.supabase_url, supabaseData.supabase_service_role_key);
+      const { error } = await partnerClient.storage.from(bucketName).remove([filePath]);
+      if (error) throw error;
+      toast.success('Arquivo excluído!');
+      handleFetchStorage();
+    } catch (err: any) {
+      toast.error('Erro ao excluir arquivo');
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const getFileIcon = (type: string) => {
+    if (type?.startsWith('image/')) return Image;
+    if (type?.includes('pdf')) return FileText;
+    return File;
+  };
+
+  useEffect(() => {
+    if (activeTab === 'storage' && supabaseData.supabase_url && supabaseData.supabase_service_role_key) {
+      handleFetchStorage();
+    }
+  }, [activeTab]);
+
   const getConfigStatus = () => {
     const hasSupabase = !!(supabaseData.supabase_url && supabaseData.supabase_anon_key);
     const hasUazapi = !!(uazapiData.uazapi_base_url && uazapiData.uazapi_admin_token);
@@ -408,6 +518,7 @@ const WhiteLabelConfig = () => {
     { id: 'companies', icon: Building2, label: 'Empresas' },
     { id: 'domain', icon: Globe, label: 'Domínio' },
     { id: 'supabase', icon: Database, label: 'Supabase' },
+    { id: 'storage', icon: HardDrive, label: 'Armazenamento' },
     { id: 'uazapi', icon: Server, label: 'UAZAPI' },
   ];
 
@@ -795,12 +906,170 @@ const WhiteLabelConfig = () => {
                       </div>
                     </div>
                   ))}
-                  <Button onClick={handleSaveSupabase} disabled={saving}>
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                    Salvar Supabase
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={handleSaveSupabase} disabled={saving}>
+                      {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                      Salvar Supabase
+                    </Button>
+                  </div>
+
+                  {/* Separator */}
+                  {status.hasSupabase && (
+                    <div className="border-t border-slate-700 pt-6 space-y-4">
+                      <div>
+                        <h3 className="text-white font-semibold text-lg mb-1">Gerenciamento de Tabelas</h3>
+                        <p className="text-slate-400 text-sm">Verifique e crie as tabelas necessárias no seu banco de dados</p>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <Button variant="outline" onClick={handleCheckTables} disabled={checkingTables} className="border-slate-600 text-slate-300 hover:text-white">
+                          {checkingTables ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <TableProperties className="h-4 w-4 mr-2" />}
+                          Verificar Tabelas
+                        </Button>
+                        <Button onClick={handleGetSql} disabled={loadingSql} className="bg-emerald-600 hover:bg-emerald-700">
+                          {loadingSql ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Database className="h-4 w-4 mr-2" />}
+                          Criar Tabelas (SQL)
+                        </Button>
+                      </div>
+
+                      {tableStatus && (
+                        <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 max-h-72 overflow-y-auto">
+                          <div className="grid grid-cols-2 gap-2">
+                            {Object.entries(tableStatus).map(([table, exists]) => (
+                              <div key={table} className="flex items-center gap-2 text-sm">
+                                {exists ? (
+                                  <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
+                                )}
+                                <span className={exists ? 'text-green-300' : 'text-red-300'}>{table}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
+            </div>
+          )}
+
+          {/* Storage Tab */}
+          {activeTab === 'storage' && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">Armazenamento</h2>
+                <p className="text-slate-400">Gerencie os buckets e arquivos do seu Supabase</p>
+              </div>
+
+              {!status.hasSupabase ? (
+                <Card className="bg-amber-500/10 border-amber-500/30">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-full bg-amber-500/20"><Lock className="h-6 w-6 text-amber-400" /></div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-amber-300">Configuração necessária</h3>
+                        <p className="text-amber-200/80 mt-1">Configure o Supabase antes de gerenciar o armazenamento.</p>
+                        <Button className="mt-4" onClick={() => setActiveTab('supabase')}>
+                          <Database className="h-4 w-4 mr-2" /> Configurar Supabase
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    <Button variant="outline" onClick={handleFetchStorage} disabled={loadingStorage} className="border-slate-600 text-slate-300 hover:text-white">
+                      {loadingStorage ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <HardDrive className="h-4 w-4 mr-2" />}
+                      Atualizar
+                    </Button>
+                  </div>
+
+                  {loadingStorage ? (
+                    <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+                  ) : storageBuckets.length === 0 ? (
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardContent className="pt-6 text-center py-12">
+                        <HardDrive className="h-12 w-12 text-slate-600 mx-auto mb-4" />
+                        <p className="text-slate-400">Nenhum bucket encontrado</p>
+                        <p className="text-slate-500 text-sm mt-1">Crie as tabelas primeiro para gerar os buckets padrão</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Summary */}
+                      <div className="grid grid-cols-3 gap-4">
+                        {storageBuckets.map((bucket: any) => (
+                          <Card key={bucket.name} className="bg-slate-800/50 border-slate-700">
+                            <CardContent className="pt-4 pb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-primary/20"><HardDrive className="h-4 w-4 text-primary" /></div>
+                                <div>
+                                  <p className="text-white font-medium text-sm">{bucket.name}</p>
+                                  <p className="text-slate-400 text-xs">{bucket.fileCount} arquivos • {formatFileSize(bucket.totalSize)}</p>
+                                </div>
+                              </div>
+                              <Badge className={`mt-2 ${bucket.public ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                                {bucket.public ? 'Público' : 'Privado'}
+                              </Badge>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+
+                      {/* File lists per bucket */}
+                      {storageBuckets.map((bucket: any) => (
+                        <Card key={bucket.name} className="bg-slate-800/50 border-slate-700">
+                          <CardHeader>
+                            <CardTitle className="text-white text-base flex items-center gap-2">
+                              <HardDrive className="h-4 w-4" /> {bucket.name}
+                              <Badge variant="outline" className="ml-2 text-slate-400 border-slate-600 text-xs">{bucket.fileCount} arquivos</Badge>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            {bucket.files.length === 0 ? (
+                              <p className="text-slate-500 text-sm text-center py-4">Nenhum arquivo neste bucket</p>
+                            ) : (
+                              <Table>
+                                <TableHeader>
+                                  <TableRow className="border-slate-700">
+                                    <TableHead className="text-slate-400">Arquivo</TableHead>
+                                    <TableHead className="text-slate-400">Tipo</TableHead>
+                                    <TableHead className="text-slate-400">Tamanho</TableHead>
+                                    <TableHead className="text-slate-400 text-right">Ações</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {bucket.files.map((file: any) => {
+                                    const FileIcon = getFileIcon(file.type);
+                                    return (
+                                      <TableRow key={file.name} className="border-slate-700">
+                                        <TableCell className="text-white flex items-center gap-2">
+                                          <FileIcon className="h-4 w-4 text-slate-400" />
+                                          <span className="truncate max-w-[200px]">{file.name}</span>
+                                        </TableCell>
+                                        <TableCell className="text-slate-400 text-xs">{file.type}</TableCell>
+                                        <TableCell className="text-slate-400">{formatFileSize(file.size)}</TableCell>
+                                        <TableCell className="text-right">
+                                          <Button variant="ghost" size="icon" onClick={() => handleDeleteStorageFile(bucket.name, file.name)}>
+                                            <Trash2 className="h-4 w-4 text-red-400" />
+                                          </Button>
+                                        </TableCell>
+                                      </TableRow>
+                                    );
+                                  })}
+                                </TableBody>
+                              </Table>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
@@ -885,6 +1154,41 @@ const WhiteLabelConfig = () => {
               {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {editingCompany ? 'Atualizar' : 'Criar'}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* SQL Dialog */}
+      <Dialog open={showSqlDialog} onOpenChange={setShowSqlDialog}>
+        <DialogContent className="bg-slate-800 border-slate-700 max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Database className="h-5 w-5" /> SQL para Criar Tabelas
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Copie o SQL abaixo e execute no <strong>SQL Editor</strong> do seu projeto Supabase para criar todas as tabelas necessárias.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
+              <p className="text-sm text-emerald-300">
+                <strong>Passo 1:</strong> Copie o SQL abaixo →{' '}
+                <strong>Passo 2:</strong> Acesse seu Supabase → SQL Editor →{' '}
+                <strong>Passo 3:</strong> Cole e execute
+              </p>
+            </div>
+            <div className="relative">
+              <pre className="bg-slate-900 border border-slate-700 rounded-lg p-4 text-xs text-green-300 overflow-auto max-h-[45vh] font-mono whitespace-pre-wrap">
+                {sqlScript}
+              </pre>
+              <Button
+                onClick={handleCopySql}
+                size="sm"
+                className={`absolute top-2 right-2 ${sqlCopied ? 'bg-green-600' : ''}`}
+              >
+                {sqlCopied ? <><Check className="h-3 w-3 mr-1" /> Copiado!</> : <><Copy className="h-3 w-3 mr-1" /> Copiar SQL</>}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
