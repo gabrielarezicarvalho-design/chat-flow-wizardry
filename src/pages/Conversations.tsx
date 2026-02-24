@@ -23,6 +23,9 @@ import {
   User,
   Image as ImageIcon,
   XCircle,
+  Bot,
+  Headphones,
+  GitBranch,
 } from "lucide-react";
 import { formatDistanceToNow, format, isToday, isYesterday } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -33,6 +36,7 @@ import { CloseConversationDialog } from "@/components/conversations/CloseConvers
 const Conversations = () => {
   const { conversations, isLoading, deleteConversation } = useConversations();
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState<"agent" | "ai" | "ura">("agent");
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
@@ -44,10 +48,21 @@ const Conversations = () => {
   const { messages, isLoading: messagesLoading } = useMessages(selectedConversationId || undefined);
 
   const filteredConversations = conversations.filter(
-    (conv) =>
-      conv.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conv.contact_phone?.includes(searchTerm)
+    (conv) => {
+      const matchesSearch = conv.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        conv.contact_phone?.includes(searchTerm);
+      const matchesTab = (conv as any).attendance_type === activeTab || 
+        (!((conv as any).attendance_type) && activeTab === "ura");
+      return matchesSearch && matchesTab;
+    }
   );
+
+  const getTabCount = (tab: string) => {
+    return conversations.filter(c => {
+      const type = (c as any).attendance_type;
+      return type === tab || (!type && tab === "ura");
+    }).length;
+  };
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -166,7 +181,7 @@ const Conversations = () => {
         <div className="px-4 py-3 flex items-center justify-between border-b border-border">
           <h2 className="text-lg font-semibold text-foreground">Conversas</h2>
           <Badge variant="secondary" className="text-xs">
-            {conversations.length}
+            {filteredConversations.length}
           </Badge>
         </div>
 
@@ -183,12 +198,73 @@ const Conversations = () => {
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="flex border-b border-border">
+          <button
+            onClick={() => { setActiveTab("agent"); setSelectedConversationId(null); }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors border-b-2",
+              activeTab === "agent"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Headphones className="w-3.5 h-3.5" />
+            <span>Atendente</span>
+            {getTabCount("agent") > 0 && (
+              <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px] rounded-full">
+                {getTabCount("agent")}
+              </Badge>
+            )}
+          </button>
+          <button
+            onClick={() => { setActiveTab("ai"); setSelectedConversationId(null); }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors border-b-2",
+              activeTab === "ai"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Bot className="w-3.5 h-3.5" />
+            <span>IA</span>
+            {getTabCount("ai") > 0 && (
+              <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px] rounded-full">
+                {getTabCount("ai")}
+              </Badge>
+            )}
+          </button>
+          <button
+            onClick={() => { setActiveTab("ura"); setSelectedConversationId(null); }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors border-b-2",
+              activeTab === "ura"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <GitBranch className="w-3.5 h-3.5" />
+            <span>URA</span>
+            {getTabCount("ura") > 0 && (
+              <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px] rounded-full">
+                {getTabCount("ura")}
+              </Badge>
+            )}
+          </button>
+        </div>
+
         {/* Conversations list */}
         <ScrollArea className="flex-1">
           {filteredConversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-              <MessageSquare className="w-10 h-10 text-muted-foreground/40 mb-3" />
-              <p className="text-sm text-muted-foreground">Nenhuma conversa</p>
+              {activeTab === "agent" && <Headphones className="w-10 h-10 text-muted-foreground/40 mb-3" />}
+              {activeTab === "ai" && <Bot className="w-10 h-10 text-muted-foreground/40 mb-3" />}
+              {activeTab === "ura" && <GitBranch className="w-10 h-10 text-muted-foreground/40 mb-3" />}
+              <p className="text-sm text-muted-foreground">
+                {activeTab === "agent" && "Nenhum atendimento humano"}
+                {activeTab === "ai" && "Nenhum atendimento com IA"}
+                {activeTab === "ura" && "Nenhum cliente na URA"}
+              </p>
             </div>
           ) : (
             <div>

@@ -531,6 +531,7 @@ export type Database = {
       conversations: {
         Row: {
           assigned_to: string | null
+          attendance_type: string
           company_id: string | null
           connection_id: string | null
           contact_avatar: string | null
@@ -550,6 +551,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          attendance_type?: string
           company_id?: string | null
           connection_id?: string | null
           contact_avatar?: string | null
@@ -569,6 +571,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          attendance_type?: string
           company_id?: string | null
           connection_id?: string | null
           contact_avatar?: string | null
