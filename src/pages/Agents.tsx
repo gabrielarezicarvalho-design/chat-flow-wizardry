@@ -104,6 +104,13 @@ const AgentsContent = () => {
     voiceStability: 0.5,
     voiceSimilarity: 0.75,
     voiceSpeed: 1.0,
+    // Knowledge & capabilities
+    knowledgeText: "",
+    canUnderstandImages: false,
+    canUnderstandAudio: false,
+    canSendImages: false,
+    aiProviderForVision: "gemini",
+    aiProviderForAudio: "gemini",
   });
 
   // New function form state
@@ -150,6 +157,12 @@ const AgentsContent = () => {
         voiceStability: agentData.voice_stability ?? 0.5,
         voiceSimilarity: agentData.voice_similarity ?? 0.75,
         voiceSpeed: agentData.voice_speed ?? 1.0,
+        knowledgeText: agentData.knowledge_text || "",
+        canUnderstandImages: agentData.can_understand_images || false,
+        canUnderstandAudio: agentData.can_understand_audio || false,
+        canSendImages: agentData.can_send_images || false,
+        aiProviderForVision: agentData.ai_provider_for_vision || "gemini",
+        aiProviderForAudio: agentData.ai_provider_for_audio || "gemini",
       });
     }
   }, [currentAgent]);
@@ -169,6 +182,12 @@ const AgentsContent = () => {
       voiceStability: 0.5,
       voiceSimilarity: 0.75,
       voiceSpeed: 1.0,
+      knowledgeText: "",
+      canUnderstandImages: false,
+      canUnderstandAudio: false,
+      canSendImages: false,
+      aiProviderForVision: "gemini",
+      aiProviderForAudio: "gemini",
     });
   };
 
@@ -215,6 +234,12 @@ const AgentsContent = () => {
           voice_stability: formData.voiceStability,
           voice_similarity: formData.voiceSimilarity,
           voice_speed: formData.voiceSpeed,
+          knowledge_text: formData.knowledgeText,
+          can_understand_images: formData.canUnderstandImages,
+          can_understand_audio: formData.canUnderstandAudio,
+          can_send_images: formData.canSendImages,
+          ai_provider_for_vision: formData.aiProviderForVision,
+          ai_provider_for_audio: formData.aiProviderForAudio,
         });
         setIsCreating(false);
         setSelectedAgent(result?.id || null);
@@ -234,6 +259,12 @@ const AgentsContent = () => {
             voice_stability: formData.voiceStability,
             voice_similarity: formData.voiceSimilarity,
             voice_speed: formData.voiceSpeed,
+            knowledge_text: formData.knowledgeText,
+            can_understand_images: formData.canUnderstandImages,
+            can_understand_audio: formData.canUnderstandAudio,
+            can_send_images: formData.canSendImages,
+            ai_provider_for_vision: formData.aiProviderForVision,
+            ai_provider_for_audio: formData.aiProviderForAudio,
           }
         });
       }
@@ -472,67 +503,128 @@ const AgentsContent = () => {
             </TabsContent>
 
             <TabsContent value="conhecimento" className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-foreground">Base de Conhecimento</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Adicione documentos que o assistente pode consultar para responder perguntas.
-                  </p>
+              <div>
+                <h3 className="font-medium text-foreground">Base de Conhecimento</h3>
+                <p className="text-sm text-muted-foreground">
+                  Adicione informações e contexto que o assistente pode usar para responder perguntas.
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="knowledgeText">Texto de conhecimento</Label>
+                <Textarea
+                  id="knowledgeText"
+                  value={formData.knowledgeText}
+                  onChange={(e) => setFormData({ ...formData, knowledgeText: e.target.value })}
+                  placeholder="Cole aqui informações sobre sua empresa, produtos, serviços, FAQ, políticas, procedimentos, etc. O assistente usará esse conteúdo como referência para responder..."
+                  className="mt-1 min-h-[200px]"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formData.knowledgeText.length} caracteres
+                </p>
+              </div>
+
+              {/* Capability toggles */}
+              <div className="border-t pt-6 space-y-4">
+                <h3 className="font-medium text-foreground">Capacidades Multimídia</h3>
+                <p className="text-sm text-muted-foreground">
+                  Ative recursos de entendimento de imagem e áudio. Cada recurso usa a API do provedor configurado e será cobrado na conta do cliente.
+                </p>
+
+                {/* Image understanding */}
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Eye className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="font-medium text-sm">Entender Imagens</p>
+                      <p className="text-xs text-muted-foreground">O assistente poderá analisar imagens enviadas pelo cliente</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Select
+                      value={formData.aiProviderForVision}
+                      onValueChange={(v) => setFormData({ ...formData, aiProviderForVision: v })}
+                      disabled={!formData.canUnderstandImages}
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gemini">Gemini</SelectItem>
+                        <SelectItem value="openai">ChatGPT</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Switch
+                      checked={formData.canUnderstandImages}
+                      onCheckedChange={(v) => setFormData({ ...formData, canUnderstandImages: v })}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.txt,.doc,.docx"
-                    onChange={handleFileUpload}
-                    className="hidden"
+
+                {formData.canUnderstandImages && !isProviderAvailable(formData.aiProviderForVision === 'openai' ? 'openai' : 'google') && (
+                  <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
+                    <AlertCircle className="w-4 h-4" />
+                    Configure a chave de API do {formData.aiProviderForVision === 'openai' ? 'ChatGPT' : 'Gemini'} em Configurações → IA
+                  </div>
+                )}
+
+                {/* Audio understanding */}
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Mic className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="font-medium text-sm">Entender Áudio</p>
+                      <p className="text-xs text-muted-foreground">O assistente poderá transcrever e entender áudios enviados</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Select
+                      value={formData.aiProviderForAudio}
+                      onValueChange={(v) => setFormData({ ...formData, aiProviderForAudio: v })}
+                      disabled={!formData.canUnderstandAudio}
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gemini">Gemini</SelectItem>
+                        <SelectItem value="openai">ChatGPT</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Switch
+                      checked={formData.canUnderstandAudio}
+                      onCheckedChange={(v) => setFormData({ ...formData, canUnderstandAudio: v })}
+                    />
+                  </div>
+                </div>
+
+                {formData.canUnderstandAudio && !isProviderAvailable(formData.aiProviderForAudio === 'openai' ? 'openai' : 'google') && (
+                  <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
+                    <AlertCircle className="w-4 h-4" />
+                    Configure a chave de API do {formData.aiProviderForAudio === 'openai' ? 'ChatGPT' : 'Gemini'} em Configurações → IA
+                  </div>
+                )}
+
+                {/* Send images */}
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Upload className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="font-medium text-sm">Enviar Imagens</p>
+                      <p className="text-xs text-muted-foreground">O assistente poderá enviar imagens para o cliente</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={formData.canSendImages}
+                    onCheckedChange={(v) => setFormData({ ...formData, canSendImages: v })}
                   />
-                  <Button 
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadDocument.isPending || !selectedAgent}
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {uploadDocument.isPending ? "Enviando..." : "Enviar Documento"}
-                  </Button>
                 </div>
               </div>
 
-              {documents.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-sm">
-                    Nenhum documento adicionado. Envie arquivos PDF, TXT ou DOCX.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <FileText className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="font-medium text-sm">{doc.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {doc.file_type.toUpperCase()} • {doc.file_size ? `${(doc.file_size / 1024).toFixed(1)} KB` : 'Tamanho desconhecido'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={doc.status === 'ready' ? 'default' : 'secondary'}>
-                          {doc.status === 'ready' ? 'Pronto' : doc.status === 'processing' ? 'Processando' : 'Erro'}
-                        </Badge>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => deleteDocument.mutate(doc.id)}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground flex items-start gap-2">
+                <Info className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>Os recursos de imagem e áudio utilizam a API do provedor selecionado (Gemini ou ChatGPT). Configure as chaves em <strong>Configurações → IA</strong> para que o custo seja cobrado diretamente na conta do cliente.</span>
+              </div>
             </TabsContent>
 
             <TabsContent value="funcoes" className="space-y-6">

@@ -16,10 +16,17 @@ export type Database = {
     Tables: {
       agents: {
         Row: {
+          ai_provider_for_audio: string | null
+          ai_provider_for_vision: string | null
+          can_send_images: boolean | null
+          can_understand_audio: boolean | null
+          can_understand_images: boolean | null
           company_id: string | null
           created_at: string
           description: string | null
           id: string
+          knowledge_images: string[] | null
+          knowledge_text: string | null
           model: string | null
           name: string
           status: string | null
@@ -29,10 +36,17 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          ai_provider_for_audio?: string | null
+          ai_provider_for_vision?: string | null
+          can_send_images?: boolean | null
+          can_understand_audio?: boolean | null
+          can_understand_images?: boolean | null
           company_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          knowledge_images?: string[] | null
+          knowledge_text?: string | null
           model?: string | null
           name: string
           status?: string | null
@@ -42,10 +56,17 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          ai_provider_for_audio?: string | null
+          ai_provider_for_vision?: string | null
+          can_send_images?: boolean | null
+          can_understand_audio?: boolean | null
+          can_understand_images?: boolean | null
           company_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          knowledge_images?: string[] | null
+          knowledge_text?: string | null
           model?: string | null
           name?: string
           status?: string | null
