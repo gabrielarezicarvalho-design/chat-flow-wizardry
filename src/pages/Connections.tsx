@@ -1065,9 +1065,9 @@ const Connections = () => {
         updates: {
           credentials: {
             ...currentCreds,
-            settings
-          },
-          auto_save_contacts: settings.autoSaveContacts === 'sim'
+            settings,
+            auto_save_contacts: settings.autoSaveContacts === 'sim'
+          }
         }
       });
 
