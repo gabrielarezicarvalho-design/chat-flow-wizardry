@@ -238,9 +238,9 @@ export const PromptImprover = ({
               Simule uma conversa com o agente para testar o prompt. A IA vai responder como o agente e mostrar um diagnóstico de cada resposta.
             </p>
 
-            <div className="max-h-[400px] overflow-y-auto rounded-lg bg-background border p-3 space-y-3">
+            <div className="max-h-[400px] overflow-y-auto rounded-lg bg-muted/30 border p-3 space-y-2">
               {chatMessages.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">
+                <p className="text-xs text-muted-foreground text-center py-6">
                   Envie uma mensagem para testar como o agente "{agentName}" responderia.
                   <br />
                   Ex: "Olá", "quais os planos?", "meu rastreador não funciona"
@@ -248,38 +248,40 @@ export const PromptImprover = ({
               )}
 
               {chatMessages.map((msg, i) => (
-                <div key={i} className="space-y-1">
+                <div key={i} className="space-y-1.5">
+                  {/* Message bubble */}
                   <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                      className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-sm shadow-sm ${
                         msg.role === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-foreground"
+                          ? "bg-primary text-primary-foreground rounded-br-md"
+                          : "bg-background text-foreground border rounded-bl-md"
                       }`}
                     >
-                      <p className="text-[10px] font-medium opacity-70 mb-0.5">
-                        {msg.role === "user" ? "Cliente (teste)" : agentName}
+                      <p className={`text-[10px] font-semibold mb-0.5 ${msg.role === "user" ? "text-primary-foreground/70" : "text-primary"}`}>
+                        {msg.role === "user" ? "👤 Cliente (teste)" : `🤖 ${agentName}`}
                       </p>
-                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                      <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                     </div>
                   </div>
 
+                  {/* System diagnosis card */}
                   {msg.diagnosis && (
-                    <div className="ml-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-2.5 text-xs space-y-1">
+                    <div className="mx-auto max-w-[95%] rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-3 text-xs space-y-1.5">
                       <div className="flex items-center gap-1.5 font-semibold text-yellow-600 dark:text-yellow-400">
-                        <AlertTriangle className="w-3.5 h-3.5" />
-                        Diagnóstico
+                        <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span>Diagnóstico interno do sistema</span>
                       </div>
-                      <p className="text-foreground/80 whitespace-pre-wrap">{msg.diagnosis}</p>
+                      <p className="text-foreground/80 whitespace-pre-wrap leading-relaxed">{msg.diagnosis}</p>
                     </div>
                   )}
                 </div>
               ))}
 
               {loading && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Analisando resposta...
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground py-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Analisando resposta...</span>
                 </div>
               )}
               <div ref={chatEndRef} />
@@ -315,7 +317,7 @@ export const PromptImprover = ({
 
         {result && expanded && !loading && activeMode !== "diagnostic_chat" && (
           <div className="space-y-3">
-            <div className="max-h-[400px] overflow-y-auto rounded-lg bg-background p-4 text-sm whitespace-pre-wrap border">
+            <div className="max-h-[400px] overflow-y-auto rounded-lg bg-muted/30 p-4 text-sm whitespace-pre-wrap border leading-relaxed">
               {result}
             </div>
 
