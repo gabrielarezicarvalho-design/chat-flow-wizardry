@@ -243,6 +243,28 @@ serve(async (req) => {
           console.log(`✅ Menu option matched: ${match.optionIndex}`);
           await supabaseAdmin.from("flow_sessions").update({ status: "completed" }).eq("id", existingSession.id);
 
+          const selectedOption = options[match.optionIndex] || null;
+          if (selectedOption?.routeType === "department" && selectedOption?.departmentId) {
+            const deptName = selectedOption?.departmentName || "o departamento selecionado";
+            const transferMsg = replaceFlowVariables(
+              selectedOption?.transferMessage || `Perfeito! Vou te direcionar para ${deptName}.`,
+              vars
+            );
+            await sendMetaMessage({
+              ...sendCtx,
+              payload: { messaging_product: "whatsapp", to: contactPhone, type: "text", text: { body: transferMsg } },
+              textForStorage: transferMsg,
+              messageType: "text",
+            });
+            await supabaseAdmin.from("conversations").update({
+              attendance_type: "agent",
+              department_id: selectedOption.departmentId,
+              assigned_to: null,
+              updated_at: new Date().toISOString(),
+            }).eq("id", conversationId);
+            return { executed: true, responses: 1 };
+          }
+
           const nextNodeId = resolveNextNodeId(currentNode.id, edges, `option-${match.optionIndex}`)
             || resolveNextNodeId(currentNode.id, edges);
 
@@ -353,6 +375,10 @@ serve(async (req) => {
               text: item.title || item.text,
               value: item.value || item.id,
               keywords: item.keywords || "",
+              routeType: item.routeType || "flow",
+              departmentId: item.departmentId || "",
+              departmentName: item.departmentName || "",
+              transferMessage: item.transferMessage || "",
             }));
           }
 
@@ -361,6 +387,28 @@ serve(async (req) => {
           if (match.matched) {
             console.log(`✅ Interactive message option matched: ${match.optionIndex}`);
             await supabaseAdmin.from("flow_sessions").update({ status: "completed" }).eq("id", existingSession.id);
+            const selectedOption = options[match.optionIndex] || null;
+            if (selectedOption?.routeType === "department" && selectedOption?.departmentId) {
+              const deptName = selectedOption?.departmentName || "o departamento selecionado";
+              const transferMsg = replaceFlowVariables(
+                selectedOption?.transferMessage || `Perfeito! Vou te direcionar para ${deptName}.`,
+                vars
+              );
+              await sendMetaMessage({
+                ...sendCtx,
+                payload: { messaging_product: "whatsapp", to: contactPhone, type: "text", text: { body: transferMsg } },
+                textForStorage: transferMsg,
+                messageType: "text",
+              });
+              await supabaseAdmin.from("conversations").update({
+                attendance_type: "agent",
+                department_id: selectedOption.departmentId,
+                assigned_to: null,
+                updated_at: new Date().toISOString(),
+              }).eq("id", conversationId);
+              return { executed: true, responses: 1 };
+            }
+
             const nextNodeId = resolveNextNodeId(currentNode.id, edges);
             if (nextNodeId) return await walkFlow(nextNodeId, nodes, edges, vars, sendCtx, conversationId, companyId, flow.id);
             return { executed: true, responses: 0 };

@@ -75,7 +75,7 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
 
   const addButton = () => {
     const buttons = nodeData.buttons || [];
-    handleUpdate('buttons', [...buttons, { id: Date.now().toString(), text: '', value: '' }]);
+    handleUpdate('buttons', [...buttons, { id: Date.now().toString(), text: '', value: '', routeType: 'flow', departmentId: '', departmentName: '' }]);
   };
 
   const updateButton = (index: number, key: string, value: any) => {
@@ -92,7 +92,7 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
 
   const addListItem = () => {
     const items = nodeData.listItems || [];
-    handleUpdate('listItems', [...items, { id: Date.now().toString(), title: '', description: '' }]);
+    handleUpdate('listItems', [...items, { id: Date.now().toString(), title: '', description: '', routeType: 'flow', departmentId: '', departmentName: '' }]);
   };
 
   const updateListItem = (index: number, key: string, value: any) => {
@@ -300,152 +300,157 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
     );
   };
 
-  const renderErrorRulesSection = () => (
-    <div className="space-y-3 mt-3">
-      <Separator />
-      <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-        <p className="text-sm font-medium text-amber-600 dark:text-amber-400 mb-1">Regras de Erro</p>
-        <p className="text-xs text-amber-600/80 dark:text-amber-400/80">
-          Configuração para quando o cliente não digitar uma opção válida.
-        </p>
-      </div>
+  const renderErrorRulesSection = () => {
+    const normalizedErrorAction = nodeData.errorAction === 'transfer'
+      ? 'transfer_queue'
+      : (nodeData.errorAction || 'transfer_queue');
 
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Mensagem de opção inválida</Label>
-        <Textarea
-          value={nodeData.invalidOptionMessage || ''}
-          onChange={(e) => handleUpdate('invalidOptionMessage', e.target.value)}
-          placeholder="Opção inválida. Por favor, escolha uma das opções acima."
-          rows={2}
-          className="resize-none"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Máximo de erros permitidos</Label>
-        <Input
-          type="number"
-          min={1}
-          max={10}
-          value={nodeData.maxErrors || 3}
-          onChange={(e) => handleUpdate('maxErrors', parseInt(e.target.value) || 3)}
-        />
-        <p className="text-xs text-muted-foreground">
-          Após atingir este número, executa a ação abaixo.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Ação após erros</Label>
-        <Select value={nodeData.errorAction || 'transfer_queue'} onValueChange={(v) => {
-          handleUpdate('errorAction', v);
-          if (v !== 'transfer_queue') {
-            handleUpdate('errorDepartmentId', '');
-            handleUpdate('errorDepartmentName', '');
-          }
-          if (v !== 'transfer_agent') {
-            handleUpdate('errorAgentId', '');
-            handleUpdate('errorAgentName', '');
-          }
-        }}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="transfer_queue">Transferir para fila (departamento)</SelectItem>
-            <SelectItem value="transfer_agent">Transferir para atendente</SelectItem>
-            <SelectItem value="message">Enviar mensagem e encerrar</SelectItem>
-            <SelectItem value="restart">Reiniciar fluxo</SelectItem>
-            <SelectItem value="continue">Seguir pela saída de erro</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {nodeData.errorAction === 'transfer_queue' && (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Fila (Departamento)</Label>
-          {departments.length === 0 ? (
-            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-              <p className="text-xs text-amber-600">Nenhum departamento cadastrado.</p>
-            </div>
-          ) : (
-            <Select
-              value={nodeData.errorDepartmentId || ''}
-              onValueChange={(v) => {
-                const dept = departments.find((d: any) => d.id === v);
-                handleUpdate('errorDepartmentId', v);
-                handleUpdate('errorDepartmentName', dept?.name || '');
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione a fila" />
-              </SelectTrigger>
-              <SelectContent>
-                {departments.map((dept: any) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: dept.color || '#3B82F6' }} />
-                      <span>{dept.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+    return (
+      <div className="space-y-3 mt-3">
+        <Separator />
+        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <p className="text-sm font-medium text-amber-600 dark:text-amber-400 mb-1">Regras de Erro</p>
+          <p className="text-xs text-amber-600/80 dark:text-amber-400/80">
+            Configuração para quando o cliente não digitar uma opção válida.
+          </p>
         </div>
-      )}
 
-      {nodeData.errorAction === 'transfer_agent' && (
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Atendente</Label>
-          {humanAgents.length === 0 ? (
-            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-              <p className="text-xs text-amber-600">Nenhum atendente cadastrado.</p>
-            </div>
-          ) : (
-            <Select
-              value={nodeData.errorAgentId || ''}
-              onValueChange={(v) => {
-                const agent = humanAgents.find((a: any) => a.id === v);
-                handleUpdate('errorAgentId', v);
-                handleUpdate('errorAgentName', agent?.name || '');
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o atendente" />
-              </SelectTrigger>
-              <SelectContent>
-                {humanAgents.map((agent: any) => (
-                  <SelectItem key={agent.id} value={agent.id}>
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full shrink-0 ${agent.isOnline ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                      <span>{agent.name}</span>
-                      {agent.isOnline && (
-                        <Badge variant="secondary" className="ml-1 text-xs bg-emerald-500/10 text-emerald-600">Online</Badge>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-      )}
-
-      {(['message', 'transfer_queue', 'transfer_agent'].includes(nodeData.errorAction || 'transfer_queue')) && (
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Mensagem final</Label>
+          <Label className="text-sm font-medium">Mensagem de opção inválida</Label>
           <Textarea
-            value={nodeData.errorFinalMessage || ''}
-            onChange={(e) => handleUpdate('errorFinalMessage', e.target.value)}
-            placeholder={['transfer_queue', 'transfer_agent'].includes(nodeData.errorAction || 'transfer_queue') ? "Você será transferido para um atendente. Aguarde." : "Desculpe, não conseguimos continuar. Tente novamente mais tarde."}
+            value={nodeData.invalidOptionMessage || ''}
+            onChange={(e) => handleUpdate('invalidOptionMessage', e.target.value)}
+            placeholder="Opção inválida. Por favor, escolha uma das opções acima."
             rows={2}
             className="resize-none"
           />
         </div>
-      )}
-    </div>
-  );
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Máximo de erros permitidos</Label>
+          <Input
+            type="number"
+            min={1}
+            max={10}
+            value={nodeData.maxErrors || 3}
+            onChange={(e) => handleUpdate('maxErrors', parseInt(e.target.value) || 3)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Após atingir este número, executa a ação abaixo.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Ação após erros</Label>
+          <Select
+            value={normalizedErrorAction}
+            onValueChange={(v) => {
+              handleUpdate('errorAction', v);
+              if (v !== 'transfer_queue') {
+                handleUpdate('errorDepartmentId', '');
+                handleUpdate('errorDepartmentName', '');
+              }
+              if (v !== 'transfer_agent') {
+                handleUpdate('errorAgentId', '');
+                handleUpdate('errorAgentName', '');
+              }
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="transfer_queue">Transferir para fila (departamento)</SelectItem>
+              <SelectItem value="transfer_agent">Transferir para atendente</SelectItem>
+              <SelectItem value="message">Enviar mensagem e encerrar</SelectItem>
+              <SelectItem value="restart">Reiniciar fluxo</SelectItem>
+              <SelectItem value="continue">Seguir pela saída de erro</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {normalizedErrorAction === 'transfer_queue' && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Fila (Departamento)</Label>
+            {departments.length === 0 ? (
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <p className="text-xs text-amber-600">Nenhum departamento cadastrado.</p>
+              </div>
+            ) : (
+              <Select
+                value={nodeData.errorDepartmentId || ''}
+                onValueChange={(v) => {
+                  const dept = departments.find((d: any) => d.id === v);
+                  handleUpdate('errorDepartmentId', v);
+                  handleUpdate('errorDepartmentName', dept?.name || '');
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a fila" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments.map((dept: any) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        )}
+
+        {normalizedErrorAction === 'transfer_agent' && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Atendente</Label>
+            {humanAgents.length === 0 ? (
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <p className="text-xs text-amber-600">Nenhum atendente cadastrado.</p>
+              </div>
+            ) : (
+              <Select
+                value={nodeData.errorAgentId || ''}
+                onValueChange={(v) => {
+                  const agent = humanAgents.find((a: any) => a.id === v);
+                  handleUpdate('errorAgentId', v);
+                  handleUpdate('errorAgentName', agent?.name || '');
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o atendente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {humanAgents.map((agent: any) => (
+                    <SelectItem key={agent.id} value={agent.id}>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${agent.isOnline ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                        <span>{agent.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        )}
+
+        {['message', 'transfer_queue', 'transfer_agent'].includes(normalizedErrorAction) && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Mensagem final</Label>
+            <Textarea
+              value={nodeData.errorFinalMessage || ''}
+              onChange={(e) => handleUpdate('errorFinalMessage', e.target.value)}
+              placeholder={['transfer_queue', 'transfer_agent'].includes(normalizedErrorAction)
+                ? "Você será transferido para um atendente. Aguarde."
+                : "Desculpe, não conseguimos continuar. Tente novamente mais tarde."}
+              rows={2}
+              className="resize-none"
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderMessageEditor = () => {
     return (
@@ -516,6 +521,58 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
                     placeholder="Palavras-chave: suporte, ajuda"
                     className="text-xs"
                   />
+
+                  <div className="space-y-2 rounded-md border bg-background/50 p-2">
+                    <Label className="text-xs">Destino desta opção</Label>
+                    <Select
+                      value={btn.routeType || 'flow'}
+                      onValueChange={(v) => {
+                        const buttons = [...(nodeData.buttons || [])];
+                        const current = buttons[index] || {};
+                        buttons[index] = {
+                          ...current,
+                          routeType: v,
+                          departmentId: v === 'department' ? (current.departmentId || '') : '',
+                          departmentName: v === 'department' ? (current.departmentName || '') : '',
+                        };
+                        handleUpdate('buttons', buttons);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Escolha o destino" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="flow">Continuar no fluxo</SelectItem>
+                        <SelectItem value="department">Transferir para departamento</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {(btn.routeType || 'flow') === 'department' && (
+                      <Select
+                        value={btn.departmentId || ''}
+                        onValueChange={(v) => {
+                          const dept = departments.find((d: any) => d.id === v);
+                          const buttons = [...(nodeData.buttons || [])];
+                          const current = buttons[index] || {};
+                          buttons[index] = {
+                            ...current,
+                            departmentId: v,
+                            departmentName: dept?.name || '',
+                          };
+                          handleUpdate('buttons', buttons);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o departamento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {departments.map((dept: any) => (
+                            <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -555,13 +612,65 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
                     </Button>
                   </div>
                   <p className="text-[10px] text-muted-foreground pl-8">
-                    {btn.text?.includes('|') 
+                    {btn.text?.includes('|')
                       ? `Texto: "${btn.text.split('|')[0]}" → ID: "${btn.text.split('|')[1]}"`
-                      : btn.text 
+                      : btn.text
                         ? `Texto: "${btn.text}" → ID: "${btn.text}"`
                         : 'Digite o texto do botão'
                     }
                   </p>
+
+                  <div className="space-y-2 rounded-md border bg-background/50 p-2">
+                    <Label className="text-xs">Destino desta opção</Label>
+                    <Select
+                      value={btn.routeType || 'flow'}
+                      onValueChange={(v) => {
+                        const buttons = [...(nodeData.buttons || [])];
+                        const current = buttons[index] || {};
+                        buttons[index] = {
+                          ...current,
+                          routeType: v,
+                          departmentId: v === 'department' ? (current.departmentId || '') : '',
+                          departmentName: v === 'department' ? (current.departmentName || '') : '',
+                        };
+                        handleUpdate('buttons', buttons);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Escolha o destino" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="flow">Continuar no fluxo</SelectItem>
+                        <SelectItem value="department">Transferir para departamento</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {(btn.routeType || 'flow') === 'department' && (
+                      <Select
+                        value={btn.departmentId || ''}
+                        onValueChange={(v) => {
+                          const dept = departments.find((d: any) => d.id === v);
+                          const buttons = [...(nodeData.buttons || [])];
+                          const current = buttons[index] || {};
+                          buttons[index] = {
+                            ...current,
+                            departmentId: v,
+                            departmentName: dept?.name || '',
+                          };
+                          handleUpdate('buttons', buttons);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o departamento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {departments.map((dept: any) => (
+                            <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -609,6 +718,58 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
                     placeholder="Descrição"
                     className="text-xs"
                   />
+
+                  <div className="space-y-2 rounded-md border bg-background/50 p-2">
+                    <Label className="text-xs">Destino desta opção</Label>
+                    <Select
+                      value={item.routeType || 'flow'}
+                      onValueChange={(v) => {
+                        const listItems = [...(nodeData.listItems || [])];
+                        const current = listItems[index] || {};
+                        listItems[index] = {
+                          ...current,
+                          routeType: v,
+                          departmentId: v === 'department' ? (current.departmentId || '') : '',
+                          departmentName: v === 'department' ? (current.departmentName || '') : '',
+                        };
+                        handleUpdate('listItems', listItems);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Escolha o destino" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="flow">Continuar no fluxo</SelectItem>
+                        <SelectItem value="department">Transferir para departamento</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {(item.routeType || 'flow') === 'department' && (
+                      <Select
+                        value={item.departmentId || ''}
+                        onValueChange={(v) => {
+                          const dept = departments.find((d: any) => d.id === v);
+                          const listItems = [...(nodeData.listItems || [])];
+                          const current = listItems[index] || {};
+                          listItems[index] = {
+                            ...current,
+                            departmentId: v,
+                            departmentName: dept?.name || '',
+                          };
+                          handleUpdate('listItems', listItems);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o departamento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {departments.map((dept: any) => (
+                            <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1060,7 +1221,7 @@ return { vars: {}, next: null };`}
   const renderMenuEditor = () => {
     const addMenuOption = () => {
       const options = nodeData.menuOptions || [];
-      handleUpdate('menuOptions', [...options, { id: Date.now().toString(), text: '', value: '', keywords: '' }]);
+      handleUpdate('menuOptions', [...options, { id: Date.now().toString(), text: '', value: '', keywords: '', routeType: 'flow', departmentId: '', departmentName: '' }]);
     };
 
     const updateMenuOption = (index: number, key: string, value: any) => {
@@ -1118,96 +1279,64 @@ return { vars: {}, next: null };`}
                   placeholder="Palavras-chave: suporte, ajuda"
                   className="text-xs"
                 />
+
+                <div className="space-y-2 rounded-md border bg-background/50 p-2">
+                  <Label className="text-xs">Destino desta opção</Label>
+                  <Select
+                    value={opt.routeType || 'flow'}
+                    onValueChange={(v) => {
+                      const options = [...(nodeData.menuOptions || [])];
+                      const current = options[index] || {};
+                      options[index] = {
+                        ...current,
+                        routeType: v,
+                        departmentId: v === 'department' ? (current.departmentId || '') : '',
+                        departmentName: v === 'department' ? (current.departmentName || '') : '',
+                      };
+                      handleUpdate('menuOptions', options);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Escolha o destino" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="flow">Continuar no fluxo</SelectItem>
+                      <SelectItem value="department">Transferir para departamento</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {(opt.routeType || 'flow') === 'department' && (
+                    <Select
+                      value={opt.departmentId || ''}
+                      onValueChange={(v) => {
+                        const dept = departments.find((d: any) => d.id === v);
+                        const options = [...(nodeData.menuOptions || [])];
+                        const current = options[index] || {};
+                        options[index] = {
+                          ...current,
+                          departmentId: v,
+                          departmentName: dept?.name || '',
+                        };
+                        handleUpdate('menuOptions', options);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o departamento" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departments.map((dept: any) => (
+                          <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <Separator />
-
-        {/* Regras de Erro integradas no Menu */}
-        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-          <p className="text-sm font-medium text-amber-600 dark:text-amber-400 mb-1">Regras de Erro</p>
-          <p className="text-xs text-amber-600/80 dark:text-amber-400/80">
-            Configuração para quando o cliente não digitar uma opção válida.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Mensagem de opção inválida</Label>
-          <Textarea
-            value={nodeData.invalidOptionMessage || ''}
-            onChange={(e) => handleUpdate('invalidOptionMessage', e.target.value)}
-            placeholder="Opção inválida. Por favor, escolha uma das opções acima."
-            rows={2}
-            className="resize-none"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Máximo de erros permitidos</Label>
-          <Input
-            type="number"
-            min={1}
-            max={10}
-            value={nodeData.maxErrors || 3}
-            onChange={(e) => handleUpdate('maxErrors', parseInt(e.target.value) || 3)}
-          />
-          <p className="text-xs text-muted-foreground">
-            Após atingir este número, segue pela saída de "Erro".
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Ação após erros</Label>
-          <Select value={nodeData.errorAction || 'continue'} onValueChange={(v) => handleUpdate('errorAction', v)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="continue">Seguir pela saída de erro</SelectItem>
-              <SelectItem value="transfer">Transferir para atendente</SelectItem>
-              <SelectItem value="message">Enviar mensagem e encerrar</SelectItem>
-              <SelectItem value="restart">Reiniciar fluxo</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {nodeData.errorAction === 'transfer' && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Departamento</Label>
-            <Select 
-              value={nodeData.errorDepartmentId || ''} 
-              onValueChange={(v) => {
-                const dept = departments.find((d: any) => d.id === v);
-                handleUpdate('errorDepartmentId', v);
-                handleUpdate('errorDepartmentName', dept?.name || '');
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {departments.map((dept: any) => (
-                  <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        {nodeData.errorAction === 'message' && (
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Mensagem final</Label>
-            <Textarea
-              value={nodeData.errorFinalMessage || ''}
-              onChange={(e) => handleUpdate('errorFinalMessage', e.target.value)}
-              placeholder="Desculpe, não conseguimos continuar. Tente novamente mais tarde."
-              rows={2}
-              className="resize-none"
-            />
-          </div>
-        )}
+        {renderErrorRulesSection()}
       </div>
     );
   };
