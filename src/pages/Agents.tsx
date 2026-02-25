@@ -98,17 +98,17 @@ const AgentsContent = () => {
     temperature: 0.7,
     responseStyle: "friendly",
     behavior: "reactive",
-    // Voice settings
     voiceEnabled: false,
     voiceId: "pFZP5JQG7iQjIQuC4Bku",
     voiceStability: 0.5,
     voiceSimilarity: 0.75,
     voiceSpeed: 1.0,
-    // Knowledge & capabilities
     knowledgeText: "",
     canUnderstandImages: false,
     canUnderstandAudio: false,
     canSendImages: false,
+    canProcessPdf: false,
+    canProcessVideo: false,
     aiProviderForVision: "gemini",
     aiProviderForAudio: "gemini",
   });
@@ -161,6 +161,8 @@ const AgentsContent = () => {
         canUnderstandImages: agentData.can_understand_images || false,
         canUnderstandAudio: agentData.can_understand_audio || false,
         canSendImages: agentData.can_send_images || false,
+        canProcessPdf: agentData.can_process_pdf || false,
+        canProcessVideo: agentData.can_process_video || false,
         aiProviderForVision: agentData.ai_provider_for_vision || "gemini",
         aiProviderForAudio: agentData.ai_provider_for_audio || "gemini",
       });
@@ -186,6 +188,8 @@ const AgentsContent = () => {
       canUnderstandImages: false,
       canUnderstandAudio: false,
       canSendImages: false,
+      canProcessPdf: false,
+      canProcessVideo: false,
       aiProviderForVision: "gemini",
       aiProviderForAudio: "gemini",
     });
@@ -238,6 +242,8 @@ const AgentsContent = () => {
           can_understand_images: formData.canUnderstandImages,
           can_understand_audio: formData.canUnderstandAudio,
           can_send_images: formData.canSendImages,
+          can_process_pdf: formData.canProcessPdf,
+          can_process_video: formData.canProcessVideo,
           ai_provider_for_vision: formData.aiProviderForVision,
           ai_provider_for_audio: formData.aiProviderForAudio,
         });
@@ -263,6 +269,8 @@ const AgentsContent = () => {
             can_understand_images: formData.canUnderstandImages,
             can_understand_audio: formData.canUnderstandAudio,
             can_send_images: formData.canSendImages,
+            can_process_pdf: formData.canProcessPdf,
+            can_process_video: formData.canProcessVideo,
             ai_provider_for_vision: formData.aiProviderForVision,
             ai_provider_for_audio: formData.aiProviderForAudio,
           }
@@ -524,106 +532,86 @@ const AgentsContent = () => {
                 </p>
               </div>
 
-              {/* Capability toggles */}
-              <div className="border-t pt-6 space-y-4">
-                <h3 className="font-medium text-foreground">Capacidades Multimídia</h3>
-                <p className="text-sm text-muted-foreground">
-                  Ative recursos de entendimento de imagem e áudio. Cada recurso usa a API do provedor configurado e será cobrado na conta do cliente.
+              {/* Configurações gerais - toggle style like reference */}
+              <div className="border-t pt-6 space-y-1">
+                <h3 className="font-medium text-foreground mb-3">Configurações gerais</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Ative os tipos de arquivo que o assistente irá processar. Os custos serão cobrados na conta do provedor de IA configurado pelo cliente.
                 </p>
 
-                {/* Image understanding */}
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Eye className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-medium text-sm">Entender Imagens</p>
-                      <p className="text-xs text-muted-foreground">O assistente poderá analisar imagens enviadas pelo cliente</p>
+                {[
+                  { key: 'canProcessPdf' as const, label: 'Processar arquivos PDF', icon: FileText },
+                  { key: 'canUnderstandAudio' as const, label: 'Processar arquivos de áudio', icon: Mic },
+                  { key: 'canProcessVideo' as const, label: 'Processar arquivos de vídeo', icon: Volume2 },
+                  { key: 'canUnderstandImages' as const, label: 'Processar arquivos de imagem', icon: Eye },
+                  { key: 'canSendImages' as const, label: 'Enviar imagens ao cliente', icon: Upload },
+                ].map((item) => (
+                  <div
+                    key={item.key}
+                    className="flex items-center gap-3 py-3 px-4 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => setFormData({ ...formData, [item.key]: !formData[item.key] })}
+                  >
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${formData[item.key] ? 'bg-emerald-500' : 'bg-muted border border-border'}`}>
+                      {formData[item.key] && <Check className="w-4 h-4 text-white" />}
                     </div>
+                    <span className="text-sm text-foreground">{item.label}</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Select
-                      value={formData.aiProviderForVision}
-                      onValueChange={(v) => setFormData({ ...formData, aiProviderForVision: v })}
-                      disabled={!formData.canUnderstandImages}
-                    >
-                      <SelectTrigger className="w-[140px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gemini">Gemini</SelectItem>
-                        <SelectItem value="openai">ChatGPT</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Switch
-                      checked={formData.canUnderstandImages}
-                      onCheckedChange={(v) => setFormData({ ...formData, canUnderstandImages: v })}
-                    />
-                  </div>
-                </div>
-
-                {formData.canUnderstandImages && !isProviderAvailable(formData.aiProviderForVision === 'openai' ? 'openai' : 'google') && (
-                  <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
-                    <AlertCircle className="w-4 h-4" />
-                    Configure a chave de API do {formData.aiProviderForVision === 'openai' ? 'ChatGPT' : 'Gemini'} em Configurações → IA
-                  </div>
-                )}
-
-                {/* Audio understanding */}
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Mic className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-medium text-sm">Entender Áudio</p>
-                      <p className="text-xs text-muted-foreground">O assistente poderá transcrever e entender áudios enviados</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Select
-                      value={formData.aiProviderForAudio}
-                      onValueChange={(v) => setFormData({ ...formData, aiProviderForAudio: v })}
-                      disabled={!formData.canUnderstandAudio}
-                    >
-                      <SelectTrigger className="w-[140px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gemini">Gemini</SelectItem>
-                        <SelectItem value="openai">ChatGPT</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Switch
-                      checked={formData.canUnderstandAudio}
-                      onCheckedChange={(v) => setFormData({ ...formData, canUnderstandAudio: v })}
-                    />
-                  </div>
-                </div>
-
-                {formData.canUnderstandAudio && !isProviderAvailable(formData.aiProviderForAudio === 'openai' ? 'openai' : 'google') && (
-                  <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
-                    <AlertCircle className="w-4 h-4" />
-                    Configure a chave de API do {formData.aiProviderForAudio === 'openai' ? 'ChatGPT' : 'Gemini'} em Configurações → IA
-                  </div>
-                )}
-
-                {/* Send images */}
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Upload className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="font-medium text-sm">Enviar Imagens</p>
-                      <p className="text-xs text-muted-foreground">O assistente poderá enviar imagens para o cliente</p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={formData.canSendImages}
-                    onCheckedChange={(v) => setFormData({ ...formData, canSendImages: v })}
-                  />
-                </div>
+                ))}
               </div>
+
+              {/* Provider selection */}
+              {(formData.canUnderstandImages || formData.canUnderstandAudio || formData.canProcessVideo) && (
+                <div className="border-t pt-6 space-y-4">
+                  <h3 className="font-medium text-foreground">Provedor de IA para processamento</h3>
+
+                  {(formData.canUnderstandImages || formData.canProcessVideo) && (
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Visão (imagem/vídeo)</Label>
+                      <Select
+                        value={formData.aiProviderForVision}
+                        onValueChange={(v) => setFormData({ ...formData, aiProviderForVision: v })}
+                      >
+                        <SelectTrigger className="w-[160px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="gemini">Gemini</SelectItem>
+                          <SelectItem value="openai">ChatGPT</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {formData.canUnderstandAudio && (
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm">Áudio</Label>
+                      <Select
+                        value={formData.aiProviderForAudio}
+                        onValueChange={(v) => setFormData({ ...formData, aiProviderForAudio: v })}
+                      >
+                        <SelectTrigger className="w-[160px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="gemini">Gemini</SelectItem>
+                          <SelectItem value="openai">ChatGPT</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {!isProviderAvailable(formData.aiProviderForVision === 'openai' ? 'openai' : 'google') && (
+                    <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      Configure a chave de API em <strong>Configurações → IA</strong>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground flex items-start gap-2">
                 <Info className="w-4 h-4 mt-0.5 shrink-0" />
-                <span>Os recursos de imagem e áudio utilizam a API do provedor selecionado (Gemini ou ChatGPT). Configure as chaves em <strong>Configurações → IA</strong> para que o custo seja cobrado diretamente na conta do cliente.</span>
+                <span>Os recursos multimídia utilizam a API do provedor selecionado (Gemini ou ChatGPT). Configure as chaves em <strong>Configurações → IA</strong> para que o custo seja cobrado diretamente na conta do cliente.</span>
               </div>
             </TabsContent>
 

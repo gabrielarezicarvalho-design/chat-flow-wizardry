@@ -18,6 +18,8 @@ export type Database = {
         Row: {
           ai_provider_for_audio: string | null
           ai_provider_for_vision: string | null
+          can_process_pdf: boolean | null
+          can_process_video: boolean | null
           can_send_images: boolean | null
           can_understand_audio: boolean | null
           can_understand_images: boolean | null
@@ -38,6 +40,8 @@ export type Database = {
         Insert: {
           ai_provider_for_audio?: string | null
           ai_provider_for_vision?: string | null
+          can_process_pdf?: boolean | null
+          can_process_video?: boolean | null
           can_send_images?: boolean | null
           can_understand_audio?: boolean | null
           can_understand_images?: boolean | null
@@ -58,6 +62,8 @@ export type Database = {
         Update: {
           ai_provider_for_audio?: string | null
           ai_provider_for_vision?: string | null
+          can_process_pdf?: boolean | null
+          can_process_video?: boolean | null
           can_send_images?: boolean | null
           can_understand_audio?: boolean | null
           can_understand_images?: boolean | null
