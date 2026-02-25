@@ -82,6 +82,7 @@ const Connections = () => {
   });
 
   const metaCacheKey = companyId ? `meta_connections_cache_${companyId}` : null;
+  const getMetaSettingsCacheKey = (connectionId: string) => `meta_connection_settings_cache_${connectionId}`;
 
   // Fetch Meta connections from whatsapp_connections table
   const fetchMetaConnections = useCallback(async () => {
@@ -547,6 +548,19 @@ const Connections = () => {
       // Meta Cloud API: configurações ficam na tabela settings por conexão
       if (connAny.provider === 'meta') {
         const settingsKey = `connection_settings_meta_${selectedConnection.id}`;
+        const localSettingsCacheKey = getMetaSettingsCacheKey(selectedConnection.id);
+
+        let cachedMetaSettings: any = null;
+        try {
+          const cachedRaw = sessionStorage.getItem(localSettingsCacheKey);
+          cachedMetaSettings = cachedRaw ? JSON.parse(cachedRaw) : null;
+        } catch {
+          cachedMetaSettings = null;
+        }
+
+        if (cachedMetaSettings) {
+          setSettings({ ...defaultSettings, ...cachedMetaSettings });
+        }
 
         const { data, error } = await supabase
           .from('settings')
@@ -557,14 +571,18 @@ const Connections = () => {
 
         if (error) {
           console.error('Erro ao carregar configurações Meta:', error);
-          resetDefaults();
+          if (!cachedMetaSettings) {
+            resetDefaults();
+          }
           return;
         }
 
         const savedSettings = (data?.value as any)?.settings;
         if (savedSettings) {
-          setSettings({ ...defaultSettings, ...savedSettings });
-        } else {
+          const mergedSettings = { ...defaultSettings, ...savedSettings };
+          setSettings(mergedSettings);
+          sessionStorage.setItem(localSettingsCacheKey, JSON.stringify(mergedSettings));
+        } else if (!cachedMetaSettings) {
           resetDefaults();
         }
         return;
@@ -1217,6 +1235,9 @@ const Connections = () => {
         if (metaSaveError) {
           throw metaSaveError;
         }
+
+        const localSettingsCacheKey = getMetaSettingsCacheKey(selectedConnection.id);
+        sessionStorage.setItem(localSettingsCacheKey, JSON.stringify(settings));
 
         // Espelhar também na conexão WhatsApp do módulo legado (motor de chatbot)
         const { data: appConnection, error: appConnectionError } = await supabase
@@ -2203,6 +2224,9 @@ const Connections = () => {
                 <SelectTrigger><SelectValue placeholder="Selecione um fluxo" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Nenhum</SelectItem>
+                  {settings.sendToUra && !flows.some((flow: any) => flow.id === settings.sendToUra) && (
+                    <SelectItem value={settings.sendToUra}>Fluxo selecionado</SelectItem>
+                  )}
                   {flows.map((flow: any) => (
                     <SelectItem key={flow.id} value={flow.id}>
                       {flow.name}
