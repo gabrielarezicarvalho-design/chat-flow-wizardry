@@ -52,11 +52,11 @@ serve(async (req) => {
       throw new Error('ElevenLabs API key not configured');
     }
 
-    // Use Lily (female, realistic Portuguese voice) as default
-    const voiceId = voice || 'pFZP5JQG7iQjIQuC4Bku';
-    const voiceStability = stability ?? 0.5;
-    const voiceSimilarity = similarity ?? 0.75;
-    const voiceSpeed = speed ?? 1.0;
+    // Use Sarah (soft, delicate, realistic female voice) as default
+    const voiceId = voice || 'EXAVITQu4vr4xnSDxMaL';
+    const voiceStability = stability ?? 0.45;
+    const voiceSimilarity = similarity ?? 0.8;
+    const voiceSpeed = speed ?? 0.95;
 
     console.log("🎤 Using ElevenLabs TTS, Voice ID:", voiceId);
 
@@ -74,7 +74,7 @@ serve(async (req) => {
           voice_settings: {
             stability: voiceStability,
             similarity_boost: voiceSimilarity,
-            style: 0.3,
+            style: 0.45,
             use_speaker_boost: true,
             speed: voiceSpeed,
           },
