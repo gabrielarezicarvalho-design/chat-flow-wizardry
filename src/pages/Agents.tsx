@@ -315,9 +315,6 @@ const AgentsContent = () => {
     setNewFunction({ name: "", description: "", function_type: "automation_ura", config: {} });
   };
 
-  const getModelAvailability = (model: typeof aiModels[0]) => {
-    return isProviderAvailable(model.provider);
-  };
 
   if (isLoading) {
     return (
@@ -410,18 +407,6 @@ const AgentsContent = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground flex items-center gap-2">
-                        Lovable AI (Incluído)
-                        <Badge variant="secondary" className="text-[10px]">Ativo</Badge>
-                      </div>
-                      {aiModels.filter(m => m.provider === "lovable").map(m => (
-                        <SelectItem key={m.value} value={m.value}>
-                          <div className="flex items-center gap-2">
-                            {m.label}
-                            <Check className="w-3 h-3 text-emerald-500" />
-                          </div>
-                        </SelectItem>
-                      ))}
-                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground flex items-center gap-2 mt-2">
                         OpenAI
                         {isProviderAvailable('openai') ? (
                           <Check className="w-3 h-3 text-emerald-500" />
@@ -430,7 +415,7 @@ const AgentsContent = () => {
                         )}
                       </div>
                       {aiModels.filter(m => m.provider === "openai").map(m => {
-                        const available = getModelAvailability(m);
+                        const available = isProviderAvailable('openai');
                         return (
                           <SelectItem key={m.value} value={m.value} disabled={!available}>
                             <div className="flex items-center gap-2">
@@ -453,7 +438,7 @@ const AgentsContent = () => {
                         )}
                       </div>
                       {aiModels.filter(m => m.provider === "google").map(m => {
-                        const available = getModelAvailability(m);
+                        const available = isProviderAvailable('google');
                         return (
                           <SelectItem key={m.value} value={m.value} disabled={!available}>
                             <div className="flex items-center gap-2">
