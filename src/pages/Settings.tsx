@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Building, User, Key, Webhook, Link as LinkIcon, CreditCard, Eye, EyeOff, Check, AlertCircle, Loader2, HardDrive, RefreshCw, FileText, Image, Database, Shield, X, Trash2 } from "lucide-react";
 import PrivacyPolicyContent from "@/components/settings/PrivacyPolicyContent";
+import { AISettingsSection } from "@/components/settings/AISettingsSection";
 import TermsOfServiceContent from "@/components/settings/TermsOfServiceContent";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -469,44 +470,7 @@ const Settings = () => {
           )}
 
           {activeTab === "apikeys" && (
-            <Card className="p-6">
-              <h2 className="text-xl font-bold text-foreground mb-4">API Keys</h2>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Production Key</p>
-                    <code className="text-xs text-muted-foreground">sk_live_••••••••••••••••</code>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => copyToClipboard("sk_live_1234567890abcdef", "Production Key")}
-                  >
-                    Copiar
-                  </Button>
-                </div>
-                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">Development Key</p>
-                    <code className="text-xs text-muted-foreground">sk_test_••••••••••••••••</code>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => copyToClipboard("sk_test_1234567890abcdef", "Development Key")}
-                  >
-                    Copiar
-                  </Button>
-                </div>
-              </div>
-              <Button 
-                className="mt-4" 
-                variant="outline"
-                onClick={handleGenerateKey}
-              >
-                Gerar Nova Key
-              </Button>
-            </Card>
+            <AISettingsSection />
           )}
 
           {activeTab === "webhooks" && (
