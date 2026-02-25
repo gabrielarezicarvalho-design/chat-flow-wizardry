@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Save, Settings, Trash2, Plus, Bot, FileText, Upload, X, Check, AlertCircle, Code, Globe, Mail, Calendar, Zap, Ticket, Eye, Mic, Volume2, Workflow, Info } from "lucide-react";
 import { PromptImprover } from "@/components/agents/PromptImprover";
+import { AgentDiagnostic } from "@/components/agents/AgentDiagnostic";
 import { useAgents } from "@/hooks/useAgents";
 import { useAgentDocuments } from "@/hooks/useAgentDocuments";
 import { useAgentFunctions, FUNCTION_TYPES, type FunctionVariable } from "@/hooks/useAgentFunctions";
@@ -477,6 +478,31 @@ const AgentsContent = () => {
                 onApplyKnowledge={(newKnowledge) => setFormData({ ...formData, knowledgeText: newKnowledge })}
               />
 
+              {/* Agent Diagnostic */}
+              <AgentDiagnostic
+                systemPrompt={formData.systemPrompt}
+                knowledgeText={formData.knowledgeText}
+                agentName={formData.name}
+                agentConfig={{
+                  model: formData.model,
+                  temperature: formData.temperature,
+                  can_understand_images: formData.canUnderstandImages,
+                  can_understand_audio: formData.canUnderstandAudio,
+                  can_send_images: formData.canSendImages,
+                  can_process_pdf: formData.canProcessPdf,
+                  signature: formData.signature,
+                  output_markers: formData.outputMarkers,
+                }}
+                onApplyPrompt={(newPrompt) => setFormData({ ...formData, systemPrompt: newPrompt })}
+                onApplyKnowledge={(newKnowledge) => setFormData({ ...formData, knowledgeText: newKnowledge })}
+                onApplyConfig={(config) => {
+                  const updates: any = { ...formData };
+                  if (config.temperature !== undefined) updates.temperature = config.temperature;
+                  if (config.model) updates.model = config.model;
+                  setFormData(updates);
+                  toast.success("Configuração atualizada!");
+                }}
+              />
               {/* Settings gear button */}
               <div className="flex justify-end pt-4 border-t">
                 <Button variant="outline" onClick={() => setShowSettings(true)}>

@@ -80,7 +80,7 @@ serve(async (req) => {
   }
 
   try {
-    const { systemPrompt, knowledgeText, agentName, mode, testMessage, chatHistory } = await req.json();
+    const { systemPrompt, knowledgeText, agentName, mode, testMessage, chatHistory, agentConfig } = await req.json();
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -256,6 +256,60 @@ IMPORTANTE:
           content: msg.content
         }));
       }
+    } else if (mode === "full_diagnostic") {
+      sysPrompt = `Você é um engenheiro de qualidade especializado em chatbots de atendimento via WhatsApp. Analise TODOS os aspectos do agente e retorne um diagnóstico completo em formato JSON PURO (sem markdown, sem backticks).
+
+O JSON deve ter esta estrutura exata:
+{
+  "issues": [
+    {
+      "category": "prompt|conhecimento|configuracao|sistema",
+      "severity": "critical|warning|info",
+      "title": "Título curto do problema",
+      "description": "Descrição detalhada do problema encontrado",
+      "fix_type": "prompt|knowledge|config|manual",
+      "fix_content": "O conteúdo corrigido ou instrução de correção",
+      "fix_description": "Explicação do que a correção faz"
+    }
+  ],
+  "score": 75,
+  "summary": "Resumo geral em 2-3 frases"
+}
+
+CATEGORIAS:
+1. prompt - Clareza do papel, tom de voz, limites, tratamento de exceções, instruções conflitantes
+2. conhecimento - Informações faltantes, organização, FAQ ausente, dados vagos
+3. configuracao - Modelo adequado, temperatura adequada, capacidades habilitadas
+4. sistema - Prompt muito longo/curto, base vazia, conflitos, assinatura ausente
+
+REGRAS:
+- Retorne APENAS JSON puro, sem texto antes ou depois, sem backticks
+- fix_type "prompt": fix_content = TRECHO a ADICIONAR ao prompt
+- fix_type "knowledge": fix_content = TRECHO a ADICIONAR à base
+- fix_type "config": fix_content = JSON de configs (ex: {"temperature": 0.5})
+- fix_type "manual": fix_content = instrução para o desenvolvedor
+- Score de 0-100 baseado na qualidade geral`;
+
+      const configInfo = agentConfig ? `\nCONFIG: Modelo=${agentConfig.model||"?"}, Temp=${agentConfig.temperature??0.7}, Imagens=${agentConfig.can_understand_images?"Sim":"Não"}, Áudio=${agentConfig.can_understand_audio?"Sim":"Não"}, PDF=${agentConfig.can_process_pdf?"Sim":"Não"}, Assinatura=${agentConfig.signature||"nenhuma"}, Marcadores=${agentConfig.output_markers||"nenhum"}` : "";
+
+      userMessage = `Diagnostique o agente "${agentName || "Assistente"}".
+
+PROMPT:
+"""
+${systemPrompt || "(VAZIO - PROBLEMA CRÍTICO)"}
+"""
+
+BASE DE CONHECIMENTO:
+"""
+${knowledgeText || "(vazia)"}
+"""
+${configInfo}`;
+    } else if (mode === "diagnostic_test") {
+      sysPrompt = systemPrompt || "Você é um assistente.";
+      if (knowledgeText) {
+        sysPrompt += `\n\nBASE DE CONHECIMENTO:\n${knowledgeText}`;
+      }
+      userMessage = testMessage || "";
     }
 
     let result: string | null = null;
