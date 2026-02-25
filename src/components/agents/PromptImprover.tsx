@@ -84,6 +84,7 @@ export const PromptImprover = ({
   // Audio playback
   const [playingAudioIdx, setPlayingAudioIdx] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -208,30 +209,18 @@ export const PromptImprover = ({
 
       // Send to AI
       const aiResponse = await sendToAI(transcribedText);
-      
-      // Generate TTS for the response
-      let responseAudioUrl: string | undefined;
-      try {
-        const { data: ttsData } = await supabase.functions.invoke("elevenlabs-tts", {
-          body: { text: aiResponse.cleanText },
-        });
-        if (ttsData?.success && ttsData?.audioContent) {
-          const audioDataUrl = `data:audio/mpeg;base64,${ttsData.audioContent}`;
-          responseAudioUrl = audioDataUrl;
-        }
-      } catch {
-        console.warn("TTS não disponível");
-      }
 
       setChatMessages(prev => [
         ...prev,
         {
           role: "assistant",
           content: aiResponse.cleanText,
-          audioUrl: responseAudioUrl,
           improvement: aiResponse.improvement,
         },
       ]);
+
+      // Auto-play response with browser TTS
+      speakText(aiResponse.cleanText, chatMessages.length + 1);
     } catch (err: any) {
       toast.error(err.message || "Erro ao processar áudio");
       setChatMessages(prev => [...prev, { role: "assistant", content: "❌ Erro ao processar o áudio." }]);
@@ -322,8 +311,25 @@ export const PromptImprover = ({
     });
   };
 
-  // --- Audio playback ---
+  // --- Audio playback via browser Speech Synthesis ---
+  const speakText = (text: string, idx: number) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "pt-BR";
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    // Try to find a Portuguese voice
+    const voices = window.speechSynthesis.getVoices();
+    const ptVoice = voices.find(v => v.lang.startsWith("pt")) || voices[0];
+    if (ptVoice) utterance.voice = ptVoice;
+    synthRef.current = utterance;
+    setPlayingAudioIdx(idx);
+    utterance.onend = () => setPlayingAudioIdx(null);
+    window.speechSynthesis.speak(utterance);
+  };
+
   const playAudio = (url: string, idx: number) => {
+    // For user audio messages with URL
     if (audioRef.current) audioRef.current.pause();
     const audio = new Audio(url);
     audioRef.current = audio;
@@ -333,6 +339,7 @@ export const PromptImprover = ({
   };
 
   const stopAudio = () => {
+    window.speechSynthesis.cancel();
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     setPlayingAudioIdx(null);
   };
@@ -481,13 +488,13 @@ export const PromptImprover = ({
                       {/* Text */}
                       <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
 
-                      {/* Audio play button for assistant */}
-                      {msg.role === "assistant" && msg.audioUrl && (
+                      {/* Audio play button for assistant - uses browser TTS */}
+                      {msg.role === "assistant" && (
                         <Button
                           variant="ghost"
                           size="sm"
                           className="mt-1.5 h-7 px-2 text-[11px] gap-1"
-                          onClick={() => playingAudioIdx === i ? stopAudio() : playAudio(msg.audioUrl!, i)}
+                          onClick={() => playingAudioIdx === i ? stopAudio() : speakText(msg.content, i)}
                         >
                           {playingAudioIdx === i ? (
                             <><VolumeX className="w-3.5 h-3.5" /> Parar áudio</>
