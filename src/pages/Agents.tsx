@@ -472,6 +472,7 @@ const AgentsContent = () => {
                 systemPrompt={formData.systemPrompt}
                 knowledgeText={formData.knowledgeText}
                 agentName={formData.name}
+                agentId={selectedAgent}
                 onApplyPrompt={(newPrompt) => setFormData({ ...formData, systemPrompt: newPrompt })}
                 onApplyKnowledge={(newKnowledge) => setFormData({ ...formData, knowledgeText: newKnowledge })}
               />
