@@ -3940,39 +3940,45 @@ ${mensagem}`;
     console.log("  🆕 Nova conversa:", isNewConversation);
     console.log("=".repeat(60));
 
-    // Buscar fluxos ativos do usuário - primeiro os vinculados à conexão, depois os gerais
-    const { data: connectionFlows, error: flowError1 } = await supabase
+    // Buscar o fluxo vinculado à conexão via credentials.settings.sendToUra
+    let linkedFlowId: string | null = null;
+    if (connection?.credentials) {
+      const creds = connection.credentials as any;
+      linkedFlowId = creds?.settings?.sendToUra || null;
+      console.log(`  🔗 Fluxo vinculado via settings: ${linkedFlowId || "nenhum"}`);
+    }
+
+    // Buscar fluxos ativos do usuário
+    const { data: allFlows, error: flowError1 } = await supabase
       .from("flows")
-      .select("id, name, flow_json, trigger, connection_id, executions_today")
+      .select("id, name, flow_data, trigger_type, is_active")
       .eq("user_id", userId)
-      .eq("status", "active")
-      .eq("connection_id", connectionId);
+      .eq("is_active", true);
 
-    const { data: generalFlows, error: flowError2 } = await supabase
-      .from("flows")
-      .select("id, name, flow_json, trigger, connection_id, executions_today")
-      .eq("user_id", userId)
-      .eq("status", "active")
-      .is("connection_id", null);
+    if (flowError1) console.log("❌ Erro ao buscar fluxos:", flowError1.message);
 
-    if (flowError1) console.log("❌ Erro ao buscar fluxos da conexão:", flowError1.message);
-    if (flowError2) console.log("❌ Erro ao buscar fluxos gerais:", flowError2.message);
+    // Priorizar o fluxo vinculado à conexão
+    let activeFlows = allFlows || [];
+    if (linkedFlowId) {
+      // Put linked flow first
+      activeFlows = [
+        ...activeFlows.filter((f: any) => f.id === linkedFlowId),
+        ...activeFlows.filter((f: any) => f.id !== linkedFlowId)
+      ];
+    }
 
-    // Priorizar fluxos vinculados à conexão
-    const activeFlows = [...(connectionFlows || []), ...(generalFlows || [])];
+    if (flowError1) console.log("❌ Erro ao buscar fluxos:", flowError1.message);
 
-    console.log(`📋 Fluxos da conexão: ${connectionFlows?.length || 0}`);
-    console.log(`📋 Fluxos gerais: ${generalFlows?.length || 0}`);
     console.log(`📋 Total de fluxos ativos: ${activeFlows.length}`);
 
     if (activeFlows && activeFlows.length > 0) {
       for (const flow of activeFlows) {
         console.log(`\n📄 Analisando fluxo: "${flow.name}"`);
         console.log(`   - ID: ${flow.id}`);
-        console.log(`   - Trigger: ${flow.trigger}`);
-        console.log(`   - Connection ID: ${flow.connection_id || "nenhum (geral)"}`);
+        console.log(`   - Trigger: ${flow.trigger_type}`);
+        console.log(`   - Vinculado: ${flow.id === linkedFlowId ? 'SIM' : 'não'}`);
         
-        const flowJson = flow.flow_json as any;
+        const flowJson = flow.flow_data as any;
         
         if (!flowJson?.nodes || !flowJson?.edges) {
           console.log(`   ⚠️ Fluxo sem dados válidos (nodes/edges ausentes)`);
@@ -3983,7 +3989,7 @@ ${mensagem}`;
         console.log(`   - Conexões: ${flowJson.edges.length}`);
 
         // Check if flow should trigger on this message
-        const trigger = flow.trigger || "message";
+        const trigger = flow.trigger_type || "message";
         
         // Trigger conditions
         const shouldTrigger = 
@@ -4033,12 +4039,10 @@ ${mensagem}`;
             flowExecuted = true;
             flowResponses = result.responses;
             
-            // Update flow execution count
+            // Update flow timestamp
             await supabase
               .from("flows")
-              .update({ 
-                executions_today: (flow.executions_today || 0) + 1 
-              })
+              .update({ updated_at: new Date().toISOString() })
               .eq("id", flow.id);
 
             console.log(`   ✅ Fluxo executado com sucesso!`);
