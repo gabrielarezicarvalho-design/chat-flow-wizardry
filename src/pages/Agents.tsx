@@ -24,18 +24,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 // All available AI models
 const aiModels = [
-  // Lovable AI Gateway models (always available)
-  { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash", provider: "lovable" },
-  { value: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro", provider: "lovable" },
-  { value: "google/gemini-2.5-flash-lite", label: "Gemini 2.5 Flash Lite", provider: "lovable" },
-  { value: "openai/gpt-5", label: "GPT-5", provider: "lovable" },
-  { value: "openai/gpt-5-mini", label: "GPT-5 Mini", provider: "lovable" },
-  { value: "openai/gpt-5-nano", label: "GPT-5 Nano", provider: "lovable" },
-  // Direct OpenAI models (requires user's OpenAI API key)
+  // OpenAI models (requires user's OpenAI API key)
   { value: "gpt-4o", label: "GPT-4o", provider: "openai" },
   { value: "gpt-4o-mini", label: "GPT-4o Mini", provider: "openai" },
   { value: "gpt-4-turbo", label: "GPT-4 Turbo", provider: "openai" },
-  // Direct Google Gemini models (requires user's Google API key)
+  // Google Gemini models (requires user's Google API key)
   { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash", provider: "google" },
   { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro", provider: "google" },
   { value: "gemini-1.5-flash", label: "Gemini 1.5 Flash", provider: "google" },
@@ -92,7 +85,7 @@ const AgentsContent = () => {
   const [formData, setFormData] = useState({
     name: "",
     signature: "",
-    model: "google/gemini-2.5-flash",
+    model: "gpt-4o",
     systemPrompt: "",
     outputMarkers: "",
     temperature: 0.7,
@@ -146,7 +139,7 @@ const AgentsContent = () => {
       setFormData({
         name: currentAgent.name || "",
         signature: agentData.signature || "",
-        model: agentData.model || "google/gemini-2.5-flash",
+        model: agentData.model || "gpt-4o",
         systemPrompt: currentAgent.system_prompt || "",
         outputMarkers: "",
         temperature: currentAgent.temperature || 0.7,
@@ -173,7 +166,7 @@ const AgentsContent = () => {
     setFormData({
       name: "",
       signature: "",
-      model: "google/gemini-2.5-flash",
+      model: "gpt-4o",
       systemPrompt: "",
       outputMarkers: "",
       temperature: 0.7,
