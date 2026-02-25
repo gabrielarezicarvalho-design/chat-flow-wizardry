@@ -2465,7 +2465,21 @@ serve(async (req) => {
       if (!content) return "";
       if (typeof content === "string") return content;
       if (typeof content === "object") {
-        return content.text || content.body || content.caption || JSON.stringify(content);
+        // Try to extract meaningful text fields first
+        const textValue = content.text || content.body || content.caption || content.message || "";
+        if (textValue && typeof textValue === "string") return textValue;
+        // For media messages (image, document, etc), return caption or empty - NEVER JSON.stringify
+        if (content.URL || content.url || content.mediaKey || content.fileSHA256 || 
+            content.mimetype || content.directPath || content.fileLength ||
+            content.mediaUrl || content.imageURL || content.documentUrl) {
+          return content.caption || content.title || "";
+        }
+        // Only stringify simple objects without media fields
+        const keys = Object.keys(content);
+        if (keys.length <= 3 && !keys.some(k => k.toLowerCase().includes('url') || k.toLowerCase().includes('media') || k.toLowerCase().includes('sha'))) {
+          return JSON.stringify(content);
+        }
+        return "";
       }
       return String(content);
     };
@@ -3466,15 +3480,37 @@ serve(async (req) => {
 
           console.log("📤 Enviando para Telegram...");
 
+          // Preparar texto da mensagem para Telegram
+          let telegramText = mensagem || "";
+          
+          // Se a mensagem parece ser JSON bruto (começa com { ou [), limpar
+          if (telegramText.startsWith('{') || telegramText.startsWith('[')) {
+            try {
+              const parsed = JSON.parse(telegramText);
+              // Tentar extrair texto útil do JSON
+              telegramText = parsed.text || parsed.body || parsed.caption || parsed.message || "[Mensagem com mídia]";
+            } catch {
+              telegramText = "[Mensagem com mídia]";
+            }
+          }
+          
+          // Escapar caracteres especiais do Markdown que podem quebrar a formatação
+          const escapeMarkdown = (text: string) => {
+            return text.replace(/([_*\[\]()~`>#+\-=|{}.!])/g, '\\$1');
+          };
+          
+          const safeContactName = escapeMarkdown(contactName || cleanPhone);
+          const safeTelegramText = escapeMarkdown(telegramText);
+
           // Construir mensagem formatada
           const telegramMessage = `📱 *Nova mensagem WhatsApp*
 
-👤 *Contato:* ${contactName || cleanPhone}
+👤 *Contato:* ${safeContactName}
 📞 *Telefone:* ${cleanPhone}
 ⏰ *Horário:* ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
 
 💬 *Mensagem:*
-${mensagem}`;
+${safeTelegramText}`;
 
           // Enviar diretamente via API do Telegram
           const TELEGRAM_BOT_TOKEN = config.telegram_bot_token || Deno.env.get("TELEGRAM_BOT_TOKEN");
@@ -3483,7 +3519,8 @@ ${mensagem}`;
             try {
               const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
               
-              const telegramResponse = await fetch(telegramUrl, {
+              // Tentar com Markdown primeiro, se falhar enviar sem formatação
+              let telegramResponse = await fetch(telegramUrl, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -3494,6 +3531,25 @@ ${mensagem}`;
                   parse_mode: "Markdown"
                 }),
               });
+
+              // Se Markdown falhar (caracteres especiais), enviar sem formatação
+              if (!telegramResponse.ok) {
+                const errorResult = await telegramResponse.json();
+                console.warn("⚠️ Markdown falhou, enviando sem formatação:", errorResult?.description);
+                
+                const plainMessage = `📱 Nova mensagem WhatsApp\n\n👤 Contato: ${contactName || cleanPhone}\n📞 Telefone: ${cleanPhone}\n⏰ Horário: ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}\n\n💬 Mensagem:\n${telegramText}`;
+                
+                telegramResponse = await fetch(telegramUrl, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    chat_id: config.telegram_chat_id,
+                    text: plainMessage
+                  }),
+                });
+              }
 
               const telegramResult = await telegramResponse.json();
               
