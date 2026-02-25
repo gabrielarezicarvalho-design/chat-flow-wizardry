@@ -19,6 +19,288 @@ serve(async (req) => {
 
   const url = new URL(req.url);
 
+  const resolveNextNodeId = (currentNodeId: string, edges: any[]): string | null => {
+    const edge = (edges || []).find((e: any) => e?.source === currentNodeId);
+    return edge?.target ?? null;
+  };
+
+  const replaceFlowVariables = (template: string, vars: Record<string, string>) => {
+    if (!template) return "";
+
+    return template
+      .replace(/\{\{\s*([\w.-]+)\s*\}\}/g, (_match, key) => vars[key] ?? "")
+      .replace(/\{\s*([\w.-]+)\s*\}/g, (_match, key) => vars[key] ?? "");
+  };
+
+  const buildMetaMessagePayload = (
+    nodeData: any,
+    to: string,
+    vars: Record<string, string>
+  ): { payload: Record<string, any>; textForStorage: string; messageType: string } | null => {
+    const messageType = nodeData?.messageType || "text";
+    const content = replaceFlowVariables(nodeData?.content || nodeData?.label || "", vars).trim();
+
+    if (messageType === "replyButtons") {
+      const rawButtons = Array.isArray(nodeData?.buttons) ? nodeData.buttons : [];
+      const buttons = rawButtons
+        .slice(0, 3)
+        .map((btn: any, index: number) => ({
+          type: "reply",
+          reply: {
+            id: String(btn?.value || btn?.id || `option_${index + 1}`),
+            title: String(btn?.text || `Opção ${index + 1}`).slice(0, 20),
+          },
+        }));
+
+      if (buttons.length > 0) {
+        const bodyText = content || "Escolha uma opção:";
+        return {
+          payload: {
+            messaging_product: "whatsapp",
+            to,
+            type: "interactive",
+            interactive: {
+              type: "button",
+              body: { text: bodyText },
+              action: { buttons },
+            },
+          },
+          textForStorage: `${bodyText}\n${buttons.map((b: any, i: number) => `${i + 1}. ${b.reply.title}`).join("\n")}`,
+          messageType: "interactive",
+        };
+      }
+    }
+
+    if (messageType === "list") {
+      const rawItems = Array.isArray(nodeData?.listItems) ? nodeData.listItems : [];
+      const rows = rawItems
+        .slice(0, 10)
+        .map((item: any, index: number) => ({
+          id: String(item?.value || item?.id || `item_${index + 1}`),
+          title: String(item?.title || item?.text || `Opção ${index + 1}`).slice(0, 24),
+          description: String(item?.description || "").slice(0, 72),
+        }));
+
+      if (rows.length > 0) {
+        const bodyText = content || "Selecione uma opção:";
+        return {
+          payload: {
+            messaging_product: "whatsapp",
+            to,
+            type: "interactive",
+            interactive: {
+              type: "list",
+              body: { text: bodyText },
+              action: {
+                button: String(nodeData?.listButtonText || "Ver opções").slice(0, 20),
+                sections: [
+                  {
+                    title: String(nodeData?.listTitle || "Opções").slice(0, 24),
+                    rows,
+                  },
+                ],
+              },
+            },
+          },
+          textForStorage: `${bodyText}\n${rows.map((r: any, i: number) => `${i + 1}. ${r.title}`).join("\n")}`,
+          messageType: "interactive",
+        };
+      }
+    }
+
+    const fallbackText = content || "...";
+    return {
+      payload: {
+        messaging_product: "whatsapp",
+        to,
+        type: "text",
+        text: { body: fallbackText },
+      },
+      textForStorage: fallbackText,
+      messageType: "text",
+    };
+  };
+
+  const sendMetaMessage = async ({
+    whatsappConnection,
+    to,
+    payload,
+    textForStorage,
+    messageType,
+    companyId,
+    whatsappConnectionId,
+    phoneNumberId,
+    conversationId,
+  }: {
+    whatsappConnection: any;
+    to: string;
+    payload: Record<string, any>;
+    textForStorage: string;
+    messageType: string;
+    companyId: string;
+    whatsappConnectionId: string;
+    phoneNumberId: string;
+    conversationId: string | null;
+  }) => {
+    if (!whatsappConnection?.meta_access_token || !whatsappConnection?.meta_phone_number_id) {
+      throw new Error("Conexão Meta sem credenciais válidas para envio");
+    }
+
+    const graphUrl = `https://graph.facebook.com/v21.0/${whatsappConnection.meta_phone_number_id}/messages`;
+
+    const response = await fetch(graphUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${whatsappConnection.meta_access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+    const waMessageId = result?.messages?.[0]?.id || null;
+
+    await supabaseAdmin.from("whatsapp_messages").insert({
+      company_id: companyId,
+      connection_id: whatsappConnectionId,
+      provider: "meta",
+      direction: "out",
+      wa_message_id: waMessageId,
+      from_number: phoneNumberId,
+      to_number: to,
+      phone_number_id: phoneNumberId,
+      message_type: messageType,
+      body: textForStorage,
+      status: response.ok ? "sent" : "failed",
+      raw: result,
+    });
+
+    if (conversationId) {
+      await supabaseAdmin.from("messages").insert({
+        conversation_id: conversationId,
+        sender_type: "agent",
+        content: textForStorage,
+        message_type: messageType,
+        status: response.ok ? "sent" : "failed",
+        external_id: waMessageId,
+      });
+
+      await supabaseAdmin
+        .from("conversations")
+        .update({
+          last_message: textForStorage,
+          last_message_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", conversationId);
+    }
+
+    if (!response.ok) {
+      throw new Error(result?.error?.message || "Falha ao enviar mensagem pela Meta");
+    }
+
+    return { waMessageId };
+  };
+
+  const executeMetaFlow = async ({
+    flow,
+    inboundMessage,
+    contactPhone,
+    contactName,
+    isNewConversation,
+    conversationId,
+    companyId,
+    whatsappConnection,
+    whatsappConnectionId,
+    phoneNumberId,
+  }: {
+    flow: any;
+    inboundMessage: string;
+    contactPhone: string;
+    contactName: string;
+    isNewConversation: boolean;
+    conversationId: string | null;
+    companyId: string;
+    whatsappConnection: any;
+    whatsappConnectionId: string;
+    phoneNumberId: string;
+  }) => {
+    const trigger = (flow?.trigger_type || "message").toLowerCase();
+    const triggerApplies =
+      trigger === "all" ||
+      trigger === "message" ||
+      (trigger === "first_message" && isNewConversation) ||
+      trigger === "keyword";
+
+    if (!triggerApplies) {
+      return { executed: false, reason: `trigger_not_applied:${trigger}` };
+    }
+
+    const flowData = (flow?.flow_data || {}) as any;
+    const nodes = Array.isArray(flowData?.nodes) ? flowData.nodes : [];
+    const edges = Array.isArray(flowData?.edges) ? flowData.edges : [];
+
+    if (!nodes.length || !edges.length) {
+      return { executed: false, reason: "invalid_flow_data" };
+    }
+
+    const startNode = nodes.find((node: any) => node?.type === "start");
+    if (!startNode?.id) {
+      return { executed: false, reason: "missing_start_node" };
+    }
+
+    const vars = {
+      contact_name: contactName,
+      contact_phone: contactPhone,
+      message: inboundMessage,
+    };
+
+    let executedMessages = 0;
+    let currentNodeId = resolveNextNodeId(startNode.id, edges);
+    let steps = 0;
+
+    while (currentNodeId && steps < 20) {
+      steps += 1;
+      const currentNode = nodes.find((node: any) => node?.id === currentNodeId);
+      if (!currentNode) break;
+
+      if (currentNode.type === "message") {
+        const built = buildMetaMessagePayload(currentNode.data, contactPhone, vars);
+        if (!built) break;
+
+        await sendMetaMessage({
+          whatsappConnection,
+          to: contactPhone,
+          payload: built.payload,
+          textForStorage: built.textForStorage,
+          messageType: built.messageType,
+          companyId,
+          whatsappConnectionId,
+          phoneNumberId,
+          conversationId,
+        });
+
+        executedMessages += 1;
+        currentNodeId = resolveNextNodeId(currentNode.id, edges);
+        continue;
+      }
+
+      if (currentNode.type === "delay") {
+        const delaySeconds = Number(currentNode?.data?.seconds || currentNode?.data?.delay || 1);
+        if (Number.isFinite(delaySeconds) && delaySeconds > 0 && delaySeconds <= 30) {
+          await new Promise((resolve) => setTimeout(resolve, delaySeconds * 1000));
+        }
+        currentNodeId = resolveNextNodeId(currentNode.id, edges);
+        continue;
+      }
+
+      // Para evitar comportamento inconsistente na Meta, paramos em nós não suportados aqui.
+      break;
+    }
+
+    return { executed: executedMessages > 0, responses: executedMessages };
+  };
+
   // ============================================================
   // GET: Meta webhook verification
   // ============================================================
