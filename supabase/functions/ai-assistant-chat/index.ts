@@ -253,49 +253,60 @@ serve(async (req) => {
     console.log("   - Voice enabled:", agent.voice_enabled);
     console.log("   - Voice ID:", agent.voice_id);
 
-    // Get Lovable API key first (preferred)
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    // Get company_id from agent
+    const companyId = agent.company_id;
     
-    // Buscar chaves de IA do usuário (fallback)
-    const { data: providerKeys, error: keysError } = await supabase
-      .from("ai_provider_keys")
-      .select("*")
-      .eq("user_id", agent.user_id)
-      .eq("is_configured", true)
-      .eq("is_valid", true);
-
-    if (keysError) {
-      console.error("⚠️ Erro ao buscar chaves de IA:", keysError);
+    // Buscar chaves de IA da empresa na tabela settings
+    let openaiKey: string | null = null;
+    let geminiKey: string | null = null;
+    
+    if (companyId) {
+      const { data: aiSettings } = await supabase
+        .from("settings")
+        .select("key, value")
+        .eq("company_id", companyId)
+        .in("key", ["ai_openai_key", "ai_gemini_key"]);
+      
+      if (aiSettings) {
+        for (const setting of aiSettings) {
+          const val = setting.value;
+          // Value can be stored as plain string or as JSON string
+          const extractKey = (v: any): string | null => {
+            if (!v) return null;
+            if (typeof v === 'string') return v;
+            if (typeof v === 'object' && v.key) return v.key;
+            return String(v);
+          };
+          if (setting.key === "ai_openai_key") openaiKey = extractKey(val);
+          if (setting.key === "ai_gemini_key") geminiKey = extractKey(val);
+        }
+      }
     }
 
-    console.log("🔑 LOVABLE_API_KEY disponível:", !!LOVABLE_API_KEY);
-    console.log("🔑 Chaves de IA do usuário:", providerKeys?.length || 0);
+    console.log("🔑 OpenAI key disponível:", !!openaiKey);
+    console.log("🔑 Gemini key disponível:", !!geminiKey);
 
     // Determine which AI provider to use
-    const agentModel = agent.model || "google/gemini-2.5-flash";
-    const isLovableModel = agentModel.includes("/"); // Lovable models have format "provider/model"
+    const agentModel = agent.model || "gpt-4o";
     const isOpenAIModel = agentModel.toLowerCase().includes("gpt");
+    const isGeminiModel = agentModel.toLowerCase().includes("gemini");
     
-    let selectedProvider = "lovable";
-    let apiKey = LOVABLE_API_KEY;
+    let selectedProvider = "";
+    let apiKey: string | null = null;
     
-    // If using Lovable model but no key, or using direct provider model
-    if (!LOVABLE_API_KEY || !isLovableModel) {
-      selectedProvider = isOpenAIModel ? "openai" : "google";
-      const providerKey = providerKeys?.find(k => k.provider === selectedProvider);
-      
-      // Fallback to other provider
-      if (!providerKey) {
-        const fallbackProvider = selectedProvider === "openai" ? "google" : "openai";
-        const fallbackKey = providerKeys?.find(k => k.provider === fallbackProvider);
-        if (fallbackKey) {
-          selectedProvider = fallbackProvider;
-          apiKey = fallbackKey.api_key;
-          console.log("⚠️ Usando provider alternativo:", selectedProvider);
-        }
-      } else {
-        apiKey = providerKey.api_key;
-      }
+    if (isOpenAIModel && openaiKey) {
+      selectedProvider = "openai";
+      apiKey = openaiKey;
+    } else if (isGeminiModel && geminiKey) {
+      selectedProvider = "google";
+      apiKey = geminiKey;
+    } else if (openaiKey) {
+      // Fallback: use whatever key is available
+      selectedProvider = "openai";
+      apiKey = openaiKey;
+    } else if (geminiKey) {
+      selectedProvider = "google";
+      apiKey = geminiKey;
     }
 
     if (!apiKey) {
@@ -421,15 +432,15 @@ IMPORTANTE:
     // Buscar histórico de mensagens da conversa (últimas 20)
     const { data: messageHistory } = await supabase
       .from("messages")
-      .select("remetente, conteudo, criado_em")
-      .eq("id_da_conversa", conversationId)
-      .order("criado_em", { ascending: true })
+      .select("sender_type, content, created_at")
+      .eq("conversation_id", conversationId)
+      .order("created_at", { ascending: true })
       .limit(20);
 
     // Construir contexto de mensagens
     const conversationMessages = (messageHistory || []).map(msg => ({
-      role: msg.remetente === "usuario" ? "user" : "assistant",
-      content: msg.conteudo
+      role: msg.sender_type === "contact" ? "user" : "assistant",
+      content: msg.content || ""
     }));
 
     // Adicionar mensagem atual com suporte a mídia (imagem/documento)
