@@ -84,7 +84,7 @@ export const PromptImprover = ({
   // Audio playback
   const [playingAudioIdx, setPlayingAudioIdx] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [ttsLoading, setTtsLoading] = useState(false);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -311,25 +311,36 @@ export const PromptImprover = ({
     });
   };
 
-  // --- Audio playback via browser Speech Synthesis ---
-  const speakText = (text: string, idx: number) => {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "pt-BR";
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    // Try to find a Portuguese voice
-    const voices = window.speechSynthesis.getVoices();
-    const ptVoice = voices.find(v => v.lang.startsWith("pt")) || voices[0];
-    if (ptVoice) utterance.voice = ptVoice;
-    synthRef.current = utterance;
+  // --- Audio playback via ElevenLabs TTS ---
+  const speakText = async (text: string, idx: number) => {
+    stopAudio();
+    setTtsLoading(true);
     setPlayingAudioIdx(idx);
-    utterance.onend = () => setPlayingAudioIdx(null);
-    window.speechSynthesis.speak(utterance);
+    try {
+      const { data: ttsData } = await supabase.functions.invoke("elevenlabs-tts", {
+        body: { text },
+      });
+      if (ttsData?.success && ttsData?.audioContent) {
+        const audioDataUrl = `data:audio/mpeg;base64,${ttsData.audioContent}`;
+        const audio = new Audio(audioDataUrl);
+        audioRef.current = audio;
+        audio.onended = () => setPlayingAudioIdx(null);
+        await audio.play();
+      } else {
+        console.warn("TTS falhou:", ttsData?.error);
+        toast.error("Erro ao gerar áudio: " + (ttsData?.error || "desconhecido"));
+        setPlayingAudioIdx(null);
+      }
+    } catch (err) {
+      console.error("TTS error:", err);
+      toast.error("Erro ao gerar áudio de voz");
+      setPlayingAudioIdx(null);
+    } finally {
+      setTtsLoading(false);
+    }
   };
 
   const playAudio = (url: string, idx: number) => {
-    // For user audio messages with URL
     if (audioRef.current) audioRef.current.pause();
     const audio = new Audio(url);
     audioRef.current = audio;
@@ -339,7 +350,6 @@ export const PromptImprover = ({
   };
 
   const stopAudio = () => {
-    window.speechSynthesis.cancel();
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     setPlayingAudioIdx(null);
   };

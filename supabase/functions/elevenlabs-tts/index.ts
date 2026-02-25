@@ -4,8 +4,27 @@ import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/b
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+// Strip emojis and special unicode characters from text
+function stripEmojis(text: string): string {
+  return text
+    .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+    .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+    .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+    .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')
+    .replace(/[\u{2600}-\u{26FF}]/gu, '')
+    .replace(/[\u{2700}-\u{27BF}]/gu, '')
+    .replace(/[\u{FE00}-\u{FE0F}]/gu, '')
+    .replace(/[\u{1F900}-\u{1F9FF}]/gu, '')
+    .replace(/[\u{1FA00}-\u{1FA6F}]/gu, '')
+    .replace(/[\u{1FA70}-\u{1FAFF}]/gu, '')
+    .replace(/[\u{200D}]/gu, '')
+    .replace(/[\u{20E3}]/gu, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,113 +32,64 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voice, stability, similarity, speed, saveToStorage, userId, provider } = await req.json();
+    const { text, voice, stability, similarity, speed, saveToStorage, userId } = await req.json();
     
     if (!text) {
       throw new Error('text is required');
     }
 
-    console.log("🔊 Generating TTS for text:", text.substring(0, 50));
-    console.log("   Provider requested:", provider || 'auto');
-
-    let audioBuffer: ArrayBuffer;
-    let usedProvider = 'openai';
-
-    // Try ElevenLabs first if API key is configured and provider is not explicitly set to openai
-    const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
-    
-    if (ELEVENLABS_API_KEY && provider !== 'openai') {
-      try {
-        console.log("🎤 Trying ElevenLabs TTS...");
-        
-        // Use provided voice or default
-        const voiceId = voice || 'pFZP5JQG7iQjIQuC4Bku'; // Lily - default voice
-        
-        // Voice settings with defaults
-        const voiceStability = stability ?? 0.5;
-        const voiceSimilarity = similarity ?? 0.75;
-        const voiceSpeed = speed ?? 1.0;
-
-        console.log("   Voice ID:", voiceId);
-
-        // Call ElevenLabs TTS API
-        const response = await fetch(
-          `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
-          {
-            method: 'POST',
-            headers: {
-              'xi-api-key': ELEVENLABS_API_KEY,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              text,
-              model_id: 'eleven_multilingual_v2',
-              voice_settings: {
-                stability: voiceStability,
-                similarity_boost: voiceSimilarity,
-                style: 0.3,
-                use_speaker_boost: true,
-                speed: voiceSpeed,
-              },
-            }),
-          }
-        );
-
-        if (response.ok) {
-          audioBuffer = await response.arrayBuffer();
-          usedProvider = 'elevenlabs';
-          console.log("✅ ElevenLabs TTS success, size:", audioBuffer.byteLength);
-        } else {
-          const errorText = await response.text();
-          console.error("⚠️ ElevenLabs TTS failed:", response.status, errorText);
-          throw new Error(`ElevenLabs error: ${response.status}`);
-        }
-      } catch (elevenLabsError) {
-        console.log("⚠️ ElevenLabs failed, falling back to OpenAI TTS...");
-        console.error("   Error:", elevenLabsError);
-      }
+    const cleanText = stripEmojis(text);
+    if (!cleanText) {
+      throw new Error('text is empty after removing emojis');
     }
 
-    // Fallback to OpenAI TTS if ElevenLabs failed or wasn't tried
-    if (!audioBuffer!) {
-      console.log("🤖 Using OpenAI TTS...");
-      
-      const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') || Deno.env.get('LOVABLE_API_KEY');
-      
-      if (!OPENAI_API_KEY) {
-        throw new Error('No TTS API key configured (OPENAI_API_KEY or LOVABLE_API_KEY)');
-      }
+    console.log("🔊 Generating TTS for text:", cleanText.substring(0, 50));
 
-      // Map voice to OpenAI voices
-      // OpenAI voices: alloy, echo, fable, onyx, nova, shimmer
-      const openaiVoice = mapVoiceToOpenAI(voice);
-      console.log("   OpenAI Voice:", openaiVoice);
+    // Try connector key first, then fallback to regular key
+    const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY_1') || Deno.env.get('ELEVENLABS_API_KEY');
+    
+    if (!ELEVENLABS_API_KEY) {
+      throw new Error('ElevenLabs API key not configured');
+    }
 
-      const response = await fetch('https://api.openai.com/v1/audio/speech', {
+    // Use Lily (female, realistic Portuguese voice) as default
+    const voiceId = voice || 'pFZP5JQG7iQjIQuC4Bku';
+    const voiceStability = stability ?? 0.5;
+    const voiceSimilarity = similarity ?? 0.75;
+    const voiceSpeed = speed ?? 1.0;
+
+    console.log("🎤 Using ElevenLabs TTS, Voice ID:", voiceId);
+
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+      {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'xi-api-key': ELEVENLABS_API_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'tts-1',
-          input: text,
-          voice: openaiVoice,
-          response_format: 'mp3',
-          speed: speed ?? 1.0,
+          text: cleanText,
+          model_id: 'eleven_multilingual_v2',
+          voice_settings: {
+            stability: voiceStability,
+            similarity_boost: voiceSimilarity,
+            style: 0.3,
+            use_speaker_boost: true,
+            speed: voiceSpeed,
+          },
         }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("❌ OpenAI TTS error:", response.status, errorText);
-        throw new Error(`OpenAI TTS error: ${response.status}`);
       }
+    );
 
-      audioBuffer = await response.arrayBuffer();
-      usedProvider = 'openai';
-      console.log("✅ OpenAI TTS success, size:", audioBuffer.byteLength);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ ElevenLabs TTS error:", response.status, errorText);
+      throw new Error(`ElevenLabs TTS error: ${response.status}`);
     }
+
+    const audioBuffer = await response.arrayBuffer();
+    console.log("✅ ElevenLabs TTS success, size:", audioBuffer.byteLength);
 
     // If saveToStorage is true, upload to Supabase Storage and return URL
     if (saveToStorage && userId) {
@@ -130,27 +100,22 @@ serve(async (req) => {
 
       const fileName = `tts/${userId}/${Date.now()}.mp3`;
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('ai-audio')
         .upload(fileName, audioBuffer, {
           contentType: 'audio/mpeg',
           upsert: false
         });
 
-      if (uploadError) {
-        console.error("❌ Storage upload error:", uploadError);
-        // Fall back to base64 response
-      } else {
+      if (!uploadError) {
         const { data: urlData } = supabase.storage
           .from('ai-audio')
           .getPublicUrl(fileName);
 
-        console.log("✅ Audio saved to storage:", urlData.publicUrl);
-
         return new Response(JSON.stringify({
           success: true,
           audioUrl: urlData.publicUrl,
-          provider: usedProvider
+          provider: 'elevenlabs'
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -163,7 +128,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       audioContent: base64Audio,
-      provider: usedProvider
+      provider: 'elevenlabs'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -179,40 +144,3 @@ serve(async (req) => {
     });
   }
 });
-
-// Map ElevenLabs voice IDs or names to OpenAI voices
-function mapVoiceToOpenAI(voice?: string): string {
-  if (!voice) return 'nova'; // Default female voice
-  
-  // If it's already an OpenAI voice name
-  const openaiVoices = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
-  if (openaiVoices.includes(voice.toLowerCase())) {
-    return voice.toLowerCase();
-  }
-  
-  // Map common ElevenLabs voice IDs to OpenAI equivalents
-  const voiceMap: Record<string, string> = {
-    // Female voices -> nova or shimmer
-    'pFZP5JQG7iQjIQuC4Bku': 'nova',      // Lily
-    'EXAVITQu4vr4xnSDxMaL': 'nova',      // Sarah
-    'FGY2WhTYpPnrIDTdsKH5': 'shimmer',   // Laura
-    'Xb7hH8MSUJpSbSDYk0k2': 'shimmer',   // Alice
-    'XrExE9yKIg1WjnnlVkGX': 'nova',      // Matilda
-    'cgSgspJ2msm6clMCkdW9': 'nova',      // Jessica
-    
-    // Male voices -> onyx, echo, or fable
-    'CwhRBWXzGAHq8TQ4Fs17': 'onyx',      // Roger
-    'IKne3meq5aSn9XLyUdCD': 'echo',      // Charlie
-    'JBFqnCBsd6RMkjVDRZzb': 'onyx',      // George
-    'N2lVS1w4EtoT3dr4eOWO': 'echo',      // Callum
-    'TX3LPaxmHKxFdv7VOQHJ': 'fable',     // Liam
-    'bIHbv24MWmeRgasZH58o': 'echo',      // Will
-    'cjVigY5qzO86Huf0OWal': 'onyx',      // Eric
-    'iP95p4xoKVk53GoZ742B': 'echo',      // Chris
-    'nPczCjzI2devNBz1zQrb': 'onyx',      // Brian
-    'onwK4e9ZLuTAKqWW03F9': 'fable',     // Daniel
-    'pqHfZKP75CvOlQylNhV4': 'onyx',      // Bill
-  };
-  
-  return voiceMap[voice] || 'nova';
-}
