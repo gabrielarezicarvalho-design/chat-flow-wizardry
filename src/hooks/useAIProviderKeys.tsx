@@ -109,7 +109,6 @@ export const useAIProviderKeys = () => {
   };
 
   const isProviderAvailable = (provider: string) => {
-    if (provider === 'lovable') return true;
     return getKeyStatus(provider).isConfigured;
   };
 
