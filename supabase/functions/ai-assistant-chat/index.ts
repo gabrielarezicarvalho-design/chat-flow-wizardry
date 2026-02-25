@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 // Helper function to check if current time is within business hours
@@ -96,33 +96,7 @@ function buildMessageContent(text: string, mediaUrl?: string, mediaType?: string
   return content;
 }
 
-// Call Lovable AI Gateway (supports vision/multimodal)
-async function callLovableAI(apiKey: string, model: string, messages: any[], temperature: number) {
-  console.log("📤 Chamando Lovable AI Gateway...");
-  console.log("   Model:", model);
-  
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: model || "google/gemini-2.5-flash",
-      messages,
-      temperature,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("❌ Erro Lovable AI:", response.status, errorText);
-    throw new Error(`Lovable AI error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content;
-}
+// Removed: Lovable AI Gateway is discontinued. Using user's own API keys only.
 
 // Call OpenAI API (fallback)
 async function callOpenAI(apiKey: string, model: string, messages: any[], temperature: number) {
@@ -139,7 +113,7 @@ async function callOpenAI(apiKey: string, model: string, messages: any[], temper
       model: model || "gpt-4o-mini",
       messages,
       temperature,
-      max_tokens: 500
+      max_tokens: 2000
     }),
   });
 
@@ -183,7 +157,7 @@ async function callGemini(apiKey: string, model: string, messages: any[], temper
       systemInstruction,
       generationConfig: {
         temperature,
-        maxOutputTokens: 500
+        maxOutputTokens: 2000
       }
     }),
   });
@@ -530,14 +504,7 @@ ${asaasContext}`;
     } else {
       // Chamar IA normalmente
       try {
-        if (selectedProvider === "lovable") {
-          aiResponse = await callLovableAI(
-            apiKey!,
-            agentModel,
-            messages,
-            agent.temperature || 0.7
-          );
-        } else if (selectedProvider === "openai") {
+        if (selectedProvider === "openai") {
           aiResponse = await callOpenAI(
             apiKey!,
             agentModel.includes("gpt") ? agentModel : "gpt-4o-mini",
