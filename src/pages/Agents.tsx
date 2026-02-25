@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Save, Settings, Trash2, Plus, Bot, FileText, Upload, X, Check, AlertCircle, Code, Globe, Mail, Calendar, Zap, Ticket, Eye, Mic, Volume2, Workflow, Info } from "lucide-react";
+import { PromptImprover } from "@/components/agents/PromptImprover";
 import { useAgents } from "@/hooks/useAgents";
 import { useAgentDocuments } from "@/hooks/useAgentDocuments";
 import { useAgentFunctions, FUNCTION_TYPES, type FunctionVariable } from "@/hooks/useAgentFunctions";
@@ -465,6 +466,15 @@ const AgentsContent = () => {
                   className="mt-1 min-h-[100px]"
                 />
               </div>
+
+              {/* AI Prompt Improver */}
+              <PromptImprover
+                systemPrompt={formData.systemPrompt}
+                knowledgeText={formData.knowledgeText}
+                agentName={formData.name}
+                onApplyPrompt={(newPrompt) => setFormData({ ...formData, systemPrompt: newPrompt })}
+                onApplyKnowledge={(newKnowledge) => setFormData({ ...formData, knowledgeText: newKnowledge })}
+              />
 
               {/* Settings gear button */}
               <div className="flex justify-end pt-4 border-t">
