@@ -31,6 +31,8 @@ export type Database = {
           knowledge_text: string | null
           model: string | null
           name: string
+          output_markers: string | null
+          signature: string | null
           status: string | null
           system_prompt: string | null
           temperature: number | null
@@ -53,6 +55,8 @@ export type Database = {
           knowledge_text?: string | null
           model?: string | null
           name: string
+          output_markers?: string | null
+          signature?: string | null
           status?: string | null
           system_prompt?: string | null
           temperature?: number | null
@@ -75,6 +79,8 @@ export type Database = {
           knowledge_text?: string | null
           model?: string | null
           name?: string
+          output_markers?: string | null
+          signature?: string | null
           status?: string | null
           system_prompt?: string | null
           temperature?: number | null
