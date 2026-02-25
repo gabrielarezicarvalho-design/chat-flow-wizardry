@@ -31,32 +31,50 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
   const { agents } = useAgents();
   
   // Buscar atendentes humanos
-  const { data: humanAgents = [] } = useQuery({
-    queryKey: ['human-agents-for-flow-new'],
+  // Buscar o company_id do usuário logado
+  const { data: currentProfile } = useQuery({
+    queryKey: ['current-profile-company'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data } = await supabase.from('profiles').select('company_id').eq('id', user.id).maybeSingle();
+      return data;
+    }
+  });
+
+  const { data: humanAgents = [] } = useQuery({
+    queryKey: ['human-agents-for-flow-new', currentProfile?.company_id],
+    queryFn: async () => {
+      if (!currentProfile?.company_id) return [];
+
+      // Buscar profiles da mesma empresa
+      const { data: companyProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, username, is_online')
+        .eq('company_id', currentProfile.company_id);
+      
+      if (profilesError) throw profilesError;
+      if (!companyProfiles || companyProfiles.length === 0) return [];
+
+      // Filtrar apenas os que têm role 'agent'
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id')
-        .eq('role', 'agent');
+        .eq('role', 'agent')
+        .in('user_id', companyProfiles.map(p => p.id));
       
       if (rolesError) throw rolesError;
-      if (!roles || roles.length === 0) return [];
+      const agentIds = new Set((roles || []).map(r => r.user_id));
       
-      const userIds = roles.map(r => r.user_id);
-      
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, full_name, username, is_online')
-        .in('id', userIds);
-      
-      if (profilesError) throw profilesError;
-      
-      return (profiles || []).map((p: any) => ({
-        id: p.id,
-        name: p.full_name || p.username || 'Atendente',
-        isOnline: p.is_online
-      }));
-    }
+      return companyProfiles
+        .filter(p => agentIds.has(p.id))
+        .map((p: any) => ({
+          id: p.id,
+          name: p.full_name || p.username || 'Atendente',
+          isOnline: p.is_online
+        }));
+    },
+    enabled: !!currentProfile?.company_id
   });
 
   useEffect(() => {
