@@ -80,7 +80,7 @@ const AgentsContent = () => {
   
   // Filter automation URAs
   const automationFlows = flows.filter((flow: any) => {
-    const flowJson = flow.flow_json;
+    const flowJson = flow.flow_data;
     return flowJson?.type === 'automation';
   });
   

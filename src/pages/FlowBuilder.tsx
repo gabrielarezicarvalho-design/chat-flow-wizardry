@@ -97,8 +97,8 @@ const FlowBuilder = () => {
     try {
       const flowData = {
         name: flowName,
-        trigger: 'message',
-        flow_json: { type: flowType, nodes, edges },
+        trigger_type: 'message',
+        flow_data: { type: flowType, nodes, edges },
       };
 
       if (id) {
@@ -131,9 +131,9 @@ const FlowBuilder = () => {
     try {
       const flowData = {
         name: flowName,
-        trigger: 'message',
-        flow_json: { type: flowType, nodes, edges },
-        status: 'active'
+        trigger_type: 'message',
+        flow_data: { type: flowType, nodes, edges },
+        is_active: true
       };
 
       if (id) {
