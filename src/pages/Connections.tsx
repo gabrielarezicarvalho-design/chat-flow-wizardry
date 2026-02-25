@@ -1161,6 +1161,40 @@ const Connections = () => {
     try {
       const connAny = selectedConnection as any;
 
+      const syncFlowActivation = async () => {
+        if (settings.sendToUra && settings.sendToUra !== "none") {
+          const { data: previousFlows } = await supabase
+            .from("flows")
+            .select("id")
+            .eq("is_active", true);
+
+          if (previousFlows && previousFlows.length > 0) {
+            for (const prevFlow of previousFlows) {
+              if (prevFlow.id !== settings.sendToUra) {
+                await supabase
+                  .from("flows")
+                  .update({ is_active: false })
+                  .eq("id", prevFlow.id);
+              }
+            }
+          }
+
+          const { error: flowError } = await supabase
+            .from("flows")
+            .update({ is_active: true })
+            .eq("id", settings.sendToUra);
+
+          if (flowError) {
+            throw flowError;
+          }
+          return;
+        }
+
+        await supabase
+          .from("flows")
+          .update({ is_active: false });
+      };
+
       // Meta Cloud API: salvar configurações por conexão na tabela settings
       if (connAny.provider === 'meta') {
         const companyId = connAny.company_id;
@@ -1184,13 +1218,41 @@ const Connections = () => {
           throw metaSaveError;
         }
 
+        // Espelhar também na conexão WhatsApp do módulo legado (motor de chatbot)
+        const { data: appConnection, error: appConnectionError } = await supabase
+          .from('connections')
+          .select('id, credentials')
+          .eq('company_id', companyId)
+          .eq('platform', 'whatsapp')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (appConnectionError) {
+          console.error('Erro ao buscar conexão WhatsApp para espelhar settings:', appConnectionError);
+        }
+
+        if (appConnection?.id) {
+          const appCreds = (appConnection.credentials as any) || {};
+          await updateConnection.mutateAsync({
+            id: appConnection.id,
+            updates: {
+              credentials: {
+                ...appCreds,
+                settings,
+                auto_save_contacts: settings.autoSaveContacts === 'sim'
+              }
+            }
+          });
+        }
+
+        await syncFlowActivation();
         toast.success("Configurações salvas com sucesso!");
         return;
       }
 
       const currentCreds = (selectedConnection.credentials as any) || {};
       
-      // Save settings to regular connection (including auto_save_contacts column)
       const updatedConnection = await updateConnection.mutateAsync({
         id: selectedConnection.id,
         updates: {
@@ -1209,47 +1271,8 @@ const Connections = () => {
         });
       }
 
-      // If a flow is selected, update the flow's is_active to link it
-      if (settings.sendToUra && settings.sendToUra !== "none") {
-        // First, deactivate any previously linked flows from this connection
-        const { data: previousFlows } = await supabase
-          .from("flows")
-          .select("id")
-          .eq("is_active", true);
-
-        if (previousFlows && previousFlows.length > 0) {
-          for (const prevFlow of previousFlows) {
-            if (prevFlow.id !== settings.sendToUra) {
-              await supabase
-                .from("flows")
-                .update({ is_active: false })
-                .eq("id", prevFlow.id);
-            }
-          }
-        }
-
-        // Link the selected flow to this connection and activate it
-        const { error: flowError } = await supabase
-          .from("flows")
-          .update({ 
-            is_active: true 
-          })
-          .eq("id", settings.sendToUra);
-
-        if (flowError) {
-          console.error("Erro ao vincular fluxo:", flowError);
-          toast.warning("Configurações salvas, mas houve erro ao vincular fluxo");
-        } else {
-          toast.success("Configurações e fluxo salvos com sucesso!");
-        }
-      } else {
-        // Deactivate all flows if "none" is selected
-        await supabase
-          .from("flows")
-          .update({ is_active: false });
-          
-        toast.success("Configurações salvas com sucesso!");
-      }
+      await syncFlowActivation();
+      toast.success("Configurações salvas com sucesso!");
     } catch (error) {
       console.error("Erro ao salvar:", error);
       toast.error("Erro ao salvar configurações");
