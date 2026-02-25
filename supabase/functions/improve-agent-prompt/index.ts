@@ -6,7 +6,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-async function callOpenAI(apiKey: string, systemPrompt: string, userMessage: string) {
+async function callOpenAI(apiKey: string, systemPrompt: string, userMessage: string, chatHistory?: any[]) {
+  const messages: any[] = [{ role: "system", content: systemPrompt }];
+  
+  if (chatHistory && chatHistory.length > 0) {
+    messages.push(...chatHistory);
+  }
+  
+  messages.push({ role: "user", content: userMessage });
+
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -15,10 +23,7 @@ async function callOpenAI(apiKey: string, systemPrompt: string, userMessage: str
     },
     body: JSON.stringify({
       model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userMessage },
-      ],
+      messages,
       temperature: 0.7,
       max_tokens: 4000,
     }),
@@ -34,13 +39,26 @@ async function callOpenAI(apiKey: string, systemPrompt: string, userMessage: str
   return data.choices?.[0]?.message?.content;
 }
 
-async function callGemini(apiKey: string, systemPrompt: string, userMessage: string) {
+async function callGemini(apiKey: string, systemPrompt: string, userMessage: string, chatHistory?: any[]) {
+  const contents: any[] = [];
+  
+  if (chatHistory && chatHistory.length > 0) {
+    for (const msg of chatHistory) {
+      contents.push({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.content }]
+      });
+    }
+  }
+  
+  contents.push({ role: "user", parts: [{ text: userMessage }] });
+
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: userMessage }] }],
+      contents,
       systemInstruction: { parts: [{ text: systemPrompt }] },
       generationConfig: { temperature: 0.7, maxOutputTokens: 4000 },
     }),
@@ -64,12 +82,10 @@ serve(async (req) => {
   try {
     const { systemPrompt, knowledgeText, agentName, mode, testMessage, chatHistory } = await req.json();
 
-    // Get user's company AI keys from settings
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get user from auth header
     const authHeader = req.headers.get("Authorization");
     let companyId: string | null = null;
 
@@ -86,7 +102,6 @@ serve(async (req) => {
       }
     }
 
-    // Fetch AI keys from settings
     let openaiKey: string | null = null;
     let geminiKey: string | null = null;
 
@@ -119,11 +134,12 @@ serve(async (req) => {
       );
     }
 
-    let sysPrompt = "Você é um especialista em engenharia de prompts e design de assistentes de IA. Sua tarefa é ajudar a melhorar prompts e bases de conhecimento de chatbots de atendimento via WhatsApp. Seja prático, direto e dê sugestões acionáveis. Sempre mantenha o conteúdo original e apenas adicione/melhore.";
-
+    let sysPrompt = "";
     let userMessage = "";
+    let formattedHistory: any[] | undefined;
 
     if (mode === "improve_prompt") {
+      sysPrompt = "Você é um especialista em engenharia de prompts e design de assistentes de IA. Sua tarefa é ajudar a melhorar prompts e bases de conhecimento de chatbots de atendimento via WhatsApp. Seja prático, direto e dê sugestões acionáveis. Sempre mantenha o conteúdo original e apenas adicione/melhore.";
       userMessage = `Analise o seguinte prompt de sistema de um assistente de IA chamado "${agentName || "Assistente"}" e sugira melhorias. NÃO apague nada do prompt original. Apenas adicione, ajuste e melhore.
 
 PROMPT ATUAL:
@@ -139,6 +155,7 @@ Responda em português brasileiro com:
 
 Foque em: clareza de papel, tom de voz, limites de atuação, formato de resposta, e tratamento de exceções.`;
     } else if (mode === "improve_knowledge") {
+      sysPrompt = "Você é um especialista em engenharia de prompts e design de assistentes de IA. Sua tarefa é ajudar a melhorar prompts e bases de conhecimento de chatbots de atendimento via WhatsApp. Seja prático, direto e dê sugestões acionáveis. Sempre mantenha o conteúdo original e apenas adicione/melhore.";
       userMessage = `Analise a seguinte base de conhecimento de um assistente de IA chamado "${agentName || "Assistente"}" e sugira melhorias de organização e conteúdo. NÃO apague nada do conteúdo original.
 
 BASE DE CONHECIMENTO ATUAL:
@@ -154,6 +171,7 @@ Responda em português brasileiro com:
 
 Foque em: organização por seções, uso de marcadores, clareza, FAQ estruturado, e informações que podem estar faltando.`;
     } else if (mode === "suggest_additions") {
+      sysPrompt = "Você é um especialista em engenharia de prompts e design de assistentes de IA. Sua tarefa é ajudar a melhorar prompts e bases de conhecimento de chatbots de atendimento via WhatsApp. Seja prático, direto e dê sugestões acionáveis. Sempre mantenha o conteúdo original e apenas adicione/melhore.";
       userMessage = `Com base no prompt e na base de conhecimento abaixo de um assistente de IA chamado "${agentName || "Assistente"}", sugira conteúdos adicionais que podem melhorar as respostas.
 
 PROMPT:
@@ -173,50 +191,88 @@ Responda em português brasileiro com:
 3. **Exemplos de perguntas difíceis** - liste 5 perguntas que o assistente provavelmente erraria hoje e como deveria responder
 4. **Template de FAQ sugerido** - crie um modelo de FAQ que pode ser preenchido pelo usuário, entre \`\`\`faq e \`\`\``;
     } else if (mode === "diagnostic_chat") {
-      // Diagnostic chat mode: simulates a conversation with the agent to test the prompt
+      // EMPLOYEE CONVERSATION MODE
+      // The manager (user) talks to the AI as their employee, giving feedback, corrections, etc.
       
-      // Build a diagnostic system prompt
-      sysPrompt = `Você vai SIMULAR ser o assistente "${agentName || "Assistente"}" usando exatamente o prompt e base de conhecimento fornecidos abaixo.
+      sysPrompt = `Você é a funcionária "${agentName || "Assistente"}" de uma empresa. Seu gerente está conversando com você para treinar, avaliar e melhorar seu atendimento.
 
-PROMPT DO ASSISTENTE:
+CONTEXTO ATUAL DO SEU TRABALHO:
+- Seu prompt de atendimento atual é:
 """
 ${systemPrompt || "(sem prompt configurado)"}
 """
 
-BASE DE CONHECIMENTO:
+- Sua base de conhecimento atual é:
 """
 ${knowledgeText || "(sem base de conhecimento)"}
 """
 
-REGRAS DA SIMULAÇÃO:
-1. Responda EXATAMENTE como o assistente responderia, seguindo o prompt e base de conhecimento à risca.
-2. Após sua resposta simulada, adicione uma seção de DIAGNÓSTICO separada por "---DIAGNÓSTICO---" contendo:
-   - Se a resposta está adequada ou tem problemas
-   - Se o prompt cobre esse cenário
-   - Se faltam informações na base de conhecimento
-   - Sugestão específica de melhoria (se aplicável)
-3. NÃO invente informações que não estão no prompt ou base de conhecimento.
-4. Se o prompt não cobre o cenário, aponte isso claramente no diagnóstico.`;
+COMO VOCÊ DEVE SE COMPORTAR:
+
+1. **QUANDO O GERENTE SIMULA UM CLIENTE** (ex: "Olá, quais os planos?", "quanto custa?"):
+   - Responda EXATAMENTE como responderia a um cliente real, usando seu prompt e base de conhecimento.
+   - NÃO invente informações que não estão na sua base.
+
+2. **QUANDO O GERENTE DÁ FEEDBACK/ADVERTÊNCIA** (ex: "você errou", "não é assim", "melhore isso", "quando o cliente perguntar X responda Y"):
+   - Aceite a correção com humildade e profissionalismo.
+   - Diga que entendeu e explique como vai melhorar.
+   - GERE AUTOMATICAMENTE uma sugestão de melhoria no formato abaixo.
+
+3. **QUANDO O GERENTE PEDE PARA MELHORAR ALGO** (ex: "aprenda a responder sobre X", "adicione informação Y"):
+   - Confirme que entendeu.
+   - GERE a sugestão de melhoria automaticamente.
+
+FORMATO DE SUGESTÃO DE MELHORIA:
+Sempre que detectar que o gerente está corrigindo, ensinando ou pedindo melhorias, ADICIONE ao final da sua resposta:
+
+---MELHORIA---
+DESTINO: [prompt ou conhecimento]
+CONTEÚDO:
+\`\`\`
+[o texto exato que deve ser adicionado/alterado]
+\`\`\`
+EXPLICAÇÃO: [breve explicação do que essa melhoria faz]
+---FIM-MELHORIA---
+
+REGRAS PARA DECIDIR O DESTINO:
+- Use "prompt" para: mudanças de comportamento, tom de voz, regras de atendimento, instruções de como agir, limites, estilo de resposta.
+- Use "conhecimento" para: informações factuais, dados de produtos/serviços, preços, FAQ, procedimentos, horários, contatos.
+
+4. **CONVERSA NORMAL** (ex: "como vai?", "está pronta?"):
+   - Responda naturalmente como uma funcionária motivada e profissional.
+
+IMPORTANTE:
+- Trate o usuário SEMPRE como seu gerente/chefe, nunca como cliente.
+- Seja receptiva a críticas e mostre vontade de melhorar.
+- Quando não souber algo, admita e pergunte como deve responder.
+- NUNCA quebre o personagem de funcionária.`;
 
       userMessage = testMessage || "";
+      
+      // Format chat history for context
+      if (chatHistory && chatHistory.length > 0) {
+        formattedHistory = chatHistory.map((msg: any) => ({
+          role: msg.role,
+          content: msg.content
+        }));
+      }
     }
 
     let result: string | null = null;
 
-    // Try OpenAI first, then Gemini as fallback
     if (openaiKey) {
       try {
-        result = await callOpenAI(openaiKey, sysPrompt, userMessage);
+        result = await callOpenAI(openaiKey, sysPrompt, userMessage, formattedHistory);
       } catch (e) {
         console.error("OpenAI failed, trying Gemini fallback:", e);
         if (geminiKey) {
-          result = await callGemini(geminiKey, sysPrompt, userMessage);
+          result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory);
         } else {
           throw e;
         }
       }
     } else if (geminiKey) {
-      result = await callGemini(geminiKey, sysPrompt, userMessage);
+      result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory);
     }
 
     return new Response(JSON.stringify({ result }), {
