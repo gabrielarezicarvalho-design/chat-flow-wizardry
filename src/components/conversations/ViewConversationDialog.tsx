@@ -108,7 +108,10 @@ export function ViewConversationDialog({
 
     messages.forEach((msg: any) => {
       const isReceived = msg.recebido === true;
-      const time = format(new Date(msg.criado_em), "dd/MM/yyyy HH:mm", { locale: ptBR });
+      const dateObj = new Date(msg.criado_em);
+      const time = !isNaN(dateObj.getTime()) 
+        ? format(dateObj, "dd/MM/yyyy HH:mm", { locale: ptBR })
+        : "Data inválida";
       const sender = isReceived ? userName : "Atendente";
       
       htmlContent += `
@@ -231,7 +234,9 @@ export function ViewConversationDialog({
                           isReceived ? "text-muted-foreground" : "text-primary-foreground/70"
                         )}
                       >
-                        {format(new Date(msg.criado_em), "HH:mm")}
+                        {msg.criado_em && !isNaN(new Date(msg.criado_em).getTime())
+                          ? format(new Date(msg.criado_em), "HH:mm")
+                          : "--:--"}
                       </p>
                     </div>
                   </div>
