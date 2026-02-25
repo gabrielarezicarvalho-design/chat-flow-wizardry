@@ -74,6 +74,7 @@ const adminNavItems: NavItem[] = [
   { to: "/flows", icon: Workflow, label: "Fluxos", feature: "flows_basic" },
   { to: "/agents", icon: Bot, label: "Agentes IA", feature: "ai_agents" },
   { to: "/departments", icon: Building2, label: "Departamentos", feature: "departments" },
+  { to: "/attendance", icon: Headphones, label: "Agentes", feature: "chat" },
   { to: "/internal-chat", icon: MessageCircle, label: "Chat Interno", feature: "internal_chat" },
   { to: "/chatgpt-credits", icon: Bot, label: "ChatGPT", feature: "chatgpt_credits" },
   { to: "/connections", icon: LinkIcon, label: "Conexões" },
