@@ -69,6 +69,10 @@ export const useConnections = () => {
         .maybeSingle();
       
       if (error) throw error;
+      if (!data) {
+        throw new Error('Conexão não encontrada para atualização');
+      }
+
       return data;
     },
     onSuccess: () => {
