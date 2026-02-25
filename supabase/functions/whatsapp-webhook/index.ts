@@ -301,6 +301,90 @@ serve(async (req) => {
     return { executed: executedMessages > 0, responses: executedMessages };
   };
 
+  const linkedFlowCache = new Map<string, { flow: any | null; reason: string }>();
+
+  const resolveActiveLinkedFlow = async ({
+    companyId,
+    whatsappConnectionId,
+  }: {
+    companyId: string;
+    whatsappConnectionId: string;
+  }): Promise<{ flow: any | null; reason: string }> => {
+    const cacheKey = `${companyId}:${whatsappConnectionId}`;
+    const cached = linkedFlowCache.get(cacheKey);
+    if (cached) return cached;
+
+    let linkedFlowId: string | null = null;
+
+    const { data: metaSettings, error: metaSettingsError } = await supabaseAdmin
+      .from("settings")
+      .select("value")
+      .eq("company_id", companyId)
+      .eq("key", `connection_settings_meta_${whatsappConnectionId}`)
+      .maybeSingle();
+
+    if (metaSettingsError) {
+      console.error("❌ Error reading Meta connection settings:", metaSettingsError.message);
+    }
+
+    const metaSettingsValue = (metaSettings?.value || {}) as any;
+    linkedFlowId = metaSettingsValue?.settings?.sendToUra || null;
+
+    if (!linkedFlowId || linkedFlowId === "none") {
+      const { data: appConnection, error: appConnectionError } = await supabaseAdmin
+        .from("connections")
+        .select("credentials")
+        .eq("company_id", companyId)
+        .eq("platform", "whatsapp")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (appConnectionError) {
+        console.error("❌ Error reading fallback connection settings:", appConnectionError.message);
+      }
+
+      const creds = (appConnection?.credentials || {}) as any;
+      linkedFlowId = creds?.settings?.sendToUra || null;
+    }
+
+    if (!linkedFlowId || linkedFlowId === "none") {
+      const result = { flow: null, reason: "no_linked_flow" };
+      linkedFlowCache.set(cacheKey, result);
+      return result;
+    }
+
+    const { data: flow, error: flowError } = await supabaseAdmin
+      .from("flows")
+      .select("id, name, is_active, trigger_type, flow_data")
+      .eq("id", linkedFlowId)
+      .eq("company_id", companyId)
+      .maybeSingle();
+
+    if (flowError) {
+      console.error("❌ Error loading linked flow:", flowError.message);
+      const result = { flow: null, reason: "flow_query_error" };
+      linkedFlowCache.set(cacheKey, result);
+      return result;
+    }
+
+    if (!flow) {
+      const result = { flow: null, reason: "flow_not_found" };
+      linkedFlowCache.set(cacheKey, result);
+      return result;
+    }
+
+    if (!flow.is_active) {
+      const result = { flow: null, reason: "flow_inactive" };
+      linkedFlowCache.set(cacheKey, result);
+      return result;
+    }
+
+    const result = { flow, reason: "ok" };
+    linkedFlowCache.set(cacheKey, result);
+    return result;
+  };
+
   // ============================================================
   // GET: Meta webhook verification
   // ============================================================
@@ -370,7 +454,7 @@ serve(async (req) => {
           // Identify company by phone_number_id
           const { data: conn, error: connError } = await supabaseAdmin
             .from("whatsapp_connections")
-            .select("id, company_id")
+            .select("id, company_id, meta_access_token, meta_phone_number_id")
             .eq("meta_phone_number_id", phoneNumberId)
             .eq("provider", "meta")
             .maybeSingle();
@@ -387,6 +471,17 @@ serve(async (req) => {
 
           const { company_id, id: whatsappConnectionId } = conn;
           console.log(`✅ Company identified: ${company_id} | WhatsApp Connection: ${whatsappConnectionId}`);
+
+          const linkedFlowResolution = await resolveActiveLinkedFlow({
+            companyId: company_id,
+            whatsappConnectionId,
+          });
+
+          if (linkedFlowResolution.flow) {
+            console.log(`🤖 Linked flow ready: ${linkedFlowResolution.flow.name} (${linkedFlowResolution.flow.id})`);
+          } else {
+            console.log(`ℹ️ Flow not executed for this connection: ${linkedFlowResolution.reason}`);
+          }
 
           // Find a user_id associated with this company (for conversation ownership)
           let userId: string | null = null;
@@ -429,6 +524,14 @@ serve(async (req) => {
 
             if (msgType === "text") {
               content = msg.text?.body || "";
+            } else if (msgType === "interactive") {
+              content = msg.interactive?.button_reply?.title
+                || msg.interactive?.button_reply?.id
+                || msg.interactive?.list_reply?.title
+                || msg.interactive?.list_reply?.id
+                || "[Interação recebida]";
+            } else if (msgType === "button") {
+              content = msg.button?.text || msg.button?.payload || "[Botão recebido]";
             } else if (msgType === "image") {
               content = msg.image?.caption || "[Imagem recebida]";
             } else if (msgType === "video") {
@@ -491,6 +594,7 @@ serve(async (req) => {
                   .maybeSingle();
 
                 let conversationId: string;
+                let isNewConversation = false;
 
                 if (existingConv) {
                   conversationId = existingConv.id;
@@ -529,6 +633,7 @@ serve(async (req) => {
                     continue;
                   }
                   conversationId = newConv.id;
+                  isNewConversation = true;
                   console.log(`💬 New conversation created: ${conversationId}`);
                 }
 
@@ -548,6 +653,31 @@ serve(async (req) => {
                   console.error("❌ Error inserting message:", msgError.message);
                 } else {
                   console.log(`📝 Message saved to conversation: ${conversationId}`);
+                }
+
+                if (linkedFlowResolution.flow) {
+                  try {
+                    const flowResult = await executeMetaFlow({
+                      flow: linkedFlowResolution.flow,
+                      inboundMessage: content,
+                      contactPhone: cleanPhone,
+                      contactName: contactName || cleanPhone,
+                      isNewConversation,
+                      conversationId,
+                      companyId: company_id,
+                      whatsappConnection: conn,
+                      whatsappConnectionId,
+                      phoneNumberId,
+                    });
+
+                    if (flowResult.executed) {
+                      console.log(`🤖 Flow executed: ${linkedFlowResolution.flow.id} (${flowResult.responses} respostas)`);
+                    } else {
+                      console.log(`ℹ️ Flow skipped: ${flowResult.reason ?? "not_executed"}`);
+                    }
+                  } catch (flowError: any) {
+                    console.error("❌ Error executing linked flow:", flowError.message);
+                  }
                 }
 
                 // 4. Auto-save contact as lead
