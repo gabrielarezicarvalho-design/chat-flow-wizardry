@@ -268,8 +268,7 @@ serve(async (req) => {
 
             const errorAction = currentNode.data?.errorAction || "continue";
 
-            if (errorAction === "transfer") {
-              const deptId = currentNode.data?.errorDepartmentId;
+            if (errorAction === "transfer" || errorAction === "transfer_queue" || errorAction === "transfer_agent") {
               const transferMsg = replaceFlowVariables(
                 currentNode.data?.errorFinalMessage || "Você será transferido para um atendente. Aguarde.",
                 vars
@@ -279,12 +278,17 @@ serve(async (req) => {
                 payload: { messaging_product: "whatsapp", to: contactPhone, type: "text", text: { body: transferMsg } },
                 textForStorage: transferMsg, messageType: "text",
               });
-              // Transfer conversation
-              await supabaseAdmin.from("conversations").update({
+              const updateData: any = {
                 attendance_type: "agent",
-                department_id: deptId || null,
                 updated_at: new Date().toISOString(),
-              }).eq("id", conversationId);
+              };
+              if (errorAction === "transfer_queue" || errorAction === "transfer") {
+                updateData.department_id = currentNode.data?.errorDepartmentId || null;
+              }
+              if (errorAction === "transfer_agent") {
+                updateData.assigned_to = currentNode.data?.errorAgentId || null;
+              }
+              await supabaseAdmin.from("conversations").update(updateData).eq("id", conversationId);
               return { executed: true, responses: 1 };
             }
 
@@ -375,10 +379,9 @@ serve(async (req) => {
               console.log(`🚫 Max errors reached for message node ${currentNode.id}`);
               await supabaseAdmin.from("flow_sessions").update({ status: "completed" }).eq("id", existingSession.id);
 
-              const errorAction = currentNode.data?.errorAction || "transfer";
+              const errorAction = currentNode.data?.errorAction || "transfer_queue";
 
-              if (errorAction === "transfer") {
-                const deptId = currentNode.data?.errorDepartmentId;
+              if (errorAction === "transfer" || errorAction === "transfer_queue" || errorAction === "transfer_agent") {
                 const transferMsg = replaceFlowVariables(
                   currentNode.data?.errorFinalMessage || "Você será transferido para um atendente. Aguarde.",
                   vars
@@ -388,9 +391,17 @@ serve(async (req) => {
                   payload: { messaging_product: "whatsapp", to: contactPhone, type: "text", text: { body: transferMsg } },
                   textForStorage: transferMsg, messageType: "text",
                 });
-                await supabaseAdmin.from("conversations").update({
-                  attendance_type: "agent", department_id: deptId || null, updated_at: new Date().toISOString(),
-                }).eq("id", conversationId);
+                const updateData: any = {
+                  attendance_type: "agent",
+                  updated_at: new Date().toISOString(),
+                };
+                if (errorAction === "transfer_queue" || errorAction === "transfer") {
+                  updateData.department_id = currentNode.data?.errorDepartmentId || null;
+                }
+                if (errorAction === "transfer_agent") {
+                  updateData.assigned_to = currentNode.data?.errorAgentId || null;
+                }
+                await supabaseAdmin.from("conversations").update(updateData).eq("id", conversationId);
                 return { executed: true, responses: 1 };
               }
 
