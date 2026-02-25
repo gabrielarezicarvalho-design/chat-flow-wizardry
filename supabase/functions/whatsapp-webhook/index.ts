@@ -336,6 +336,108 @@ serve(async (req) => {
         }
       }
 
+      // ── RESUME: message node with interactive content (replyButtons, buttons, list) ──
+      if (currentNode.type === "message") {
+        const msgType = currentNode.data?.messageType || "text";
+        if (["replyButtons", "buttons", "list"].includes(msgType)) {
+          // Extract options from buttons or listItems
+          let options: any[] = [];
+          if (msgType === "buttons" || msgType === "replyButtons") {
+            options = Array.isArray(currentNode.data?.buttons) ? currentNode.data.buttons : [];
+          } else if (msgType === "list") {
+            options = (Array.isArray(currentNode.data?.listItems) ? currentNode.data.listItems : []).map((item: any) => ({
+              text: item.title || item.text,
+              value: item.value || item.id,
+              keywords: item.keywords || "",
+            }));
+          }
+
+          const match = matchMenuOption(inboundMessage, options);
+
+          if (match.matched) {
+            console.log(`✅ Interactive message option matched: ${match.optionIndex}`);
+            await supabaseAdmin.from("flow_sessions").update({ status: "completed" }).eq("id", existingSession.id);
+            const nextNodeId = resolveNextNodeId(currentNode.id, edges);
+            if (nextNodeId) return await walkFlow(nextNodeId, nodes, edges, vars, sendCtx, conversationId, companyId, flow.id);
+            return { executed: true, responses: 0 };
+          } else {
+            // Invalid – apply error rules
+            const newErrorCount = (existingSession.error_count || 0) + 1;
+            const maxErrors = Number(currentNode.data?.maxErrors) || 3;
+            const invalidMsg = replaceFlowVariables(
+              currentNode.data?.invalidOptionMessage || "❌ Opção inválida. Por favor, escolha uma das opções disponíveis.",
+              vars
+            );
+
+            console.log(`⚠️ Invalid interactive input (${newErrorCount}/${maxErrors}): "${inboundMessage}"`);
+
+            if (newErrorCount >= maxErrors) {
+              console.log(`🚫 Max errors reached for message node ${currentNode.id}`);
+              await supabaseAdmin.from("flow_sessions").update({ status: "completed" }).eq("id", existingSession.id);
+
+              const errorAction = currentNode.data?.errorAction || "transfer";
+
+              if (errorAction === "transfer") {
+                const deptId = currentNode.data?.errorDepartmentId;
+                const transferMsg = replaceFlowVariables(
+                  currentNode.data?.errorFinalMessage || "Você será transferido para um atendente. Aguarde.",
+                  vars
+                );
+                await sendMetaMessage({
+                  ...sendCtx,
+                  payload: { messaging_product: "whatsapp", to: contactPhone, type: "text", text: { body: transferMsg } },
+                  textForStorage: transferMsg, messageType: "text",
+                });
+                await supabaseAdmin.from("conversations").update({
+                  attendance_type: "agent", department_id: deptId || null, updated_at: new Date().toISOString(),
+                }).eq("id", conversationId);
+                return { executed: true, responses: 1 };
+              }
+
+              if (errorAction === "message") {
+                const finalMsg = replaceFlowVariables(
+                  currentNode.data?.errorFinalMessage || "Não foi possível continuar o atendimento.",
+                  vars
+                );
+                await sendMetaMessage({
+                  ...sendCtx,
+                  payload: { messaging_product: "whatsapp", to: contactPhone, type: "text", text: { body: finalMsg } },
+                  textForStorage: finalMsg, messageType: "text",
+                });
+                return { executed: true, responses: 1 };
+              }
+
+              if (errorAction === "restart") {
+                const startNode = nodes.find((n: any) => n.type === "start");
+                if (startNode) {
+                  const nextId = resolveNextNodeId(startNode.id, edges);
+                  if (nextId) return await walkFlow(nextId, nodes, edges, vars, sendCtx, conversationId, companyId, flow.id);
+                }
+                return { executed: false, reason: "restart_failed" };
+              }
+
+              // continue
+              const nextId = resolveNextNodeId(currentNode.id, edges);
+              if (nextId) return await walkFlow(nextId, nodes, edges, vars, sendCtx, conversationId, companyId, flow.id);
+              return { executed: true, responses: 0 };
+            }
+
+            // Send error message + re-send original interactive message
+            await sendMetaMessage({
+              ...sendCtx,
+              payload: { messaging_product: "whatsapp", to: contactPhone, type: "text", text: { body: invalidMsg } },
+              textForStorage: invalidMsg, messageType: "text",
+            });
+
+            const rebuilt = buildMetaMessagePayload(currentNode.data, contactPhone, vars);
+            if (rebuilt) await sendMetaMessage({ ...sendCtx, ...rebuilt });
+
+            await supabaseAdmin.from("flow_sessions").update({ error_count: newErrorCount }).eq("id", existingSession.id);
+            return { executed: true, responses: 2 };
+          }
+        }
+      }
+
       // For input nodes or unknown waiting nodes, just continue
       vars["response"] = inboundMessage;
       await supabaseAdmin.from("flow_sessions").update({ status: "completed" }).eq("id", existingSession.id);
