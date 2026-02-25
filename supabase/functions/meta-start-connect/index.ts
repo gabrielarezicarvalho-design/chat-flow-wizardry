@@ -91,6 +91,7 @@ serve(async (req) => {
       redirect_uri: callbackUrl,
       state: stateToken,
       response_type: "code",
+      auth_type: "rerequest",
     });
 
     // Add config_id if available (required for Embedded Signup)
