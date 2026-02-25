@@ -790,6 +790,45 @@ export type Database = {
           },
         ]
       }
+      flow_sessions: {
+        Row: {
+          company_id: string
+          conversation_id: string
+          created_at: string
+          current_node_id: string
+          error_count: number
+          flow_id: string
+          id: string
+          status: string
+          updated_at: string
+          variables: Json | null
+        }
+        Insert: {
+          company_id: string
+          conversation_id: string
+          created_at?: string
+          current_node_id: string
+          error_count?: number
+          flow_id: string
+          id?: string
+          status?: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Update: {
+          company_id?: string
+          conversation_id?: string
+          created_at?: string
+          current_node_id?: string
+          error_count?: number
+          flow_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Relationships: []
+      }
       flows: {
         Row: {
           company_id: string | null

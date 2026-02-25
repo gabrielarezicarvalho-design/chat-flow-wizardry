@@ -7,7 +7,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
@@ -19,51 +18,45 @@ serve(async (req) => {
 
   const url = new URL(req.url);
 
-  const resolveNextNodeId = (currentNodeId: string, edges: any[]): string | null => {
-    const edge = (edges || []).find((e: any) => e?.source === currentNodeId);
+  // ── Helpers ──
+
+  const resolveNextNodeId = (currentNodeId: string, edges: any[], handleId?: string): string | null => {
+    if (handleId) {
+      const edge = (edges || []).find((e: any) => e?.source === currentNodeId && e?.sourceHandle === handleId);
+      if (edge) return edge.target;
+    }
+    const edge = (edges || []).find((e: any) => e?.source === currentNodeId && (!e?.sourceHandle || e?.sourceHandle === null));
     return edge?.target ?? null;
   };
 
   const replaceFlowVariables = (template: string, vars: Record<string, string>) => {
     if (!template) return "";
-
     return template
-      .replace(/\{\{\s*([\w.-]+)\s*\}\}/g, (_match, key) => vars[key] ?? "")
-      .replace(/\{\s*([\w.-]+)\s*\}/g, (_match, key) => vars[key] ?? "");
+      .replace(/\{\{\s*([\w.-]+)\s*\}\}/g, (_m, key) => vars[key] ?? "")
+      .replace(/\{\s*([\w.-]+)\s*\}/g, (_m, key) => vars[key] ?? "");
   };
 
   const buildMetaMessagePayload = (
-    nodeData: any,
-    to: string,
-    vars: Record<string, string>
+    nodeData: any, to: string, vars: Record<string, string>
   ): { payload: Record<string, any>; textForStorage: string; messageType: string } | null => {
     const messageType = nodeData?.messageType || "text";
     const content = replaceFlowVariables(nodeData?.content || nodeData?.label || "", vars).trim();
 
     if (messageType === "replyButtons") {
       const rawButtons = Array.isArray(nodeData?.buttons) ? nodeData.buttons : [];
-      const buttons = rawButtons
-        .slice(0, 3)
-        .map((btn: any, index: number) => ({
-          type: "reply",
-          reply: {
-            id: String(btn?.value || btn?.id || `option_${index + 1}`),
-            title: String(btn?.text || `Opção ${index + 1}`).slice(0, 20),
-          },
-        }));
-
+      const buttons = rawButtons.slice(0, 3).map((btn: any, index: number) => ({
+        type: "reply",
+        reply: {
+          id: String(btn?.value || btn?.id || `option_${index + 1}`),
+          title: String(btn?.text || `Opção ${index + 1}`).slice(0, 20),
+        },
+      }));
       if (buttons.length > 0) {
         const bodyText = content || "Escolha uma opção:";
         return {
           payload: {
-            messaging_product: "whatsapp",
-            to,
-            type: "interactive",
-            interactive: {
-              type: "button",
-              body: { text: bodyText },
-              action: { buttons },
-            },
+            messaging_product: "whatsapp", to, type: "interactive",
+            interactive: { type: "button", body: { text: bodyText }, action: { buttons } },
           },
           textForStorage: `${bodyText}\n${buttons.map((b: any, i: number) => `${i + 1}. ${b.reply.title}`).join("\n")}`,
           messageType: "interactive",
@@ -73,32 +66,21 @@ serve(async (req) => {
 
     if (messageType === "list") {
       const rawItems = Array.isArray(nodeData?.listItems) ? nodeData.listItems : [];
-      const rows = rawItems
-        .slice(0, 10)
-        .map((item: any, index: number) => ({
-          id: String(item?.value || item?.id || `item_${index + 1}`),
-          title: String(item?.title || item?.text || `Opção ${index + 1}`).slice(0, 24),
-          description: String(item?.description || "").slice(0, 72),
-        }));
-
+      const rows = rawItems.slice(0, 10).map((item: any, index: number) => ({
+        id: String(item?.value || item?.id || `item_${index + 1}`),
+        title: String(item?.title || item?.text || `Opção ${index + 1}`).slice(0, 24),
+        description: String(item?.description || "").slice(0, 72),
+      }));
       if (rows.length > 0) {
         const bodyText = content || "Selecione uma opção:";
         return {
           payload: {
-            messaging_product: "whatsapp",
-            to,
-            type: "interactive",
+            messaging_product: "whatsapp", to, type: "interactive",
             interactive: {
-              type: "list",
-              body: { text: bodyText },
+              type: "list", body: { text: bodyText },
               action: {
                 button: String(nodeData?.listButtonText || "Ver opções").slice(0, 20),
-                sections: [
-                  {
-                    title: String(nodeData?.listTitle || "Opções").slice(0, 24),
-                    rows,
-                  },
-                ],
+                sections: [{ title: String(nodeData?.listTitle || "Opções").slice(0, 24), rows }],
               },
             },
           },
@@ -110,242 +92,442 @@ serve(async (req) => {
 
     const fallbackText = content || "...";
     return {
-      payload: {
-        messaging_product: "whatsapp",
-        to,
-        type: "text",
-        text: { body: fallbackText },
-      },
+      payload: { messaging_product: "whatsapp", to, type: "text", text: { body: fallbackText } },
       textForStorage: fallbackText,
       messageType: "text",
     };
   };
 
-  const sendMetaMessage = async ({
-    whatsappConnection,
-    to,
-    payload,
-    textForStorage,
-    messageType,
-    companyId,
-    whatsappConnectionId,
-    phoneNumberId,
-    conversationId,
-  }: {
-    whatsappConnection: any;
-    to: string;
-    payload: Record<string, any>;
-    textForStorage: string;
-    messageType: string;
-    companyId: string;
-    whatsappConnectionId: string;
-    phoneNumberId: string;
-    conversationId: string | null;
+  const buildMenuPayload = (nodeData: any, to: string, vars: Record<string, string>) => {
+    const options: any[] = Array.isArray(nodeData?.menuOptions) ? nodeData.menuOptions : [];
+    const menuMessage = replaceFlowVariables(nodeData?.menuMessage || "Escolha uma opção:", vars);
+
+    if (options.length <= 3) {
+      // Use reply buttons
+      const buttons = options.map((opt: any, i: number) => ({
+        type: "reply",
+        reply: {
+          id: String(opt.value || opt.text || `option_${i + 1}`),
+          title: String(opt.text || `Opção ${i + 1}`).slice(0, 20),
+        },
+      }));
+      return {
+        payload: {
+          messaging_product: "whatsapp", to, type: "interactive",
+          interactive: { type: "button", body: { text: menuMessage }, action: { buttons } },
+        },
+        textForStorage: `${menuMessage}\n${options.map((o: any, i: number) => `${i + 1}. ${o.text}`).join("\n")}`,
+        messageType: "interactive",
+      };
+    } else {
+      // Use list
+      const rows = options.map((opt: any, i: number) => ({
+        id: String(opt.value || opt.text || `option_${i + 1}`),
+        title: String(opt.text || `Opção ${i + 1}`).slice(0, 24),
+      }));
+      return {
+        payload: {
+          messaging_product: "whatsapp", to, type: "interactive",
+          interactive: {
+            type: "list", body: { text: menuMessage },
+            action: { button: "Ver opções", sections: [{ title: "Opções", rows }] },
+          },
+        },
+        textForStorage: `${menuMessage}\n${options.map((o: any, i: number) => `${i + 1}. ${o.text}`).join("\n")}`,
+        messageType: "interactive",
+      };
+    }
+  };
+
+  const sendMetaMessage = async (params: {
+    whatsappConnection: any; to: string; payload: Record<string, any>;
+    textForStorage: string; messageType: string; companyId: string;
+    whatsappConnectionId: string; phoneNumberId: string; conversationId: string | null;
   }) => {
+    const { whatsappConnection, to, payload, textForStorage, messageType, companyId, whatsappConnectionId, phoneNumberId, conversationId } = params;
     if (!whatsappConnection?.meta_access_token || !whatsappConnection?.meta_phone_number_id) {
       throw new Error("Conexão Meta sem credenciais válidas para envio");
     }
-
     const graphUrl = `https://graph.facebook.com/v21.0/${whatsappConnection.meta_phone_number_id}/messages`;
-
     const response = await fetch(graphUrl, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${whatsappConnection.meta_access_token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${whatsappConnection.meta_access_token}`, "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-
     const result = await response.json();
     const waMessageId = result?.messages?.[0]?.id || null;
 
     await supabaseAdmin.from("whatsapp_messages").insert({
-      company_id: companyId,
-      connection_id: whatsappConnectionId,
-      provider: "meta",
-      direction: "out",
-      wa_message_id: waMessageId,
-      from_number: phoneNumberId,
-      to_number: to,
-      phone_number_id: phoneNumberId,
-      message_type: messageType,
-      body: textForStorage,
-      status: response.ok ? "sent" : "failed",
-      raw: result,
+      company_id: companyId, connection_id: whatsappConnectionId, provider: "meta",
+      direction: "out", wa_message_id: waMessageId, from_number: phoneNumberId,
+      to_number: to, phone_number_id: phoneNumberId, message_type: messageType,
+      body: textForStorage, status: response.ok ? "sent" : "failed", raw: result,
     });
 
     if (conversationId) {
       await supabaseAdmin.from("messages").insert({
-        conversation_id: conversationId,
-        sender_type: "agent",
-        content: textForStorage,
-        message_type: messageType,
-        status: response.ok ? "sent" : "failed",
-        external_id: waMessageId,
+        conversation_id: conversationId, sender_type: "agent", content: textForStorage,
+        message_type: messageType, status: response.ok ? "sent" : "failed", external_id: waMessageId,
       });
-
-      await supabaseAdmin
-        .from("conversations")
-        .update({
-          last_message: textForStorage,
-          last_message_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", conversationId);
+      await supabaseAdmin.from("conversations").update({
+        last_message: textForStorage, last_message_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+      }).eq("id", conversationId);
     }
 
-    if (!response.ok) {
-      throw new Error(result?.error?.message || "Falha ao enviar mensagem pela Meta");
-    }
-
+    if (!response.ok) throw new Error(result?.error?.message || "Falha ao enviar mensagem pela Meta");
     return { waMessageId };
   };
 
-  const executeMetaFlow = async ({
-    flow,
-    inboundMessage,
-    contactPhone,
-    contactName,
-    isNewConversation,
-    conversationId,
-    companyId,
-    whatsappConnection,
-    whatsappConnectionId,
-    phoneNumberId,
-  }: {
-    flow: any;
-    inboundMessage: string;
-    contactPhone: string;
-    contactName: string;
-    isNewConversation: boolean;
-    conversationId: string | null;
-    companyId: string;
-    whatsappConnection: any;
-    whatsappConnectionId: string;
-    phoneNumberId: string;
-  }) => {
-    const trigger = (flow?.trigger_type || "message").toLowerCase();
-    const triggerApplies =
-      trigger === "all" ||
-      trigger === "message" ||
-      (trigger === "first_message" && isNewConversation) ||
-      trigger === "keyword";
+  // ── Match menu option ──
+  const matchMenuOption = (input: string, options: any[]): { matched: boolean; optionIndex: number } => {
+    const normalizedInput = input.trim().toLowerCase();
 
-    if (!triggerApplies) {
-      return { executed: false, reason: `trigger_not_applied:${trigger}` };
+    for (let i = 0; i < options.length; i++) {
+      const opt = options[i];
+      // Match by number
+      if (normalizedInput === String(i + 1)) return { matched: true, optionIndex: i };
+      // Match by exact text
+      if (opt.text && opt.text.toLowerCase().trim() === normalizedInput) return { matched: true, optionIndex: i };
+      // Match by value/id
+      if (opt.value && opt.value.toLowerCase().trim() === normalizedInput) return { matched: true, optionIndex: i };
+      // Match by keywords
+      if (opt.keywords) {
+        const keywords = opt.keywords.split(',').map((k: string) => k.trim().toLowerCase()).filter(Boolean);
+        if (keywords.some((kw: string) => normalizedInput.includes(kw))) return { matched: true, optionIndex: i };
+      }
     }
+    return { matched: false, optionIndex: -1 };
+  };
+
+  // ── Stateful flow engine ──
+  const executeMetaFlow = async (params: {
+    flow: any; inboundMessage: string; contactPhone: string; contactName: string;
+    isNewConversation: boolean; conversationId: string | null; companyId: string;
+    whatsappConnection: any; whatsappConnectionId: string; phoneNumberId: string;
+  }) => {
+    const { flow, inboundMessage, contactPhone, contactName, isNewConversation, conversationId, companyId, whatsappConnection, whatsappConnectionId, phoneNumberId } = params;
+
+    if (!conversationId) return { executed: false, reason: "no_conversation" };
 
     const flowData = (flow?.flow_data || {}) as any;
     const nodes = Array.isArray(flowData?.nodes) ? flowData.nodes : [];
     const edges = Array.isArray(flowData?.edges) ? flowData.edges : [];
+    if (!nodes.length) return { executed: false, reason: "invalid_flow_data" };
 
-    if (!nodes.length || !edges.length) {
-      return { executed: false, reason: "invalid_flow_data" };
+    const vars: Record<string, string> = { contact_name: contactName, contact_phone: contactPhone, message: inboundMessage };
+
+    const sendCtx = { whatsappConnection, to: contactPhone, companyId, whatsappConnectionId, phoneNumberId, conversationId };
+
+    // Check for existing active session
+    const { data: existingSession } = await supabaseAdmin
+      .from("flow_sessions")
+      .select("*")
+      .eq("conversation_id", conversationId)
+      .eq("status", "waiting_input")
+      .maybeSingle();
+
+    if (existingSession) {
+      // ── RESUME: user is responding to a menu/input node ──
+      const currentNode = nodes.find((n: any) => n.id === existingSession.current_node_id);
+      if (!currentNode) {
+        await supabaseAdmin.from("flow_sessions").update({ status: "completed" }).eq("id", existingSession.id);
+        return { executed: false, reason: "node_not_found" };
+      }
+
+      if (currentNode.type === "menu") {
+        const options: any[] = Array.isArray(currentNode.data?.menuOptions) ? currentNode.data.menuOptions : [];
+        const match = matchMenuOption(inboundMessage, options);
+
+        if (match.matched) {
+          // Valid option – follow option edge
+          console.log(`✅ Menu option matched: ${match.optionIndex}`);
+          await supabaseAdmin.from("flow_sessions").update({ status: "completed" }).eq("id", existingSession.id);
+
+          const nextNodeId = resolveNextNodeId(currentNode.id, edges, `option-${match.optionIndex}`)
+            || resolveNextNodeId(currentNode.id, edges);
+
+          if (nextNodeId) {
+            return await walkFlow(nextNodeId, nodes, edges, vars, sendCtx, conversationId, companyId, flow.id);
+          }
+          return { executed: true, responses: 0 };
+        } else {
+          // Invalid option – increment error count
+          const newErrorCount = (existingSession.error_count || 0) + 1;
+          const maxErrors = Number(currentNode.data?.maxErrors) || 3;
+          const invalidMsg = replaceFlowVariables(
+            currentNode.data?.invalidOptionMessage || "❌ Opção inválida. Por favor, escolha uma das opções disponíveis.",
+            vars
+          );
+
+          console.log(`⚠️ Invalid menu input (${newErrorCount}/${maxErrors}): "${inboundMessage}"`);
+
+          if (newErrorCount >= maxErrors) {
+            // Max errors reached – execute error action
+            console.log(`🚫 Max errors reached for menu node ${currentNode.id}`);
+            await supabaseAdmin.from("flow_sessions").update({ status: "completed" }).eq("id", existingSession.id);
+
+            const errorAction = currentNode.data?.errorAction || "continue";
+
+            if (errorAction === "transfer") {
+              const deptId = currentNode.data?.errorDepartmentId;
+              const transferMsg = replaceFlowVariables(
+                currentNode.data?.errorFinalMessage || "Você será transferido para um atendente. Aguarde.",
+                vars
+              );
+              await sendMetaMessage({
+                ...sendCtx,
+                payload: { messaging_product: "whatsapp", to: contactPhone, type: "text", text: { body: transferMsg } },
+                textForStorage: transferMsg, messageType: "text",
+              });
+              // Transfer conversation
+              await supabaseAdmin.from("conversations").update({
+                attendance_type: "agent",
+                department_id: deptId || null,
+                updated_at: new Date().toISOString(),
+              }).eq("id", conversationId);
+              return { executed: true, responses: 1 };
+            }
+
+            if (errorAction === "message") {
+              const finalMsg = replaceFlowVariables(
+                currentNode.data?.errorFinalMessage || "Não foi possível continuar o atendimento. Tente novamente mais tarde.",
+                vars
+              );
+              await sendMetaMessage({
+                ...sendCtx,
+                payload: { messaging_product: "whatsapp", to: contactPhone, type: "text", text: { body: finalMsg } },
+                textForStorage: finalMsg, messageType: "text",
+              });
+              return { executed: true, responses: 1 };
+            }
+
+            if (errorAction === "restart") {
+              const startNode = nodes.find((n: any) => n.type === "start");
+              if (startNode) {
+                const nextId = resolveNextNodeId(startNode.id, edges);
+                if (nextId) return await walkFlow(nextId, nodes, edges, vars, sendCtx, conversationId, companyId, flow.id);
+              }
+              return { executed: false, reason: "restart_failed" };
+            }
+
+            // "continue" – follow error edge
+            const errorNextId = resolveNextNodeId(currentNode.id, edges, "error")
+              || resolveNextNodeId(currentNode.id, edges);
+            if (errorNextId) {
+              return await walkFlow(errorNextId, nodes, edges, vars, sendCtx, conversationId, companyId, flow.id);
+            }
+            return { executed: true, responses: 0 };
+          }
+
+          // Send error message + re-send menu
+          await sendMetaMessage({
+            ...sendCtx,
+            payload: { messaging_product: "whatsapp", to: contactPhone, type: "text", text: { body: invalidMsg } },
+            textForStorage: invalidMsg, messageType: "text",
+          });
+
+          const menuBuilt = buildMenuPayload(currentNode.data, contactPhone, vars);
+          await sendMetaMessage({ ...sendCtx, ...menuBuilt });
+
+          // Update error count
+          await supabaseAdmin.from("flow_sessions").update({ error_count: newErrorCount }).eq("id", existingSession.id);
+
+          return { executed: true, responses: 2 };
+        }
+      }
+
+      // For input nodes or unknown waiting nodes, just continue
+      vars["response"] = inboundMessage;
+      await supabaseAdmin.from("flow_sessions").update({ status: "completed" }).eq("id", existingSession.id);
+      const nextId = resolveNextNodeId(currentNode.id, edges);
+      if (nextId) return await walkFlow(nextId, nodes, edges, vars, sendCtx, conversationId, companyId, flow.id);
+      return { executed: true, responses: 0 };
     }
 
-    const startNode = nodes.find((node: any) => node?.type === "start");
-    if (!startNode?.id) {
-      return { executed: false, reason: "missing_start_node" };
-    }
+    // ── NEW FLOW: no active session – only trigger on new conversations or first message ──
+    const trigger = (flow?.trigger_type || "message").toLowerCase();
+    const triggerApplies =
+      trigger === "all" || trigger === "message" ||
+      (trigger === "first_message" && isNewConversation) ||
+      trigger === "keyword";
 
-    const vars = {
-      contact_name: contactName,
-      contact_phone: contactPhone,
-      message: inboundMessage,
-    };
+    if (!triggerApplies) return { executed: false, reason: `trigger_not_applied:${trigger}` };
 
-    let executedMessages = 0;
-    let currentNodeId = resolveNextNodeId(startNode.id, edges);
+    const startNode = nodes.find((n: any) => n.type === "start");
+    if (!startNode?.id) return { executed: false, reason: "missing_start_node" };
+
+    const nextNodeId = resolveNextNodeId(startNode.id, edges);
+    if (!nextNodeId) return { executed: false, reason: "no_node_after_start" };
+
+    return await walkFlow(nextNodeId, nodes, edges, vars, sendCtx, conversationId, companyId, flow.id);
+  };
+
+  // ── Walk flow graph until hitting a wait node or end ──
+  const walkFlow = async (
+    startNodeId: string, nodes: any[], edges: any[], vars: Record<string, string>,
+    sendCtx: any, conversationId: string, companyId: string, flowId: string
+  ): Promise<{ executed: boolean; responses: number; reason?: string }> => {
+    let currentNodeId: string | null = startNodeId;
     let steps = 0;
+    let executedMessages = 0;
 
-    while (currentNodeId && steps < 20) {
-      steps += 1;
-      const currentNode = nodes.find((node: any) => node?.id === currentNodeId);
+    while (currentNodeId && steps < 30) {
+      steps++;
+      const currentNode = nodes.find((n: any) => n.id === currentNodeId);
       if (!currentNode) break;
 
+      // ── Message node ──
       if (currentNode.type === "message") {
-        const built = buildMetaMessagePayload(currentNode.data, contactPhone, vars);
+        const built = buildMetaMessagePayload(currentNode.data, sendCtx.to, vars);
         if (!built) break;
+        await sendMetaMessage({ ...sendCtx, ...built });
+        executedMessages++;
 
-        await sendMetaMessage({
-          whatsappConnection,
-          to: contactPhone,
-          payload: built.payload,
-          textForStorage: built.textForStorage,
-          messageType: built.messageType,
-          companyId,
-          whatsappConnectionId,
-          phoneNumberId,
-          conversationId,
-        });
+        // Check if message has reply buttons – need to wait for response
+        const msgType = currentNode.data?.messageType || "text";
+        if (msgType === "replyButtons" || msgType === "buttons" || msgType === "list") {
+          // Save session – wait for user to pick an option
+          // For message nodes with interactive elements, we treat like menu
+          await supabaseAdmin.from("flow_sessions").insert({
+            conversation_id: conversationId, company_id: companyId, flow_id: flowId,
+            current_node_id: currentNode.id, error_count: 0, status: "waiting_input",
+          });
+          console.log(`⏸️ Flow paused at interactive message node ${currentNode.id} – waiting for input`);
+          return { executed: true, responses: executedMessages };
+        }
 
-        executedMessages += 1;
         currentNodeId = resolveNextNodeId(currentNode.id, edges);
         continue;
       }
 
+      // ── Menu node ──
+      if (currentNode.type === "menu") {
+        const menuBuilt = buildMenuPayload(currentNode.data, sendCtx.to, vars);
+        await sendMetaMessage({ ...sendCtx, ...menuBuilt });
+        executedMessages++;
+
+        // Save session – wait for user choice
+        await supabaseAdmin.from("flow_sessions").insert({
+          conversation_id: conversationId, company_id: companyId, flow_id: flowId,
+          current_node_id: currentNode.id, error_count: 0, status: "waiting_input",
+        });
+        console.log(`⏸️ Flow paused at menu node ${currentNode.id} – waiting for input`);
+        return { executed: true, responses: executedMessages };
+      }
+
+      // ── Delay node ──
       if (currentNode.type === "delay") {
-        const delaySeconds = Number(currentNode?.data?.seconds || currentNode?.data?.delay || 1);
-        if (Number.isFinite(delaySeconds) && delaySeconds > 0 && delaySeconds <= 30) {
-          await new Promise((resolve) => setTimeout(resolve, delaySeconds * 1000));
+        const secs = Number(currentNode.data?.seconds || currentNode.data?.delay || 1);
+        if (Number.isFinite(secs) && secs > 0 && secs <= 30) {
+          await new Promise((r) => setTimeout(r, secs * 1000));
         }
         currentNodeId = resolveNextNodeId(currentNode.id, edges);
         continue;
       }
 
-      // Para evitar comportamento inconsistente na Meta, paramos em nós não suportados aqui.
-      break;
+      // ── Forward/Transfer node ──
+      if (currentNode.type === "forward") {
+        const transferMsg = replaceFlowVariables(currentNode.data?.transferMessage || "", vars);
+        if (transferMsg) {
+          await sendMetaMessage({
+            ...sendCtx,
+            payload: { messaging_product: "whatsapp", to: sendCtx.to, type: "text", text: { body: transferMsg } },
+            textForStorage: transferMsg, messageType: "text",
+          });
+          executedMessages++;
+        }
+
+        const isClose = currentNode.data?.action === "close";
+        if (isClose) {
+          await supabaseAdmin.from("conversations").update({
+            status: "closed", updated_at: new Date().toISOString(),
+          }).eq("id", conversationId);
+        } else {
+          const deptId = currentNode.data?.departmentId || null;
+          const agentId = currentNode.data?.specificAgentId || null;
+          await supabaseAdmin.from("conversations").update({
+            attendance_type: "agent",
+            department_id: deptId,
+            assigned_to: agentId,
+            updated_at: new Date().toISOString(),
+          }).eq("id", conversationId);
+        }
+        return { executed: true, responses: executedMessages };
+      }
+
+      // ── Input node – wait for response ──
+      if (currentNode.type === "input") {
+        const prompt = replaceFlowVariables(currentNode.data?.content || currentNode.data?.label || "", vars);
+        if (prompt) {
+          await sendMetaMessage({
+            ...sendCtx,
+            payload: { messaging_product: "whatsapp", to: sendCtx.to, type: "text", text: { body: prompt } },
+            textForStorage: prompt, messageType: "text",
+          });
+          executedMessages++;
+        }
+        await supabaseAdmin.from("flow_sessions").insert({
+          conversation_id: conversationId, company_id: companyId, flow_id: flowId,
+          current_node_id: currentNode.id, error_count: 0, status: "waiting_input",
+        });
+        console.log(`⏸️ Flow paused at input node ${currentNode.id}`);
+        return { executed: true, responses: executedMessages };
+      }
+
+      // ── Condition node ──
+      if (currentNode.type === "condition") {
+        const condValue = replaceFlowVariables(currentNode.data?.conditionValue || "", vars).toLowerCase();
+        const inputVal = (vars["message"] || vars["response"] || "").toLowerCase();
+        const condMatch = inputVal.includes(condValue);
+        const handleId = condMatch ? "yes" : "no";
+        currentNodeId = resolveNextNodeId(currentNode.id, edges, handleId) || resolveNextNodeId(currentNode.id, edges);
+        continue;
+      }
+
+      // ── Tag node ──
+      if (currentNode.type === "tag") {
+        const tagName = currentNode.data?.tagName || currentNode.data?.label;
+        if (tagName && conversationId) {
+          const { data: conv } = await supabaseAdmin.from("conversations").select("tags").eq("id", conversationId).maybeSingle();
+          const existingTags: string[] = Array.isArray(conv?.tags) ? conv.tags : [];
+          if (!existingTags.includes(tagName)) {
+            await supabaseAdmin.from("conversations").update({ tags: [...existingTags, tagName] }).eq("id", conversationId);
+          }
+        }
+        currentNodeId = resolveNextNodeId(currentNode.id, edges);
+        continue;
+      }
+
+      // ── Unknown node – skip ──
+      console.log(`⚠️ Skipping unsupported node type: ${currentNode.type}`);
+      currentNodeId = resolveNextNodeId(currentNode.id, edges);
     }
 
     return { executed: executedMessages > 0, responses: executedMessages };
   };
 
+  // ── Linked flow resolution ──
   const linkedFlowCache = new Map<string, { flow: any | null; reason: string }>();
 
-  const resolveActiveLinkedFlow = async ({
-    companyId,
-    whatsappConnectionId,
-  }: {
-    companyId: string;
-    whatsappConnectionId: string;
-  }): Promise<{ flow: any | null; reason: string }> => {
+  const resolveActiveLinkedFlow = async ({ companyId, whatsappConnectionId }: { companyId: string; whatsappConnectionId: string }) => {
     const cacheKey = `${companyId}:${whatsappConnectionId}`;
     const cached = linkedFlowCache.get(cacheKey);
     if (cached) return cached;
 
     let linkedFlowId: string | null = null;
 
-    const { data: metaSettings, error: metaSettingsError } = await supabaseAdmin
-      .from("settings")
-      .select("value")
-      .eq("company_id", companyId)
-      .eq("key", `connection_settings_meta_${whatsappConnectionId}`)
-      .maybeSingle();
+    const { data: metaSettings } = await supabaseAdmin
+      .from("settings").select("value")
+      .eq("company_id", companyId).eq("key", `connection_settings_meta_${whatsappConnectionId}`).maybeSingle();
 
-    if (metaSettingsError) {
-      console.error("❌ Error reading Meta connection settings:", metaSettingsError.message);
-    }
-
-    const metaSettingsValue = (metaSettings?.value || {}) as any;
-    linkedFlowId = metaSettingsValue?.settings?.sendToUra || null;
+    linkedFlowId = (metaSettings?.value as any)?.settings?.sendToUra || null;
 
     if (!linkedFlowId || linkedFlowId === "none") {
-      const { data: appConnection, error: appConnectionError } = await supabaseAdmin
-        .from("connections")
-        .select("credentials")
-        .eq("company_id", companyId)
-        .eq("platform", "whatsapp")
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (appConnectionError) {
-        console.error("❌ Error reading fallback connection settings:", appConnectionError.message);
-      }
-
-      const creds = (appConnection?.credentials || {}) as any;
-      linkedFlowId = creds?.settings?.sendToUra || null;
+      const { data: appConn } = await supabaseAdmin
+        .from("connections").select("credentials")
+        .eq("company_id", companyId).eq("platform", "whatsapp")
+        .order("updated_at", { ascending: false }).limit(1).maybeSingle();
+      linkedFlowId = (appConn?.credentials as any)?.settings?.sendToUra || null;
     }
 
     if (!linkedFlowId || linkedFlowId === "none") {
@@ -354,31 +536,12 @@ serve(async (req) => {
       return result;
     }
 
-    const { data: flow, error: flowError } = await supabaseAdmin
-      .from("flows")
-      .select("id, name, is_active, trigger_type, flow_data")
-      .eq("id", linkedFlowId)
-      .eq("company_id", companyId)
-      .maybeSingle();
+    const { data: flow } = await supabaseAdmin
+      .from("flows").select("id, name, is_active, trigger_type, flow_data")
+      .eq("id", linkedFlowId).eq("company_id", companyId).maybeSingle();
 
-    if (flowError) {
-      console.error("❌ Error loading linked flow:", flowError.message);
-      const result = { flow: null, reason: "flow_query_error" };
-      linkedFlowCache.set(cacheKey, result);
-      return result;
-    }
-
-    if (!flow) {
-      const result = { flow: null, reason: "flow_not_found" };
-      linkedFlowCache.set(cacheKey, result);
-      return result;
-    }
-
-    if (!flow.is_active) {
-      const result = { flow: null, reason: "flow_inactive" };
-      linkedFlowCache.set(cacheKey, result);
-      return result;
-    }
+    if (!flow) { const r = { flow: null, reason: "flow_not_found" }; linkedFlowCache.set(cacheKey, r); return r; }
+    if (!flow.is_active) { const r = { flow: null, reason: "flow_inactive" }; linkedFlowCache.set(cacheKey, r); return r; }
 
     const result = { flow, reason: "ok" };
     linkedFlowCache.set(cacheKey, result);
@@ -393,38 +556,14 @@ serve(async (req) => {
     const token = url.searchParams.get("hub.verify_token");
     const challenge = url.searchParams.get("hub.challenge");
 
-    console.log("📥 Webhook GET verification:", { mode, token: token ? "***" : "missing", challenge });
-
     if (mode === "subscribe" && token && challenge) {
-      const { data: settings, error } = await supabaseAdmin
-        .from("app_settings")
-        .select("whatsapp_verify_token")
-        .eq("id", 1)
-        .maybeSingle();
+      const { data: settings } = await supabaseAdmin
+        .from("app_settings").select("whatsapp_verify_token").eq("id", 1).maybeSingle();
 
-      if (error) {
-        console.error("❌ Error reading app_settings:", error.message);
-        return new Response("Internal error", { status: 403 });
+      if (settings?.whatsapp_verify_token && token === settings.whatsapp_verify_token) {
+        return new Response(challenge, { status: 200, headers: { ...corsHeaders, "Content-Type": "text/plain" } });
       }
-
-      const storedToken = settings?.whatsapp_verify_token;
-
-      if (!storedToken) {
-        console.error("❌ No verify_token configured in app_settings");
-        return new Response("Forbidden", { status: 403 });
-      }
-
-      if (token === storedToken) {
-        console.log("✅ Webhook verified successfully");
-        return new Response(challenge, {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "text/plain" },
-        });
-      }
-
-      console.warn("⚠️ Token mismatch");
     }
-
     return new Response("Forbidden", { status: 403 });
   }
 
@@ -446,305 +585,144 @@ serve(async (req) => {
           if (!value) continue;
 
           const phoneNumberId = value?.metadata?.phone_number_id;
-          if (!phoneNumberId) {
-            console.warn("⚠️ No phone_number_id in payload, skipping");
-            continue;
-          }
+          if (!phoneNumberId) continue;
 
-          // Identify company by phone_number_id
-          const { data: conn, error: connError } = await supabaseAdmin
+          const { data: conn } = await supabaseAdmin
             .from("whatsapp_connections")
             .select("id, company_id, meta_access_token, meta_phone_number_id")
-            .eq("meta_phone_number_id", phoneNumberId)
-            .eq("provider", "meta")
-            .maybeSingle();
+            .eq("meta_phone_number_id", phoneNumberId).eq("provider", "meta").maybeSingle();
 
-          if (connError) {
-            console.error("❌ DB error finding connection:", connError.message);
-            continue;
-          }
-
-          if (!conn) {
-            console.warn(`⚠️ No company found for phone_number_id: ${phoneNumberId}, ignoring`);
-            continue;
-          }
+          if (!conn) { console.warn(`⚠️ No company for phone_number_id: ${phoneNumberId}`); continue; }
 
           const { company_id, id: whatsappConnectionId } = conn;
-          console.log(`✅ Company identified: ${company_id} | WhatsApp Connection: ${whatsappConnectionId}`);
 
-          const linkedFlowResolution = await resolveActiveLinkedFlow({
-            companyId: company_id,
-            whatsappConnectionId,
-          });
-
+          const linkedFlowResolution = await resolveActiveLinkedFlow({ companyId: company_id, whatsappConnectionId });
           if (linkedFlowResolution.flow) {
-            console.log(`🤖 Linked flow ready: ${linkedFlowResolution.flow.name} (${linkedFlowResolution.flow.id})`);
-          } else {
-            console.log(`ℹ️ Flow not executed for this connection: ${linkedFlowResolution.reason}`);
+            console.log(`🤖 Flow ready: ${linkedFlowResolution.flow.name}`);
           }
 
-          // Find a user_id associated with this company (for conversation ownership)
           let userId: string | null = null;
-          const { data: companyProfile } = await supabaseAdmin
-            .from("profiles")
-            .select("id")
-            .eq("company_id", company_id)
-            .limit(1)
-            .maybeSingle();
-          
-          if (companyProfile) {
-            userId = companyProfile.id;
-          }
+          const { data: companyProfile } = await supabaseAdmin.from("profiles").select("id").eq("company_id", company_id).limit(1).maybeSingle();
+          if (companyProfile) userId = companyProfile.id;
 
-          // conversations.connection_id references public.connections (not whatsapp_connections)
           let conversationConnectionId: string | null = null;
-          const { data: appConnection } = await supabaseAdmin
-            .from("connections")
-            .select("id")
-            .eq("company_id", company_id)
-            .eq("platform", "whatsapp")
-            .order("updated_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
+          const { data: appConnection } = await supabaseAdmin.from("connections").select("id").eq("company_id", company_id).eq("platform", "whatsapp").order("updated_at", { ascending: false }).limit(1).maybeSingle();
+          if (appConnection?.id) conversationConnectionId = appConnection.id;
 
-          if (appConnection?.id) {
-            conversationConnectionId = appConnection.id;
-          }
-
-          // Get contact info from Meta payload
           const contacts = value?.contacts || [];
-          const contactInfo = contacts[0] || {};
-          const contactName = contactInfo?.profile?.name || null;
+          const contactName = contacts[0]?.profile?.name || null;
 
-          // ---- Process incoming messages ----
+          // ── Process messages ──
           const messages = value?.messages || [];
           for (const msg of messages) {
             let content = "";
             const msgType = msg.type || "text";
 
-            if (msgType === "text") {
-              content = msg.text?.body || "";
-            } else if (msgType === "interactive") {
-              content = msg.interactive?.button_reply?.title
-                || msg.interactive?.button_reply?.id
-                || msg.interactive?.list_reply?.title
-                || msg.interactive?.list_reply?.id
-                || "[Interação recebida]";
-            } else if (msgType === "button") {
-              content = msg.button?.text || msg.button?.payload || "[Botão recebido]";
-            } else if (msgType === "image") {
-              content = msg.image?.caption || "[Imagem recebida]";
-            } else if (msgType === "video") {
-              content = msg.video?.caption || "[Vídeo recebido]";
-            } else if (msgType === "audio") {
-              content = "[Áudio recebido]";
-            } else if (msgType === "document") {
-              content = msg.document?.filename || "[Documento recebido]";
-            } else if (msgType === "location") {
-              content = `[Localização: ${msg.location?.latitude},${msg.location?.longitude}]`;
-            } else if (msgType === "contacts") {
-              content = "[Contato recebido]";
-            } else if (msgType === "sticker") {
-              content = "[Figurinha recebida]";
-            } else if (msgType === "reaction") {
-              content = msg.reaction?.emoji || "[Reação]";
-            } else {
-              content = `[${msgType}]`;
-            }
+            if (msgType === "text") content = msg.text?.body || "";
+            else if (msgType === "interactive") {
+              content = msg.interactive?.button_reply?.title || msg.interactive?.button_reply?.id
+                || msg.interactive?.list_reply?.title || msg.interactive?.list_reply?.id || "[Interação]";
+            } else if (msgType === "button") content = msg.button?.text || msg.button?.payload || "[Botão]";
+            else if (msgType === "image") content = msg.image?.caption || "[Imagem]";
+            else if (msgType === "video") content = msg.video?.caption || "[Vídeo]";
+            else if (msgType === "audio") content = "[Áudio]";
+            else if (msgType === "document") content = msg.document?.filename || "[Documento]";
+            else if (msgType === "location") content = `[Localização: ${msg.location?.latitude},${msg.location?.longitude}]`;
+            else if (msgType === "sticker") content = "[Figurinha]";
+            else if (msgType === "reaction") content = msg.reaction?.emoji || "[Reação]";
+            else content = `[${msgType}]`;
 
             const fromNumber = msg.from || "";
             const cleanPhone = fromNumber.replace(/\D/g, "");
 
-            // 1. Save to whatsapp_messages (raw log)
-            const { error: insertError } = await supabaseAdmin
-              .from("whatsapp_messages")
-              .insert({
-                company_id,
-                connection_id: whatsappConnectionId,
-                provider: "meta",
-                direction: "in",
-                wa_message_id: msg.id,
-                from_number: fromNumber,
-                to_number: phoneNumberId,
-                phone_number_id: phoneNumberId,
-                message_type: msgType,
-                body: content,
-                status: "received",
-                raw: msg,
-              });
+            // Save raw message
+            await supabaseAdmin.from("whatsapp_messages").insert({
+              company_id, connection_id: whatsappConnectionId, provider: "meta",
+              direction: "in", wa_message_id: msg.id, from_number: fromNumber,
+              to_number: phoneNumberId, phone_number_id: phoneNumberId,
+              message_type: msgType, body: content, status: "received", raw: msg,
+            });
 
-            if (insertError) {
-              console.error("❌ Error inserting whatsapp_message:", insertError.message);
-            } else {
-              console.log(`📩 WhatsApp message saved: ${msg.id} from ${fromNumber} (${msgType})`);
-            }
-
-            // 2. Create or update conversation in conversations table
             if (userId && cleanPhone) {
               try {
-                // Find existing open conversation
+                // Find/create conversation
                 const { data: existingConv } = await supabaseAdmin
-                  .from("conversations")
-                  .select("id, status")
-                  .eq("contact_phone", cleanPhone)
-                  .eq("company_id", company_id)
-                  .not("status", "eq", "closed")
-                  .order("updated_at", { ascending: false })
-                  .limit(1)
-                  .maybeSingle();
+                  .from("conversations").select("id, status, attendance_type")
+                  .eq("contact_phone", cleanPhone).eq("company_id", company_id)
+                  .not("status", "eq", "closed").order("updated_at", { ascending: false }).limit(1).maybeSingle();
 
                 let conversationId: string;
                 let isNewConversation = false;
 
                 if (existingConv) {
                   conversationId = existingConv.id;
-                  // Update existing conversation
-                  await supabaseAdmin
-                    .from("conversations")
-                    .update({
-                      last_message: content,
-                      last_message_at: new Date().toISOString(),
-                      updated_at: new Date().toISOString(),
-                      unread_count: 1, // Increment would be better but this works
-                    })
-                    .eq("id", conversationId);
-                  console.log(`💬 Conversation updated: ${conversationId}`);
+                  await supabaseAdmin.from("conversations").update({
+                    last_message: content, last_message_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(), unread_count: 1,
+                  }).eq("id", conversationId);
                 } else {
-                  // Create new conversation
                   const { data: newConv, error: convError } = await supabaseAdmin
-                    .from("conversations")
-                    .insert({
-                      user_id: userId,
-                      company_id,
-                      connection_id: conversationConnectionId,
-                      contact_phone: cleanPhone,
-                      contact_name: contactName || cleanPhone,
-                      status: "open",
-                      attendance_type: "ura",
-                      last_message: content,
-                      last_message_at: new Date().toISOString(),
-                      unread_count: 1,
-                    })
-                    .select("id")
-                    .single();
-
-                  if (convError) {
-                    console.error("❌ Error creating conversation:", convError.message);
-                    continue;
-                  }
+                    .from("conversations").insert({
+                      user_id: userId, company_id, connection_id: conversationConnectionId,
+                      contact_phone: cleanPhone, contact_name: contactName || cleanPhone,
+                      status: "open", attendance_type: "ura",
+                      last_message: content, last_message_at: new Date().toISOString(), unread_count: 1,
+                    }).select("id").single();
+                  if (convError) { console.error("❌ Error creating conversation:", convError.message); continue; }
                   conversationId = newConv.id;
                   isNewConversation = true;
-                  console.log(`💬 New conversation created: ${conversationId}`);
                 }
 
-                // 3. Insert message into messages table (for chat UI)
-                const { error: msgError } = await supabaseAdmin
-                  .from("messages")
-                  .insert({
-                    conversation_id: conversationId,
-                    sender_type: "customer",
-                    content: content,
-                    message_type: msgType,
-                    status: "received",
-                    external_id: msg.id,
-                  });
+                // Save message to conversation
+                await supabaseAdmin.from("messages").insert({
+                  conversation_id: conversationId, sender_type: "customer", content,
+                  message_type: msgType, status: "received", external_id: msg.id,
+                });
 
-                if (msgError) {
-                  console.error("❌ Error inserting message:", msgError.message);
-                } else {
-                  console.log(`📝 Message saved to conversation: ${conversationId}`);
-                }
-
-                if (linkedFlowResolution.flow) {
+                // Only execute flow if conversation is in URA mode
+                const convType = existingConv?.attendance_type || "ura";
+                if (linkedFlowResolution.flow && convType === "ura") {
                   try {
                     const flowResult = await executeMetaFlow({
-                      flow: linkedFlowResolution.flow,
-                      inboundMessage: content,
-                      contactPhone: cleanPhone,
-                      contactName: contactName || cleanPhone,
-                      isNewConversation,
-                      conversationId,
-                      companyId: company_id,
-                      whatsappConnection: conn,
-                      whatsappConnectionId,
-                      phoneNumberId,
+                      flow: linkedFlowResolution.flow, inboundMessage: content,
+                      contactPhone: cleanPhone, contactName: contactName || cleanPhone,
+                      isNewConversation, conversationId, companyId: company_id,
+                      whatsappConnection: conn, whatsappConnectionId, phoneNumberId,
                     });
-
-                    if (flowResult.executed) {
-                      console.log(`🤖 Flow executed: ${linkedFlowResolution.flow.id} (${flowResult.responses} respostas)`);
-                    } else {
-                      console.log(`ℹ️ Flow skipped: ${flowResult.reason ?? "not_executed"}`);
-                    }
+                    console.log(`🤖 Flow result: ${JSON.stringify(flowResult)}`);
                   } catch (flowError: any) {
-                    console.error("❌ Error executing linked flow:", flowError.message);
+                    console.error("❌ Flow error:", flowError.message);
                   }
                 }
 
-                // 4. Auto-save contact as lead
-                const { data: existingLead } = await supabaseAdmin
-                  .from("leads")
-                  .select("id")
-                  .eq("phone", cleanPhone)
-                  .eq("user_id", userId)
-                  .maybeSingle();
-
+                // Auto-save lead
+                const { data: existingLead } = await supabaseAdmin.from("leads").select("id").eq("phone", cleanPhone).eq("user_id", userId).maybeSingle();
                 if (!existingLead) {
-                  await supabaseAdmin
-                    .from("leads")
-                    .insert({
-                      user_id: userId,
-                      phone: cleanPhone,
-                      name: contactName || cleanPhone,
-                      source: "WhatsApp Meta",
-                      status: "warm",
-                    });
-                  console.log(`📇 Lead created for ${cleanPhone}`);
+                  await supabaseAdmin.from("leads").insert({
+                    user_id: userId, phone: cleanPhone, name: contactName || cleanPhone,
+                    source: "WhatsApp Meta", status: "warm",
+                  });
                 }
               } catch (convErr: any) {
-                console.error("❌ Error processing conversation:", convErr.message);
+                console.error("❌ Conversation error:", convErr.message);
               }
-            } else {
-              console.warn("⚠️ No userId found for company, skipping conversation creation");
             }
           }
 
-          // ---- Process status updates ----
+          // ── Status updates ──
           const statuses = value?.statuses || [];
           for (const st of statuses) {
-            const newStatus = st.status;
-            // Only update with valid statuses
             const validStatuses = ['sent', 'delivered', 'read', 'failed'];
-            if (!validStatuses.includes(newStatus)) {
-              console.log(`⚠️ Skipping unknown status: ${newStatus}`);
-              continue;
-            }
-
-            const { error: updateError } = await supabaseAdmin
-              .from("whatsapp_messages")
-              .update({ status: newStatus })
-              .eq("wa_message_id", st.id)
-              .eq("company_id", company_id);
-
-            if (updateError) {
-              console.error("❌ Error updating status:", updateError.message);
-            } else {
-              console.log(`🔄 Status updated: ${st.id} → ${newStatus}`);
-            }
+            if (!validStatuses.includes(st.status)) continue;
+            await supabaseAdmin.from("whatsapp_messages").update({ status: st.status }).eq("wa_message_id", st.id).eq("company_id", company_id);
           }
         }
       }
 
-      return new Response("EVENT_RECEIVED", {
-        status: 200,
-        headers: { "Content-Type": "text/plain" },
-      });
+      return new Response("EVENT_RECEIVED", { status: 200, headers: { "Content-Type": "text/plain" } });
     } catch (error) {
       console.error("❌ Webhook POST error:", error);
-      // Never return 500 to Meta
-      return new Response("EVENT_RECEIVED", {
-        status: 200,
-        headers: { "Content-Type": "text/plain" },
-      });
+      return new Response("EVENT_RECEIVED", { status: 200, headers: { "Content-Type": "text/plain" } });
     }
   }
 
