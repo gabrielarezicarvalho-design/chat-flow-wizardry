@@ -78,12 +78,22 @@ serve(async (req) => {
       console.log("✅ Access token obtained successfully");
 
       // Try multiple approaches to find WABA and phone number
-      let wabaId = null;
-      let phoneNumberId = null;
-      let displayPhoneNumber = null;
-      let businessId = null;
+      let wabaId: string | null = null;
+      let phoneNumberId: string | null = null;
+      let displayPhoneNumber: string | null = null;
+      let businessId: string | null = null;
 
-      // Approach 1: Get shared WABAs via the business integration endpoint
+      const previousWabaId = conn.meta_waba_id;
+      const previousPhoneNumberId = conn.meta_phone_number_id;
+
+      const pickPreferredId = (ids: string[] = [], previousId?: string | null): string | null => {
+        if (!ids.length) return null;
+        if (!previousId) return ids[0] ?? null;
+        const differentId = ids.find((id) => id && id !== previousId);
+        return differentId ?? ids[0] ?? null;
+      };
+
+      // Approach 1: Get WABA IDs from granular scopes (Embedded Signup)
       try {
         const sharedWabasResp = await fetch(
           `https://graph.facebook.com/v21.0/debug_token?input_token=${accessToken}`,
@@ -91,13 +101,14 @@ serve(async (req) => {
         );
         const debugData = await sharedWabasResp.json();
         console.log("🔍 Debug token data:", JSON.stringify(debugData));
-        
-        // Extract granular scopes which contain WABA info
+
         const granularScopes = debugData?.data?.granular_scopes || [];
         for (const scope of granularScopes) {
-          if (scope.scope === "whatsapp_business_management" && scope.target_ids?.length > 0) {
-            wabaId = scope.target_ids[0];
-            console.log("📱 Found WABA ID from debug token:", wabaId);
+          if (scope.scope === "whatsapp_business_management" && Array.isArray(scope.target_ids) && scope.target_ids.length > 0) {
+            const candidateWabaIds = scope.target_ids.filter(Boolean);
+            wabaId = pickPreferredId(candidateWabaIds, previousWabaId);
+            console.log("📱 Selected WABA ID from debug token:", wabaId, "Candidates:", candidateWabaIds);
+            break;
           }
         }
       } catch (e) {
@@ -112,9 +123,13 @@ serve(async (req) => {
           );
           const assignedWabas = await assignedWabasResp.json();
           console.log("📋 Assigned WABAs:", JSON.stringify(assignedWabas));
-          
-          if (assignedWabas?.data?.length > 0) {
-            wabaId = assignedWabas.data[0].id;
+
+          const candidateWabaIds = (assignedWabas?.data || [])
+            .map((item: any) => item?.id)
+            .filter(Boolean);
+
+          if (candidateWabaIds.length > 0) {
+            wabaId = pickPreferredId(candidateWabaIds, previousWabaId);
           }
         } catch (e) {
           console.error("Assigned WABAs approach failed:", e);
@@ -132,16 +147,20 @@ serve(async (req) => {
 
           if (businessesData?.data?.length > 0) {
             businessId = businessesData.data[0].id;
-            
+
             // Get WABAs owned by this business
             const bizWabasResp = await fetch(
               `https://graph.facebook.com/v21.0/${businessId}/owned_whatsapp_business_accounts?access_token=${accessToken}`
             );
             const bizWabas = await bizWabasResp.json();
             console.log("📱 Business WABAs:", JSON.stringify(bizWabas));
-            
-            if (bizWabas?.data?.length > 0) {
-              wabaId = bizWabas.data[0].id;
+
+            const candidateWabaIds = (bizWabas?.data || [])
+              .map((item: any) => item?.id)
+              .filter(Boolean);
+
+            if (candidateWabaIds.length > 0) {
+              wabaId = pickPreferredId(candidateWabaIds, previousWabaId);
             }
           }
         } catch (e) {
@@ -160,7 +179,7 @@ serve(async (req) => {
         }
       }
 
-      // If we found a WABA, get phone numbers
+      // If we found a WABA, get phone numbers (prefer one different from previous when available)
       if (wabaId) {
         try {
           const phonesResp = await fetch(
@@ -169,9 +188,11 @@ serve(async (req) => {
           const phonesData = await phonesResp.json();
           console.log("📞 Phone numbers:", JSON.stringify(phonesData));
 
-          if (phonesData?.data?.length > 0) {
-            phoneNumberId = phonesData.data[0].id;
-            displayPhoneNumber = phonesData.data[0].display_phone_number;
+          const phones = Array.isArray(phonesData?.data) ? phonesData.data : [];
+          if (phones.length > 0) {
+            const preferredPhone = phones.find((phone: any) => phone?.id && phone.id !== previousPhoneNumberId) || phones[0];
+            phoneNumberId = preferredPhone?.id || null;
+            displayPhoneNumber = preferredPhone?.display_phone_number || null;
           }
         } catch (e) {
           console.error("Phone numbers fetch failed:", e);
