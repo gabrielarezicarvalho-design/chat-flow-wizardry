@@ -312,6 +312,7 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
             <SelectContent>
               <SelectItem value="text">Texto simples</SelectItem>
               <SelectItem value="buttons">Menu de opções</SelectItem>
+              <SelectItem value="replyButtons">Botão de Resposta</SelectItem>
               <SelectItem value="list">Lista interativa</SelectItem>
               <SelectItem value="image">Imagem</SelectItem>
               <SelectItem value="audio">Áudio</SelectItem>
@@ -321,7 +322,7 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
           </Select>
         </div>
         
-        {['text', 'buttons', 'list'].includes(nodeData.messageType || 'text') && (
+        {['text', 'buttons', 'replyButtons', 'list'].includes(nodeData.messageType || 'text') && (
           <div className="space-y-2">
             <Label className="text-sm font-medium">Conteúdo</Label>
             <Textarea
@@ -368,6 +369,50 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
                     placeholder="Palavras-chave: suporte, ajuda"
                     className="text-xs"
                   />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {nodeData.messageType === 'replyButtons' && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Botões de Resposta</Label>
+              <Button size="sm" variant="outline" onClick={addButton} disabled={(nodeData.buttons?.length || 0) >= 3}>
+                <Plus className="h-3 w-3 mr-1" /> Adicionar
+              </Button>
+            </div>
+            <div className="p-3 rounded-lg bg-muted/50 border">
+              <p className="text-xs text-muted-foreground">
+                Formato: <code className="bg-muted px-1 rounded">texto|id</code> ou apenas <code className="bg-muted px-1 rounded">texto</code> (ID será igual ao texto). Máx. 3 botões.
+              </p>
+            </div>
+            <div className="space-y-2">
+              {(nodeData.buttons || []).map((btn: any, index: number) => (
+                <div key={btn.id || index} className="p-3 border rounded-lg bg-muted/30 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="w-6 h-6 rounded-full flex items-center justify-center p-0">
+                      {index + 1}
+                    </Badge>
+                    <Input
+                      value={btn.text || ''}
+                      onChange={(e) => updateButton(index, 'text', e.target.value)}
+                      placeholder={`texto|id ou apenas texto`}
+                      className="flex-1"
+                    />
+                    <Button size="icon" variant="ghost" onClick={() => removeButton(index)} className="text-destructive h-8 w-8">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground pl-8">
+                    {btn.text?.includes('|') 
+                      ? `Texto: "${btn.text.split('|')[0]}" → ID: "${btn.text.split('|')[1]}"`
+                      : btn.text 
+                        ? `Texto: "${btn.text}" → ID: "${btn.text}"`
+                        : 'Digite o texto do botão'
+                    }
+                  </p>
                 </div>
               ))}
             </div>

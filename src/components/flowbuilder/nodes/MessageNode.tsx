@@ -13,6 +13,7 @@ export const MessageNode = ({ data, selected }: MessageNodeProps) => {
       case 'audio': return <FileAudio className="h-4 w-4 text-white" />;
       case 'document': return <File className="h-4 w-4 text-white" />;
       case 'buttons': return <Grid3X3 className="h-4 w-4 text-white" />;
+      case 'replyButtons': return <Grid3X3 className="h-4 w-4 text-white" />;
       case 'list': return <ListOrdered className="h-4 w-4 text-white" />;
       default: return <MessageSquare className="h-4 w-4 text-white" />;
     }
@@ -21,6 +22,7 @@ export const MessageNode = ({ data, selected }: MessageNodeProps) => {
   const getLabel = () => {
     switch (data?.messageType) {
       case 'buttons': return 'Menu de opções';
+      case 'replyButtons': return 'Botão de Resposta';
       case 'list': return 'Lista de opções';
       case 'image': return 'Enviar imagem';
       case 'audio': return 'Enviar áudio';
@@ -30,10 +32,10 @@ export const MessageNode = ({ data, selected }: MessageNodeProps) => {
   };
 
   const hasWarning = !data?.content && !data?.label;
-  const isMenu = data?.messageType === 'buttons' || data?.messageType === 'list';
+  const isMenu = data?.messageType === 'buttons' || data?.messageType === 'list' || data?.messageType === 'replyButtons';
   const buttons = data?.buttons || [];
   const listItems = data?.listItems || [];
-  const menuOptions = isMenu ? (data?.messageType === 'buttons' ? buttons : listItems) : [];
+  const menuOptions = isMenu ? (data?.messageType === 'list' ? listItems : buttons) : [];
   const hasErrorHandle = isMenu && data?.errorMessage;
 
   return (
