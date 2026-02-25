@@ -18,7 +18,7 @@ import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
 import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell, Globe, ArrowLeft, Send, Search, MoreHorizontal, Eye, Calendar, ChevronDown, ChevronRight } from "lucide-react";
 import { TelegramNotifications } from "@/components/mass-sending/TelegramNotifications";
-import { OrphanedInstancesAlert } from "@/components/connections/OrphanedInstancesAlert";
+// OrphanedInstancesAlert removed
 import { DeleteConnectionDialog } from "@/components/connections/DeleteConnectionDialog";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -73,8 +73,8 @@ const Connections = () => {
   });
 
   // Fetch Meta connections from whatsapp_connections table
-  useEffect(() => {
-    const fetchMetaConnections = async () => {
+  const fetchMetaConnections = useCallback(async () => {
+    try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -96,10 +96,17 @@ const Connections = () => {
       if (!error && data) {
         setMetaConnections(data);
       }
-    };
+    } catch (err) {
+      console.error("Error fetching meta connections:", err);
+    }
+  }, []);
 
+  // Initial fetch + interval polling for Meta connections
+  useEffect(() => {
     fetchMetaConnections();
-  }, [connections]); // Refresh when connections change
+    const interval = setInterval(fetchMetaConnections, 5000);
+    return () => clearInterval(interval);
+  }, [fetchMetaConnections]);
 
   // Fetch company max_connections limit
   useEffect(() => {
@@ -1611,7 +1618,7 @@ const Connections = () => {
           </div>
         )}
 
-        <OrphanedInstancesAlert />
+        {/* OrphanedInstancesAlert removed */}
 
         {/* Table Card */}
         <Card className="border-border overflow-hidden">
