@@ -16,6 +16,7 @@ import { useFlows } from "@/hooks/useFlows";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useCompanyId } from "@/hooks/useCompanyId";
 import { MessageSquare, Plus, Loader2, Trash2, QrCode, Webhook, Users, Settings, Code, Wifi, WifiOff, Copy, Save, X, Bot, AlertTriangle, RefreshCw, Tag, Download, Smartphone, Link2, Bell, Globe, ArrowLeft, Send, Search, MoreHorizontal, Eye, Calendar, ChevronDown, ChevronRight } from "lucide-react";
 import { TelegramNotifications } from "@/components/mass-sending/TelegramNotifications";
 // OrphanedInstancesAlert removed
@@ -30,8 +31,16 @@ const Connections = () => {
   const { departments } = useDepartments();
   const { agents } = useAgents();
   const { isAdmin } = useUserRole();
+  const { companyId } = useCompanyId();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [metaConnections, setMetaConnections] = useState<any[]>([]);
+  const [metaConnections, setMetaConnections] = useState<any[]>(() => {
+    try {
+      const cached = sessionStorage.getItem('meta_connections_cache');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   const [metaTestDialogOpen, setMetaTestDialogOpen] = useState(false);
   const [metaTestConnection, setMetaTestConnection] = useState<any>(null);
   const [metaDetailsDialogOpen, setMetaDetailsDialogOpen] = useState(false);
@@ -72,41 +81,85 @@ const Connections = () => {
     environment: 'PROD'
   });
 
+  const metaCacheKey = companyId ? `meta_connections_cache_${companyId}` : null;
+
   // Fetch Meta connections from whatsapp_connections table
   const fetchMetaConnections = useCallback(async () => {
+    if (!companyId) return;
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (!profile?.company_id) return;
-
       const { data, error } = await supabase
         .from('whatsapp_connections')
         .select('*')
-        .eq('company_id', profile.company_id)
+        .eq('company_id', companyId)
         .eq('provider', 'meta')
         .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        setMetaConnections(data);
-      }
+      if (error) throw error;
+      setMetaConnections(data ?? []);
     } catch (err) {
       console.error("Error fetching meta connections:", err);
     }
-  }, []);
+  }, [companyId]);
 
-  // Initial fetch + interval polling for Meta connections
+  // Restore cached Meta connections immediately when company changes
   useEffect(() => {
+    if (!metaCacheKey) {
+      setMetaConnections([]);
+      return;
+    }
+
+    try {
+      const cached = sessionStorage.getItem(metaCacheKey);
+      setMetaConnections(cached ? JSON.parse(cached) : []);
+    } catch {
+      setMetaConnections([]);
+    }
+  }, [metaCacheKey]);
+
+  // Persist cache to avoid Meta row flicker after refresh/navigation
+  useEffect(() => {
+    if (!metaCacheKey) return;
+    sessionStorage.setItem(metaCacheKey, JSON.stringify(metaConnections));
+    sessionStorage.setItem('meta_connections_cache', JSON.stringify(metaConnections));
+  }, [metaConnections, metaCacheKey]);
+
+  // Poll every second to keep Meta Cloud API always visible and updated
+  useEffect(() => {
+    if (!companyId) return;
+
     fetchMetaConnections();
-    const interval = setInterval(fetchMetaConnections, 5000);
+    const interval = setInterval(fetchMetaConnections, 1000);
     return () => clearInterval(interval);
-  }, [fetchMetaConnections]);
+  }, [companyId, fetchMetaConnections]);
+
+  // Realtime sync to avoid waiting for next poll tick
+  useEffect(() => {
+    if (!companyId) return;
+
+    const channel = supabase
+      .channel(`meta-connections-${companyId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'whatsapp_connections',
+          filter: `company_id=eq.${companyId}`,
+        },
+        (payload) => {
+          const row = ((payload.new as any) ?? (payload.old as any));
+          if (row?.provider === 'meta') {
+            void fetchMetaConnections();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [companyId, fetchMetaConnections]);
 
   // Fetch company max_connections limit
   useEffect(() => {
