@@ -73,6 +73,12 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
     onUpdate(node.id, newData);
   };
 
+  const handleUpdateMultiple = (updates: Record<string, any>) => {
+    const newData = { ...nodeData, ...updates };
+    setNodeData(newData);
+    onUpdate(node.id, newData);
+  };
+
   const addButton = () => {
     const buttons = nodeData.buttons || [];
     handleUpdate('buttons', [...buttons, { id: Date.now().toString(), text: '', value: '', routeType: 'flow', departmentId: '', departmentName: '' }]);
@@ -340,33 +346,31 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
           </p>
         </div>
 
-        <div className="space-y-2">
+         <div className="space-y-2">
           <Label className="text-sm font-medium">Ação após erros</Label>
-          <Select
+          <select
+            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             value={normalizedErrorAction}
-            onValueChange={(v) => {
-              handleUpdate('errorAction', v);
+            onChange={(e) => {
+              const v = e.target.value;
+              const updates: Record<string, any> = { errorAction: v };
               if (v !== 'transfer_queue') {
-                handleUpdate('errorDepartmentId', '');
-                handleUpdate('errorDepartmentName', '');
+                updates.errorDepartmentId = '';
+                updates.errorDepartmentName = '';
               }
               if (v !== 'transfer_agent') {
-                handleUpdate('errorAgentId', '');
-                handleUpdate('errorAgentName', '');
+                updates.errorAgentId = '';
+                updates.errorAgentName = '';
               }
+              handleUpdateMultiple(updates);
             }}
           >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="transfer_queue">Transferir para fila (departamento)</SelectItem>
-              <SelectItem value="transfer_agent">Transferir para atendente</SelectItem>
-              <SelectItem value="message">Enviar mensagem e encerrar</SelectItem>
-              <SelectItem value="restart">Reiniciar fluxo</SelectItem>
-              <SelectItem value="continue">Seguir pela saída de erro</SelectItem>
-            </SelectContent>
-          </Select>
+            <option value="transfer_queue">Transferir para fila (departamento)</option>
+            <option value="transfer_agent">Transferir para atendente</option>
+            <option value="message">Enviar mensagem e encerrar</option>
+            <option value="restart">Reiniciar fluxo</option>
+            <option value="continue">Seguir pela saída de erro</option>
+          </select>
         </div>
 
         {normalizedErrorAction === 'transfer_queue' && (
