@@ -440,50 +440,92 @@ const Connections = () => {
   // Load settings when connection changes
   useEffect(() => {
     const loadSettings = async () => {
+      const defaultSettings = {
+        departments: [],
+        attendantsPerAgent: '',
+        requireCloseReason: 'nao',
+        requireContractNumber: 'nao',
+        sendToUra: '',
+        sendToAiAgent: '',
+        headerSignature: 'nao',
+        closeOnInactivity: 'nao',
+        multiQueueHistory: 'nao',
+        applyTriggersActive: 'nao',
+        applyTriggersScheduled: 'nao',
+        autoSaveContacts: 'sim',
+        allowActiveAttendance: 'sim',
+        importHistory: 'nao',
+        limitTransfersToQueue: 'nao',
+        distributionStrategy: 'round_robin',
+        notifyNewAttendance: 'sim',
+        externalDeviceMessage: 'ignorar'
+      };
+
+      const defaultMessageSettings = {
+        welcomeMessage: '',
+        closingMessage: '',
+        absenceMessage: '',
+        transferMessage: '',
+        autoReplyEnabled: false,
+        autoReplyMessage: '',
+        autoReplyButtonText: '',
+        autoReplyButtonUrl: ''
+      };
+
+      const resetDefaults = () => {
+        setSettings(defaultSettings);
+        setMessageSettings(defaultMessageSettings);
+      };
+
+      if (!selectedConnection) {
+        resetDefaults();
+        return;
+      }
+
+      const connAny = selectedConnection as any;
+
+      // Meta Cloud API: configurações ficam na tabela settings por conexão
+      if (connAny.provider === 'meta') {
+        const settingsKey = `connection_settings_meta_${selectedConnection.id}`;
+
+        const { data, error } = await supabase
+          .from('settings')
+          .select('value')
+          .eq('company_id', connAny.company_id)
+          .eq('key', settingsKey)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Erro ao carregar configurações Meta:', error);
+          resetDefaults();
+          return;
+        }
+
+        const savedSettings = (data?.value as any)?.settings;
+        if (savedSettings) {
+          setSettings({ ...defaultSettings, ...savedSettings });
+        } else {
+          resetDefaults();
+        }
+        return;
+      }
+
+      // UAZAPI/Conexões padrão: configurações ficam em credentials
       if (selectedConnection?.credentials) {
         const creds = selectedConnection.credentials as any;
         if (creds.settings) {
-          setSettings(prev => ({ ...prev, ...creds.settings }));
+          setSettings({ ...defaultSettings, ...creds.settings });
+        } else {
+          setSettings(defaultSettings);
         }
         if (creds.messages) {
-          setMessageSettings(prev => ({ ...prev, ...creds.messages }));
+          setMessageSettings({ ...defaultMessageSettings, ...creds.messages });
+        } else {
+          setMessageSettings(defaultMessageSettings);
         }
       } else {
-        // Reset to defaults when no credentials
-        setSettings({
-          departments: [],
-          attendantsPerAgent: '',
-          requireCloseReason: 'nao',
-          requireContractNumber: 'nao',
-          sendToUra: '',
-          sendToAiAgent: '',
-          headerSignature: 'nao',
-          closeOnInactivity: 'nao',
-          multiQueueHistory: 'nao',
-          applyTriggersActive: 'nao',
-          applyTriggersScheduled: 'nao',
-          autoSaveContacts: 'sim',
-          allowActiveAttendance: 'sim',
-          importHistory: 'nao',
-          limitTransfersToQueue: 'nao',
-          distributionStrategy: 'round_robin',
-          notifyNewAttendance: 'sim',
-          externalDeviceMessage: 'ignorar'
-        });
-        setMessageSettings({
-          welcomeMessage: '',
-          closingMessage: '',
-          absenceMessage: '',
-          transferMessage: '',
-          autoReplyEnabled: false,
-          autoReplyMessage: '',
-          autoReplyButtonText: '',
-          autoReplyButtonUrl: ''
-        });
+        resetDefaults();
       }
-
-      // Load linked flow - simplified without connection_id
-      // Connection-flow linking is stored in flow settings instead
     };
 
     loadSettings();
@@ -1057,10 +1099,39 @@ const Connections = () => {
     
     setSavingSettings(true);
     try {
+      const connAny = selectedConnection as any;
+
+      // Meta Cloud API: salvar configurações por conexão na tabela settings
+      if (connAny.provider === 'meta') {
+        const companyId = connAny.company_id;
+        if (!companyId) {
+          throw new Error('Empresa da conexão Meta não encontrada');
+        }
+
+        const settingsKey = `connection_settings_meta_${selectedConnection.id}`;
+        const { error: metaSaveError } = await supabase
+          .from('settings')
+          .upsert(
+            {
+              company_id: companyId,
+              key: settingsKey,
+              value: { settings }
+            },
+            { onConflict: 'company_id,key' }
+          );
+
+        if (metaSaveError) {
+          throw metaSaveError;
+        }
+
+        toast.success("Configurações salvas com sucesso!");
+        return;
+      }
+
       const currentCreds = (selectedConnection.credentials as any) || {};
       
-      // Save settings to connection (including auto_save_contacts column)
-      await updateConnection.mutateAsync({
+      // Save settings to regular connection (including auto_save_contacts column)
+      const updatedConnection = await updateConnection.mutateAsync({
         id: selectedConnection.id,
         updates: {
           credentials: {
@@ -1070,6 +1141,13 @@ const Connections = () => {
           }
         }
       });
+
+      if (updatedConnection) {
+        setSelectedConnection((prev: any) => {
+          if (!prev || prev.id !== updatedConnection.id) return prev;
+          return { ...prev, ...updatedConnection, provider: prev.provider };
+        });
+      }
 
       // If a flow is selected, update the flow's is_active to link it
       if (settings.sendToUra && settings.sendToUra !== "none") {
