@@ -466,9 +466,19 @@ ABRIR CHAMADO AUTOMÁTICO:
 - Se estiver FORA do horário comercial e precisar escalar, um chamado será aberto automaticamente.
 - Informe ao cliente que o chamado foi registrado e que alguém entrará em contato.`;
 
+    // Include knowledge base if available
+    const knowledgeSection = agent.knowledge_text ? `
+
+BASE DE CONHECIMENTO (USE ESTAS INFORMAÇÕES PARA RESPONDER):
+${agent.knowledge_text}
+
+INSTRUÇÃO: Sempre que o cliente fizer uma pergunta cujas informações estejam na base de conhecimento acima, RESPONDA usando essas informações. Não invente dados. Use exatamente o que está na base.` : "";
+
     const fullSystemPrompt = `${baseSystemPrompt}
 Responda de forma ${agent.response_style === 'formal' ? 'formal e profissional' : agent.response_style === 'casual' ? 'casual e descontraída' : 'amigável e prestativa'}.
 Seja conciso e objetivo nas respostas. Responda sempre em português brasileiro.
+
+${knowledgeSection}
 
 ${visionInstructions}
 
