@@ -62,7 +62,7 @@ serve(async (req) => {
   }
 
   try {
-    const { systemPrompt, knowledgeText, agentName, mode } = await req.json();
+    const { systemPrompt, knowledgeText, agentName, mode, testMessage, chatHistory } = await req.json();
 
     // Get user's company AI keys from settings
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -119,7 +119,7 @@ serve(async (req) => {
       );
     }
 
-    const sysPrompt = "Você é um especialista em engenharia de prompts e design de assistentes de IA. Sua tarefa é ajudar a melhorar prompts e bases de conhecimento de chatbots de atendimento via WhatsApp. Seja prático, direto e dê sugestões acionáveis. Sempre mantenha o conteúdo original e apenas adicione/melhore.";
+    let sysPrompt = "Você é um especialista em engenharia de prompts e design de assistentes de IA. Sua tarefa é ajudar a melhorar prompts e bases de conhecimento de chatbots de atendimento via WhatsApp. Seja prático, direto e dê sugestões acionáveis. Sempre mantenha o conteúdo original e apenas adicione/melhore.";
 
     let userMessage = "";
 
@@ -172,6 +172,33 @@ Responda em português brasileiro com:
 2. **Conteúdos sugeridos** - liste 5-8 tópicos/informações que deveriam ser adicionados à base de conhecimento
 3. **Exemplos de perguntas difíceis** - liste 5 perguntas que o assistente provavelmente erraria hoje e como deveria responder
 4. **Template de FAQ sugerido** - crie um modelo de FAQ que pode ser preenchido pelo usuário, entre \`\`\`faq e \`\`\``;
+    } else if (mode === "diagnostic_chat") {
+      // Diagnostic chat mode: simulates a conversation with the agent to test the prompt
+      
+      // Build a diagnostic system prompt
+      sysPrompt = `Você vai SIMULAR ser o assistente "${agentName || "Assistente"}" usando exatamente o prompt e base de conhecimento fornecidos abaixo.
+
+PROMPT DO ASSISTENTE:
+"""
+${systemPrompt || "(sem prompt configurado)"}
+"""
+
+BASE DE CONHECIMENTO:
+"""
+${knowledgeText || "(sem base de conhecimento)"}
+"""
+
+REGRAS DA SIMULAÇÃO:
+1. Responda EXATAMENTE como o assistente responderia, seguindo o prompt e base de conhecimento à risca.
+2. Após sua resposta simulada, adicione uma seção de DIAGNÓSTICO separada por "---DIAGNÓSTICO---" contendo:
+   - Se a resposta está adequada ou tem problemas
+   - Se o prompt cobre esse cenário
+   - Se faltam informações na base de conhecimento
+   - Sugestão específica de melhoria (se aplicável)
+3. NÃO invente informações que não estão no prompt ou base de conhecimento.
+4. Se o prompt não cobre o cenário, aponte isso claramente no diagnóstico.`;
+
+      userMessage = testMessage || "";
     }
 
     let result: string | null = null;
