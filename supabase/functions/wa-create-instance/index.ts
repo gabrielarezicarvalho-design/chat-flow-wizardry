@@ -5,6 +5,73 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
 
+async function configureWebhook(baseUrl: string, token: string) {
+  const webhookUrl = `https://usxpwndgjlnhbdxxoujf.supabase.co/functions/v1/wa-webhook-listener`;
+  console.log("🔧 Auto-configuring webhook to:", webhookUrl);
+
+  const allEvents = [
+    "messages", "RECEIVE_MESSAGE", "MESSAGE_STATUS",
+    "messages.upsert", "messages.update", "message", "message.any",
+    "poll", "poll.vote", "poll_vote", "pollUpdate", "polls.vote",
+    "connection", "connection.update", "qrcode", "qr",
+    "contacts.update", "contacts.upsert", "chats.update", "chats.upsert",
+    "groups.update", "groups.upsert", "group-participants.update",
+    "presence.update", "labels.edit", "labels.association", "call"
+  ];
+
+  const requestBody = {
+    url: webhookUrl,
+    webhookURL: webhookUrl,
+    webhook: webhookUrl,
+    enabled: true,
+    events: allEvents,
+    allEvents: true,
+    on_message: true,
+    on_message_received: true,
+    on_poll: true,
+    on_poll_vote: true,
+    webhookByEvents: false,
+    webhookBase64: true,
+    readMessages: true,
+    rejectCall: false,
+    msgCall: "",
+    groupsIgnore: false,
+    alwaysOnline: false,
+    readStatus: true,
+    syncFullHistory: false
+  };
+
+  const attempts = [
+    { endpoint: "/webhook", method: "POST" },
+    { endpoint: "/webhook/set", method: "POST" },
+    { endpoint: "/instance/webhook", method: "POST" },
+    { endpoint: "/webhook", method: "PUT" },
+    { endpoint: "/instance/webhook", method: "PUT" },
+  ];
+
+  for (const { endpoint, method } of attempts) {
+    try {
+      const response = await fetch(`${baseUrl}${endpoint}`, {
+        method,
+        headers: { "Content-Type": "application/json", "token": token },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`✅ Webhook configured via ${method} ${endpoint}`);
+        return { success: true, webhookUrl, method, endpoint };
+      }
+      console.log(`❌ ${method} ${endpoint}: HTTP ${response.status}`);
+    } catch (err) {
+      console.log(`❌ ${method} ${endpoint}: ${err}`);
+    }
+  }
+
+  console.log("⚠️ All webhook config attempts failed");
+  return { success: false };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -12,7 +79,6 @@ serve(async (req) => {
 
   try {
     const { name, phone, environment } = await req.json();
-
     console.log("📝 Creating instance:", { name, phone, environment });
 
     if (!name) {
@@ -22,7 +88,6 @@ serve(async (req) => {
       });
     }
 
-    // Pegar token admin e base url dos secrets baseado no ambiente
     const ADMIN_TOKEN = environment?.toUpperCase() === "PROD"
       ? Deno.env.get("UZAPI_ADMIN_TOKEN_PROD")
       : Deno.env.get("UZAPI_ADMIN_TOKEN_TESTE");
@@ -31,73 +96,51 @@ serve(async (req) => {
       ? Deno.env.get("UZAPI_BASE_URL_PROD")
       : Deno.env.get("UZAPI_BASE_URL_TESTE");
 
-    console.log("🔑 Using BASE_URL:", BASE_URL);
-    console.log("🔑 ADMIN_TOKEN exists:", !!ADMIN_TOKEN);
-    console.log("🔑 ADMIN_TOKEN length:", ADMIN_TOKEN?.length || 0);
-
     if (!ADMIN_TOKEN) {
-      console.error("❌ Admin token not found for environment:", environment);
       return new Response(JSON.stringify({ error: "Admin token not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    // Fazer POST para /instance/init com o token admin
+    // Create instance
     const response = await fetch(`${BASE_URL}/instance/init`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "admintoken": ADMIN_TOKEN
-      },
-      body: JSON.stringify({
-        name: name,
-        nameInSystem: "marketflow"
-      })
+      headers: { "Content-Type": "application/json", "admintoken": ADMIN_TOKEN },
+      body: JSON.stringify({ name, nameInSystem: "marketflow" })
     });
 
     const data = await response.json();
     console.log("📡 UAZAPI response:", data);
 
     if (!response.ok) {
-      console.error("❌ UAZAPI error:", data);
-      return new Response(JSON.stringify({
-        error: "Failed to create instance",
-        status: response.status,
-        details: data
-      }), {
+      return new Response(JSON.stringify({ error: "Failed to create instance", status: response.status, details: data }), {
         status: response.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    // Extrair dados da resposta
     const instanceId = data?.instance?.id;
     const token = data?.instance?.token;
 
     if (!instanceId || !token) {
-      console.error("❌ Missing instance data:", data);
-      return new Response(JSON.stringify({
-        error: "Instance data incomplete",
-        details: data
-      }), {
+      return new Response(JSON.stringify({ error: "Instance data incomplete", details: data }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    // Agora fazer POST para /instance/connect para gerar o QR code
+    // Auto-configure webhook immediately after instance creation
+    const webhookResult = await configureWebhook(BASE_URL!, token);
+    console.log("🔧 Webhook auto-config result:", webhookResult);
+
+    // Connect to generate QR code
     const connectBody: any = {};
-    if (phone) {
-      connectBody.phone = phone;
-    }
+    if (phone) connectBody.phone = phone;
 
     const connectResponse = await fetch(`${BASE_URL}/instance/connect`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "token": token
-      },
+      headers: { "Content-Type": "application/json", "token": token },
       body: JSON.stringify(connectBody)
     });
 
@@ -105,42 +148,39 @@ serve(async (req) => {
     console.log("📱 Connect response:", connectData);
 
     if (!connectResponse.ok) {
-      console.error("❌ Connect error:", connectData);
-      // Return success with instance data but no QR code - let frontend handle retry
       return new Response(JSON.stringify({
         success: true,
         instance_id: instanceId,
-        token: token,
+        token,
         base_url: BASE_URL,
         qrcode: null,
         paircode: null,
+        webhook_configured: webhookResult.success,
         connect_error: connectData?.error || "Failed to generate QR code"
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    // Extrair dados corretos da resposta UAZAPI
     const qrcode = connectData?.instance?.qrcode;
     const paircode = connectData?.instance?.paircode;
-
     console.log("✅ Instance created successfully:", instanceId);
 
     return new Response(JSON.stringify({
       success: true,
       instance_id: instanceId,
-      token: token,
+      token,
       base_url: BASE_URL,
-      qrcode: qrcode,
-      paircode: paircode
+      qrcode,
+      paircode,
+      webhook_configured: webhookResult.success
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
 
   } catch (err) {
     console.error("❌ Error creating instance:", err);
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
