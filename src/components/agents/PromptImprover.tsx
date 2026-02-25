@@ -26,7 +26,7 @@ interface ImprovementSuggestion {
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
-  imageUrl?: string;
+  imageUrls?: string[];
   audioUrl?: string;
   isAudio?: boolean;
   improvement?: ImprovementSuggestion;
@@ -71,10 +71,10 @@ export const PromptImprover = ({
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Media state
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // Media state - multiple images
+  const [selectedImages, setSelectedImages] = useState<{ file: File; preview: string; base64: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Audio recording
   const [isRecording, setIsRecording] = useState(false);
@@ -92,9 +92,9 @@ export const PromptImprover = ({
 
   useEffect(() => {
     return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
     };
-  }, [imagePreview]);
+  }, [selectedImages]);
 
   const analyze = async (mode: Mode) => {
     if (mode === "diagnostic_chat") {
@@ -124,22 +124,71 @@ export const PromptImprover = ({
     }
   };
 
-  // --- Image ---
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Apenas imagens"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Máx 5MB"); return; }
-    setSelectedImage(file);
-    setImagePreview(URL.createObjectURL(file));
+  // --- Image helpers ---
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(file);
+    });
   };
 
-  const clearImage = () => {
-    setSelectedImage(null);
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
-    setImagePreview(null);
+  const addImageFiles = async (files: File[]) => {
+    const validFiles = files.filter(f => {
+      if (!f.type.startsWith("image/")) { toast.error("Apenas imagens"); return false; }
+      if (f.size > 5 * 1024 * 1024) { toast.error("Máx 5MB por imagem"); return false; }
+      return true;
+    });
+    const newImages = await Promise.all(validFiles.map(async (file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      base64: await fileToBase64(file),
+    })));
+    setSelectedImages(prev => [...prev, ...newImages]);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) addImageFiles(files);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => {
+      const updated = [...prev];
+      URL.revokeObjectURL(updated[index].preview);
+      updated.splice(index, 1);
+      return updated;
+    });
+  };
+
+  const clearImages = () => {
+    selectedImages.forEach(img => URL.revokeObjectURL(img.preview));
+    setSelectedImages([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // --- Paste handler ---
+  const handlePaste = useCallback((e: ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const imageFiles: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith("image/")) {
+        const file = items[i].getAsFile();
+        if (file) imageFiles.push(file);
+      }
+    }
+    if (imageFiles.length > 0) {
+      e.preventDefault();
+      addImageFiles(imageFiles);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [handlePaste]);
 
   // --- Audio Recording ---
   const startRecording = async () => {
@@ -239,7 +288,7 @@ export const PromptImprover = ({
   };
 
   // --- Core AI call ---
-  const sendToAI = async (message: string): Promise<{ cleanText: string; improvement?: ImprovementSuggestion }> => {
+  const sendToAI = async (message: string, imageBase64s?: string[]): Promise<{ cleanText: string; improvement?: ImprovementSuggestion }> => {
     const { data, error } = await supabase.functions.invoke("improve-agent-prompt", {
       body: {
         systemPrompt,
@@ -247,6 +296,7 @@ export const PromptImprover = ({
         agentName,
         mode: "diagnostic_chat",
         testMessage: message,
+        images: imageBase64s,
         chatHistory: chatMessages
           .filter(m => !m.isAudio || m.content !== "🎤 Mensagem de áudio")
           .map(m => ({ role: m.role, content: m.content })),
@@ -261,23 +311,27 @@ export const PromptImprover = ({
 
   // --- Send text message ---
   const sendMessage = async () => {
-    if ((!chatInput.trim() && !selectedImage) || loading) return;
+    if ((!chatInput.trim() && selectedImages.length === 0) || loading) return;
 
     const userMsg = chatInput.trim();
+    const currentImages = [...selectedImages];
+    const imagePreviews = currentImages.map(img => img.preview);
+    const imageBase64s = currentImages.map(img => img.base64);
+    
     setChatInput("");
     setChatMessages(prev => [
       ...prev,
-      { role: "user", content: userMsg || "📷 Imagem enviada", imageUrl: imagePreview || undefined },
+      { role: "user", content: userMsg || `📷 ${currentImages.length} imagem(ns) enviada(s)`, imageUrls: imagePreviews.length > 0 ? imagePreviews : undefined },
     ]);
-    clearImage();
+    setSelectedImages([]);
     setLoading(true);
 
     try {
-      const msgToSend = selectedImage
-        ? `${userMsg || "Enviou uma imagem."}\n[O gerente anexou uma imagem.]`
+      const msgToSend = currentImages.length > 0
+        ? `${userMsg || "Enviou imagem(ns)."}\n[O gerente anexou ${currentImages.length} imagem(ns). Analise o conteúdo visual.]`
         : userMsg;
 
-      const aiResponse = await sendToAI(msgToSend);
+      const aiResponse = await sendToAI(msgToSend, imageBase64s.length > 0 ? imageBase64s : undefined);
 
       const newMsg: ChatMessage = {
         role: "assistant",
@@ -517,10 +571,10 @@ export const PromptImprover = ({
                         {msg.role === "user" ? "👔 Você (gerente)" : `🤖 ${agentName}`}
                       </p>
 
-                      {/* Image */}
-                      {msg.imageUrl && (
-                        <img src={msg.imageUrl} alt="Imagem" className="rounded-lg mb-2 max-h-48 object-cover w-full" />
-                      )}
+                      {/* Images */}
+                      {msg.imageUrls && msg.imageUrls.map((url, imgIdx) => (
+                        <img key={imgIdx} src={url} alt="Imagem" className="rounded-lg mb-2 max-h-48 object-cover w-full" />
+                      ))}
 
                       {/* Audio player for user */}
                       {msg.isAudio && msg.audioUrl && (
@@ -624,19 +678,23 @@ export const PromptImprover = ({
               <div ref={chatEndRef} />
             </div>
 
-            {/* Image preview */}
-            {imagePreview && (
-              <div className="relative inline-block">
-                <img src={imagePreview} alt="Preview" className="h-16 rounded-lg border" />
-                <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-5 w-5 rounded-full" onClick={clearImage}>
-                  <X className="w-3 h-3" />
-                </Button>
+            {/* Image previews */}
+            {selectedImages.length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {selectedImages.map((img, idx) => (
+                  <div key={idx} className="relative inline-block">
+                    <img src={img.preview} alt="Preview" className="h-16 rounded-lg border" />
+                    <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-5 w-5 rounded-full" onClick={() => removeImage(idx)}>
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             )}
 
             {/* Input area */}
             <div className="flex items-center gap-1.5">
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+              <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageSelect} className="hidden" />
               <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => fileInputRef.current?.click()} disabled={loading} title="Enviar imagem">
                 <Image className="w-4 h-4" />
               </Button>
@@ -658,7 +716,7 @@ export const PromptImprover = ({
                 disabled={loading || isRecording}
                 className="text-sm"
               />
-              <Button size="icon" className="h-9 w-9 flex-shrink-0" onClick={sendMessage} disabled={loading || (!chatInput.trim() && !selectedImage) || isRecording}>
+              <Button size="icon" className="h-9 w-9 flex-shrink-0" onClick={sendMessage} disabled={loading || (!chatInput.trim() && selectedImages.length === 0) || isRecording}>
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </Button>
             </div>
