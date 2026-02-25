@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Wand2, BookOpen, Lightbulb, Loader2, Copy, Check, ChevronDown, ChevronUp, MessageCircle, Send, AlertTriangle, Image, Mic, Square, Volume2, VolumeX, Paperclip, X } from "lucide-react";
+import { Sparkles, Wand2, BookOpen, Lightbulb, Loader2, Copy, Check, ChevronDown, ChevronUp, Send, Image, Mic, Square, Volume2, VolumeX, X, UserCog, CheckCircle, FileText, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -17,13 +17,39 @@ interface PromptImproverProps {
 
 type Mode = "improve_prompt" | "improve_knowledge" | "suggest_additions" | "diagnostic_chat";
 
+interface ImprovementSuggestion {
+  destination: "prompt" | "conhecimento";
+  content: string;
+  explanation: string;
+}
+
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
-  diagnosis?: string;
   imageUrl?: string;
   audioUrl?: string;
   isAudio?: boolean;
+  improvement?: ImprovementSuggestion;
+  improvementApplied?: boolean;
+}
+
+function parseImprovement(text: string): { cleanText: string; improvement?: ImprovementSuggestion } {
+  const improvementRegex = /---MELHORIA---\s*\nDESTINO:\s*(prompt|conhecimento)\s*\nCONTEÚDO:\s*\n```\n?([\s\S]*?)\n?```\s*\nEXPLICAÇÃO:\s*([\s\S]*?)\n---FIM-MELHORIA---/i;
+  const match = text.match(improvementRegex);
+
+  if (match) {
+    const cleanText = text.replace(improvementRegex, "").trim();
+    return {
+      cleanText,
+      improvement: {
+        destination: match[1].toLowerCase().trim() as "prompt" | "conhecimento",
+        content: match[2].trim(),
+        explanation: match[3].trim(),
+      },
+    };
+  }
+
+  return { cleanText: text };
 }
 
 export const PromptImprover = ({
@@ -39,24 +65,23 @@ export const PromptImprover = ({
   const [activeMode, setActiveMode] = useState<Mode | null>(null);
   const [expanded, setExpanded] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [showDiagnosis, setShowDiagnosis] = useState(true);
-  
-  // Diagnostic chat state
+
+  // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
-  
+
   // Media state
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Audio recording state
+
+  // Audio recording
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  
-  // Audio playback state
+
+  // Audio playback
   const [playingAudioIdx, setPlayingAudioIdx] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -64,7 +89,6 @@ export const PromptImprover = ({
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
-  // Cleanup image preview URL
   useEffect(() => {
     return () => {
       if (imagePreview) URL.revokeObjectURL(imagePreview);
@@ -89,30 +113,22 @@ export const PromptImprover = ({
       const { data, error } = await supabase.functions.invoke("improve-agent-prompt", {
         body: { systemPrompt, knowledgeText, agentName, mode },
       });
-
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
       setResult(data.result);
     } catch (err: any) {
-      console.error("Erro ao analisar:", err);
       toast.error(err.message || "Erro ao analisar com IA");
     } finally {
       setLoading(false);
     }
   };
 
+  // --- Image ---
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Apenas imagens são suportadas");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Imagem muito grande (máx 5MB)");
-      return;
-    }
+    if (!file.type.startsWith("image/")) { toast.error("Apenas imagens"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Máx 5MB"); return; }
     setSelectedImage(file);
     setImagePreview(URL.createObjectURL(file));
   };
@@ -124,23 +140,19 @@ export const PromptImprover = ({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  // --- Audio Recording ---
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
-      };
-
+      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach(t => t.stop());
         const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
-        await sendAudioMessage(audioBlob);
+        await handleAudioMessage(audioBlob);
       };
-
       mediaRecorder.start();
       setIsRecording(true);
     } catch {
@@ -155,148 +167,165 @@ export const PromptImprover = ({
     }
   };
 
-  const sendAudioMessage = async (audioBlob: Blob) => {
+  // --- Transcribe audio and send ---
+  const handleAudioMessage = async (audioBlob: Blob) => {
     const audioUrl = URL.createObjectURL(audioBlob);
     setChatMessages(prev => [...prev, { role: "user", content: "🎤 Mensagem de áudio", audioUrl, isAudio: true }]);
     setLoading(true);
 
     try {
-      // Convert audio to base64 to send to the API
+      // Convert to base64 for transcription
       const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve) => {
+      const base64 = await new Promise<string>((resolve) => {
         reader.onloadend = () => resolve(reader.result as string);
         reader.readAsDataURL(audioBlob);
       });
-      const audioBase64 = await base64Promise;
 
-      const { data, error } = await supabase.functions.invoke("improve-agent-prompt", {
-        body: {
-          systemPrompt,
-          knowledgeText,
-          agentName,
-          mode: "diagnostic_chat",
-          testMessage: "[O cliente enviou um áudio. Transcrição simulada: O cliente está fazendo uma pergunta por áudio. Responda normalmente como se tivesse entendido a mensagem.]",
-          chatHistory: chatMessages.map(m => ({ role: m.role, content: m.content })),
-        },
+      // Transcribe the audio
+      let transcribedText = "";
+      try {
+        const { data: transcribeData } = await supabase.functions.invoke("elevenlabs-transcribe", {
+          body: { audioBase64: base64 },
+        });
+        transcribedText = transcribeData?.text || "";
+      } catch {
+        console.warn("Transcrição falhou, usando mensagem genérica");
+      }
+
+      if (!transcribedText) {
+        transcribedText = "[áudio não transcrito]";
+      }
+
+      // Update the user message with transcription
+      setChatMessages(prev => {
+        const updated = [...prev];
+        const lastUserIdx = updated.length - 1;
+        if (updated[lastUserIdx]?.role === "user") {
+          updated[lastUserIdx] = { ...updated[lastUserIdx], content: `🎤 "${transcribedText}"` };
+        }
+        return updated;
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      const fullResponse = data.result || "";
-      const parts = fullResponse.split("---DIAGNÓSTICO---");
-      const agentResponse = parts[0]?.trim() || fullResponse;
-      const diagnosis = parts[1]?.trim() || null;
-
+      // Send to AI
+      const aiResponse = await sendToAI(transcribedText);
+      
       // Generate TTS for the response
       let responseAudioUrl: string | undefined;
       try {
-        const ttsResponse = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({ text: agentResponse, voiceId: "pFZP5JQG7iQjIQuC4Bku" }),
-          }
-        );
-        if (ttsResponse.ok) {
-          const audioBlob = await ttsResponse.blob();
-          responseAudioUrl = URL.createObjectURL(audioBlob);
+        const { data: ttsData } = await supabase.functions.invoke("elevenlabs-tts", {
+          body: { text: aiResponse.cleanText },
+        });
+        if (ttsData?.success && ttsData?.audioContent) {
+          const audioDataUrl = `data:audio/mpeg;base64,${ttsData.audioContent}`;
+          responseAudioUrl = audioDataUrl;
         }
-      } catch (ttsErr) {
-        console.warn("TTS não disponível:", ttsErr);
+      } catch {
+        console.warn("TTS não disponível");
       }
 
       setChatMessages(prev => [
         ...prev,
-        { role: "assistant", content: agentResponse, diagnosis: diagnosis || undefined, audioUrl: responseAudioUrl },
+        {
+          role: "assistant",
+          content: aiResponse.cleanText,
+          audioUrl: responseAudioUrl,
+          improvement: aiResponse.improvement,
+        },
       ]);
     } catch (err: any) {
-      console.error("Erro no chat diagnóstico:", err);
-      toast.error(err.message || "Erro ao testar com IA");
-      setChatMessages(prev => [
-        ...prev,
-        { role: "assistant", content: "❌ Erro ao processar. Verifique suas chaves de IA." },
-      ]);
+      toast.error(err.message || "Erro ao processar áudio");
+      setChatMessages(prev => [...prev, { role: "assistant", content: "❌ Erro ao processar o áudio." }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const sendDiagnosticMessage = async () => {
+  // --- Core AI call ---
+  const sendToAI = async (message: string): Promise<{ cleanText: string; improvement?: ImprovementSuggestion }> => {
+    const { data, error } = await supabase.functions.invoke("improve-agent-prompt", {
+      body: {
+        systemPrompt,
+        knowledgeText,
+        agentName,
+        mode: "diagnostic_chat",
+        testMessage: message,
+        chatHistory: chatMessages
+          .filter(m => !m.isAudio || m.content !== "🎤 Mensagem de áudio")
+          .map(m => ({ role: m.role, content: m.content })),
+      },
+    });
+
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+
+    return parseImprovement(data.result || "");
+  };
+
+  // --- Send text message ---
+  const sendMessage = async () => {
     if ((!chatInput.trim() && !selectedImage) || loading) return;
 
     const userMsg = chatInput.trim();
-    const hasImage = !!selectedImage;
-    let imageDataUrl: string | undefined;
-
-    if (selectedImage) {
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve) => {
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(selectedImage);
-      });
-      imageDataUrl = await base64Promise;
-    }
-
     setChatInput("");
     setChatMessages(prev => [
       ...prev,
       { role: "user", content: userMsg || "📷 Imagem enviada", imageUrl: imagePreview || undefined },
     ]);
-    
     clearImage();
     setLoading(true);
 
     try {
-      const messageToSend = hasImage
-        ? `${userMsg || "O cliente enviou uma imagem."}\n\n[O cliente anexou uma imagem. Responda considerando que pode haver conteúdo visual relevante.]`
+      const msgToSend = selectedImage
+        ? `${userMsg || "Enviou uma imagem."}\n[O gerente anexou uma imagem.]`
         : userMsg;
 
-      const { data, error } = await supabase.functions.invoke("improve-agent-prompt", {
-        body: {
-          systemPrompt,
-          knowledgeText,
-          agentName,
-          mode: "diagnostic_chat",
-          testMessage: messageToSend,
-          chatHistory: chatMessages.map(m => ({ role: m.role, content: m.content })),
-        },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      const fullResponse = data.result || "";
-      const parts = fullResponse.split("---DIAGNÓSTICO---");
-      const agentResponse = parts[0]?.trim() || fullResponse;
-      const diagnosis = parts[1]?.trim() || null;
+      const aiResponse = await sendToAI(msgToSend);
 
       setChatMessages(prev => [
         ...prev,
-        { role: "assistant", content: agentResponse, diagnosis: diagnosis || undefined },
+        {
+          role: "assistant",
+          content: aiResponse.cleanText,
+          improvement: aiResponse.improvement,
+        },
       ]);
     } catch (err: any) {
-      console.error("Erro no chat diagnóstico:", err);
-      toast.error(err.message || "Erro ao testar com IA");
-      setChatMessages(prev => [
-        ...prev,
-        { role: "assistant", content: "❌ Erro ao processar. Verifique suas chaves de IA em Configurações → IA." },
-      ]);
+      toast.error(err.message || "Erro ao enviar mensagem");
+      setChatMessages(prev => [...prev, { role: "assistant", content: "❌ Erro ao processar. Verifique suas chaves de IA." }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const playAudio = (audioUrl: string, idx: number) => {
-    if (audioRef.current) {
-      audioRef.current.pause();
+  // --- Apply improvement ---
+  const applyImprovement = (msgIndex: number, forceDestination?: "prompt" | "conhecimento") => {
+    const msg = chatMessages[msgIndex];
+    if (!msg?.improvement) return;
+
+    const dest = forceDestination || msg.improvement.destination;
+    const content = msg.improvement.content;
+
+    if (dest === "prompt") {
+      const newPrompt = systemPrompt ? `${systemPrompt}\n\n${content}` : content;
+      onApplyPrompt(newPrompt);
+      toast.success("✅ Melhoria aplicada ao Prompt!");
+    } else {
+      const newKnowledge = knowledgeText ? `${knowledgeText}\n\n${content}` : content;
+      onApplyKnowledge(newKnowledge);
+      toast.success("✅ Melhoria aplicada à Base de Conhecimento!");
     }
-    const audio = new Audio(audioUrl);
+
+    setChatMessages(prev => {
+      const updated = [...prev];
+      updated[msgIndex] = { ...updated[msgIndex], improvementApplied: true };
+      return updated;
+    });
+  };
+
+  // --- Audio playback ---
+  const playAudio = (url: string, idx: number) => {
+    if (audioRef.current) audioRef.current.pause();
+    const audio = new Audio(url);
     audioRef.current = audio;
     setPlayingAudioIdx(idx);
     audio.onended = () => setPlayingAudioIdx(null);
@@ -304,13 +333,11 @@ export const PromptImprover = ({
   };
 
   const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     setPlayingAudioIdx(null);
   };
 
+  // --- Analysis helpers ---
   const extractCodeBlock = (tag: string): string | null => {
     if (!result) return null;
     const regex = new RegExp("```" + tag + "\\n([\\s\\S]*?)```", "i");
@@ -321,38 +348,21 @@ export const PromptImprover = ({
   const handleApply = () => {
     if (activeMode === "improve_prompt") {
       const improved = extractCodeBlock("prompt");
-      if (improved) {
-        onApplyPrompt(improved);
-        toast.success("Prompt atualizado!");
-      } else {
-        toast.error("Não foi possível extrair o prompt melhorado");
-      }
+      if (improved) { onApplyPrompt(improved); toast.success("Prompt atualizado!"); }
+      else toast.error("Não foi possível extrair o prompt melhorado");
     } else if (activeMode === "improve_knowledge") {
       const improved = extractCodeBlock("knowledge");
-      if (improved) {
-        onApplyKnowledge(improved);
-        toast.success("Base de conhecimento atualizada!");
-      } else {
-        toast.error("Não foi possível extrair a base melhorada");
-      }
+      if (improved) { onApplyKnowledge(improved); toast.success("Base atualizada!"); }
+      else toast.error("Não foi possível extrair a base melhorada");
     } else if (activeMode === "suggest_additions") {
       const faq = extractCodeBlock("faq");
-      if (faq) {
-        const current = knowledgeText ? knowledgeText + "\n\n" : "";
-        onApplyKnowledge(current + faq);
-        toast.success("FAQ adicionado à base de conhecimento!");
-      } else {
-        toast.error("Não foi possível extrair o FAQ sugerido");
-      }
+      if (faq) { onApplyKnowledge((knowledgeText ? knowledgeText + "\n\n" : "") + faq); toast.success("FAQ adicionado!"); }
+      else toast.error("Não foi possível extrair o FAQ");
     }
   };
 
   const handleCopy = () => {
-    if (result) {
-      navigator.clipboard.writeText(result);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    if (result) { navigator.clipboard.writeText(result); setCopied(true); setTimeout(() => setCopied(false), 2000); }
   };
 
   const canApply = result && (
@@ -362,35 +372,16 @@ export const PromptImprover = ({
   );
 
   const actions = [
-    {
-      mode: "improve_prompt" as Mode,
-      icon: Wand2,
-      label: "Melhorar Prompt",
-      disabled: !systemPrompt?.trim(),
-    },
-    {
-      mode: "improve_knowledge" as Mode,
-      icon: BookOpen,
-      label: "Melhorar Base",
-      disabled: !knowledgeText?.trim(),
-    },
-    {
-      mode: "suggest_additions" as Mode,
-      icon: Lightbulb,
-      label: "Sugerir Conteúdo",
-      disabled: !systemPrompt?.trim() && !knowledgeText?.trim(),
-    },
-    {
-      mode: "diagnostic_chat" as Mode,
-      icon: MessageCircle,
-      label: "Testar Chat",
-      disabled: !systemPrompt?.trim(),
-    },
+    { mode: "improve_prompt" as Mode, icon: Wand2, label: "Melhorar Prompt", disabled: !systemPrompt?.trim() },
+    { mode: "improve_knowledge" as Mode, icon: BookOpen, label: "Melhorar Base", disabled: !knowledgeText?.trim() },
+    { mode: "suggest_additions" as Mode, icon: Lightbulb, label: "Sugerir Conteúdo", disabled: !systemPrompt?.trim() && !knowledgeText?.trim() },
+    { mode: "diagnostic_chat" as Mode, icon: UserCog, label: "Conversar com Funcionário", disabled: !systemPrompt?.trim() },
   ];
 
   return (
     <Card className="border-primary/20 bg-primary/5">
       <div className="p-4">
+        {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
@@ -403,6 +394,7 @@ export const PromptImprover = ({
           )}
         </div>
 
+        {/* Action buttons */}
         <div className="flex flex-wrap gap-2 mb-3">
           {actions.map((action) => (
             <Button
@@ -423,40 +415,44 @@ export const PromptImprover = ({
           ))}
         </div>
 
-        {/* Diagnostic Chat Mode */}
+        {/* ========== EMPLOYEE CONVERSATION MODE ========== */}
         {activeMode === "diagnostic_chat" && expanded && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                Converse com o agente como se fosse um cliente real. Envie texto, imagem ou áudio.
-              </p>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-xs h-6 px-2"
-                onClick={() => setShowDiagnosis(!showDiagnosis)}
-              >
-                <AlertTriangle className="w-3 h-3 mr-1" />
-                {showDiagnosis ? "Ocultar diagnóstico" : "Mostrar diagnóstico"}
-              </Button>
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Converse com <strong>{agentName}</strong> como se fosse seu(a) gerente. Dê feedback, corrija erros, ensine novas respostas — ela aprende e sugere melhorias automaticamente.
+            </p>
 
             {/* Chat area */}
             <div className="max-h-[500px] overflow-y-auto rounded-xl bg-background border shadow-inner p-3 space-y-3">
               {chatMessages.length === 0 && (
-                <div className="text-center py-8 space-y-2">
-                  <MessageCircle className="w-8 h-8 mx-auto text-muted-foreground/40" />
-                  <p className="text-xs text-muted-foreground">
-                    Envie uma mensagem para testar como <strong>{agentName}</strong> responderia.
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/60">
-                    Ex: "Olá", "quais os planos?", "meu rastreador não funciona"
-                  </p>
+                <div className="text-center py-8 space-y-3">
+                  <UserCog className="w-10 h-10 mx-auto text-muted-foreground/30" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Converse com {agentName}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground/60 max-w-xs mx-auto">
+                      Simule um cliente, dê advertências, ensine como responder, peça para melhorar em algo específico. As melhorias são aplicadas automaticamente.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 justify-center mt-3">
+                    {["Olá, quais os planos?", "Melhore sua saudação", "Quando perguntarem preço, responda assim..."].map(suggestion => (
+                      <Button
+                        key={suggestion}
+                        variant="outline"
+                        size="sm"
+                        className="text-[10px] h-6 px-2"
+                        onClick={() => { setChatInput(suggestion); }}
+                      >
+                        {suggestion}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               )}
 
               {chatMessages.map((msg, i) => (
-                <div key={i} className="space-y-1.5">
+                <div key={i} className="space-y-2">
                   {/* Message bubble */}
                   <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
@@ -467,64 +463,99 @@ export const PromptImprover = ({
                       }`}
                     >
                       <p className={`text-[10px] font-semibold mb-1 ${msg.role === "user" ? "text-primary-foreground/70" : "text-primary"}`}>
-                        {msg.role === "user" ? "👤 Você (cliente)" : `🤖 ${agentName}`}
+                        {msg.role === "user" ? "👔 Você (gerente)" : `🤖 ${agentName}`}
                       </p>
-                      
-                      {/* Image attachment */}
+
+                      {/* Image */}
                       {msg.imageUrl && (
-                        <img 
-                          src={msg.imageUrl} 
-                          alt="Imagem enviada" 
-                          className="rounded-lg mb-2 max-h-48 object-cover w-full"
-                        />
+                        <img src={msg.imageUrl} alt="Imagem" className="rounded-lg mb-2 max-h-48 object-cover w-full" />
                       )}
 
-                      {/* Audio message */}
+                      {/* Audio player for user */}
                       {msg.isAudio && msg.audioUrl && (
-                        <div className="mb-1">
-                          <audio src={msg.audioUrl} controls className="h-8 w-full max-w-[200px]" />
+                        <div className="mb-1.5">
+                          <audio src={msg.audioUrl} controls className="h-8 w-full max-w-[220px]" />
                         </div>
                       )}
 
-                      {/* Text content */}
-                      {msg.content && !msg.isAudio && (
-                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                      )}
-                      {msg.isAudio && msg.content !== "🎤 Mensagem de áudio" && (
-                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                      )}
+                      {/* Text */}
+                      <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
 
-                      {/* Audio playback button for assistant responses */}
+                      {/* Audio play button for assistant */}
                       {msg.role === "assistant" && msg.audioUrl && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="mt-1 h-6 px-2 text-[10px]"
+                          className="mt-1.5 h-7 px-2 text-[11px] gap-1"
                           onClick={() => playingAudioIdx === i ? stopAudio() : playAudio(msg.audioUrl!, i)}
                         >
                           {playingAudioIdx === i ? (
-                            <><VolumeX className="w-3 h-3 mr-1" /> Parar</>
+                            <><VolumeX className="w-3.5 h-3.5" /> Parar áudio</>
                           ) : (
-                            <><Volume2 className="w-3 h-3 mr-1" /> Ouvir</>
+                            <><Volume2 className="w-3.5 h-3.5" /> Ouvir resposta</>
                           )}
                         </Button>
                       )}
                     </div>
                   </div>
 
-                  {/* System diagnosis card */}
-                  {showDiagnosis && msg.diagnosis && (
-                    <div className="mx-auto max-w-[95%] rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-3 text-xs space-y-1.5">
-                      <div className="flex items-center gap-1.5 font-semibold text-yellow-600 dark:text-yellow-400">
-                        <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>Diagnóstico interno</span>
+                  {/* Improvement suggestion card */}
+                  {msg.improvement && (
+                    <div className={`mx-auto max-w-[95%] rounded-xl border p-3 text-xs space-y-2 ${
+                      msg.improvementApplied 
+                        ? "border-emerald-500/30 bg-emerald-500/5" 
+                        : "border-primary/30 bg-primary/5"
+                    }`}>
+                      <div className="flex items-center gap-1.5 font-semibold text-primary">
+                        <Zap className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span>Sugestão de melhoria</span>
+                        <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                          msg.improvement.destination === "prompt" 
+                            ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" 
+                            : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        }`}>
+                          {msg.improvement.destination === "prompt" ? "📋 Prompt" : "📚 Conhecimento"}
+                        </span>
                       </div>
-                      <p className="text-foreground/80 whitespace-pre-wrap leading-relaxed">{msg.diagnosis}</p>
+                      
+                      <div className="bg-background/80 rounded-lg p-2 border text-[11px] font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">
+                        {msg.improvement.content}
+                      </div>
+                      
+                      <p className="text-muted-foreground">{msg.improvement.explanation}</p>
+
+                      {msg.improvementApplied ? (
+                        <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          <span>Melhoria aplicada!</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            className="h-7 text-[11px] bg-emerald-500 hover:bg-emerald-600 text-white"
+                            onClick={() => applyImprovement(i)}
+                          >
+                            <Check className="w-3 h-3 mr-1" />
+                            Aplicar em {msg.improvement.destination === "prompt" ? "Prompt" : "Conhecimento"}
+                          </Button>
+                          {/* Offer to apply to the other destination */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-[11px]"
+                            onClick={() => applyImprovement(i, msg.improvement!.destination === "prompt" ? "conhecimento" : "prompt")}
+                          >
+                            Aplicar em {msg.improvement.destination === "prompt" ? "Conhecimento" : "Prompt"}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
 
+              {/* Typing indicator */}
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
@@ -546,39 +577,18 @@ export const PromptImprover = ({
             {imagePreview && (
               <div className="relative inline-block">
                 <img src={imagePreview} alt="Preview" className="h-16 rounded-lg border" />
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full"
-                  onClick={clearImage}
-                >
+                <Button variant="destructive" size="icon" className="absolute -top-2 -right-2 h-5 w-5 rounded-full" onClick={clearImage}>
                   <X className="w-3 h-3" />
                 </Button>
               </div>
             )}
 
             {/* Input area */}
-            <div className="flex items-center gap-2">
-              {/* Image upload */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="hidden"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 flex-shrink-0"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={loading}
-                title="Enviar imagem"
-              >
+            <div className="flex items-center gap-1.5">
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+              <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0" onClick={() => fileInputRef.current?.click()} disabled={loading} title="Enviar imagem">
                 <Image className="w-4 h-4" />
               </Button>
-
-              {/* Audio recording */}
               <Button
                 variant={isRecording ? "destructive" : "ghost"}
                 size="icon"
@@ -589,21 +599,15 @@ export const PromptImprover = ({
               >
                 {isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4" />}
               </Button>
-
               <Input
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendDiagnosticMessage()}
-                placeholder="Digite como cliente..."
+                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                placeholder="Fale com sua funcionária..."
                 disabled={loading || isRecording}
                 className="text-sm"
               />
-              <Button
-                size="icon"
-                className="h-9 w-9 flex-shrink-0"
-                onClick={sendDiagnosticMessage}
-                disabled={loading || (!chatInput.trim() && !selectedImage) || isRecording}
-              >
+              <Button size="icon" className="h-9 w-9 flex-shrink-0" onClick={sendMessage} disabled={loading || (!chatInput.trim() && !selectedImage) || isRecording}>
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </Button>
             </div>
@@ -611,13 +615,13 @@ export const PromptImprover = ({
             {isRecording && (
               <div className="flex items-center gap-2 text-xs text-destructive animate-pulse">
                 <div className="w-2 h-2 bg-destructive rounded-full" />
-                Gravando áudio... Clique no botão para parar.
+                Gravando áudio... Clique no botão para parar e enviar.
               </div>
             )}
           </div>
         )}
 
-        {/* Analysis modes */}
+        {/* ========== ANALYSIS MODES ========== */}
         {loading && activeMode !== "diagnostic_chat" && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -630,7 +634,6 @@ export const PromptImprover = ({
             <div className="max-h-[400px] overflow-y-auto rounded-lg bg-muted/30 p-4 text-sm whitespace-pre-wrap border leading-relaxed">
               {result}
             </div>
-
             <div className="flex items-center gap-2">
               {canApply && (
                 <Button size="sm" onClick={handleApply} className="bg-emerald-500 hover:bg-emerald-600 text-white">
@@ -639,11 +642,7 @@ export const PromptImprover = ({
                 </Button>
               )}
               <Button variant="outline" size="sm" onClick={handleCopy}>
-                {copied ? (
-                  <Check className="w-3 h-3 mr-1.5" />
-                ) : (
-                  <Copy className="w-3 h-3 mr-1.5" />
-                )}
+                {copied ? <Check className="w-3 h-3 mr-1.5" /> : <Copy className="w-3 h-3 mr-1.5" />}
                 {copied ? "Copiado" : "Copiar"}
               </Button>
             </div>
