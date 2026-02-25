@@ -300,6 +300,94 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
     );
   };
 
+  const renderErrorRulesSection = () => (
+    <div className="space-y-3 mt-3">
+      <Separator />
+      <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+        <p className="text-sm font-medium text-amber-600 dark:text-amber-400 mb-1">Regras de Erro</p>
+        <p className="text-xs text-amber-600/80 dark:text-amber-400/80">
+          Configuração para quando o cliente não digitar uma opção válida.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Mensagem de opção inválida</Label>
+        <Textarea
+          value={nodeData.invalidOptionMessage || ''}
+          onChange={(e) => handleUpdate('invalidOptionMessage', e.target.value)}
+          placeholder="Opção inválida. Por favor, escolha uma das opções acima."
+          rows={2}
+          className="resize-none"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Máximo de erros permitidos</Label>
+        <Input
+          type="number"
+          min={1}
+          max={10}
+          value={nodeData.maxErrors || 3}
+          onChange={(e) => handleUpdate('maxErrors', parseInt(e.target.value) || 3)}
+        />
+        <p className="text-xs text-muted-foreground">
+          Após atingir este número, executa a ação abaixo.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Ação após erros</Label>
+        <Select value={nodeData.errorAction || 'transfer'} onValueChange={(v) => handleUpdate('errorAction', v)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="transfer">Transferir para atendente/fila</SelectItem>
+            <SelectItem value="message">Enviar mensagem e encerrar</SelectItem>
+            <SelectItem value="restart">Reiniciar fluxo</SelectItem>
+            <SelectItem value="continue">Seguir pela saída de erro</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {nodeData.errorAction === 'transfer' && (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Departamento/Fila</Label>
+          <Select
+            value={nodeData.errorDepartmentId || ''}
+            onValueChange={(v) => {
+              const dept = departments.find((d: any) => d.id === v);
+              handleUpdate('errorDepartmentId', v);
+              handleUpdate('errorDepartmentName', dept?.name || '');
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              {departments.map((dept: any) => (
+                <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {(nodeData.errorAction === 'message' || nodeData.errorAction === 'transfer') && (
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Mensagem final</Label>
+          <Textarea
+            value={nodeData.errorFinalMessage || ''}
+            onChange={(e) => handleUpdate('errorFinalMessage', e.target.value)}
+            placeholder={nodeData.errorAction === 'transfer' ? "Você será transferido para um atendente. Aguarde." : "Desculpe, não conseguimos continuar. Tente novamente mais tarde."}
+            rows={2}
+            className="resize-none"
+          />
+        </div>
+      )}
+    </div>
+  );
+
   const renderMessageEditor = () => {
     return (
       <div className="space-y-4">
@@ -372,6 +460,8 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
                 </div>
               ))}
             </div>
+
+            {renderErrorRulesSection()}
           </div>
         )}
 
@@ -416,6 +506,8 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
                 </div>
               ))}
             </div>
+
+            {renderErrorRulesSection()}
           </div>
         )}
 
@@ -461,6 +553,8 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
                 </div>
               ))}
             </div>
+
+            {renderErrorRulesSection()}
           </div>
         )}
 
