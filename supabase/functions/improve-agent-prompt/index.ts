@@ -6,14 +6,25 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-async function callOpenAI(apiKey: string, systemPrompt: string, userMessage: string, chatHistory?: any[]) {
+async function callOpenAI(apiKey: string, systemPrompt: string, userMessage: string, chatHistory?: any[], images?: string[]) {
   const messages: any[] = [{ role: "system", content: systemPrompt }];
   
   if (chatHistory && chatHistory.length > 0) {
     messages.push(...chatHistory);
   }
   
-  messages.push({ role: "user", content: userMessage });
+  // Build user message with images if present
+  if (images && images.length > 0) {
+    const content: any[] = [{ type: "text", text: userMessage }];
+    for (const img of images) {
+      content.push({ type: "image_url", image_url: { url: img } });
+    }
+    messages.push({ role: "user", content });
+  } else {
+    messages.push({ role: "user", content: userMessage });
+  }
+
+  const model = images && images.length > 0 ? "gpt-4o-mini" : "gpt-4o-mini";
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -22,7 +33,7 @@ async function callOpenAI(apiKey: string, systemPrompt: string, userMessage: str
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model,
       messages,
       temperature: 0.7,
       max_tokens: 4000,
@@ -39,7 +50,7 @@ async function callOpenAI(apiKey: string, systemPrompt: string, userMessage: str
   return data.choices?.[0]?.message?.content;
 }
 
-async function callGemini(apiKey: string, systemPrompt: string, userMessage: string, chatHistory?: any[]) {
+async function callGemini(apiKey: string, systemPrompt: string, userMessage: string, chatHistory?: any[], images?: string[]) {
   const contents: any[] = [];
   
   if (chatHistory && chatHistory.length > 0) {
@@ -51,7 +62,20 @@ async function callGemini(apiKey: string, systemPrompt: string, userMessage: str
     }
   }
   
-  contents.push({ role: "user", parts: [{ text: userMessage }] });
+  // Build user parts with images
+  const userParts: any[] = [{ text: userMessage }];
+  if (images && images.length > 0) {
+    for (const img of images) {
+      // Extract base64 data and mime type
+      const match = img.match(/^data:(image\/\w+);base64,(.+)$/);
+      if (match) {
+        userParts.push({
+          inline_data: { mime_type: match[1], data: match[2] }
+        });
+      }
+    }
+  }
+  contents.push({ role: "user", parts: userParts });
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
@@ -80,7 +104,7 @@ serve(async (req) => {
   }
 
   try {
-    const { systemPrompt, knowledgeText, agentName, mode, testMessage, chatHistory, agentConfig } = await req.json();
+    const { systemPrompt, knowledgeText, agentName, mode, testMessage, chatHistory, agentConfig, images } = await req.json();
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -316,17 +340,17 @@ ${configInfo}`;
 
     if (openaiKey) {
       try {
-        result = await callOpenAI(openaiKey, sysPrompt, userMessage, formattedHistory);
+        result = await callOpenAI(openaiKey, sysPrompt, userMessage, formattedHistory, images);
       } catch (e) {
         console.error("OpenAI failed, trying Gemini fallback:", e);
         if (geminiKey) {
-          result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory);
+          result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
         } else {
           throw e;
         }
       }
     } else if (geminiKey) {
-      result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory);
+      result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
     }
 
     return new Response(JSON.stringify({ result }), {
