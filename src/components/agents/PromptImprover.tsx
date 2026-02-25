@@ -210,14 +210,23 @@ export const PromptImprover = ({
       // Send to AI
       const aiResponse = await sendToAI(transcribedText);
 
-      setChatMessages(prev => [
-        ...prev,
-        {
-          role: "assistant",
-          content: aiResponse.cleanText,
-          improvement: aiResponse.improvement,
-        },
-      ]);
+      const newMsg: ChatMessage = {
+        role: "assistant",
+        content: aiResponse.cleanText,
+        improvement: aiResponse.improvement,
+      };
+
+      setChatMessages(prev => [...prev, newMsg]);
+
+      // Auto-apply improvement
+      if (aiResponse.improvement) {
+        autoApplyImprovement(aiResponse.improvement);
+        setChatMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { ...updated[updated.length - 1], improvementApplied: true };
+          return updated;
+        });
+      }
 
       // Auto-play response with browser TTS
       speakText(aiResponse.cleanText, chatMessages.length + 1);
@@ -270,14 +279,23 @@ export const PromptImprover = ({
 
       const aiResponse = await sendToAI(msgToSend);
 
-      setChatMessages(prev => [
-        ...prev,
-        {
-          role: "assistant",
-          content: aiResponse.cleanText,
-          improvement: aiResponse.improvement,
-        },
-      ]);
+      const newMsg: ChatMessage = {
+        role: "assistant",
+        content: aiResponse.cleanText,
+        improvement: aiResponse.improvement,
+      };
+
+      setChatMessages(prev => [...prev, newMsg]);
+
+      // Auto-apply improvement
+      if (aiResponse.improvement) {
+        autoApplyImprovement(aiResponse.improvement);
+        setChatMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { ...updated[updated.length - 1], improvementApplied: true };
+          return updated;
+        });
+      }
     } catch (err: any) {
       toast.error(err.message || "Erro ao enviar mensagem");
       setChatMessages(prev => [...prev, { role: "assistant", content: "❌ Erro ao processar. Verifique suas chaves de IA." }]);
@@ -286,7 +304,23 @@ export const PromptImprover = ({
     }
   };
 
-  // --- Apply improvement ---
+  // --- Auto-apply improvement (no user interaction needed) ---
+  const autoApplyImprovement = (improvement: ImprovementSuggestion) => {
+    const dest = improvement.destination;
+    const content = improvement.content;
+
+    if (dest === "prompt") {
+      const newPrompt = systemPrompt ? `${systemPrompt}\n\n${content}` : content;
+      onApplyPrompt(newPrompt);
+      toast.success("✅ Melhoria aplicada automaticamente ao Prompt!");
+    } else {
+      const newKnowledge = knowledgeText ? `${knowledgeText}\n\n${content}` : content;
+      onApplyKnowledge(newKnowledge);
+      toast.success("✅ Melhoria aplicada automaticamente à Base de Conhecimento!");
+    }
+  };
+
+  // --- Apply improvement (manual) ---
   const applyImprovement = (msgIndex: number, forceDestination?: "prompt" | "conhecimento") => {
     const msg = chatMessages[msgIndex];
     if (!msg?.improvement) return;
