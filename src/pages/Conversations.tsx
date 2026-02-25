@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { CloseConversationDialog } from "@/components/conversations/CloseConversationDialog";
 import { TransferDialog } from "@/components/conversations/TransferDialog";
+import { MessageContent } from "@/components/conversations/MessageContent";
 import { EditContactDialog } from "@/components/conversations/EditContactDialog";
 
 const Conversations = () => {
@@ -549,7 +550,30 @@ const Conversations = () => {
                   </div>
                 ) : (
                   messages.map((msg: any) => {
-                    const isAgent = msg.sender_type === "agent" || msg.sender_type === "system";
+                    const isAgent = msg.sender_type === "agent";
+                    const isSystem = msg.sender_type === "system" || msg.sender_type === "bot";
+                    const isContact = msg.sender_type === "contact";
+
+                    // System/bot messages: centered info style
+                    if (isSystem) {
+                      return (
+                        <div key={msg.id} className="flex justify-center mb-2">
+                          <div className="max-w-[85%] px-4 py-2 rounded-lg text-xs bg-muted/60 border border-border/50 text-muted-foreground">
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <Bot className="w-3 h-3 text-primary/70" />
+                              <span className="font-medium text-primary/80">Sistema</span>
+                            </div>
+                            <MessageContent content={msg.content || ''} type={msg.message_type || 'text'} isSent={false} />
+                            <div className="flex justify-end mt-1">
+                              <span className="text-[10px] text-muted-foreground/50">
+                                {formatMessageTime(msg.created_at)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
                     return (
                       <div
                         key={msg.id}
@@ -566,24 +590,12 @@ const Conversations = () => {
                               : "bg-card border border-border text-foreground rounded-bl-sm"
                           )}
                         >
-                          {msg.media_url && (
-                            <div className="mb-2 rounded overflow-hidden">
-                              <img
-                                src={msg.media_url}
-                                alt="media"
-                                className="max-w-full max-h-64 object-cover rounded"
-                              />
-                            </div>
-                          )}
-                          <p className="whitespace-pre-wrap break-words leading-relaxed">
-                            {msg.content}
-                          </p>
-                          <div
-                            className={cn(
-                              "flex items-center gap-1 mt-1",
-                              isAgent ? "justify-end" : "justify-end"
-                            )}
-                          >
+                          <MessageContent 
+                            content={msg.content || ''} 
+                            type={msg.message_type || 'text'} 
+                            isSent={isAgent} 
+                          />
+                          <div className={cn("flex items-center gap-1 mt-1 justify-end")}>
                             <span
                               className={cn(
                                 "text-[10px]",
