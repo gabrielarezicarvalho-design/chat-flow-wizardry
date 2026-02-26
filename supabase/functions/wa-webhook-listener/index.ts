@@ -2112,11 +2112,12 @@ async function executeAiAgentNode(
     .from("conversations")
     .update({ 
       assigned_agent_id: agentId,
-      flow_state: flowState
+      flow_state: flowState,
+      attendance_type: "ai"
     })
     .eq("id", context.conversationId);
 
-  console.log("✅ Assistente IA atribuído à conversa");
+  console.log("✅ Assistente IA atribuído à conversa (attendance_type → ai)");
 
   // ========================================
   // CHAMAR AI-ASSISTANT-CHAT EDGE FUNCTION
@@ -2178,7 +2179,8 @@ async function executeAiAgentNode(
           department_id: fallbackDepartmentId,
           status: "waiting",
           assigned_agent_id: null,
-          flow_state: null
+          flow_state: null,
+          attendance_type: "agent"
         })
         .eq("id", context.conversationId);
 
@@ -2296,10 +2298,11 @@ async function executeForwardNode(
     
     const updateData: any = { 
       assigned_agent: specificAgentId,
-      status: 'in_attendance', // Direto para atendimento
-      flow_state: null, // Limpa estado do fluxo
-      department_id: null, // Remove departamento (agente específico)
-      assigned_agent_id: null // Limpa AI agent
+      status: 'in_attendance',
+      flow_state: null,
+      department_id: null,
+      assigned_agent_id: null,
+      attendance_type: 'agent'
     };
     
     const { error } = await supabase
@@ -2324,10 +2327,11 @@ async function executeForwardNode(
     
     const updateData: any = { 
       department_id: departmentId,
-      status: 'waiting', // Move para fila
-      flow_state: null, // Limpa estado do fluxo
-      assigned_agent: null, // Nenhum atendente ainda
-      assigned_agent_id: null // Limpa AI agent
+      status: 'waiting',
+      flow_state: null,
+      assigned_agent: null,
+      assigned_agent_id: null,
+      attendance_type: 'agent'
     };
     
     const { error } = await supabase
