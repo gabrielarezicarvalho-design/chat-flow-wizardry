@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { 
   LayoutDashboard, Building2, Users, Bot, Plug, Brain, BarChart3, 
   CreditCard, Shield, Settings, LogOut, ChevronLeft,
-  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, BookOpen, Code2
+  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, BookOpen, Code2, TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +31,7 @@ const menuItems = [
   { id: "ia", icon: Brain, label: "IA & Automação", description: "Modelos & Uso" },
   { id: "programador", icon: Code2, label: "Programador IA", description: "Diagnóstico & Debug" },
   { id: "feedback", icon: Bug, label: "Bugs & Melhorias", description: "Feedbacks" },
+  { id: "metricas", icon: TrendingUp, label: "Métricas de Uso", description: "Por Empresa" },
   { id: "relatorios", icon: BarChart3, label: "Relatórios", description: "Globais" },
   { id: "faturamento", icon: CreditCard, label: "Planos & Faturamento", description: "Assinaturas" },
   { id: "seguranca", icon: Shield, label: "Segurança", description: "Auditoria" },

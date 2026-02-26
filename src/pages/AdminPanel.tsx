@@ -18,6 +18,7 @@ import AdminFeedback from "@/components/admin/sections/AdminFeedback";
 
 import AdminWhatsAppMeta from "@/components/admin/sections/AdminWhatsAppMeta";
 import AdminDocumentacao from "@/components/admin/sections/AdminDocumentacao";
+import AdminMetricas from "@/components/admin/sections/AdminMetricas";
 
 export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -46,6 +47,8 @@ export default function AdminPanel() {
         return <AdminProgramador />;
       case "feedback":
         return <AdminFeedback />;
+      case "metricas":
+        return <AdminMetricas />;
       case "relatorios":
         return <AdminRelatorios />;
       case "faturamento":
