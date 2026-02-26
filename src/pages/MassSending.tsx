@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useVpsStorage } from "@/hooks/useVpsStorage";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -120,6 +121,7 @@ interface CampaignTemplate {
 }
 
 function MassSendingContent() {
+  const { upload: uploadToVpsStorage } = useVpsStorage();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
@@ -418,36 +420,10 @@ function MassSendingContent() {
       setIsUploading(true);
       
       try {
-        const { data: userData } = await supabase.auth.getUser();
-        if (!userData.user) {
-          toast.error("Você precisa estar logado para enviar vídeos");
-          setMediaFile(null);
-          setIsUploading(false);
-          return;
-        }
+        const result = await uploadToVpsStorage(file, undefined);
         
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${userData.user.id}/${Date.now()}_media.${fileExt}`;
-        
-        // Simulate progress for better UX (Supabase doesn't provide native progress)
-        const progressInterval = setInterval(() => {
-          setUploadProgress(prev => {
-            if (prev >= 90) {
-              clearInterval(progressInterval);
-              return 90;
-            }
-            return prev + 10;
-          });
-        }, 200);
-        
-        const { error: uploadError } = await supabase.storage
-          .from("campaign-media")
-          .upload(fileName, file);
-        
-        clearInterval(progressInterval);
-        
-        if (uploadError) {
-          toast.error("Erro ao enviar arquivo: " + uploadError.message);
+        if (!result.success) {
+          toast.error(result.error || "Erro ao enviar arquivo");
           setMediaFile(null);
           setUploadProgress(0);
           setIsUploading(false);
@@ -455,14 +431,9 @@ function MassSendingContent() {
         }
         
         setUploadProgress(100);
-        
-        const { data: publicUrl } = supabase.storage
-          .from("campaign-media")
-          .getPublicUrl(fileName);
-        
-        setMediaUrl(publicUrl.publicUrl);
+        setMediaUrl(result.url);
         toast.success("Arquivo enviado: " + file.name);
-        console.log("[MassSending] Media uploaded to storage:", publicUrl.publicUrl);
+        console.log("[MassSending] Media uploaded to VPS storage:", result.url);
         
         // Reset progress after a short delay
         setTimeout(() => {
