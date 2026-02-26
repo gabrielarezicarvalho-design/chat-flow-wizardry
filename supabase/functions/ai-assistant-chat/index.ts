@@ -472,7 +472,14 @@ ABRIR CHAMADO AUTOMÁTICO:
 BASE DE CONHECIMENTO (USE ESTAS INFORMAÇÕES PARA RESPONDER):
 ${agent.knowledge_text}
 
-INSTRUÇÃO: Sempre que o cliente fizer uma pergunta cujas informações estejam na base de conhecimento acima, RESPONDA usando essas informações. Não invente dados. Use exatamente o que está na base.` : "";
+REGRAS ABSOLUTAS DA BASE DE CONHECIMENTO:
+1. SEMPRE que o cliente fizer uma PERGUNTA (com "?" ou palavras como "qual", "quanto", "quais", "como", etc), você DEVE responder DIRETAMENTE usando as informações da base de conhecimento acima.
+2. NUNCA repita a mesma resposta anterior. Se o cliente fez uma nova pergunta, dê uma NOVA resposta relevante.
+3. Se a pergunta do cliente tem resposta na base de conhecimento, RESPONDA COM OS DADOS ESPECÍFICOS (valores, planos, preços, detalhes).
+4. NÃO repita apresentações comerciais se já foram enviadas. Responda OBJETIVAMENTE o que foi perguntado.
+5. Se o cliente perguntou "quais os valores" ou "quanto custa", liste os planos e preços disponíveis na base.
+6. Não invente dados. Use exatamente o que está na base.
+7. PRIORIDADE: Responder a pergunta do cliente > Seguir fluxo de apresentação.` : "";
 
     const fullSystemPrompt = `${baseSystemPrompt}
 Responda de forma ${agent.response_style === 'formal' ? 'formal e profissional' : agent.response_style === 'casual' ? 'casual e descontraída' : 'amigável e prestativa'}.
