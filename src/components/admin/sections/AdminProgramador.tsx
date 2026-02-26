@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ReactMarkdown from "react-markdown";
 import { 
   Code2, Send, ImagePlus, Trash2, Bot, User, Loader2, 
-  AlertTriangle, Bug, Lightbulb, Cpu, Paperclip, X, Building2
+  AlertTriangle, Bug, Lightbulb, Cpu, Paperclip, X, Building2, Wrench, Copy, Check
 } from "lucide-react";
 
 interface Message {
@@ -28,6 +28,7 @@ export function AdminProgramador() {
   const [images, setImages] = useState<string[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -38,7 +39,6 @@ export function AdminProgramador() {
       const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
       if (data) {
         setCompanies(data);
-        // Default to first company with OpenAI key
         if (data.length > 0 && !selectedCompanyId) {
           setSelectedCompanyId(data[0].id);
         }
@@ -53,10 +53,95 @@ export function AdminProgramador() {
     }
   }, [messages]);
 
+  // === Shared streaming function ===
+  const streamFromAPI = async (apiMessages: any[], onUpdate: (text: string) => void): Promise<string> => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("Não autenticado");
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-ai-programmer`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          messages: apiMessages,
+          action: "chat",
+          companyId: selectedCompanyId,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Erro: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("Sem stream");
+
+    const decoder = new TextDecoder();
+    let assistantText = "";
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+        let line = buffer.slice(0, newlineIndex);
+        buffer = buffer.slice(newlineIndex + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") break;
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) {
+            assistantText += content;
+            onUpdate(assistantText);
+          }
+        } catch {
+          buffer = line + "\n" + buffer;
+          break;
+        }
+      }
+    }
+
+    // Final flush
+    if (buffer.trim()) {
+      for (let raw of buffer.split("\n")) {
+        if (!raw || raw.startsWith(":") || raw.trim() === "" || !raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) {
+            assistantText += content;
+            onUpdate(assistantText);
+          }
+        } catch { /* ignore */ }
+      }
+    }
+
+    return assistantText;
+  };
+
+  // === Image handling ===
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       reader.onload = (ev) => {
@@ -65,14 +150,12 @@ export function AdminProgramador() {
       };
       reader.readAsDataURL(file);
     });
-    
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     const items = e.clipboardData?.items;
     if (!items) return;
-
     for (const item of Array.from(items)) {
       if (item.type.startsWith("image/")) {
         e.preventDefault();
@@ -92,26 +175,19 @@ export function AdminProgramador() {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  // === Send message ===
   const sendMessage = async () => {
     const trimmedInput = input.trim();
     if (!trimmedInput && images.length === 0) return;
     if (isLoading) return;
 
-    // Build user message content
     let userContent: any;
     if (images.length > 0) {
       userContent = [];
       images.forEach(img => {
-        userContent.push({
-          type: "image_url",
-          image_url: { url: img, detail: "high" }
-        });
+        userContent.push({ type: "image_url", image_url: { url: img, detail: "high" } });
       });
-      if (trimmedInput) {
-        userContent.push({ type: "text", text: trimmedInput });
-      } else {
-        userContent.push({ type: "text", text: "Analise esta imagem e identifique o problema." });
-      }
+      userContent.push({ type: "text", text: trimmedInput || "Analise esta imagem e identifique o problema." });
     } else {
       userContent = trimmedInput;
     }
@@ -123,120 +199,76 @@ export function AdminProgramador() {
     setImages([]);
     setIsLoading(true);
 
-    // Build messages for API (include history)
-    const apiMessages = newMessages.map(m => ({
-      role: m.role,
-      content: m.content
-    }));
+    const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Não autenticado");
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-ai-programmer`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            messages: apiMessages,
-            action: "chat",
-            companyId: selectedCompanyId,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Erro: ${response.status}`);
-      }
-
-      // Stream response
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("Sem stream");
-
-      const decoder = new TextDecoder();
-      let assistantText = "";
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-          let line = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 1);
-
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantText += content;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === "assistant") {
-                  return prev.map((m, i) =>
-                    i === prev.length - 1 ? { ...m, content: assistantText } : m
-                  );
-                }
-                return [...prev, { role: "assistant", content: assistantText }];
-              });
-            }
-          } catch {
-            buffer = line + "\n" + buffer;
-            break;
+      await streamFromAPI(apiMessages, (text) => {
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last?.role === "assistant") {
+            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: text } : m);
           }
-        }
-      }
-
-      // Final flush
-      if (buffer.trim()) {
-        for (let raw of buffer.split("\n")) {
-          if (!raw || raw.startsWith(":") || raw.trim() === "") continue;
-          if (!raw.startsWith("data: ")) continue;
-          const jsonStr = raw.slice(6).trim();
-          if (jsonStr === "[DONE]") continue;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantText += content;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === "assistant") {
-                  return prev.map((m, i) =>
-                    i === prev.length - 1 ? { ...m, content: assistantText } : m
-                  );
-                }
-                return [...prev, { role: "assistant", content: assistantText }];
-              });
-            }
-          } catch { /* ignore */ }
-        }
-      }
-
+          return [...prev, { role: "assistant", content: text }];
+        });
+      });
     } catch (error: any) {
       console.error("Erro:", error);
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: `❌ **Erro:** ${error.message}`
-      }]);
+      setMessages(prev => [...prev, { role: "assistant", content: `❌ **Erro:** ${error.message}` }]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // === Resolve Problem ===
+  const handleResolveProblem = async (assistantMessageIndex: number) => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    // Get all messages up to this assistant response
+    const contextMessages = messages.slice(0, assistantMessageIndex + 1);
+
+    // Add a follow-up asking for the fix
+    const resolvePrompt: Message = {
+      role: "user",
+      content: `Com base no diagnóstico acima, agora RESOLVA o problema. Gere o código corrigido COMPLETO da edge function que precisa ser alterada.
+
+FORMATO OBRIGATÓRIO DA RESPOSTA:
+1. 📋 **Resumo da correção** - O que vai ser corrigido (2-3 linhas)
+2. 📁 **Arquivo:** \`supabase/functions/NOME/index.ts\` - Nome do arquivo
+3. 🔧 **Código corrigido COMPLETO** - O arquivo inteiro corrigido em um bloco de código TypeScript
+4. ✅ **O que mudou** - Lista das alterações feitas
+
+IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O admin vai copiar e colar o código inteiro.`
+    };
+
+    const newMessages = [...contextMessages, resolvePrompt];
+    setMessages(newMessages);
+
+    const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
+
+    try {
+      await streamFromAPI(apiMessages, (text) => {
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last?.role === "assistant") {
+            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: text } : m);
+          }
+          return [...prev, { role: "assistant", content: text }];
+        });
+      });
+    } catch (error: any) {
+      console.error("Erro:", error);
+      setMessages(prev => [...prev, { role: "assistant", content: `❌ **Erro ao gerar correção:** ${error.message}` }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // === Copy code block ===
+  const handleCopyCode = (code: string, index: number) => {
+    navigator.clipboard.writeText(code);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -263,6 +295,28 @@ export function AdminProgramador() {
       .filter((c: any) => c.type === "image_url")
       .map((c: any) => c.image_url?.url)
       .filter(Boolean);
+  };
+
+  // Check if an assistant message contains a diagnosis (not a code fix)
+  const isDiagnosisMessage = (content: string | any[]): boolean => {
+    const text = getMessageText(content);
+    // It's a diagnosis if it doesn't contain the resolve prompt response markers
+    const hasCodeFix = text.includes("Código corrigido COMPLETO") || text.includes("```typescript");
+    const hasDiagnosticContent = text.includes("❌") || text.includes("⚠️") || text.includes("ℹ️") || 
+      text.includes("Erro") || text.includes("problema") || text.includes("Sugestão") ||
+      text.includes("Verificar") || text.includes("diagnóstico") || text.length > 100;
+    return hasDiagnosticContent && !hasCodeFix;
+  };
+
+  // Extract code blocks from message
+  const extractCodeBlocks = (text: string): string[] => {
+    const regex = /```(?:typescript|ts|javascript|js)?\n([\s\S]*?)```/g;
+    const blocks: string[] = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      blocks.push(match[1].trim());
+    }
+    return blocks;
   };
 
   const quickActions = [
@@ -322,63 +376,23 @@ export function AdminProgramador() {
               <button
                 key={action.label}
                 onClick={() => {
-                  // Set input and trigger send directly
                   const fakeInput = action.prompt;
                   setInput("");
-                  // Send directly with prompt
                   const userMessage: Message = { role: "user", content: fakeInput };
                   setMessages([userMessage]);
                   setIsLoading(true);
                   (async () => {
                     try {
-                      const { data: { session } } = await supabase.auth.getSession();
-                      if (!session) throw new Error("Não autenticado");
-                      const response = await fetch(
-                        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-ai-programmer`,
-                        {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${session.access_token}`,
-                          },
-                          body: JSON.stringify({ messages: [{ role: "user", content: fakeInput }], action: "chat", companyId: selectedCompanyId }),
+                      await streamFromAPI(
+                        [{ role: "user", content: fakeInput }],
+                        (text) => {
+                          setMessages(prev => {
+                            const last = prev[prev.length - 1];
+                            if (last?.role === "assistant") return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: text } : m);
+                            return [...prev, { role: "assistant", content: text }];
+                          });
                         }
                       );
-                      if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `Erro: ${response.status}`);
-                      }
-                      const reader = response.body?.getReader();
-                      if (!reader) throw new Error("Sem stream");
-                      const decoder = new TextDecoder();
-                      let assistantText = "";
-                      let buffer = "";
-                      while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-                        buffer += decoder.decode(value, { stream: true });
-                        let ni: number;
-                        while ((ni = buffer.indexOf("\n")) !== -1) {
-                          let line = buffer.slice(0, ni);
-                          buffer = buffer.slice(ni + 1);
-                          if (line.endsWith("\r")) line = line.slice(0, -1);
-                          if (line.startsWith(":") || line.trim() === "" || !line.startsWith("data: ")) continue;
-                          const js = line.slice(6).trim();
-                          if (js === "[DONE]") break;
-                          try {
-                            const p = JSON.parse(js);
-                            const c = p.choices?.[0]?.delta?.content;
-                            if (c) {
-                              assistantText += c;
-                              setMessages(prev => {
-                                const last = prev[prev.length - 1];
-                                if (last?.role === "assistant") return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantText } : m);
-                                return [...prev, { role: "assistant", content: assistantText }];
-                              });
-                            }
-                          } catch { buffer = line + "\n" + buffer; break; }
-                        }
-                      }
                     } catch (error: any) {
                       setMessages(prev => [...prev, { role: "assistant", content: `❌ **Erro:** ${error.message}` }]);
                     } finally {
@@ -412,48 +426,105 @@ export function AdminProgramador() {
           </div>
         )}
 
-        {messages.map((msg, index) => (
-          <div key={index} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            {msg.role === "assistant" && (
-              <div className="h-8 w-8 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-1">
-                <Bot className="h-4 w-4 text-violet-400" />
+        {messages.map((msg, index) => {
+          const messageText = getMessageText(msg.content);
+          const codeBlocks = msg.role === "assistant" ? extractCodeBlocks(messageText) : [];
+          const showResolveButton = msg.role === "assistant" && !isLoading && isDiagnosisMessage(msg.content) && index === messages.length - 1;
+          
+          return (
+            <div key={index}>
+              <div className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                {msg.role === "assistant" && (
+                  <div className="h-8 w-8 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                    <Bot className="h-4 w-4 text-violet-400" />
+                  </div>
+                )}
+                <div className={`max-w-[85%] rounded-xl px-4 py-3 ${
+                  msg.role === "user" 
+                    ? "bg-emerald-500/20 border border-emerald-500/20" 
+                    : "bg-white/5 border border-white/10"
+                }`}>
+                  {/* Images */}
+                  {getMessageImages(msg.content).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {getMessageImages(msg.content).map((img, i) => (
+                        <img 
+                          key={i} 
+                          src={img} 
+                          alt="Upload" 
+                          className="max-w-[200px] max-h-[200px] rounded-lg object-cover cursor-pointer hover:opacity-80"
+                          onClick={() => window.open(img, "_blank")}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  {/* Text */}
+                  {msg.role === "assistant" ? (
+                    <div className="prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                      <ReactMarkdown
+                        components={{
+                          code({ node, className, children, ...props }) {
+                            const isInline = !className;
+                            if (isInline) {
+                              return <code className="bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono text-emerald-300" {...props}>{children}</code>;
+                            }
+                            const codeText = String(children).replace(/\n$/, '');
+                            const blockIndex = codeBlocks.indexOf(codeText);
+                            return (
+                              <div className="relative group my-3">
+                                <div className="absolute top-2 right-2 z-10">
+                                  <button
+                                    onClick={() => handleCopyCode(codeText, index * 100 + (blockIndex >= 0 ? blockIndex : 0))}
+                                    className="flex items-center gap-1 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-xs text-slate-300 transition-colors"
+                                  >
+                                    {copiedIndex === index * 100 + (blockIndex >= 0 ? blockIndex : 0) ? (
+                                      <><Check className="h-3 w-3 text-emerald-400" /> Copiado!</>
+                                    ) : (
+                                      <><Copy className="h-3 w-3" /> Copiar</>
+                                    )}
+                                  </button>
+                                </div>
+                                <pre className="bg-black/40 rounded-lg p-4 overflow-x-auto border border-white/5">
+                                  <code className={className} {...props}>{children}</code>
+                                </pre>
+                              </div>
+                            );
+                          }
+                        }}
+                      >
+                        {messageText}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-white whitespace-pre-wrap">{getMessageText(msg.content)}</p>
+                  )}
+                </div>
+                {msg.role === "user" && (
+                  <div className="h-8 w-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                    <User className="h-4 w-4 text-emerald-400" />
+                  </div>
+                )}
               </div>
-            )}
-            <div className={`max-w-[85%] rounded-xl px-4 py-3 ${
-              msg.role === "user" 
-                ? "bg-emerald-500/20 border border-emerald-500/20" 
-                : "bg-white/5 border border-white/10"
-            }`}>
-              {/* Images */}
-              {getMessageImages(msg.content).length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {getMessageImages(msg.content).map((img, i) => (
-                    <img 
-                      key={i} 
-                      src={img} 
-                      alt="Upload" 
-                      className="max-w-[200px] max-h-[200px] rounded-lg object-cover cursor-pointer hover:opacity-80"
-                      onClick={() => window.open(img, "_blank")}
-                    />
-                  ))}
+
+              {/* Resolve Problem Button */}
+              {showResolveButton && (
+                <div className="ml-11 mt-2">
+                  <Button
+                    onClick={() => handleResolveProblem(index)}
+                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium shadow-lg shadow-orange-500/20"
+                    size="sm"
+                  >
+                    <Wrench className="h-4 w-4 mr-2" />
+                    🔧 Resolver Problema
+                  </Button>
+                  <p className="text-xs text-slate-500 mt-1 ml-1">
+                    O IA vai gerar o código corrigido para você copiar e aplicar
+                  </p>
                 </div>
-              )}
-              {/* Text */}
-              {msg.role === "assistant" ? (
-                <div className="prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                  <ReactMarkdown>{getMessageText(msg.content)}</ReactMarkdown>
-                </div>
-              ) : (
-                <p className="text-sm text-white whitespace-pre-wrap">{getMessageText(msg.content)}</p>
               )}
             </div>
-            {msg.role === "user" && (
-              <div className="h-8 w-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-1">
-                <User className="h-4 w-4 text-emerald-400" />
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
 
         {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
           <div className="flex gap-3">
