@@ -51,10 +51,10 @@ serve(async (req) => {
 
     const { messages, action, context } = await req.json();
 
-    // Get OpenAI key from secrets
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openaiKey) {
-      return new Response(JSON.stringify({ error: "Chave OpenAI não configurada nos secrets do projeto" }), {
+    // Get Lovable AI key
+    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!lovableKey) {
+      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY não configurada" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -202,18 +202,18 @@ Quando analisar imagens, descreva o que vê e identifique o problema.`;
       ...messages
     ];
 
-    console.log("🤖 Admin AI Programmer - Chamando GPT-4o");
+    console.log("🤖 Admin AI Programmer - Chamando Lovable AI Gateway");
     console.log("   Mensagens:", messages.length);
     console.log("   Action:", action);
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${openaiKey}`,
+        "Authorization": `Bearer ${lovableKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "google/gemini-2.5-flash",
         messages: openaiMessages,
         temperature: 0.3,
         max_tokens: 4000,
@@ -223,7 +223,7 @@ Quando analisar imagens, descreva o que vê e identifique o problema.`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("❌ Erro OpenAI:", response.status, errorText);
+      console.error("❌ Erro AI Gateway:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit excedido. Aguarde um momento." }), {
@@ -231,8 +231,15 @@ Quando analisar imagens, descreva o que vê e identifique o problema.`;
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Créditos insuficientes. Adicione créditos no workspace." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       
-      return new Response(JSON.stringify({ error: `Erro OpenAI: ${response.status}` }), {
+      return new Response(JSON.stringify({ error: `Erro AI Gateway: ${response.status}` }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
