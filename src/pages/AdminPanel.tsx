@@ -8,6 +8,7 @@ import { AdminAgentes } from "@/components/admin/sections/AdminAgentes";
 import { AdminIntegracoes } from "@/components/admin/sections/AdminIntegracoes";
 import { AdminArmazenamento } from "@/components/admin/sections/AdminArmazenamento";
 import { AdminIA } from "@/components/admin/sections/AdminIA";
+import { AdminProgramador } from "@/components/admin/sections/AdminProgramador";
 import { AdminRelatorios } from "@/components/admin/sections/AdminRelatorios";
 import { AdminFaturamento } from "@/components/admin/sections/AdminFaturamento";
 import { AdminSeguranca } from "@/components/admin/sections/AdminSeguranca";
@@ -41,6 +42,8 @@ export default function AdminPanel() {
         return <AdminArmazenamento />;
       case "ia":
         return <AdminIA />;
+      case "programador":
+        return <AdminProgramador />;
       case "feedback":
         return <AdminFeedback />;
       case "relatorios":

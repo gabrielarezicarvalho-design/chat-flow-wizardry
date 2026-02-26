@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { 
   LayoutDashboard, Building2, Users, Bot, Plug, Brain, BarChart3, 
   CreditCard, Shield, Settings, LogOut, ChevronLeft,
-  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, BookOpen
+  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, BookOpen, Code2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,7 @@ const menuItems = [
   { id: "whatsapp-meta", icon: Menu, label: "WhatsApp Meta API", description: "Config Global", parent: "integracoes" },
   { id: "armazenamento", icon: HardDrive, label: "Armazenamento", description: "Drive & Storage" },
   { id: "ia", icon: Brain, label: "IA & Automação", description: "Modelos & Uso" },
+  { id: "programador", icon: Code2, label: "Programador IA", description: "Diagnóstico & Debug" },
   { id: "feedback", icon: Bug, label: "Bugs & Melhorias", description: "Feedbacks" },
   { id: "relatorios", icon: BarChart3, label: "Relatórios", description: "Globais" },
   { id: "faturamento", icon: CreditCard, label: "Planos & Faturamento", description: "Assinaturas" },
