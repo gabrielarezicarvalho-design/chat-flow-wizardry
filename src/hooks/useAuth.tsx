@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { getSubdomainSlug, resolveCompanyBySlug, validateUserCompany } from '@/lib/subdomain';
 
 interface AuthContextType {
   user: User | null;
@@ -72,6 +73,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
 
         if (!internalError) {
+          // Validate subdomain before completing login
+          const subdomainValid = await validateSubdomainAccess();
+          if (!subdomainValid) return;
+          
           toast.success('Login realizado com sucesso!');
           navigate('/');
           return;
@@ -85,8 +90,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .single();
 
         if (profile) {
-          // Get the email from auth.users through the user's ID
-          // Try common email patterns
           const patterns = [
             `${usernameOrEmail}@marketflow.com.br`,
             `${usernameOrEmail}@internal.marketflow.local`,
@@ -99,6 +102,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
             
             if (!patternError) {
+              const subdomainValid = await validateSubdomainAccess();
+              if (!subdomainValid) return;
+              
               toast.success('Login realizado com sucesso!');
               navigate('/');
               return;
@@ -117,12 +123,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
 
+      // Validate subdomain before completing login
+      const subdomainValid = await validateSubdomainAccess();
+      if (!subdomainValid) return;
+
       toast.success('Login realizado com sucesso!');
       navigate('/');
     } catch (error: any) {
       toast.error('Credenciais inválidas');
       throw error;
     }
+  };
+
+  /**
+   * Validates that the currently authenticated user belongs to the company
+   * associated with the current subdomain. If not, signs out and shows error.
+   */
+  const validateSubdomainAccess = async (): Promise<boolean> => {
+    const slug = getSubdomainSlug();
+    if (!slug) return true; // Not in subdomain environment, skip validation
+
+    const company = await resolveCompanyBySlug(slug);
+    if (!company) {
+      await supabase.auth.signOut();
+      toast.error('Empresa não encontrada. Verifique o endereço.');
+      return false;
+    }
+
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (!currentSession?.user) return false;
+
+    const isValid = await validateUserCompany(currentSession.user.id, company.id);
+    if (!isValid) {
+      await supabase.auth.signOut();
+      toast.error('Você não tem acesso a esta empresa. Verifique seu endereço.');
+      return false;
+    }
+
+    return true;
   };
 
   const signUp = async (email: string, password: string, fullName: string, companyName: string) => {
