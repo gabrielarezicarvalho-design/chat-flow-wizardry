@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Building2, MessageSquare, Users, Zap, RefreshCw, Loader2,
-  Search, TrendingUp, BarChart3, HardDrive, ChevronDown, ChevronRight
+  Search, TrendingUp, BarChart3, HardDrive, ChevronDown, ChevronRight,
+  Database
 } from "lucide-react";
 
 interface CompanyMetrics {
@@ -26,40 +27,66 @@ interface CompanyMetrics {
   totalLeads: number;
   totalAgents: number;
   totalFlows: number;
-  storageEstimate: string;
+  storageSize: number;
+  storageFiles: number;
+  storageBuckets: Record<string, { size: number; count: number }>;
 }
+
+interface StorageData {
+  globalBuckets: { name: string; totalSize: number; fileCount: number; isPublic: boolean }[];
+  totalStorage: number;
+  totalFiles: number;
+  perCompany: Record<string, { totalSize: number; fileCount: number; bucketBreakdown: Record<string, { size: number; count: number }> }>;
+}
+
+const formatBytes = (bytes: number): string => {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
 export default function AdminMetricas() {
   const [metrics, setMetrics] = useState<CompanyMetrics[]>([]);
+  const [storageData, setStorageData] = useState<StorageData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [storageLoading, setStorageLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<"messages" | "conversations" | "users" | "name">("messages");
+  const [sortBy, setSortBy] = useState<"messages" | "conversations" | "users" | "name" | "storage">("messages");
 
   useEffect(() => {
     fetchMetrics();
   }, []);
 
+  const fetchStorageStats = async () => {
+    setStorageLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-storage-stats');
+      if (error) throw error;
+      setStorageData(data as StorageData);
+      toast.success("Dados de armazenamento carregados");
+    } catch (error) {
+      console.error("Error fetching storage:", error);
+      toast.error("Erro ao carregar dados de armazenamento");
+    } finally {
+      setStorageLoading(false);
+    }
+  };
+
   const fetchMetrics = async () => {
     setLoading(true);
     try {
-      // Fetch all companies
       const { data: companies, error: compErr } = await supabase
         .from("companies")
         .select("id, name, slug, plan, is_active")
         .order("name");
       if (compErr) throw compErr;
 
-      // Fetch all related data in parallel
       const [
-        profilesRes,
-        conversationsRes,
-        messagesRes,
-        connectionsRes,
-        campaignsRes,
-        leadsRes,
-        agentsRes,
-        flowsRes,
+        profilesRes, conversationsRes, messagesRes, connectionsRes,
+        campaignsRes, leadsRes, agentsRes, flowsRes,
       ] = await Promise.all([
         supabase.from("profiles").select("id, company_id, is_online"),
         supabase.from("conversations").select("id, company_id, status"),
@@ -80,13 +107,11 @@ export default function AdminMetricas() {
       const agents = agentsRes.data || [];
       const flows = flowsRes.data || [];
 
-      // Build conversation ID to company_id map for messages
       const convCompanyMap = new Map<string, string>();
       conversations.forEach((c) => {
         if (c.company_id) convCompanyMap.set(c.id, c.company_id);
       });
 
-      // Count messages per company
       const msgCountByCompany = new Map<string, number>();
       messages.forEach((m) => {
         const compId = m.conversation_id ? convCompanyMap.get(m.conversation_id) : null;
@@ -105,12 +130,7 @@ export default function AdminMetricas() {
         const compFlows = flows.filter((f) => f.company_id === company.id);
         const totalMsgs = msgCountByCompany.get(company.id) || 0;
 
-        // Rough storage estimate: ~1KB per message + ~2KB per conversation
-        const storageBytes = totalMsgs * 1024 + compConvs.length * 2048;
-        const storageEstimate =
-          storageBytes > 1024 * 1024
-            ? `${(storageBytes / (1024 * 1024)).toFixed(1)} MB`
-            : `${(storageBytes / 1024).toFixed(0)} KB`;
+        const compStorage = storageData?.perCompany?.[company.id];
 
         return {
           id: company.id,
@@ -129,11 +149,16 @@ export default function AdminMetricas() {
           totalLeads: compLeads.length,
           totalAgents: compAgents.length,
           totalFlows: compFlows.length,
-          storageEstimate,
+          storageSize: compStorage?.totalSize || 0,
+          storageFiles: compStorage?.fileCount || 0,
+          storageBuckets: compStorage?.bucketBreakdown || {},
         };
       });
 
       setMetrics(result);
+
+      // Also fetch storage stats
+      fetchStorageStats();
     } catch (error) {
       console.error("Error fetching metrics:", error);
       toast.error("Erro ao carregar métricas");
@@ -141,6 +166,21 @@ export default function AdminMetricas() {
       setLoading(false);
     }
   };
+
+  // Re-merge storage data when it arrives
+  useEffect(() => {
+    if (storageData && metrics.length > 0) {
+      setMetrics(prev => prev.map(m => {
+        const compStorage = storageData.perCompany?.[m.id];
+        return {
+          ...m,
+          storageSize: compStorage?.totalSize || 0,
+          storageFiles: compStorage?.fileCount || 0,
+          storageBuckets: compStorage?.bucketBreakdown || {},
+        };
+      }));
+    }
+  }, [storageData]);
 
   const filtered = metrics
     .filter(
@@ -153,11 +193,11 @@ export default function AdminMetricas() {
         case "messages": return b.totalMessages - a.totalMessages;
         case "conversations": return b.totalConversations - a.totalConversations;
         case "users": return b.totalUsers - a.totalUsers;
+        case "storage": return b.storageSize - a.storageSize;
         default: return a.name.localeCompare(b.name);
       }
     });
 
-  // Totals
   const totals = metrics.reduce(
     (acc, m) => ({
       messages: acc.messages + m.totalMessages,
@@ -189,12 +229,41 @@ export default function AdminMetricas() {
       </div>
 
       {/* Global Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <StatCard icon={MessageSquare} label="Total Mensagens" value={totals.messages.toLocaleString()} gradient="from-blue-500/20 to-blue-500/5" />
         <StatCard icon={TrendingUp} label="Total Conversas" value={totals.conversations.toLocaleString()} gradient="from-emerald-500/20 to-emerald-500/5" />
         <StatCard icon={Users} label="Total Usuários" value={totals.users.toLocaleString()} gradient="from-cyan-500/20 to-cyan-500/5" />
         <StatCard icon={Zap} label="Conexões Ativas" value={totals.connections.toLocaleString()} gradient="from-purple-500/20 to-purple-500/5" />
+        <StatCard
+          icon={HardDrive}
+          label="Armazenamento Total"
+          value={storageLoading ? "..." : formatBytes(storageData?.totalStorage || 0)}
+          gradient="from-amber-500/20 to-amber-500/5"
+          sub={storageData ? `${storageData.totalFiles} arquivos` : undefined}
+        />
       </div>
+
+      {/* Global Bucket Breakdown */}
+      {storageData && storageData.globalBuckets.length > 0 && (
+        <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
+          <div className="flex items-center gap-2 mb-3">
+            <Database className="h-4 w-4 text-amber-400" />
+            <h3 className="text-sm font-medium text-white">Buckets de Armazenamento</h3>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {storageData.globalBuckets.map(b => (
+              <div key={b.name} className="p-3 rounded-lg bg-white/5 border border-white/5">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-xs font-medium text-slate-300 truncate">{b.name}</p>
+                  {b.isPublic && <Badge className="bg-green-500/20 text-green-400 text-[9px]">público</Badge>}
+                </div>
+                <p className="text-sm font-bold text-amber-400">{formatBytes(b.totalSize)}</p>
+                <p className="text-[10px] text-slate-500">{b.fileCount} arquivos</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Search & Sort */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -207,8 +276,8 @@ export default function AdminMetricas() {
             className="pl-10 bg-white/5 border-white/10 text-white"
           />
         </div>
-        <div className="flex gap-2">
-          {(["messages", "conversations", "users", "name"] as const).map((s) => (
+        <div className="flex gap-2 flex-wrap">
+          {(["messages", "conversations", "users", "storage", "name"] as const).map((s) => (
             <Button
               key={s}
               size="sm"
@@ -216,7 +285,7 @@ export default function AdminMetricas() {
               onClick={() => setSortBy(s)}
               className={sortBy === s ? "bg-emerald-500/20 text-emerald-400" : "text-slate-400 hover:text-white"}
             >
-              {s === "messages" ? "Mensagens" : s === "conversations" ? "Conversas" : s === "users" ? "Usuários" : "Nome"}
+              {s === "messages" ? "Mensagens" : s === "conversations" ? "Conversas" : s === "users" ? "Usuários" : s === "storage" ? "Armazenamento" : "Nome"}
             </Button>
           ))}
         </div>
@@ -239,7 +308,6 @@ export default function AdminMetricas() {
               key={company.id}
               className="rounded-xl border border-white/10 bg-white/5 overflow-hidden transition-all"
             >
-              {/* Company Row */}
               <button
                 onClick={() => setExpandedId(expandedId === company.id ? null : company.id)}
                 className="w-full flex items-center gap-4 p-4 hover:bg-white/5 transition-colors text-left"
@@ -250,13 +318,7 @@ export default function AdminMetricas() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-white truncate">{company.name}</p>
-                    <Badge
-                      className={
-                        company.is_active
-                          ? "bg-emerald-500/20 text-emerald-400 text-[10px]"
-                          : "bg-red-500/20 text-red-400 text-[10px]"
-                      }
-                    >
+                    <Badge className={company.is_active ? "bg-emerald-500/20 text-emerald-400 text-[10px]" : "bg-red-500/20 text-red-400 text-[10px]"}>
                       {company.is_active ? "Ativa" : "Inativa"}
                     </Badge>
                     <Badge className="bg-purple-500/20 text-purple-400 text-[10px]">{company.plan}</Badge>
@@ -264,12 +326,11 @@ export default function AdminMetricas() {
                   <p className="text-xs text-slate-500">{company.slug || "—"}</p>
                 </div>
 
-                {/* Quick Stats */}
                 <div className="hidden md:flex items-center gap-6 text-sm">
                   <MetricPill icon={MessageSquare} value={company.totalMessages} label="msgs" />
                   <MetricPill icon={TrendingUp} value={company.totalConversations} label="conversas" />
                   <MetricPill icon={Users} value={company.totalUsers} label="usuários" />
-                  <MetricPill icon={Zap} value={company.activeConnections} label="conexões" />
+                  <MetricPill icon={HardDrive} value={0} label={formatBytes(company.storageSize)} hideValue />
                 </div>
 
                 {expandedId === company.id ? (
@@ -279,10 +340,9 @@ export default function AdminMetricas() {
                 )}
               </button>
 
-              {/* Expanded Details */}
               {expandedId === company.id && (
                 <div className="px-4 pb-4 border-t border-white/5">
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 pt-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 pt-4">
                     <DetailCard label="Mensagens" value={company.totalMessages.toLocaleString()} color="text-blue-400" />
                     <DetailCard label="Conversas" value={company.totalConversations.toLocaleString()} sub={`${company.openConversations} abertas`} color="text-emerald-400" />
                     <DetailCard label="Usuários" value={company.totalUsers.toLocaleString()} sub={`${company.onlineUsers} online`} color="text-cyan-400" />
@@ -291,8 +351,31 @@ export default function AdminMetricas() {
                     <DetailCard label="Leads" value={company.totalLeads.toLocaleString()} color="text-pink-400" />
                     <DetailCard label="Agentes IA" value={company.totalAgents.toLocaleString()} color="text-indigo-400" />
                     <DetailCard label="Fluxos" value={company.totalFlows.toLocaleString()} color="text-orange-400" />
-                    <DetailCard label="Armazenamento" value={company.storageEstimate} icon={<HardDrive className="h-3 w-3" />} color="text-slate-300" />
+                    <DetailCard
+                      label="Armazenamento Real"
+                      value={storageLoading ? "..." : formatBytes(company.storageSize)}
+                      sub={storageLoading ? "carregando..." : `${company.storageFiles} arquivos`}
+                      icon={<HardDrive className="h-3 w-3" />}
+                      color="text-amber-400"
+                    />
                   </div>
+
+                  {/* Bucket breakdown per company */}
+                  {Object.keys(company.storageBuckets).length > 0 && (
+                    <div className="mt-3 p-3 rounded-lg bg-white/5 border border-white/5">
+                      <p className="text-xs text-slate-500 mb-2">Detalhes por bucket:</p>
+                      <div className="flex flex-wrap gap-3">
+                        {Object.entries(company.storageBuckets).map(([bucket, info]) => (
+                          <div key={bucket} className="flex items-center gap-2 text-xs">
+                            <Database className="h-3 w-3 text-amber-400/60" />
+                            <span className="text-slate-400">{bucket}:</span>
+                            <span className="text-amber-400 font-medium">{formatBytes(info.size)}</span>
+                            <span className="text-slate-600">({info.count} arq.)</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -304,15 +387,9 @@ export default function AdminMetricas() {
 }
 
 function StatCard({
-  icon: Icon,
-  label,
-  value,
-  gradient,
+  icon: Icon, label, value, gradient, sub,
 }: {
-  icon: any;
-  label: string;
-  value: string;
-  gradient: string;
+  icon: any; label: string; value: string; gradient: string; sub?: string;
 }) {
   return (
     <div className={`p-4 rounded-xl bg-gradient-to-br ${gradient} border border-white/10`}>
@@ -321,32 +398,25 @@ function StatCard({
         <span className="text-xs text-white/60">{label}</span>
       </div>
       <p className="text-2xl font-bold text-white">{value}</p>
+      {sub && <p className="text-[10px] text-white/50 mt-1">{sub}</p>}
     </div>
   );
 }
 
-function MetricPill({ icon: Icon, value, label }: { icon: any; value: number; label: string }) {
+function MetricPill({ icon: Icon, value, label, hideValue }: { icon: any; value: number; label: string; hideValue?: boolean }) {
   return (
     <div className="flex items-center gap-1.5 text-slate-300">
       <Icon className="h-3.5 w-3.5 text-slate-500" />
-      <span className="font-medium">{value.toLocaleString()}</span>
+      {!hideValue && <span className="font-medium">{value.toLocaleString()}</span>}
       <span className="text-[10px] text-slate-500">{label}</span>
     </div>
   );
 }
 
 function DetailCard({
-  label,
-  value,
-  sub,
-  color,
-  icon,
+  label, value, sub, color, icon,
 }: {
-  label: string;
-  value: string;
-  sub?: string;
-  color: string;
-  icon?: React.ReactNode;
+  label: string; value: string; sub?: string; color: string; icon?: React.ReactNode;
 }) {
   return (
     <div className="p-3 rounded-lg bg-white/5 border border-white/5">
