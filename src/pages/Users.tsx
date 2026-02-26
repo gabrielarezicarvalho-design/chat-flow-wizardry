@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useConnections } from "@/hooks/useConnections";
+import { useAllUserPermissions, defaultPermissions, type UserPermissions } from "@/hooks/useUserPermissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,46 +62,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface UserPermissions {
-  accessSupervisor: boolean;
-  chatFunctions: boolean;
-  taskManagement: boolean;
-  autoLoginQueues: boolean;
-  exportAttendances: boolean;
-  activityMonitoring: boolean;
-  createTasksForOthers: boolean;
-  clearPulledAttendances: boolean;
-  viewSelectQueueAttendances: boolean;
-  ignoreLimitsLockedAttendances: boolean;
-  reopenAttendances: boolean;
-  reopenThirdPartyAttendances: boolean;
-  readAttendanceHistory: boolean;
-  openNewChats: boolean;
-  alwaysOnline: boolean;
-  accessInternalChat: boolean;
-  accessWhatsAppGroups: boolean;
-}
-
-const defaultPermissions: UserPermissions = {
-  accessSupervisor: false,
-  chatFunctions: true,
-  taskManagement: false,
-  autoLoginQueues: false,
-  exportAttendances: false,
-  activityMonitoring: false,
-  createTasksForOthers: false,
-  clearPulledAttendances: false,
-  viewSelectQueueAttendances: false,
-  ignoreLimitsLockedAttendances: false,
-  reopenAttendances: false,
-  reopenThirdPartyAttendances: false,
-  readAttendanceHistory: false,
-  openNewChats: true,
-  alwaysOnline: false,
-  accessInternalChat: true,
-  accessWhatsAppGroups: false,
-};
-
 interface UserWithRole {
   id: string;
   full_name: string | null;
@@ -111,7 +72,6 @@ interface UserWithRole {
   avatar_url: string | null;
   phone: string | null;
   is_company_admin: boolean | null;
-  permissions?: UserPermissions;
   role?: string;
 }
 
@@ -127,7 +87,6 @@ export default function Users() {
   const [editingUser, setEditingUser] = useState<UserWithRole | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
-  const [userPermissions, setUserPermissions] = useState<Record<string, UserPermissions>>({});
   const [userDepartments, setUserDepartments] = useState<Record<string, string[]>>({});
   const [userConnections, setUserConnections] = useState<Record<string, string[]>>({});
   const [newUser, setNewUser] = useState({
@@ -182,7 +141,6 @@ export default function Users() {
     queryFn: async () => {
       if (!currentUserProfile?.company_id) return [];
 
-      // Only fetch users from the same company
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
@@ -191,14 +149,11 @@ export default function Users() {
 
       if (profilesError) throw profilesError;
 
-      // Filter out the main MarketFlow admin (email: admin@marketflow.com.br)
       const filteredProfiles = (profiles || []).filter(profile => {
-        // Exclude the general MarketFlow admin based on username pattern
         const isMainAdmin = profile.username === null && profile.full_name?.includes('MarketFlow');
         return !isMainAdmin;
       });
 
-      // Fetch roles for each user
       const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
         .select("user_id, role");
@@ -209,12 +164,28 @@ export default function Users() {
 
       return filteredProfiles.map((profile) => ({
         ...profile,
-        permissions: (profile as any).permissions || defaultPermissions,
         role: roleMap.get(profile.id) || "user",
       })) as UserWithRole[];
     },
     enabled: !!currentUserProfile?.company_id,
   });
+
+  // Fetch permissions from database for all users
+  const userIds = users.map(u => u.id);
+  const { data: allPermissions = {} } = useAllUserPermissions(userIds);
+
+  // Local state for optimistic permission updates
+  const [localPermissions, setLocalPermissions] = useState<Record<string, UserPermissions>>({});
+
+  // Sync from DB whenever allPermissions changes
+  useEffect(() => {
+    setLocalPermissions(allPermissions);
+  }, [allPermissions]);
+
+  // Get permissions for a user (local override or DB or default)
+  const getPerms = (userId: string): UserPermissions => {
+    return localPermissions[userId] || allPermissions[userId] || defaultPermissions;
+  };
 
   // Fetch department members for all users
   const { data: departmentMembersData = [] } = useQuery({
@@ -240,88 +211,86 @@ export default function Users() {
     },
   });
 
-  // Initialize userConnections state from database
   useEffect(() => {
     const connectionsMap: Record<string, string[]> = {};
     userConnectionsData.forEach((uc: any) => {
-      if (!connectionsMap[uc.user_id]) {
-        connectionsMap[uc.user_id] = [];
-      }
+      if (!connectionsMap[uc.user_id]) connectionsMap[uc.user_id] = [];
       connectionsMap[uc.user_id].push(uc.connection_id);
     });
     setUserConnections(connectionsMap);
   }, [userConnectionsData]);
 
-  // Initialize userDepartments state from database
   useEffect(() => {
     const departmentsMap: Record<string, string[]> = {};
     departmentMembersData.forEach((dm: any) => {
-      if (!departmentsMap[dm.agent_id]) {
-        departmentsMap[dm.agent_id] = [];
-      }
-      departmentsMap[dm.agent_id].push(dm.department_id);
+      if (!departmentsMap[dm.user_id]) departmentsMap[dm.user_id] = [];
+      departmentsMap[dm.user_id].push(dm.department_id);
     });
     setUserDepartments(departmentsMap);
   }, [departmentMembersData]);
-
-  // Initialize userPermissions from loaded users
-  useEffect(() => {
-    const permissionsMap: Record<string, UserPermissions> = {};
-    users.forEach((u) => {
-      permissionsMap[u.id] = u.permissions || defaultPermissions;
-    });
-    setUserPermissions(permissionsMap);
-  }, [users]);
 
   // Real-time subscription for profile status changes
   useEffect(() => {
     const channel = supabase
       .channel('profiles-status')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles'
-        },
-        () => {
-          refetch();
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => refetch())
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [refetch]);
 
-  // Filter users by search
   const filteredUsers = users.filter((u) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
-    return (
-      u.full_name?.toLowerCase().includes(query) ||
-      u.username?.toLowerCase().includes(query)
-    );
+    return u.full_name?.toLowerCase().includes(query) || u.username?.toLowerCase().includes(query);
   });
 
-  // Count stats
   const onlineCount = users.filter((u) => u.is_online).length;
   const offlineCount = users.filter((u) => !u.is_online).length;
   const totalCount = users.length;
+
+  // Save permissions mutation
+  const savePermissions = useMutation({
+    mutationFn: async ({ userId, perms }: { userId: string; perms: UserPermissions }) => {
+      const { error } = await supabase
+        .from("user_permissions")
+        .upsert(
+          {
+            user_id: userId,
+            company_id: currentUserProfile?.company_id || null,
+            ...perms,
+          },
+          { onConflict: "user_id" }
+        );
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["all-user-permissions"] });
+      queryClient.invalidateQueries({ queryKey: ["user-permissions", variables.userId] });
+      toast.success("Permissão salva!");
+    },
+    onError: (error: any) => {
+      toast.error("Erro ao salvar permissão: " + (error.message || ""));
+    },
+  });
 
   // Create user mutation
   const createUser = useMutation({
     mutationFn: async (userData: typeof newUser) => {
       const { data, error } = await supabase.functions.invoke("create-user", {
-        body: {
-          ...userData,
-          company_id: currentUserProfile?.company_id,
-        },
+        body: { ...userData, company_id: currentUserProfile?.company_id },
       });
-      
       if (error) throw error;
       if (!data.success) throw new Error(data.error);
+
+      // Save permissions for the new user
+      if (data.user_id) {
+        await supabase.from("user_permissions").upsert({
+          user_id: data.user_id,
+          company_id: currentUserProfile?.company_id || null,
+          ...userData.permissions,
+        }, { onConflict: "user_id" });
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -329,6 +298,7 @@ export default function Users() {
       setIsDialogOpen(false);
       setNewUser({ username: "", password: "", full_name: "", role: "agent", permissions: { ...defaultPermissions } });
       refetch();
+      queryClient.invalidateQueries({ queryKey: ["all-user-permissions"] });
     },
     onError: (error: any) => {
       toast.error(error.message || "Erro ao criar usuário");
@@ -341,7 +311,6 @@ export default function Users() {
       const { data, error } = await supabase.functions.invoke("delete-user", {
         body: { user_id: userId },
       });
-      
       if (error) throw error;
       if (!data.success) throw new Error(data.error);
       return data;
@@ -366,15 +335,10 @@ export default function Users() {
         .maybeSingle();
 
       if (existing) {
-        const { error } = await supabase
-          .from("user_roles")
-          .update({ role })
-          .eq("user_id", userId);
+        const { error } = await supabase.from("user_roles").update({ role }).eq("user_id", userId);
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from("user_roles")
-          .insert([{ user_id: userId, role }]);
+        const { error } = await supabase.from("user_roles").insert([{ user_id: userId, role }]);
         if (error) throw error;
       }
     },
@@ -387,40 +351,27 @@ export default function Users() {
     },
   });
 
-  // Update schedule mutation - removed as work_schedule column doesn't exist
-  // Using department_members instead for schedule-like functionality
-
   const handleSaveSchedule = async () => {
-    // Schedules are not currently stored - just close dialog
     toast.info("Funcionalidade de horários em desenvolvimento");
     setIsScheduleDialogOpen(false);
     setEditingUser(null);
   };
 
-  // Update department mutation - supports multiple departments via department_members
   const updateUserDepartment = useMutation({
     mutationFn: async ({ userId, departmentId, add }: { userId: string; departmentId: string; add: boolean }) => {
       if (add) {
-        // Check if already exists
         const { data: existing } = await supabase
           .from("department_members")
           .select("id")
           .eq("user_id", userId)
           .eq("department_id", departmentId)
           .maybeSingle();
-        
         if (!existing) {
-          const { error } = await supabase
-            .from("department_members")
-            .insert([{ department_id: departmentId, user_id: userId }]);
+          const { error } = await supabase.from("department_members").insert([{ department_id: departmentId, user_id: userId }]);
           if (error) throw error;
         }
       } else {
-        const { error } = await supabase
-          .from("department_members")
-          .delete()
-          .eq("user_id", userId)
-          .eq("department_id", departmentId);
+        const { error } = await supabase.from("department_members").delete().eq("user_id", userId).eq("department_id", departmentId);
         if (error) throw error;
       }
     },
@@ -435,13 +386,6 @@ export default function Users() {
     },
   });
 
-  // Update permissions - stored locally only since column doesn't exist
-  const handleUpdatePermissions = (userId: string, permissions: UserPermissions) => {
-    setUserPermissions(prev => ({ ...prev, [userId]: permissions }));
-    // Note: permissions are stored in local state only - no database column exists
-  };
-
-  // Logout user mutation (set offline)
   const logoutUser = useMutation({
     mutationFn: async (userId: string) => {
       const { error } = await supabase
@@ -459,20 +403,13 @@ export default function Users() {
     },
   });
 
-  // Update user connection mutation
   const updateUserConnection = useMutation({
     mutationFn: async ({ userId, connectionId, add }: { userId: string; connectionId: string; add: boolean }) => {
       if (add) {
-        const { error } = await supabase
-          .from("user_connections")
-          .insert([{ user_id: userId, connection_id: connectionId }]);
+        const { error } = await supabase.from("user_connections").insert([{ user_id: userId, connection_id: connectionId }]);
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from("user_connections")
-          .delete()
-          .eq("user_id", userId)
-          .eq("connection_id", connectionId);
+        const { error } = await supabase.from("user_connections").delete().eq("user_id", userId).eq("connection_id", connectionId);
         if (error) throw error;
       }
     },
@@ -488,21 +425,12 @@ export default function Users() {
 
   const getInitials = (name: string | null) => {
     if (!name) return "??";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
+    return name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
   };
 
   const handleOpenSchedule = (u: UserWithRole) => {
     setEditingUser(u);
-    setScheduleForm({
-      start: "08:00",
-      end: "18:00",
-      days: [1, 2, 3, 4, 5],
-    });
+    setScheduleForm({ start: "08:00", end: "18:00", days: [1, 2, 3, 4, 5] });
     setIsScheduleDialogOpen(true);
   };
 
@@ -516,25 +444,17 @@ export default function Users() {
 
   const toggleExpand = (userId: string) => {
     setExpandedUserId(expandedUserId === userId ? null : userId);
-    if (!userPermissions[userId]) {
-      setUserPermissions((prev) => ({ ...prev, [userId]: { ...defaultPermissions } }));
-    }
   };
 
   const togglePermission = (userId: string, key: keyof UserPermissions) => {
-    const currentPerms = userPermissions[userId] || defaultPermissions;
-    const newPerms = {
-      ...currentPerms,
-      [key]: !currentPerms[key],
-    };
-    
-    setUserPermissions((prev) => ({
-      ...prev,
-      [userId]: newPerms,
-    }));
-    
-    // Save permissions locally (no database column for permissions)
-    handleUpdatePermissions(userId, newPerms);
+    const currentPerms = getPerms(userId);
+    const newPerms: UserPermissions = { ...currentPerms, [key]: !currentPerms[key] };
+
+    // Optimistic local update
+    setLocalPermissions((prev) => ({ ...prev, [userId]: newPerms }));
+
+    // Persist to database
+    savePermissions.mutate({ userId, perms: newPerms });
   };
 
   const toggleUserDepartment = (userId: string, deptId: string) => {
@@ -551,8 +471,6 @@ export default function Users() {
   const toggleUserConnection = (userId: string, connId: string) => {
     const currentConnections = userConnections[userId] || [];
     const isCurrentlyAssigned = currentConnections.includes(connId);
-    
-    // Update local state optimistically
     setUserConnections((prev) => {
       const current = prev[userId] || [];
       if (isCurrentlyAssigned) {
@@ -561,43 +479,32 @@ export default function Users() {
         return { ...prev, [userId]: [...current, connId] };
       }
     });
-    
-    // Update in database
-    updateUserConnection.mutate({
-      userId,
-      connectionId: connId,
-      add: !isCurrentlyAssigned,
-    });
+    updateUserConnection.mutate({ userId, connectionId: connId, add: !isCurrentlyAssigned });
   };
 
   const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
+  // Permission groups - removed "activityMonitoring" and "ignoreLimitsLockedAttendances"
   const permissionGroups = [
     {
       title: "Geral",
       items: [
-        { key: "accessSupervisor" as const, label: "Acessar funções de supervisão" },
-        { key: "chatFunctions" as const, label: "Funções de chat" },
-        { key: "taskManagement" as const, label: "Gestão de tarefas" },
-        { key: "autoLoginQueues" as const, label: "Logar automaticamente às filas" },
-        { key: "exportAttendances" as const, label: "Exportar atendimentos" },
-        { key: "activityMonitoring" as const, label: "Habilitar monitoramento de atividades" },
-        { key: "createTasksForOthers" as const, label: "Permitir criar tarefas para outros" },
+        { key: "can_supervise" as const, label: "Acessar funções de supervisão" },
+        { key: "can_manage_tasks" as const, label: "Gestão de tarefas" },
+        { key: "auto_login_queue" as const, label: "Logar automaticamente às filas" },
+        { key: "can_export_chats" as const, label: "Exportar atendimentos" },
+        { key: "can_create_tasks_for_others" as const, label: "Permitir criar tarefas para outros" },
       ],
     },
     {
       title: "Chat",
       items: [
-        { key: "clearPulledAttendances" as const, label: "Limpar atendimentos puxados" },
-        { key: "viewSelectQueueAttendances" as const, label: "Visualizar e selecionar atendimentos da fila" },
-        { key: "ignoreLimitsLockedAttendances" as const, label: "Ignorar limites para atendimentos travados" },
-        { key: "reopenAttendances" as const, label: "Reabrir atendimentos" },
-        { key: "reopenThirdPartyAttendances" as const, label: "Reabrir atendimentos de terceiros" },
-        { key: "readAttendanceHistory" as const, label: "Ler mensagens no histórico de atendimentos" },
-        { key: "openNewChats" as const, label: "Abrir novos chats" },
-        { key: "alwaysOnline" as const, label: "Usuário sempre online" },
-        { key: "accessInternalChat" as const, label: "Acessar chat interno" },
-        { key: "accessWhatsAppGroups" as const, label: "Acessar grupos de WA" },
+        { key: "can_view_queue" as const, label: "Visualizar e selecionar atendimentos da fila" },
+        { key: "can_read_chat_history" as const, label: "Ler mensagens no histórico de atendimentos" },
+        { key: "can_open_new_chats" as const, label: "Abrir novos chats" },
+        { key: "always_online" as const, label: "Usuário sempre online" },
+        { key: "can_access_internal_chat" as const, label: "Acessar chat interno" },
+        { key: "can_access_wa_groups" as const, label: "Acessar grupos de WA" },
       ],
     },
   ];
@@ -631,9 +538,7 @@ export default function Users() {
 
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
-          if (!open) {
-            setNewUser({ username: "", password: "", full_name: "", role: "agent", permissions: { ...defaultPermissions } });
-          }
+          if (!open) setNewUser({ username: "", password: "", full_name: "", role: "agent", permissions: { ...defaultPermissions } });
         }}>
           <DialogTrigger asChild>
             <Button className="gap-2" disabled={!canAddMoreUsers}>
@@ -647,28 +552,14 @@ export default function Users() {
               <p className="text-sm text-muted-foreground">Campos marcados com * são obrigatórios</p>
             </DialogHeader>
             <div className="space-y-6 pt-4">
-              {/* Basic info */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Usuário*</Label>
-                  <Input
-                    placeholder="Usuário"
-                    value={newUser.username}
-                    onChange={(e) =>
-                      setNewUser({ ...newUser, username: e.target.value })
-                    }
-                  />
+                  <Input placeholder="Usuário" value={newUser.username} onChange={(e) => setNewUser({ ...newUser, username: e.target.value })} />
                 </div>
-
                 <div className="space-y-2">
                   <Label>Nome*</Label>
-                  <Input
-                    placeholder="Nome completo"
-                    value={newUser.full_name}
-                    onChange={(e) =>
-                      setNewUser({ ...newUser, full_name: e.target.value })
-                    }
-                  />
+                  <Input placeholder="Nome completo" value={newUser.full_name} onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })} />
                 </div>
               </div>
 
@@ -680,33 +571,17 @@ export default function Users() {
                       type={showPassword ? "text" : "password"}
                       placeholder="Senha de acesso"
                       value={newUser.password}
-                      onChange={(e) =>
-                        setNewUser({ ...newUser, password: e.target.value })
-                      }
+                      onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
                     />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full" onClick={() => setShowPassword(!showPassword)}>
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </Button>
                   </div>
                 </div>
-
                 <div className="space-y-2">
                   <Label>Tipo</Label>
-                  <Select
-                    value={newUser.role}
-                    onValueChange={(value: "admin" | "agent") =>
-                      setNewUser({ ...newUser, role: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
+                  <Select value={newUser.role} onValueChange={(value: "admin" | "agent") => setNewUser({ ...newUser, role: value })}>
+                    <SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="agent">Agente</SelectItem>
                       <SelectItem value="admin">Administrador</SelectItem>
@@ -724,18 +599,12 @@ export default function Users() {
                       <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{group.title}</h4>
                       <div className="grid grid-cols-1 gap-2">
                         {group.items.map((item) => (
-                          <div
-                            key={item.key}
-                            className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                          >
+                          <div key={item.key} className="flex items-center justify-between p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                             <span className="text-sm">{item.label}</span>
                             <Switch
                               checked={newUser.permissions[item.key]}
                               onCheckedChange={(checked) =>
-                                setNewUser({
-                                  ...newUser,
-                                  permissions: { ...newUser.permissions, [item.key]: checked },
-                                })
+                                setNewUser({ ...newUser, permissions: { ...newUser.permissions, [item.key]: checked } })
                               }
                             />
                           </div>
@@ -747,10 +616,8 @@ export default function Users() {
               </div>
 
               <div className="flex justify-end gap-2 pt-4 border-t">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button 
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
+                <Button
                   onClick={() => createUser.mutate(newUser)}
                   disabled={!newUser.username || !newUser.full_name || !newUser.password || createUser.isPending}
                 >
@@ -766,12 +633,7 @@ export default function Users() {
       <div className="flex justify-end">
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Pesquisar..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
+          <Input placeholder="Pesquisar..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
         </div>
       </div>
 
@@ -792,15 +654,11 @@ export default function Users() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
-                  Carregando...
-                </TableCell>
+                <TableCell colSpan={7} className="text-center py-8">Carregando...</TableCell>
               </TableRow>
             ) : filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
-                  Nenhum usuário encontrado
-                </TableCell>
+                <TableCell colSpan={7} className="text-center py-8">Nenhum usuário encontrado</TableCell>
               </TableRow>
             ) : (
               filteredUsers.map((u, index) => (
@@ -809,15 +667,8 @@ export default function Users() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <input type="checkbox" className="w-4 h-4 rounded border-muted-foreground" />
-                        <button
-                          onClick={() => toggleExpand(u.id)}
-                          className="p-0.5 hover:bg-muted rounded transition-transform"
-                        >
-                          {expandedUserId === u.id ? (
-                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                          )}
+                        <button onClick={() => toggleExpand(u.id)} className="p-0.5 hover:bg-muted rounded transition-transform">
+                          {expandedUserId === u.id ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
                         </button>
                       </div>
                     </TableCell>
@@ -825,91 +676,42 @@ export default function Users() {
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <Avatar className="w-8 h-8">
-                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                              {getInitials(u.full_name)}
-                            </AvatarFallback>
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs">{getInitials(u.full_name)}</AvatarFallback>
                           </Avatar>
-                          <Circle 
-                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${
-                              u.is_online 
-                                ? 'text-green-500 fill-green-500' 
-                                : 'text-muted-foreground fill-muted-foreground'
-                            }`}
-                          />
+                          <Circle className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${u.is_online ? 'text-green-500 fill-green-500' : 'text-muted-foreground fill-muted-foreground'}`} />
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-medium text-primary">
-                            {u.full_name || "Sem nome"}
-                          </span>
-                          <span className={`text-xs ${u.is_online ? 'text-green-600' : 'text-muted-foreground'}`}>
-                            {u.is_online ? 'Online' : 'Offline'}
-                          </span>
+                          <span className="font-medium text-primary">{u.full_name || "Sem nome"}</span>
+                          <span className={`text-xs ${u.is_online ? 'text-green-600' : 'text-muted-foreground'}`}>{u.is_online ? 'Online' : 'Offline'}</span>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-primary">
-                      {u.username || "-"}
-                    </TableCell>
-                    <TableCell>
-                      {u.role === "admin" ? "Administrador" : "Agente"}
-                    </TableCell>
+                    <TableCell className="text-primary">{u.username || "-"}</TableCell>
+                    <TableCell>{u.role === "admin" ? "Administrador" : "Agente"}</TableCell>
                     <TableCell>
                       {u.created_at
-                        ? new Date(u.created_at).toLocaleString("pt-BR", { 
-                            year: 'numeric', 
-                            month: '2-digit', 
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })
+                        ? new Date(u.created_at).toLocaleString("pt-BR", { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
                         : "-"}
                     </TableCell>
-                    <TableCell className="text-primary">
-                      {index + 1}
-                    </TableCell>
+                    <TableCell className="text-primary">{index + 1}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleOpenSchedule(u)}
-                          title="Horários"
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => handleOpenSchedule(u)} title="Horários">
                           <Calendar className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setEditingUser(u);
-                            setIsEditDialogOpen(true);
-                          }}
-                          title="Editar"
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => { setEditingUser(u); setIsEditDialogOpen(true); }} title="Editar">
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => logoutUser.mutate(u.id)}
-                          title="Deslogar"
-                          disabled={!u.is_online}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => logoutUser.mutate(u.id)} title="Deslogar" disabled={!u.is_online}>
                           <LogOut className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeleteUserId(u.id)}
-                          title="Excluir"
-                        >
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteUserId(u.id)} title="Excluir">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </TableCell>
                   </TableRow>
-                  
+
                   {/* Expanded Permissions Panel */}
                   {expandedUserId === u.id && (
                     <TableRow key={`${u.id}-expanded`}>
@@ -918,7 +720,6 @@ export default function Users() {
                           {/* Permissions Column */}
                           <div className="lg:col-span-2 space-y-6">
                             <h3 className="font-semibold text-foreground">Permissões e opções</h3>
-                            
                             {permissionGroups.map((group) => (
                               <div key={group.title}>
                                 <h4 className="text-sm font-medium text-muted-foreground mb-3">{group.title}</h4>
@@ -926,7 +727,7 @@ export default function Users() {
                                   {group.items.map((item) => (
                                     <div key={item.key} className="flex items-center gap-3">
                                       <Switch
-                                        checked={(userPermissions[u.id] || defaultPermissions)[item.key]}
+                                        checked={getPerms(u.id)[item.key]}
                                         onCheckedChange={() => togglePermission(u.id, item.key)}
                                       />
                                       <span className="text-sm text-foreground">{item.label}</span>
@@ -940,10 +741,7 @@ export default function Users() {
                           {/* Departments Column */}
                           <div className="space-y-4">
                             <h3 className="font-semibold text-foreground">Departamentos</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Selecione os departamentos que este usuário pertence.
-                            </p>
-                            
+                            <p className="text-sm text-muted-foreground">Selecione os departamentos que este usuário pertence.</p>
                             <div className="space-y-2 max-h-64 overflow-y-auto">
                               {departments && departments.length > 0 ? (
                                 departments.map((dept) => (
@@ -952,33 +750,19 @@ export default function Users() {
                                       id={`dept-${u.id}-${dept.id}`}
                                       checked={(userDepartments[u.id] || []).includes(dept.id)}
                                       onCheckedChange={() => {
-                                        const currentDepts = userDepartments[u.id] || [];
-                                        const isCurrentlyAssigned = currentDepts.includes(dept.id);
+                                        const isAssigned = (userDepartments[u.id] || []).includes(dept.id);
                                         toggleUserDepartment(u.id, dept.id);
-                                        // Update in database
-                                        updateUserDepartment.mutate({
-                                          userId: u.id,
-                                          departmentId: dept.id,
-                                          add: !isCurrentlyAssigned,
-                                        });
+                                        updateUserDepartment.mutate({ userId: u.id, departmentId: dept.id, add: !isAssigned });
                                       }}
                                     />
-                                    <label
-                                      htmlFor={`dept-${u.id}-${dept.id}`}
-                                      className="text-sm text-foreground cursor-pointer flex items-center gap-2"
-                                    >
-                                      <span
-                                        className="w-2 h-2 rounded-full"
-                                        style={{ backgroundColor: dept.color || '#3B82F6' }}
-                                      />
+                                    <label htmlFor={`dept-${u.id}-${dept.id}`} className="text-sm text-foreground cursor-pointer flex items-center gap-2">
+                                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dept.color || '#3B82F6' }} />
                                       {dept.name}
                                     </label>
                                   </div>
                                 ))
                               ) : (
-                                <p className="text-sm text-muted-foreground italic">
-                                  Nenhum departamento cadastrado
-                                </p>
+                                <p className="text-sm text-muted-foreground italic">Nenhum departamento cadastrado</p>
                               )}
                             </div>
                           </div>
@@ -986,10 +770,7 @@ export default function Users() {
                           {/* Connections Column */}
                           <div className="space-y-4">
                             <h3 className="font-semibold text-foreground">Conexões</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Selecione as conexões que este usuário pode receber contatos.
-                            </p>
-                            
+                            <p className="text-sm text-muted-foreground">Selecione as conexões que este usuário pode receber contatos.</p>
                             <div className="space-y-2 max-h-64 overflow-y-auto">
                               {connections && connections.length > 0 ? (
                                 connections.map((conn) => (
@@ -999,23 +780,14 @@ export default function Users() {
                                       checked={(userConnections[u.id] || []).includes(conn.id)}
                                       onCheckedChange={() => toggleUserConnection(u.id, conn.id)}
                                     />
-                                    <label
-                                      htmlFor={`conn-${u.id}-${conn.id}`}
-                                      className="text-sm text-foreground cursor-pointer flex items-center gap-2"
-                                    >
-                                      <span
-                                        className={`w-2 h-2 rounded-full ${
-                                          conn.status === 'connected' ? 'bg-green-500' : 'bg-muted-foreground'
-                                        }`}
-                                      />
+                                    <label htmlFor={`conn-${u.id}-${conn.id}`} className="text-sm text-foreground cursor-pointer flex items-center gap-2">
+                                      <span className={`w-2 h-2 rounded-full ${conn.status === 'connected' ? 'bg-green-500' : 'bg-muted-foreground'}`} />
                                       {conn.instance_name}
                                     </label>
                                   </div>
                                 ))
                               ) : (
-                                <p className="text-sm text-muted-foreground italic">
-                                  Nenhuma conexão cadastrada
-                                </p>
+                                <p className="text-sm text-muted-foreground italic">Nenhuma conexão cadastrada</p>
                               )}
                             </div>
                           </div>
@@ -1055,9 +827,7 @@ export default function Users() {
                     setIsEditDialogOpen(false);
                   }}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="agent">Agente</SelectItem>
                     <SelectItem value="admin">Administrador</SelectItem>
@@ -1074,54 +844,32 @@ export default function Users() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Horário de Trabalho</DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              {editingUser?.full_name}
-            </p>
+            <p className="text-sm text-muted-foreground">{editingUser?.full_name}</p>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Início</Label>
-                <Input
-                  type="time"
-                  value={scheduleForm.start}
-                  onChange={(e) => setScheduleForm({ ...scheduleForm, start: e.target.value })}
-                />
+                <Input type="time" value={scheduleForm.start} onChange={(e) => setScheduleForm({ ...scheduleForm, start: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label>Fim</Label>
-                <Input
-                  type="time"
-                  value={scheduleForm.end}
-                  onChange={(e) => setScheduleForm({ ...scheduleForm, end: e.target.value })}
-                />
+                <Input type="time" value={scheduleForm.end} onChange={(e) => setScheduleForm({ ...scheduleForm, end: e.target.value })} />
               </div>
             </div>
             <div className="space-y-2">
               <Label>Dias da Semana</Label>
               <div className="flex gap-2">
                 {dayNames.map((day, index) => (
-                  <Button
-                    key={index}
-                    variant={scheduleForm.days.includes(index) ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => toggleDay(index)}
-                    className="flex-1"
-                  >
+                  <Button key={index} variant={scheduleForm.days.includes(index) ? "default" : "outline"} size="sm" onClick={() => toggleDay(index)} className="flex-1">
                     {day}
                   </Button>
                 ))}
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={() => handleSaveSchedule()}
-              >
-                Salvar
-              </Button>
+              <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>Cancelar</Button>
+              <Button onClick={() => handleSaveSchedule()}>Salvar</Button>
             </div>
           </div>
         </DialogContent>
@@ -1132,16 +880,11 @@ export default function Users() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir Usuário</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
+            <AlertDialogDescription>Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleteUserId && deleteUser.mutate(deleteUserId)}
-            >
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteUserId && deleteUser.mutate(deleteUserId)}>
               {deleteUser.isPending ? "Excluindo..." : "Excluir"}
             </AlertDialogAction>
           </AlertDialogFooter>

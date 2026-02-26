@@ -1444,6 +1444,71 @@ export type Database = {
           },
         ]
       }
+      user_permissions: {
+        Row: {
+          always_online: boolean
+          auto_login_queue: boolean
+          can_access_internal_chat: boolean
+          can_access_wa_groups: boolean
+          can_create_tasks_for_others: boolean
+          can_export_chats: boolean
+          can_manage_tasks: boolean
+          can_open_new_chats: boolean
+          can_read_chat_history: boolean
+          can_supervise: boolean
+          can_view_queue: boolean
+          company_id: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          always_online?: boolean
+          auto_login_queue?: boolean
+          can_access_internal_chat?: boolean
+          can_access_wa_groups?: boolean
+          can_create_tasks_for_others?: boolean
+          can_export_chats?: boolean
+          can_manage_tasks?: boolean
+          can_open_new_chats?: boolean
+          can_read_chat_history?: boolean
+          can_supervise?: boolean
+          can_view_queue?: boolean
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          always_online?: boolean
+          auto_login_queue?: boolean
+          can_access_internal_chat?: boolean
+          can_access_wa_groups?: boolean
+          can_create_tasks_for_others?: boolean
+          can_export_chats?: boolean
+          can_manage_tasks?: boolean
+          can_open_new_chats?: boolean
+          can_read_chat_history?: boolean
+          can_supervise?: boolean
+          can_view_queue?: boolean
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
