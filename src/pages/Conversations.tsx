@@ -524,12 +524,6 @@ const Conversations = () => {
                     </Button>
                   </>
                 )}
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Phone className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
               </div>
             </div>
 
