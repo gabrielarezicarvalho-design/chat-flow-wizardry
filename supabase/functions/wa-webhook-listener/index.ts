@@ -3653,7 +3653,7 @@ ${safeTelegramText}`;
     if (leadData) {
       const { data: existingConv } = await supabase
         .from("conversations")
-        .select("id, status, department_id, assigned_to, attendance_type")
+        .select("id, status, department_id, assigned_to, attendance_type, flow_state")
         .eq("contact_phone", cleanPhone)
         .eq("connection_id", connectionId)
         .not("status", "eq", "closed")
@@ -3664,7 +3664,7 @@ ${safeTelegramText}`;
     } else {
       const { data: existingConv } = await supabase
         .from("conversations")
-        .select("id, status, department_id, assigned_to, attendance_type")
+        .select("id, status, department_id, assigned_to, attendance_type, flow_state")
         .eq("contact_phone", cleanPhone)
         .eq("connection_id", connectionId)
         .not("status", "eq", "closed")
