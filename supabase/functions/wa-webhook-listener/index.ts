@@ -1561,11 +1561,12 @@ async function transferToFallback(
   // Clear flow state and update department
   await supabase
     .from("conversations")
-    .update({ 
-      flow_state: null,
+    .update({
       department_id: departmentId,
-      assigned_agent_id: null,
-      status: 'waiting'
+      assigned_to: null,
+      status: "waiting",
+      attendance_type: "agent",
+      updated_at: new Date().toISOString()
     })
     .eq("id", conversationId);
 
@@ -2108,16 +2109,21 @@ async function executeAiAgentNode(
     ai_error_count: 0
   };
 
-  await supabase
+  const { error: assignAiError } = await supabase
     .from("conversations")
-    .update({ 
-      assigned_agent_id: agentId,
-      flow_state: flowState,
-      attendance_type: "ai"
+    .update({
+      assigned_to: agentId,
+      attendance_type: "ai",
+      status: "open",
+      updated_at: new Date().toISOString()
     })
     .eq("id", context.conversationId);
 
-  console.log("✅ Assistente IA atribuído à conversa (attendance_type → ai)");
+  if (assignAiError) {
+    console.error("❌ Falha ao atualizar conversa para IA:", assignAiError.message);
+  } else {
+    console.log("✅ Assistente IA atribuído à conversa (attendance_type → ai)");
+  }
 
   // ========================================
   // CHAMAR AI-ASSISTANT-CHAT EDGE FUNCTION
@@ -2175,12 +2181,12 @@ async function executeAiAgentNode(
       
       await supabase
         .from("conversations")
-        .update({ 
+        .update({
           department_id: fallbackDepartmentId,
           status: "waiting",
-          assigned_agent_id: null,
-          flow_state: null,
-          attendance_type: "agent"
+          assigned_to: null,
+          attendance_type: "agent",
+          updated_at: new Date().toISOString()
         })
         .eq("id", context.conversationId);
 
@@ -2296,13 +2302,12 @@ async function executeForwardNode(
     
     const agentName = agentProfile?.full_name || agentProfile?.username || 'Atendente';
     
-    const updateData: any = { 
-      assigned_agent: specificAgentId,
-      status: 'in_attendance',
-      flow_state: null,
+    const updateData: any = {
+      assigned_to: specificAgentId,
+      status: "in_attendance",
       department_id: null,
-      assigned_agent_id: null,
-      attendance_type: 'agent'
+      attendance_type: "agent",
+      updated_at: new Date().toISOString()
     };
     
     const { error } = await supabase
@@ -2325,13 +2330,12 @@ async function executeForwardNode(
   if (departmentId) {
     console.log("📋 Transferindo para fila do departamento...");
     
-    const updateData: any = { 
+    const updateData: any = {
       department_id: departmentId,
-      status: 'waiting',
-      flow_state: null,
-      assigned_agent: null,
-      assigned_agent_id: null,
-      attendance_type: 'agent'
+      status: "waiting",
+      assigned_to: null,
+      attendance_type: "agent",
+      updated_at: new Date().toISOString()
     };
     
     const { error } = await supabase
@@ -2365,9 +2369,11 @@ async function executeForwardNode(
   
   await supabase
     .from("conversations")
-    .update({ 
-      status: 'waiting',
-      flow_state: null
+    .update({
+      status: "waiting",
+      attendance_type: "agent",
+      assigned_to: null,
+      updated_at: new Date().toISOString()
     })
     .eq("id", context.conversationId);
 
@@ -3647,7 +3653,7 @@ ${safeTelegramText}`;
     if (leadData) {
       const { data: existingConv } = await supabase
         .from("conversations")
-        .select("id, status, department_id, assigned_to")
+        .select("id, status, department_id, assigned_to, attendance_type")
         .eq("contact_phone", cleanPhone)
         .eq("connection_id", connectionId)
         .not("status", "eq", "closed")
@@ -3658,7 +3664,7 @@ ${safeTelegramText}`;
     } else {
       const { data: existingConv } = await supabase
         .from("conversations")
-        .select("id, status, department_id, assigned_to")
+        .select("id, status, department_id, assigned_to, attendance_type")
         .eq("contact_phone", cleanPhone)
         .eq("connection_id", connectionId)
         .not("status", "eq", "closed")
@@ -3687,10 +3693,11 @@ ${safeTelegramText}`;
           contact_name: contactName || cleanPhone,
           contact_avatar: payload?.chat?.imagePreview || null,
           status: "open",
+          attendance_type: "ura",
           last_message: mensagem,
           last_message_at: new Date().toISOString()
         })
-        .select("id, status, department_id, assigned_to")
+        .select("id, status, department_id, assigned_to, attendance_type")
         .single();
 
       if (convError) {
@@ -4128,17 +4135,17 @@ ${safeTelegramText}`;
     let aiAssistantUsed = false;
     
     // Se não executou fluxo, verificar se há assistente IA atribuído
-    if (!flowExecuted && conversationData.assigned_agent_id) {
+    if (!flowExecuted && conversationData.attendance_type === "ai" && conversationData.assigned_to) {
       console.log("\n" + "=".repeat(60));
       console.log("🤖 VERIFICANDO ASSISTENTE IA...");
-      console.log("   Agent ID:", conversationData.assigned_agent_id);
+      console.log("   Agent ID:", conversationData.assigned_to);
       console.log("=".repeat(60));
 
       // Verificar se o agente está ativo
       const { data: agent } = await supabase
         .from("agents")
         .select("id, name, status")
-        .eq("id", conversationData.assigned_agent_id)
+        .eq("id", conversationData.assigned_to)
         .eq("status", "active")
         .single();
 
