@@ -49,12 +49,31 @@ serve(async (req) => {
       });
     }
 
-    const { messages, action, context } = await req.json();
+    const { messages, action, context, companyId } = await req.json();
 
-    // Get Lovable AI key
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!lovableKey) {
-      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY não configurada" }), {
+    // Get OpenAI key from company settings or fallback to env
+    let openaiKey = "";
+    
+    if (companyId) {
+      const { data: keySetting } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("company_id", companyId)
+        .eq("key", "ai_openai_key")
+        .maybeSingle();
+      
+      if (keySetting?.value) {
+        openaiKey = String(keySetting.value);
+      }
+    }
+    
+    if (!openaiKey) {
+      // Fallback: try env OPENAI_API_KEY
+      openaiKey = Deno.env.get("OPENAI_API_KEY") || "";
+    }
+
+    if (!openaiKey) {
+      return new Response(JSON.stringify({ error: "Chave OpenAI não configurada. Configure a chave IA da empresa." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -202,18 +221,19 @@ Quando analisar imagens, descreva o que vê e identifique o problema.`;
       ...messages
     ];
 
-    console.log("🤖 Admin AI Programmer - Chamando Lovable AI Gateway");
+    console.log("🤖 Admin AI Programmer - Chamando OpenAI GPT-4o");
     console.log("   Mensagens:", messages.length);
     console.log("   Action:", action);
+    console.log("   Company:", companyId || "N/A");
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${lovableKey}`,
+        "Authorization": `Bearer ${openaiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o",
         messages: openaiMessages,
         temperature: 0.3,
         max_tokens: 4000,
@@ -223,23 +243,23 @@ Quando analisar imagens, descreva o que vê e identifique o problema.`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("❌ Erro AI Gateway:", response.status, errorText);
+      console.error("❌ Erro OpenAI:", response.status, errorText);
       
+      if (response.status === 401) {
+        return new Response(JSON.stringify({ error: "Chave OpenAI inválida. Verifique a configuração da empresa." }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit excedido. Aguarde um momento." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos insuficientes. Adicione créditos no workspace." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       
-      return new Response(JSON.stringify({ error: `Erro AI Gateway: ${response.status}` }), {
+      return new Response(JSON.stringify({ error: `Erro OpenAI: ${response.status}` }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
