@@ -572,6 +572,7 @@ export type Database = {
           contact_phone: string
           created_at: string
           department_id: string | null
+          flow_state: Json | null
           id: string
           last_message: string | null
           last_message_at: string | null
@@ -592,6 +593,7 @@ export type Database = {
           contact_phone: string
           created_at?: string
           department_id?: string | null
+          flow_state?: Json | null
           id?: string
           last_message?: string | null
           last_message_at?: string | null
@@ -612,6 +614,7 @@ export type Database = {
           contact_phone?: string
           created_at?: string
           department_id?: string | null
+          flow_state?: Json | null
           id?: string
           last_message?: string | null
           last_message_at?: string | null
