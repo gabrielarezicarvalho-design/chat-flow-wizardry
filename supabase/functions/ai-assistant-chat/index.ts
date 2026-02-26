@@ -413,7 +413,7 @@ IMPORTANTE:
 
     // Construir contexto de mensagens
     const conversationMessages = (messageHistory || []).map(msg => ({
-      role: msg.sender_type === "contact" ? "user" : "assistant",
+      role: (msg.sender_type === "contact" || msg.sender_type === "customer") ? "user" : "assistant",
       content: msg.content || ""
     }));
 
@@ -935,15 +935,16 @@ ${asaasContext}`;
       }
     }
 
-    // Save AI response to database (use "sistema" as remetente to avoid constraint error)
+    // Save AI response to database
     const { error: msgError } = await supabase
       .from("messages")
       .insert({
-        id_da_conversa: conversationId,
-        remetente: "sistema",
-        conteudo: finalAiResponse,
-        tipo: "text",
-        recebido: false
+        conversation_id: conversationId,
+        sender_type: "agent",
+        sender_id: agentId,
+        content: finalAiResponse,
+        message_type: "text",
+        status: "sent"
       });
 
     if (msgError) {
