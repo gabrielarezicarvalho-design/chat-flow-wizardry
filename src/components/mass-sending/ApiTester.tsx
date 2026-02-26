@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Play, Loader2, Copy, Check, Trash2, Plus, Terminal, Send, X, Upload, Image as ImageIcon, Link, Video, FileText, Music } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { uploadToVps } from "@/lib/vps-storage";
 
 interface Connection {
   id: string;
@@ -115,21 +116,10 @@ export function ApiTester({ connections }: ApiTesterProps) {
 
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `test-${Date.now()}.${fileExt}`;
-      const filePath = `api-tester/${fileName}`;
+      const uploadResult = await uploadToVps(file);
+      if (!uploadResult.success) throw new Error(uploadResult.error || 'Erro no upload');
 
-      const { error: uploadError } = await supabase.storage
-        .from("media")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrl } = supabase.storage
-        .from("media")
-        .getPublicUrl(filePath);
-
-      setMediaUrl(publicUrl.publicUrl);
+      setMediaUrl(uploadResult.url);
       
       if (type.startsWith("image") || type.startsWith("video")) {
         setPreviewMedia(URL.createObjectURL(file));

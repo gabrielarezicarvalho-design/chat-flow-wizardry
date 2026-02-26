@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useVpsStorage } from "@/hooks/useVpsStorage";
+import { uploadToVps, uploadBlobToVps } from "@/lib/vps-storage";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -679,14 +680,13 @@ function MassSendingContent() {
           }
           const byteArray = new Uint8Array(byteNumbers);
           const blob = new Blob([byteArray], { type: mimeType });
-          const fileName = `${userData.user.id}/${Date.now()}_campaign.${ext}`;
-          const { error: uploadErr } = await supabase.storage.from("campaign-media").upload(fileName, blob);
-          if (!uploadErr) {
-            const { data: pubUrl } = supabase.storage.from("campaign-media").getPublicUrl(fileName);
-            finalMediaUrl = pubUrl.publicUrl;
+          const fileName = `${Date.now()}_campaign.${ext}`;
+          const vpsResult = await uploadBlobToVps(blob, fileName);
+          if (vpsResult.success) {
+            finalMediaUrl = vpsResult.url;
             addLog("success", `Mídia convertida: ${finalMediaUrl}`);
           } else {
-            addLog("warning", `Falha ao converter mídia: ${uploadErr.message}. Usando base64.`);
+            addLog("warning", `Falha ao converter mídia: ${vpsResult.error}. Usando base64.`);
           }
         } catch (convErr: any) {
           addLog("warning", `Erro ao converter mídia: ${convErr.message}`);
@@ -1231,12 +1231,11 @@ function MassSendingContent() {
           const byteArray = new Uint8Array(byteChars.length);
           for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
           const blob = new Blob([byteArray], { type: mimeMatch ? mimeMatch[1] : "application/octet-stream" });
-          const { error: uploadErr } = await supabase.storage.from("campaign-media").upload(fileName, blob);
-          if (!uploadErr) {
-            const { data: pubUrl } = supabase.storage.from("campaign-media").getPublicUrl(fileName);
-            finalMediaUrl = pubUrl.publicUrl;
+          const vpsResult = await uploadBlobToVps(blob, fileName);
+          if (vpsResult.success) {
+            finalMediaUrl = vpsResult.url;
           } else {
-            console.error("[MassSending] Upload error:", uploadErr);
+            console.error("[MassSending] Upload error:", vpsResult.error);
           }
         } catch (uploadEx) {
           console.error("[MassSending] Base64 conversion error:", uploadEx);
@@ -1340,20 +1339,14 @@ function MassSendingContent() {
 
       toast.loading("Enviando imagem...", { id: "carousel-upload" });
 
-      const { error: uploadError } = await supabase.storage
-        .from("campaign-media")
-        .upload(fileName, file);
+      const vpsResult = await uploadToVps(file);
 
-      if (uploadError) {
-        toast.error("Erro ao enviar imagem: " + uploadError.message, { id: "carousel-upload" });
+      if (!vpsResult.success) {
+        toast.error("Erro ao enviar imagem: " + vpsResult.error, { id: "carousel-upload" });
         return;
       }
 
-      const { data: publicUrl } = supabase.storage
-        .from("campaign-media")
-        .getPublicUrl(fileName);
-
-      updateCarouselCard(index, "imageUrl", publicUrl.publicUrl);
+      updateCarouselCard(index, "imageUrl", vpsResult.url);
       toast.success("Imagem enviada com sucesso!", { id: "carousel-upload" });
     } catch (error: any) {
       toast.error("Erro ao enviar imagem: " + error.message, { id: "carousel-upload" });

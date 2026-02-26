@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Plus, Trash2, Upload, Calendar, Clock, Users, Gift, Eye, Edit, FileSpreadsheet, Image, Play, Pause, Video, List, MessageSquare, Cake, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { uploadToVps } from "@/lib/vps-storage";
 import { format, isToday, addDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BirthdayImportDialog } from "./BirthdayImportDialog";
@@ -323,27 +324,10 @@ export function BirthdayCampaigns({ connections }: BirthdayCampaignsProps) {
 
     setUploadingMedia(true);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Não autenticado");
+      const uploadResult = await uploadToVps(file);
+      if (!uploadResult.success) throw new Error(uploadResult.error || 'Erro no upload');
 
-      const fileExt = file.name.split(".").pop();
-      const fileName = `birthday-campaigns/${userData.user.id}/${Date.now()}.${fileExt}`;
-
-      const { data, error } = await supabase.storage
-        .from("media")
-        .upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: false
-        });
-
-      if (error) throw error;
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("media")
-        .getPublicUrl(data.path);
-
-      setFormData({ ...formData, media_url: urlData.publicUrl });
+      setFormData({ ...formData, media_url: uploadResult.url });
       toast.success("Mídia enviada!");
     } catch (err: any) {
       console.error("Upload error:", err);

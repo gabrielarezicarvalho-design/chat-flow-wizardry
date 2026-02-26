@@ -104,6 +104,65 @@ export async function uploadToVps(
 }
 
 /**
+ * Upload a Blob (e.g. audio recording) to the VPS storage API.
+ */
+export async function uploadBlobToVps(
+  blob: Blob,
+  fileName: string,
+  companySlug?: string,
+  onProgress?: (progress: number) => void
+): Promise<VpsUploadResult> {
+  const file = new File([blob], fileName, { type: blob.type });
+  return uploadToVps(file, companySlug, onProgress);
+}
+
+/**
+ * List files stored on the VPS for a given company.
+ */
+export async function listVpsFiles(companySlug?: string): Promise<{ success: boolean; files: VpsFileInfo[]; error?: string }> {
+  const slug = resolveCompanySlug(companySlug);
+  if (!slug) {
+    return { success: false, files: [], error: 'Empresa não identificada.' };
+  }
+  try {
+    const res = await fetch(`${VPS_STORAGE_BASE_URL}/files/${slug}`);
+    if (!res.ok) {
+      return { success: false, files: [], error: `Erro: ${res.status}` };
+    }
+    const data = await res.json();
+    return { success: true, files: data.files || [] };
+  } catch (error: any) {
+    return { success: false, files: [], error: error.message };
+  }
+}
+
+export interface VpsFileInfo {
+  name: string;
+  size: number;
+  createdAt: string;
+  mimetype?: string;
+}
+
+/**
+ * Delete a file from VPS storage.
+ */
+export async function deleteVpsFile(fileName: string, companySlug?: string): Promise<{ success: boolean; error?: string }> {
+  const slug = resolveCompanySlug(companySlug);
+  if (!slug) {
+    return { success: false, error: 'Empresa não identificada.' };
+  }
+  try {
+    const res = await fetch(`${VPS_STORAGE_BASE_URL}/delete/${slug}/${fileName}`, { method: 'DELETE' });
+    if (!res.ok) {
+      return { success: false, error: `Erro: ${res.status}` };
+    }
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Get the public download URL for a file on the VPS.
  */
 export function getVpsDownloadUrl(companySlug: string, fileName: string): string {
