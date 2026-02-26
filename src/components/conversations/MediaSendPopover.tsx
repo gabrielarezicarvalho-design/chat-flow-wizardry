@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Paperclip, Image, FileText, Loader2, X, Video } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToVps } from "@/lib/vps-storage";
 
 interface MediaSendPopoverProps {
   connectionId: string;
@@ -92,21 +93,12 @@ export const MediaSendPopover = ({
     setSending(true);
     
     try {
-      // Sanitize filename and create unique name
-      const sanitizedName = sanitizeFileName(selectedFile.name);
-      const fileName = `${Date.now()}-${sanitizedName}`;
+      // Upload to VPS storage
+      const uploadResult = await uploadToVps(selectedFile);
       
-      // Upload to Supabase storage first
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(`conversations/${conversationId}/${fileName}`, selectedFile);
-      
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('media')
-        .getPublicUrl(uploadData.path);
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Erro no upload para o servidor');
+      }
 
       const fileType = getFileType(selectedFile);
 
@@ -116,7 +108,7 @@ export const MediaSendPopover = ({
           connectionId,
           phone,
           type: fileType,
-          file: publicUrl,
+          file: uploadResult.url,
           caption: caption || undefined,
           docName: fileType === 'document' ? selectedFile.name : undefined,
           conversationId
