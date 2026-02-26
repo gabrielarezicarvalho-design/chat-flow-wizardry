@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, Square, Loader2, Send, Play, Pause, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadBlobToVps } from "@/lib/vps-storage";
 
 interface AudioRecorderButtonProps {
   connectionId: string;
@@ -156,18 +157,11 @@ export const AudioRecorderButton = ({
     setIsSending(true);
     
     try {
-      // Upload to Supabase storage
+      // Upload to VPS storage
       const fileName = `${Date.now()}-audio.webm`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(`conversations/${conversationId}/${fileName}`, audioBlob);
-      
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('media')
-        .getPublicUrl(uploadData.path);
+      const uploadResult = await uploadBlobToVps(audioBlob, fileName);
+      if (!uploadResult.success) throw new Error(uploadResult.error || 'Erro no upload');
+      const publicUrl = uploadResult.url;
 
       // Send via UZAPI
       const { data, error } = await supabase.functions.invoke('wa-send-media', {
