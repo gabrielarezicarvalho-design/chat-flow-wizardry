@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { 
   Building2, Plus, Pencil, Trash2, Lock, Unlock, Search, 
-  RefreshCw, Loader2, CheckCircle, XCircle, User, Eye, EyeOff, MessageSquare, Shield
+  RefreshCw, Loader2, CheckCircle, XCircle, User, Eye, EyeOff, MessageSquare, Shield,
+  Globe, HardDrive
 } from "lucide-react";
 import { CompanyWhatsAppConnections } from "@/components/admin/CompanyWhatsAppConnections";
 
@@ -53,6 +54,7 @@ export function AdminEmpresas() {
     is_active: true,
     max_users: 10,
     max_connections: 3,
+    storage_limit: 9,
     plan: "basic",
     admin_username: "",
     admin_password: "",
@@ -119,10 +121,11 @@ export function AdminEmpresas() {
     try {
       const data: any = {
         name: form.name,
-        slug: form.slug || form.name.toLowerCase().replace(/\s+/g, '-'),
+        slug: form.slug || form.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
         is_active: form.is_active,
         max_users: form.max_users,
         max_connections: form.max_connections,
+        storage_limit: form.storage_limit,
         plan: form.plan,
         features: form.useCustomFeatures ? form.features : null
       };
@@ -202,6 +205,7 @@ export function AdminEmpresas() {
       is_active: true,
       max_users: defaultPlan?.max_users || 10,
       max_connections: defaultPlan?.max_connections || 3,
+      storage_limit: 9,
       plan: defaultPlan?.slug || "basic",
       admin_username: "",
       admin_password: "",
@@ -215,14 +219,15 @@ export function AdminEmpresas() {
   const openEdit = async (company: Company) => {
     setEditingCompany(company);
     
-    // Fetch company features override
+    // Fetch company features and storage_limit
     const { data: companyFull } = await supabase
       .from("companies")
-      .select("features")
+      .select("features, storage_limit")
       .eq("id", company.id)
       .single();
     
     const companyFeatures = (companyFull as any)?.features as string[] | null;
+    const storageLimit = (companyFull as any)?.storage_limit as number ?? 9;
     const selectedPlan = plans.find(p => p.slug === company.plan);
     
     setForm({
@@ -231,6 +236,7 @@ export function AdminEmpresas() {
       is_active: company.is_active,
       max_users: company.max_users,
       max_connections: company.max_connections,
+      storage_limit: storageLimit,
       plan: company.plan,
       admin_username: "",
       admin_password: "",
@@ -344,6 +350,7 @@ export function AdminEmpresas() {
                   <td className="p-4">
                     <p className="text-sm text-slate-300">{company.max_users} usuários</p>
                     <p className="text-xs text-slate-500">{company.max_connections} conexões</p>
+                    <p className="text-xs text-slate-500">{(company as any).storage_limit || 9}GB storage</p>
                   </td>
                   <td className="p-4">
                     {company.is_active ? (
@@ -387,9 +394,26 @@ export function AdminEmpresas() {
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-white/5 border-white/10" placeholder="Ex: Empresa XYZ" />
             </div>
             
+            {/* Subdomain Configuration */}
             <div className="space-y-2">
-              <Label>Slug (URL)</Label>
-              <Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="bg-white/5 border-white/10" placeholder="empresa-xyz" />
+              <div className="flex items-center gap-2">
+                <Globe className="h-4 w-4 text-cyan-400" />
+                <Label>Subdomínio</Label>
+              </div>
+              <div className="flex items-center gap-0">
+                <Input 
+                  value={form.slug} 
+                  onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })} 
+                  className="bg-white/5 border-white/10 rounded-r-none" 
+                  placeholder="empresa-xyz" 
+                />
+                <span className="px-3 py-2 bg-white/10 border border-white/10 border-l-0 rounded-r-md text-xs text-slate-400 whitespace-nowrap">
+                  .marketflowchat.com.br
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
+                URL de acesso: <span className="text-cyan-400">{form.slug || 'empresa'}.marketflowchat.com.br</span>
+              </p>
             </div>
 
             {/* Plan Selector */}
@@ -412,15 +436,23 @@ export function AdminEmpresas() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Máx. Usuários</Label>
                 <Input type="number" min={1} value={form.max_users} onChange={(e) => setForm({ ...form, max_users: Number(e.target.value) })} className="bg-white/5 border-white/10" />
-                <p className="text-xs text-slate-500">Preenchido pelo plano, pode customizar</p>
+                <p className="text-xs text-slate-500">Preenchido pelo plano</p>
               </div>
               <div className="space-y-2">
                 <Label>Máx. Conexões</Label>
                 <Input type="number" min={1} value={form.max_connections} onChange={(e) => setForm({ ...form, max_connections: Number(e.target.value) })} className="bg-white/5 border-white/10" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-1">
+                  <HardDrive className="h-3 w-3 text-emerald-400" />
+                  <Label>Storage (GB)</Label>
+                </div>
+                <Input type="number" min={1} max={100} value={form.storage_limit} onChange={(e) => setForm({ ...form, storage_limit: Number(e.target.value) })} className="bg-white/5 border-white/10" />
+                <p className="text-xs text-slate-500">{form.storage_limit}GB na VPS</p>
               </div>
             </div>
 
