@@ -49,9 +49,80 @@ serve(async (req) => {
       });
     }
 
-    const { messages, action, context, companyId } = await req.json();
+    const body = await req.json();
+    const { action, companyId } = body;
 
-    // Get OpenAI key from company settings or fallback to env
+    // ========== APPLY FIX ACTION ==========
+    if (action === "apply-fix") {
+      const { agentId, field, newValue } = body;
+      
+      if (!agentId || !field || newValue === undefined) {
+        return new Response(JSON.stringify({ error: "Parâmetros inválidos: agentId, field e newValue são obrigatórios" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Only allow specific fields to be updated
+      const allowedFields = ["system_prompt", "knowledge_text", "temperature", "model", "signature", "output_markers", "status"];
+      if (!allowedFields.includes(field)) {
+        return new Response(JSON.stringify({ error: `Campo '${field}' não permitido. Campos permitidos: ${allowedFields.join(", ")}` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error: updateError } = await supabase
+        .from("agents")
+        .update({ [field]: newValue, updated_at: new Date().toISOString() })
+        .eq("id", agentId);
+
+      if (updateError) {
+        console.error("Erro ao atualizar agente:", updateError);
+        return new Response(JSON.stringify({ error: `Erro ao atualizar: ${updateError.message}` }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, message: `Campo '${field}' do agente atualizado com sucesso!` }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ========== APPLY SETTINGS ACTION ==========
+    if (action === "apply-settings") {
+      const { settingKey, settingValue, targetCompanyId } = body;
+      
+      if (!settingKey || settingValue === undefined || !targetCompanyId) {
+        return new Response(JSON.stringify({ error: "Parâmetros inválidos" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error: upsertError } = await supabase
+        .from("settings")
+        .upsert({ company_id: targetCompanyId, key: settingKey, value: settingValue }, { onConflict: "company_id,key" });
+
+      if (upsertError) {
+        return new Response(JSON.stringify({ error: `Erro ao atualizar setting: ${upsertError.message}` }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, message: `Setting '${settingKey}' atualizada com sucesso!` }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ========== CHAT/DIAGNOSE ACTION ==========
+    const { messages } = body;
+
+    // Get OpenAI key - properly extract from jsonb
     let openaiKey = "";
     
     if (companyId) {
@@ -63,12 +134,21 @@ serve(async (req) => {
         .maybeSingle();
       
       if (keySetting?.value) {
-        openaiKey = String(keySetting.value);
+        // Handle jsonb: value could be a string or a JSON-wrapped string
+        const val = keySetting.value;
+        if (typeof val === "string") {
+          openaiKey = val;
+        } else if (typeof val === "object" && val !== null) {
+          openaiKey = String(val);
+        } else {
+          openaiKey = String(val);
+        }
+        // Remove any surrounding quotes that jsonb might add
+        openaiKey = openaiKey.replace(/^"|"$/g, '');
       }
     }
     
     if (!openaiKey) {
-      // Fallback: try env OPENAI_API_KEY
       openaiKey = Deno.env.get("OPENAI_API_KEY") || "";
     }
 
@@ -79,11 +159,10 @@ serve(async (req) => {
       });
     }
 
-    // Gather system context based on action
+    // Gather system context
     let systemContext = "";
 
     if (action === "diagnose" || action === "chat") {
-      // Fetch recent data for context
       const [agentsRes, flowsRes, connectionsRes, conversationsRes] = await Promise.all([
         supabase.from("agents").select("id, name, status, model, system_prompt, knowledge_text, company_id").limit(20),
         supabase.from("flows").select("id, name, is_active, trigger_type, description, company_id").limit(20),
@@ -95,7 +174,7 @@ serve(async (req) => {
 DADOS ATUAIS DO SISTEMA (consultados em tempo real):
 
 === AGENTES IA (${agentsRes.data?.length || 0}) ===
-${agentsRes.data?.map(a => `- ${a.name} (${a.id.substring(0, 8)}): status=${a.status}, model=${a.model}
+${agentsRes.data?.map(a => `- ${a.name} [ID: ${a.id}] (company: ${a.company_id}): status=${a.status}, model=${a.model}
   Prompt: ${a.system_prompt?.substring(0, 200) || "N/A"}...
   Base conhecimento: ${a.knowledge_text ? a.knowledge_text.substring(0, 200) + "..." : "Vazia"}`).join("\n") || "Nenhum"}
 
@@ -111,16 +190,12 @@ ${conversationsRes.data?.map(c => `- ${c.contact_name || c.contact_phone} (${c.i
     }
 
     // If specific agent context requested
-    if (context?.agentId) {
-      const { data: agent } = await supabase
-        .from("agents")
-        .select("*")
-        .eq("id", context.agentId)
-        .single();
-      
+    if (body.context?.agentId) {
+      const { data: agent } = await supabase.from("agents").select("*").eq("id", body.context.agentId).single();
       if (agent) {
         systemContext += `
 === AGENTE ESPECÍFICO SELECIONADO ===
+ID: ${agent.id}
 Nome: ${agent.name}
 Modelo: ${agent.model}
 Status: ${agent.status}
@@ -139,20 +214,9 @@ Capacidades: vision=${agent.can_understand_images}, audio=${agent.can_understand
     }
 
     // If specific conversation context
-    if (context?.conversationId) {
-      const { data: conv } = await supabase
-        .from("conversations")
-        .select("*")
-        .eq("id", context.conversationId)
-        .single();
-
-      const { data: msgs } = await supabase
-        .from("messages")
-        .select("sender_type, content, created_at, message_type")
-        .eq("conversation_id", context.conversationId)
-        .order("created_at", { ascending: true })
-        .limit(30);
-      
+    if (body.context?.conversationId) {
+      const { data: conv } = await supabase.from("conversations").select("*").eq("id", body.context.conversationId).single();
+      const { data: msgs } = await supabase.from("messages").select("sender_type, content, created_at, message_type").eq("conversation_id", body.context.conversationId).order("created_at", { ascending: true }).limit(30);
       if (conv) {
         systemContext += `
 === CONVERSA ESPECÍFICA ===
@@ -171,7 +235,43 @@ ${msgs?.map(m => `[${m.sender_type}] ${m.content?.substring(0, 200)}`).join("\n"
     const systemPrompt = `Você é o PROGRAMADOR IA do sistema MarketFlow Chat - uma plataforma de atendimento via WhatsApp com agentes IA, fluxos automatizados (URA) e gestão de conversas.
 
 SUA FUNÇÃO:
-Você é um engenheiro de software sênior que diagnostica problemas no sistema. Quando o admin enviar screenshots, logs ou descrever um problema, você deve:
+Você é um engenheiro de software sênior que diagnostica problemas no sistema E APLICA CORREÇÕES AUTOMATICAMENTE.
+
+QUANDO IDENTIFICAR PROBLEMAS EM AGENTES IA:
+Se o problema for no prompt ou knowledge_text de um agente, você DEVE incluir no final da sua resposta um bloco JSON especial com a correção, no formato:
+
+\`\`\`json:apply-fix
+{
+  "type": "agent-fix",
+  "agentId": "UUID_DO_AGENTE",
+  "agentName": "Nome do Agente",
+  "fixes": [
+    {
+      "field": "system_prompt",
+      "description": "Descrição curta do que foi corrigido",
+      "newValue": "O novo prompt completo corrigido aqui"
+    }
+  ]
+}
+\`\`\`
+
+QUANDO IDENTIFICAR PROBLEMAS DE CÓDIGO:
+Gere o código corrigido completo e inclua um bloco:
+
+\`\`\`json:code-fix
+{
+  "type": "code-fix",
+  "file": "supabase/functions/NOME/index.ts",
+  "description": "Descrição da correção",
+  "code": "código completo aqui"
+}
+\`\`\`
+
+REGRAS IMPORTANTES PARA OS BLOCOS DE CORREÇÃO:
+- Use APENAS IDs de agentes que existem nos dados do sistema (listados acima)
+- O campo "field" pode ser: system_prompt, knowledge_text, temperature, model, signature, output_markers, status
+- Sempre gere o valor COMPLETO do campo, não apenas o trecho alterado
+- SEMPRE inclua o bloco json:apply-fix quando identificar um problema em agente que pode ser corrigido
 
 1. IDENTIFICAR se o problema é:
    - ❌ ERRO DE PROMPT: O agente IA está respondendo errado por causa do prompt ou da base de conhecimento
@@ -180,10 +280,7 @@ Você é um engenheiro de software sênior que diagnostica problemas no sistema.
 
 2. EXPLICAR a causa raiz do problema de forma clara
 
-3. SUGERIR a solução específica:
-   - Se for prompt: dizer EXATAMENTE o que alterar no prompt ou knowledge base
-   - Se for sistema: explicar o bug e o que precisa ser corrigido no código
-   - Se for configuração: explicar passo a passo o que configurar
+3. SUGERIR E GERAR a solução específica com o bloco de correção apropriado
 
 CONHECIMENTO DA ARQUITETURA:
 - Frontend: React + TypeScript + Tailwind + Shadcn UI
@@ -213,9 +310,9 @@ ${systemContext}
 
 FORMATO DE RESPOSTA:
 Use markdown com emojis para facilitar a leitura. Seja direto e técnico.
-Quando analisar imagens, descreva o que vê e identifique o problema.`;
+Quando analisar imagens, descreva o que vê e identifique o problema.
+SEMPRE que possível, inclua os blocos json:apply-fix ou json:code-fix para correção automática.`;
 
-    // Build OpenAI messages
     const openaiMessages = [
       { role: "system", content: systemPrompt },
       ...messages
@@ -225,6 +322,7 @@ Quando analisar imagens, descreva o que vê e identifique o problema.`;
     console.log("   Mensagens:", messages.length);
     console.log("   Action:", action);
     console.log("   Company:", companyId || "N/A");
+    console.log("   Key starts with:", openaiKey.substring(0, 10) + "...");
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -265,7 +363,6 @@ Quando analisar imagens, descreva o que vê e identifique o problema.`;
       });
     }
 
-    // Stream response back
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });

@@ -6,9 +6,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 import { 
   Code2, Send, ImagePlus, Trash2, Bot, User, Loader2, 
-  AlertTriangle, Bug, Lightbulb, Cpu, Paperclip, X, Building2, Wrench, Copy, Check
+  AlertTriangle, Bug, Lightbulb, Cpu, X, Building2, Wrench, Copy, Check,
+  Zap, FileCode, CheckCircle2
 } from "lucide-react";
 
 interface Message {
@@ -21,6 +23,22 @@ interface Company {
   name: string;
 }
 
+interface AgentFix {
+  type: "agent-fix";
+  agentId: string;
+  agentName: string;
+  fixes: { field: string; description: string; newValue: string }[];
+}
+
+interface CodeFix {
+  type: "code-fix";
+  file: string;
+  description: string;
+  code: string;
+}
+
+type FixBlock = AgentFix | CodeFix;
+
 export function AdminProgramador() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -29,6 +47,8 @@ export function AdminProgramador() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [applyingFix, setApplyingFix] = useState<string | null>(null);
+  const [appliedFixes, setAppliedFixes] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,6 +72,80 @@ export function AdminProgramador() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // === Parse fix blocks from assistant message ===
+  const parseFixBlocks = (text: string): FixBlock[] => {
+    const blocks: FixBlock[] = [];
+    const agentFixRegex = /```json:apply-fix\s*\n([\s\S]*?)```/g;
+    const codeFixRegex = /```json:code-fix\s*\n([\s\S]*?)```/g;
+    
+    let match;
+    while ((match = agentFixRegex.exec(text)) !== null) {
+      try {
+        const parsed = JSON.parse(match[1].trim());
+        if (parsed.type === "agent-fix") blocks.push(parsed);
+      } catch { /* ignore */ }
+    }
+    while ((match = codeFixRegex.exec(text)) !== null) {
+      try {
+        const parsed = JSON.parse(match[1].trim());
+        if (parsed.type === "code-fix") blocks.push(parsed);
+      } catch { /* ignore */ }
+    }
+    return blocks;
+  };
+
+  // === Remove fix blocks from displayed text ===
+  const cleanMessageText = (text: string): string => {
+    return text
+      .replace(/```json:apply-fix\s*\n[\s\S]*?```/g, '')
+      .replace(/```json:code-fix\s*\n[\s\S]*?```/g, '')
+      .trim();
+  };
+
+  // === Apply agent fix ===
+  const applyAgentFix = async (fix: AgentFix) => {
+    const fixKey = `agent-${fix.agentId}`;
+    setApplyingFix(fixKey);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Não autenticado");
+
+      for (const f of fix.fixes) {
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-ai-programmer`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              action: "apply-fix",
+              agentId: fix.agentId,
+              field: f.field,
+              newValue: f.newValue,
+              companyId: selectedCompanyId,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || "Erro ao aplicar correção");
+        }
+      }
+
+      setAppliedFixes(prev => new Set(prev).add(fixKey));
+      toast.success(`✅ Correção aplicada no agente "${fix.agentName}"!`);
+    } catch (error: any) {
+      console.error("Erro ao aplicar fix:", error);
+      toast.error(`❌ Erro: ${error.message}`);
+    } finally {
+      setApplyingFix(null);
+    }
+  };
 
   // === Shared streaming function ===
   const streamFromAPI = async (apiMessages: any[], onUpdate: (text: string) => void): Promise<string> => {
@@ -118,7 +212,6 @@ export function AdminProgramador() {
       }
     }
 
-    // Final flush
     if (buffer.trim()) {
       for (let raw of buffer.split("\n")) {
         if (!raw || raw.startsWith(":") || raw.trim() === "" || !raw.startsWith("data: ")) continue;
@@ -224,21 +317,21 @@ export function AdminProgramador() {
     if (isLoading) return;
     setIsLoading(true);
 
-    // Get all messages up to this assistant response
     const contextMessages = messages.slice(0, assistantMessageIndex + 1);
 
-    // Add a follow-up asking for the fix
     const resolvePrompt: Message = {
       role: "user",
-      content: `Com base no diagnóstico acima, agora RESOLVA o problema. Gere o código corrigido COMPLETO da edge function que precisa ser alterada.
+      content: `Com base no diagnóstico acima, agora RESOLVA o problema. 
 
-FORMATO OBRIGATÓRIO DA RESPOSTA:
-1. 📋 **Resumo da correção** - O que vai ser corrigido (2-3 linhas)
-2. 📁 **Arquivo:** \`supabase/functions/NOME/index.ts\` - Nome do arquivo
-3. 🔧 **Código corrigido COMPLETO** - O arquivo inteiro corrigido em um bloco de código TypeScript
-4. ✅ **O que mudou** - Lista das alterações feitas
+Se for um problema de PROMPT ou BASE DE CONHECIMENTO de um agente:
+- Gere o bloco json:apply-fix com a correção completa para que eu possa aplicar automaticamente com 1 clique.
 
-IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O admin vai copiar e colar o código inteiro.`
+Se for um problema de CÓDIGO:
+- Gere o código corrigido COMPLETO em um bloco json:code-fix.
+
+Se for ambos, gere os dois blocos.
+
+IMPORTANTE: Sempre inclua os blocos de correção para que eu possa aplicar automaticamente!`
     };
 
     const newMessages = [...contextMessages, resolvePrompt];
@@ -281,6 +374,7 @@ IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O
   const clearChat = () => {
     setMessages([]);
     setImages([]);
+    setAppliedFixes(new Set());
   };
 
   const getMessageText = (content: string | any[]): string => {
@@ -297,18 +391,15 @@ IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O
       .filter(Boolean);
   };
 
-  // Check if an assistant message contains a diagnosis (not a code fix)
   const isDiagnosisMessage = (content: string | any[]): boolean => {
     const text = getMessageText(content);
-    // It's a diagnosis if it doesn't contain the resolve prompt response markers
-    const hasCodeFix = text.includes("Código corrigido COMPLETO") || text.includes("```typescript");
+    const hasFixBlock = text.includes("json:apply-fix") || text.includes("json:code-fix");
     const hasDiagnosticContent = text.includes("❌") || text.includes("⚠️") || text.includes("ℹ️") || 
       text.includes("Erro") || text.includes("problema") || text.includes("Sugestão") ||
       text.includes("Verificar") || text.includes("diagnóstico") || text.length > 100;
-    return hasDiagnosticContent && !hasCodeFix;
+    return hasDiagnosticContent && !hasFixBlock;
   };
 
-  // Extract code blocks from message
   const extractCodeBlocks = (text: string): string[] => {
     const regex = /```(?:typescript|ts|javascript|js)?\n([\s\S]*?)```/g;
     const blocks: string[] = [];
@@ -320,11 +411,98 @@ IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O
   };
 
   const quickActions = [
-    { label: "Diagnosticar agentes", icon: Bug, prompt: "Faça um diagnóstico completo de todos os agentes IA ativos. Verifique se os prompts estão bem estruturados, se a base de conhecimento está preenchida, e se as configurações estão corretas." },
+    { label: "Diagnosticar agentes", icon: Bug, prompt: "Faça um diagnóstico completo de todos os agentes IA ativos. Verifique se os prompts estão bem estruturados, se a base de conhecimento está preenchida, e se as configurações estão corretas. Se encontrar problemas, gere os blocos json:apply-fix para correção automática." },
     { label: "Verificar fluxos", icon: Cpu, prompt: "Analise os fluxos ativos e verifique se estão configurados corretamente. Procure por problemas comuns como nós desconectados, fluxos sem bloco de início, ou configurações faltantes." },
     { label: "Status conexões", icon: AlertTriangle, prompt: "Verifique o status de todas as conexões WhatsApp. Identifique conexões desconectadas, com problemas ou inativas." },
-    { label: "Dicas de melhoria", icon: Lightbulb, prompt: "Com base nos dados atuais do sistema, sugira melhorias que poderiam ser feitas nos prompts dos agentes, nos fluxos e nas configurações gerais." },
+    { label: "Dicas de melhoria", icon: Lightbulb, prompt: "Com base nos dados atuais do sistema, sugira melhorias que poderiam ser feitas nos prompts dos agentes, nos fluxos e nas configurações gerais. Gere blocos json:apply-fix para as correções de prompt sugeridas." },
   ];
+
+  // === Render fix action cards ===
+  const renderFixCards = (fixBlocks: FixBlock[], messageIndex: number) => {
+    if (fixBlocks.length === 0) return null;
+    
+    return (
+      <div className="ml-11 mt-3 space-y-3">
+        {fixBlocks.map((fix, i) => {
+          if (fix.type === "agent-fix") {
+            const agentFix = fix as AgentFix;
+            const fixKey = `agent-${agentFix.agentId}`;
+            const isApplying = applyingFix === fixKey;
+            const isApplied = appliedFixes.has(fixKey);
+            
+            return (
+              <div key={`fix-${messageIndex}-${i}`} className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="h-4 w-4 text-amber-400" />
+                  <span className="text-sm font-medium text-amber-300">Correção de Agente: {agentFix.agentName}</span>
+                </div>
+                <div className="space-y-1 mb-3">
+                  {agentFix.fixes.map((f, fi) => (
+                    <p key={fi} className="text-xs text-slate-400">
+                      • <span className="text-slate-300">{f.field}</span>: {f.description}
+                    </p>
+                  ))}
+                </div>
+                {isApplied ? (
+                  <div className="flex items-center gap-2 text-emerald-400 text-sm">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Correção aplicada com sucesso!
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => applyAgentFix(agentFix)}
+                    disabled={isApplying}
+                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium shadow-lg shadow-orange-500/20"
+                    size="sm"
+                  >
+                    {isApplying ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Aplicando...</>
+                    ) : (
+                      <><Wrench className="h-4 w-4 mr-2" /> Aplicar Correção</>
+                    )}
+                  </Button>
+                )}
+              </div>
+            );
+          }
+          
+          if (fix.type === "code-fix") {
+            const codeFix = fix as CodeFix;
+            const copyKey = `code-${messageIndex}-${i}`;
+            const isCopied = copiedIndex === messageIndex * 1000 + i;
+            
+            return (
+              <div key={`fix-${messageIndex}-${i}`} className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <FileCode className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm font-medium text-blue-300">Correção de Código</span>
+                </div>
+                <p className="text-xs text-slate-400 mb-1">📁 {codeFix.file}</p>
+                <p className="text-xs text-slate-400 mb-3">{codeFix.description}</p>
+                <Button
+                  onClick={() => {
+                    handleCopyCode(codeFix.code, messageIndex * 1000 + i);
+                    toast.success("Código copiado! Cole no editor para aplicar.");
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-500/30 text-blue-300 hover:bg-blue-500/10"
+                >
+                  {isCopied ? (
+                    <><Check className="h-4 w-4 mr-2 text-emerald-400" /> Copiado!</>
+                  ) : (
+                    <><Copy className="h-4 w-4 mr-2" /> Copiar Código Corrigido</>
+                  )}
+                </Button>
+              </div>
+            );
+          }
+          
+          return null;
+        })}
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)] p-4 lg:p-6">
@@ -336,7 +514,7 @@ IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">Programador IA</h1>
-            <p className="text-sm text-slate-400">GPT-4o • Diagnóstico de sistema & prompts</p>
+            <p className="text-sm text-slate-400">GPT-4o • Diagnóstico & correção automática</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -418,10 +596,10 @@ IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O
             <h2 className="text-lg font-medium text-slate-400 mb-2">Programador IA</h2>
             <p className="text-sm text-slate-500 max-w-md">
               Envie screenshots de erros, descreva problemas ou peça diagnósticos. 
-              Eu analiso se o problema é no prompt, no código ou na configuração.
+              Eu analiso, identifico o problema e posso aplicar correções automaticamente.
             </p>
             <p className="text-xs text-slate-600 mt-2">
-              💡 Dica: Cole imagens direto com Ctrl+V
+              💡 Dica: Cole imagens direto com Ctrl+V • Correções de prompt são aplicadas com 1 clique
             </p>
           </div>
         )}
@@ -429,6 +607,8 @@ IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O
         {messages.map((msg, index) => {
           const messageText = getMessageText(msg.content);
           const codeBlocks = msg.role === "assistant" ? extractCodeBlocks(messageText) : [];
+          const fixBlocks = msg.role === "assistant" ? parseFixBlocks(messageText) : [];
+          const displayText = msg.role === "assistant" ? cleanMessageText(messageText) : messageText;
           const showResolveButton = msg.role === "assistant" && !isLoading && isDiagnosisMessage(msg.content) && index === messages.length - 1;
           
           return (
@@ -492,7 +672,7 @@ IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O
                           }
                         }}
                       >
-                        {messageText}
+                        {displayText}
                       </ReactMarkdown>
                     </div>
                   ) : (
@@ -506,6 +686,9 @@ IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O
                 )}
               </div>
 
+              {/* Fix Action Cards */}
+              {fixBlocks.length > 0 && renderFixCards(fixBlocks, index)}
+
               {/* Resolve Problem Button */}
               {showResolveButton && (
                 <div className="ml-11 mt-2">
@@ -518,7 +701,7 @@ IMPORTANTE: Gere o código COMPLETO do arquivo, não apenas o trecho alterado. O
                     🔧 Resolver Problema
                   </Button>
                   <p className="text-xs text-slate-500 mt-1 ml-1">
-                    O IA vai gerar o código corrigido para você copiar e aplicar
+                    O IA vai gerar correções que você pode aplicar com 1 clique
                   </p>
                 </div>
               )}
