@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ReactMarkdown from "react-markdown";
 import { 
   Code2, Send, ImagePlus, Trash2, Bot, User, Loader2, 
-  AlertTriangle, Bug, Lightbulb, Cpu, Paperclip, X
+  AlertTriangle, Bug, Lightbulb, Cpu, Paperclip, X, Building2
 } from "lucide-react";
 
 interface Message {
@@ -15,14 +16,36 @@ interface Message {
   content: string | any[];
 }
 
+interface Company {
+  id: string;
+  name: string;
+}
+
 export function AdminProgramador() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Load companies
+  useEffect(() => {
+    const loadCompanies = async () => {
+      const { data } = await supabase.from("companies").select("id, name").eq("is_active", true);
+      if (data) {
+        setCompanies(data);
+        // Default to first company with OpenAI key
+        if (data.length > 0 && !selectedCompanyId) {
+          setSelectedCompanyId(data[0].id);
+        }
+      }
+    };
+    loadCompanies();
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -121,6 +144,7 @@ export function AdminProgramador() {
           body: JSON.stringify({
             messages: apiMessages,
             action: "chat",
+            companyId: selectedCompanyId,
           }),
         }
       );
@@ -262,6 +286,17 @@ export function AdminProgramador() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+            <SelectTrigger className="w-[200px] h-8 text-xs">
+              <Building2 className="h-3 w-3 mr-1" />
+              <SelectValue placeholder="Selecione empresa" />
+            </SelectTrigger>
+            <SelectContent>
+              {companies.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">
             OpenAI GPT-4o
           </Badge>
@@ -306,7 +341,7 @@ export function AdminProgramador() {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${session.access_token}`,
                           },
-                          body: JSON.stringify({ messages: [{ role: "user", content: fakeInput }], action: "chat" }),
+                          body: JSON.stringify({ messages: [{ role: "user", content: fakeInput }], action: "chat", companyId: selectedCompanyId }),
                         }
                       );
                       if (!response.ok) {
