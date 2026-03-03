@@ -147,8 +147,6 @@ function App() {
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
                                 <Route path="*" element={<NotFound />} />
-                                <Route path="/test-webhook" element={<TestWebhook />} />
-                                <Route path="*" element={<NotFound />} />
                               </Routes>
                             </Suspense>
                           </MainLayout>
