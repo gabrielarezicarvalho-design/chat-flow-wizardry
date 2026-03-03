@@ -1,7 +1,9 @@
 import { useUserRole } from "@/hooks/useUserRole";
-import Dashboard from "./Dashboard";
-import AgentDashboard from "./AgentDashboard";
 import { Loading } from "@/components/ui/loading";
+import { lazy, Suspense } from "react";
+
+const Dashboard = lazy(() => import("./Dashboard"));
+const AgentDashboard = lazy(() => import("./AgentDashboard"));
 
 const Home = () => {
   const { isAdmin, isLoading } = useUserRole();
@@ -10,8 +12,11 @@ const Home = () => {
     return <Loading />;
   }
 
-  // Show AgentDashboard for agents, Dashboard for admins
-  return isAdmin ? <Dashboard /> : <AgentDashboard />;
+  return (
+    <Suspense fallback={<Loading />}>
+      {isAdmin ? <Dashboard /> : <AgentDashboard />}
+    </Suspense>
+  );
 };
 
 export default Home;

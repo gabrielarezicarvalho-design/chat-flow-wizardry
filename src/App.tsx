@@ -15,14 +15,16 @@ import { MultiSessionAlert } from "./components/MultiSessionAlert";
 import { FeatureGate } from "./components/FeatureGate";
 
 // Eager load main pages for better UX
-import Home from "./pages/Home";
-import Conversations from "./pages/Conversations";
 import Auth from "./pages/Auth";
-import MassSending from "./pages/MassSending";
 import PublicForm from "./pages/PublicForm";
 import FlowForm from "./pages/FlowForm";
 import BetaLanding from "./pages/BetaLanding";
-import Users from "./pages/Users";
+
+// Lazy load heavier pages
+const Home = lazy(() => import("./pages/Home"));
+const Conversations = lazy(() => import("./pages/Conversations"));
+const MassSending = lazy(() => import("./pages/MassSending"));
+const Users = lazy(() => import("./pages/Users"));
 
 // Admin pages - separate login flow
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
