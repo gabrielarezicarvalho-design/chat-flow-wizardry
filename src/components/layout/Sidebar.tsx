@@ -1,4 +1,5 @@
 import { useState, createContext, useContext } from "react";
+import sixxLogo from "@/assets/sixx-logo.png";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -250,10 +251,10 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
         <div className={cn("border-b border-white/10", collapsed ? "p-4" : "p-6")}>
           <div className="flex items-center gap-3">
             <div className={cn(
-              "rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0",
+              "flex items-center justify-center flex-shrink-0",
               collapsed ? "w-10 h-10" : "w-10 h-10"
             )}>
-                <Sparkles className="w-6 h-6" />
+                <img src={sixxLogo} alt="Logo" className="w-10 h-10 object-contain" />
               </div>
             {!collapsed &&
             <div>
