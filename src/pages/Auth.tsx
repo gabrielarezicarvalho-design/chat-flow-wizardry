@@ -151,7 +151,7 @@ const Auth = () => {
             opacity: [0.2, 0.4, 0.2]
           }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-cyan-500/15 rounded-full blur-[80px]" />
+          className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-[#0c522e]/20 rounded-full blur-[80px]" />
         
 
         {/* Content */}
