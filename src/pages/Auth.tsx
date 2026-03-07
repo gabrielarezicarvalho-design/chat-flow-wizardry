@@ -166,7 +166,7 @@ const Auth = () => {
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
             
             <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">Invaiper </h1>
+              <h1 className="text-3xl font-bold text-white tracking-tight">INVAIPER </h1>
               <p className="text-slate-400">Plataforma de IA & Disparos em Massa</p>
             </div>
           </div>
