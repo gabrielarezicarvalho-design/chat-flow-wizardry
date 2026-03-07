@@ -280,7 +280,7 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
-                    className="h-12 text-base pr-12 bg-slate-900/50 border-slate-700 focus:border-primary text-white placeholder:text-slate-500 transition-all duration-300" />
+                    className="h-12 text-base pr-12 bg-slate-900/50 border-slate-700 focus:border-[#0c522e] text-white placeholder:text-slate-500 transition-all duration-300" />
                   
                   <Button
                     type="button"
