@@ -242,7 +242,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
 
   return (
     <aside className={cn(
-      "fixed left-0 top-0 h-screen bg-gradient-to-b from-[#077907] to-[#055205] text-white shadow-xl z-50 transition-all duration-300",
+      "fixed left-0 top-0 h-screen bg-gradient-to-b from-primary to-primary-dark text-white shadow-xl z-50 transition-all duration-300",
       collapsed ? "w-20" : "w-64"
     )}>
       <div className="flex flex-col h-full">
@@ -268,7 +268,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
         <button
           onClick={onToggle}
           className={cn(
-            "absolute -right-3 top-20 w-6 h-6 rounded-full bg-[#077907] border-2 border-white/20 flex items-center justify-center hover:bg-[#055205] transition-colors shadow-lg",
+            "absolute -right-3 top-20 w-6 h-6 rounded-full bg-primary border-2 border-white/20 flex items-center justify-center hover:bg-primary-dark transition-colors shadow-lg",
             "hover:scale-110"
           )}
         >

@@ -91,7 +91,7 @@ const Auth = () => {
     icon: Send,
     label: 'Mensagens Enviadas',
     value: formatNumber(stats.totalMessagesSent),
-    color: 'from-[#0c522e] to-emerald-600',
+    color: 'from-blue-500 to-cyan-500',
     delay: 0.2
   },
   {
@@ -128,9 +128,9 @@ const Auth = () => {
         className="hidden lg:flex lg:w-3/5 relative overflow-hidden">
         
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-[#0c522e]/30">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#0c522e]/25 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#0c522e]/15 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-primary/20">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent" />
         </div>
         
         {/* Grid Pattern */}
@@ -143,7 +143,7 @@ const Auth = () => {
             opacity: [0.3, 0.5, 0.3]
           }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#0c522e]/25 rounded-full blur-[100px]" />
+          className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px]" />
         
         <motion.div
           animate={{
@@ -151,7 +151,7 @@ const Auth = () => {
             opacity: [0.2, 0.4, 0.2]
           }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-[#0c522e]/20 rounded-full blur-[80px]" />
+          className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-cyan-500/15 rounded-full blur-[80px]" />
         
 
         {/* Content */}
@@ -179,7 +179,7 @@ const Auth = () => {
             className="mb-6">
             
             <h2 className="text-lg font-semibold text-white/90 mb-3 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-[#0c522e]" />
+              <Zap className="w-5 h-5 text-primary" />
               Estatísticas da Plataforma
             </h2>
             <div className="grid grid-cols-2 gap-3">
@@ -263,7 +263,7 @@ const Auth = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   autoComplete="username"
-                  className="h-12 text-base bg-slate-900/50 border-slate-700 focus:border-[#0c522e] text-white placeholder:text-slate-500 transition-all duration-300" />
+                  className="h-12 text-base bg-slate-900/50 border-slate-700 focus:border-primary text-white placeholder:text-slate-500 transition-all duration-300" />
                 
               </div>
 
@@ -280,7 +280,7 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
-                    className="h-12 text-base pr-12 bg-slate-900/50 border-slate-700 focus:border-[#0c522e] text-white placeholder:text-slate-500 transition-all duration-300" />
+                    className="h-12 text-base pr-12 bg-slate-900/50 border-slate-700 focus:border-primary text-white placeholder:text-slate-500 transition-all duration-300" />
                   
                   <Button
                     type="button"
@@ -301,7 +301,7 @@ const Auth = () => {
                 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base font-semibold bg-[#0c522e] hover:bg-[#0c522e]/90 transition-all duration-300 shadow-lg shadow-[#0c522e]/25"
+                  className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25"
                   disabled={loading}>
                   
                   {loading ?
@@ -320,22 +320,22 @@ const Auth = () => {
             <div className="text-center text-sm text-slate-500 mt-6 space-y-1">
               <p>Problemas para acessar? Entre em contato:</p>
               <div className="flex items-center justify-center gap-3 flex-wrap">
-                <a href="mailto:contato@marketflowchat.com.br" className="text-[#0c522e] hover:underline transition-colors">
+                <a href="mailto:contato@marketflowchat.com.br" className="text-primary hover:underline transition-colors">
                   contato@marketflowchat.com.br
                 </a>
                 <span className="text-slate-600">•</span>
-                <a href="https://wa.me/5551992226536" target="_blank" rel="noopener noreferrer" className="text-[#0c522e] hover:underline transition-colors">
+                <a href="https://wa.me/5551992226536" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline transition-colors">
                   WhatsApp
                 </a>
               </div>
             </div>
 
             <div className="flex items-center justify-center gap-3 mt-4 text-xs text-slate-500">
-               <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="hover:text-[#0c522e] transition-colors">Privacidade</a>
-               <span>•</span>
-               <a href="/termos-de-servico" target="_blank" rel="noopener noreferrer" className="hover:text-[#0c522e] transition-colors">Termos</a>
-               <span>•</span>
-               <a href="/exclusao-de-dados" target="_blank" rel="noopener noreferrer" className="hover:text-[#0c522e] transition-colors">Exclusão de Dados</a>
+              <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Privacidade</a>
+              <span>•</span>
+              <a href="/termos-de-servico" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Termos</a>
+              <span>•</span>
+              <a href="/exclusao-de-dados" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Exclusão de Dados</a>
             </div>
           </motion.div>
 
@@ -348,7 +348,7 @@ const Auth = () => {
             
             {statsCards.slice(0, 2).map((stat, index) =>
             <div key={index} className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-4 text-center">
-                <stat.icon className={`w-5 h-5 mx-auto mb-2 text-[#0c522e]`} />
+                <stat.icon className={`w-5 h-5 mx-auto mb-2 text-primary`} />
                 <p className="text-xl font-bold text-white">{stat.value}</p>
                 <p className="text-slate-400 text-xs">{stat.label}</p>
               </div>
