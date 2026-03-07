@@ -301,7 +301,7 @@ const Auth = () => {
                 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/25"
+                  className="w-full h-12 text-base font-semibold bg-[#0c522e] hover:bg-[#0c522e]/90 transition-all duration-300 shadow-lg shadow-[#0c522e]/25"
                   disabled={loading}>
                   
                   {loading ?
