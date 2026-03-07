@@ -1,5 +1,4 @@
 import { useState, createContext, useContext } from "react";
-import invaierLogo from "@/assets/invaiper-logo.png";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -258,7 +257,8 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
               </div>
             {!collapsed && (
               <div>
-                <img src={invaierLogo} alt="INVAIPER" className="h-8 w-auto" />
+                <h1 className="text-xl font-bold">MARKETFLOW</h1>
+                <p className="text-xs text-white/70">Automação Inteligente</p>
               </div>
             )}
           </div>
