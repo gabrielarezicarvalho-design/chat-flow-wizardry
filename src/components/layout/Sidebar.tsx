@@ -1,4 +1,5 @@
 import { useState, createContext, useContext } from "react";
+import invaierLogo from "@/assets/invaiper-logo.png";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
