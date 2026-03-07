@@ -331,11 +331,11 @@ const Auth = () => {
             </div>
 
             <div className="flex items-center justify-center gap-3 mt-4 text-xs text-slate-500">
-              <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Privacidade</a>
-              <span>•</span>
-              <a href="/termos-de-servico" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Termos</a>
-              <span>•</span>
-              <a href="/exclusao-de-dados" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Exclusão de Dados</a>
+               <a href="/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="hover:text-[#0c522e] transition-colors">Privacidade</a>
+               <span>•</span>
+               <a href="/termos-de-servico" target="_blank" rel="noopener noreferrer" className="hover:text-[#0c522e] transition-colors">Termos</a>
+               <span>•</span>
+               <a href="/exclusao-de-dados" target="_blank" rel="noopener noreferrer" className="hover:text-[#0c522e] transition-colors">Exclusão de Dados</a>
             </div>
           </motion.div>
 
