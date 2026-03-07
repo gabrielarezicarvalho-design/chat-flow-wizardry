@@ -179,7 +179,7 @@ const Auth = () => {
             className="mb-6">
             
             <h2 className="text-lg font-semibold text-white/90 mb-3 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-primary" />
+              <Zap className="w-5 h-5 text-[#0c522e]" />
               Estatísticas da Plataforma
             </h2>
             <div className="grid grid-cols-2 gap-3">
