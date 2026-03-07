@@ -324,7 +324,7 @@ const Auth = () => {
                   contato@marketflowchat.com.br
                 </a>
                 <span className="text-slate-600">•</span>
-                <a href="https://wa.me/5551992226536" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline transition-colors">
+                <a href="https://wa.me/5551992226536" target="_blank" rel="noopener noreferrer" className="text-[#0c522e] hover:underline transition-colors">
                   WhatsApp
                 </a>
               </div>
