@@ -7,6 +7,7 @@ import { Eye, EyeOff, Send, Users, CheckCircle, Zap, BarChart3 } from 'lucide-re
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import robotImage from '@/assets/marketflow-robot.png';
+import invaiperLogo from '@/assets/invaiper-logo.png';
 
 interface CampaignStats {
   totalCampaigns: number;
