@@ -268,7 +268,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
         <button
           onClick={onToggle}
           className={cn(
-            "absolute -right-3 top-20 w-6 h-6 rounded-full bg-primary border-2 border-white/20 flex items-center justify-center hover:bg-primary-dark transition-colors shadow-lg",
+            "absolute -right-3 top-20 w-6 h-6 rounded-full bg-[#077907] border-2 border-white/20 flex items-center justify-center hover:bg-[#055205] transition-colors shadow-lg",
             "hover:scale-110"
           )}
         >
