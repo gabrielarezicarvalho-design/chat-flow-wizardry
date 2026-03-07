@@ -348,7 +348,7 @@ const Auth = () => {
             
             {statsCards.slice(0, 2).map((stat, index) =>
             <div key={index} className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-4 text-center">
-                <stat.icon className={`w-5 h-5 mx-auto mb-2 text-primary`} />
+                <stat.icon className={`w-5 h-5 mx-auto mb-2 text-[#0c522e]`} />
                 <p className="text-xl font-bold text-white">{stat.value}</p>
                 <p className="text-slate-400 text-xs">{stat.label}</p>
               </div>
