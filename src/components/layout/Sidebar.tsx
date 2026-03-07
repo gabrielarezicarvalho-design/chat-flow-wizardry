@@ -252,9 +252,9 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
           <div className="flex items-center gap-3">
             <div className={cn(
               "flex items-center justify-center flex-shrink-0",
-              collapsed ? "w-10 h-10" : "w-10 h-10"
+              collapsed ? "w-12 h-12" : "w-16 h-16"
             )}>
-                <img src={sixxLogo} alt="Logo" className="w-10 h-10 object-contain" />
+                <img src={sixxLogo} alt="Logo" className={cn(collapsed ? "w-12 h-12" : "w-16 h-16", "object-contain")} />
               </div>
             {!collapsed &&
             <div>
