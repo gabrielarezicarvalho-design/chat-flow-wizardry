@@ -159,11 +159,11 @@ const Auth = () => {
           {/* Header with Robot */}
           <div className="flex items-center gap-3 mb-6">
             <motion.img
-              src={robotImage}
+
               alt="MarketFlow"
               className="w-16 h-16 object-contain"
               animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} src="/lovable-uploads/11699bd2-3692-43bb-9561-ec077bf559bf.png" />
             
             <div>
               <h1 className="text-3xl font-bold text-white tracking-tight">INVAIPER </h1>
