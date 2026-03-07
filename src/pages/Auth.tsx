@@ -91,7 +91,7 @@ const Auth = () => {
     icon: Send,
     label: 'Mensagens Enviadas',
     value: formatNumber(stats.totalMessagesSent),
-    color: 'from-blue-500 to-cyan-500',
+    color: 'from-[#0c522e] to-emerald-600',
     delay: 0.2
   },
   {
