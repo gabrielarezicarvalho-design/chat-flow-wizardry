@@ -1,4 +1,5 @@
 import { useState, createContext, useContext } from "react";
+import sixxLogo from "@/assets/sixx-logo.png";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
