@@ -166,7 +166,7 @@ const Auth = () => {
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} src="/lovable-uploads/11699bd2-3692-43bb-9561-ec077bf559bf.png" />
             
             <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">INVAIPER </h1>
+              <h1 className="text-3xl font-bold text-white tracking-tight">INVA<span style={{ color: '#1400ff' }}>IPER</span> </h1>
               <p className="text-slate-400">Plataforma de IA & Disparos em Massa</p>
             </div>
           </div>
