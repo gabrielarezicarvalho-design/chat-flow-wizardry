@@ -128,9 +128,9 @@ const Auth = () => {
         className="hidden lg:flex lg:w-3/5 relative overflow-hidden">
         
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-primary/20">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-[#0c522e]/30">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#0c522e]/25 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-[#0c522e]/15 via-transparent to-transparent" />
         </div>
         
         {/* Grid Pattern */}
