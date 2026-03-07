@@ -7,6 +7,7 @@ import { Eye, EyeOff, Send, Users, CheckCircle, Zap, BarChart3 } from 'lucide-re
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import robotImage from '@/assets/marketflow-robot.png';
+import invaiperLogo from '@/assets/invaiper-logo.png';
 
 interface CampaignStats {
   totalCampaigns: number;
@@ -166,7 +167,7 @@ const Auth = () => {
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
             
             <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">Invaiper </h1>
+              <img src={invaiperLogo} alt="Invaiper" className="h-10" />
               <p className="text-slate-400">Plataforma de IA & Disparos em Massa</p>
             </div>
           </div>
