@@ -161,7 +161,7 @@ const Auth = () => {
             <motion.img
 
               alt="MarketFlow"
-              className="w-16 h-16 object-contain"
+              className="w-28 h-28 object-contain"
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} src="/lovable-uploads/11699bd2-3692-43bb-9561-ec077bf559bf.png" />
             
@@ -229,7 +229,7 @@ const Auth = () => {
               <motion.img
                 src={robotImage}
                 alt="MarketFlow"
-                className="w-24 h-24 object-contain"
+                className="w-32 h-32 object-contain"
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} />
               
