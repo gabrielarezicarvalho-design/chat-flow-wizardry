@@ -1533,7 +1533,9 @@ function MassSendingContent() {
     ? manualContacts.split("\n").filter(n => n.trim()).length
     : contactSource === "tags"
       ? getContactsFromTags().length
-      : csvContacts.length;
+      : contactSource === "leads"
+        ? selectedLeads.length
+        : csvContacts.length;
 
   const getStatusColor = (status: string) => {
     switch (status) {
