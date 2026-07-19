@@ -72,6 +72,28 @@ async function configureWebhook(baseUrl: string, token: string) {
   return { success: false };
 }
 
+function normalizeBaseUrl(value: string | undefined): string | null {
+  if (!value) return null;
+
+  const trimmedValue = value.trim().replace(/\/+$/, "");
+
+  if (!trimmedValue || trimmedValue.includes("PLACEHOLDER_VALUE_TO_BE_REPLACED")) {
+    return null;
+  }
+
+  try {
+    const parsedUrl = new URL(trimmedValue);
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) return null;
+    return parsedUrl.toString().replace(/\/+$/, "");
+  } catch (_error) {
+    return null;
+  }
+}
+
+function isConfiguredSecret(value: string | undefined): value is string {
+  return Boolean(value?.trim()) && !value!.includes("PLACEHOLDER_VALUE_TO_BE_REPLACED");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -96,15 +118,24 @@ serve(async (req) => {
       ? Deno.env.get("UZAPI_BASE_URL_PROD")
       : Deno.env.get("UZAPI_BASE_URL_TESTE");
 
-    if (!ADMIN_TOKEN) {
-      return new Response(JSON.stringify({ error: "Admin token not configured" }), {
+    const normalizedBaseUrl = normalizeBaseUrl(BASE_URL);
+
+    if (!isConfiguredSecret(ADMIN_TOKEN)) {
+      return new Response(JSON.stringify({ error: "Token admin da UAZAPI não configurado para este ambiente." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    if (!normalizedBaseUrl) {
+      return new Response(JSON.stringify({ error: "URL base da UAZAPI não configurada para este ambiente." }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
     // Create instance
-    const response = await fetch(`${BASE_URL}/instance/init`, {
+    const response = await fetch(`${normalizedBaseUrl}/instance/init`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "admintoken": ADMIN_TOKEN },
       body: JSON.stringify({ name, nameInSystem: "marketflow" })
@@ -131,14 +162,14 @@ serve(async (req) => {
     }
 
     // Auto-configure webhook immediately after instance creation
-    const webhookResult = await configureWebhook(BASE_URL!, token);
+    const webhookResult = await configureWebhook(normalizedBaseUrl, token);
     console.log("🔧 Webhook auto-config result:", webhookResult);
 
     // Connect to generate QR code
     const connectBody: any = {};
     if (phone) connectBody.phone = phone;
 
-    const connectResponse = await fetch(`${BASE_URL}/instance/connect`, {
+    const connectResponse = await fetch(`${normalizedBaseUrl}/instance/connect`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "token": token },
       body: JSON.stringify(connectBody)
@@ -152,7 +183,7 @@ serve(async (req) => {
         success: true,
         instance_id: instanceId,
         token,
-        base_url: BASE_URL,
+        base_url: normalizedBaseUrl,
         qrcode: null,
         paircode: null,
         webhook_configured: webhookResult.success,
@@ -170,7 +201,7 @@ serve(async (req) => {
       success: true,
       instance_id: instanceId,
       token,
-      base_url: BASE_URL,
+      base_url: normalizedBaseUrl,
       qrcode,
       paircode,
       webhook_configured: webhookResult.success
