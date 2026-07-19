@@ -27,7 +27,7 @@ const FlowBuilder = () => {
   const [isTesterOpen, setIsTesterOpen] = useState(false);
   const [isTemplateOpen, setIsTemplateOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveRef = useRef<any | null>(null);
 
   const validationErrors = validateFlow(nodes, edges);
   const hasErrors = validationErrors.some(e => e.type === 'error');

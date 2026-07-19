@@ -46,7 +46,7 @@ const DemoChatAnimation = () => {
     isBot: true
   }];
   useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
+    const timers: number[] = [];
     messages.forEach((msg, i) => {
       const timer = setTimeout(() => {
         setVisibleMessages(i + 1);

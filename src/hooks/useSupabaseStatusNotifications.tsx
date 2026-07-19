@@ -7,7 +7,7 @@ export const useSupabaseStatusNotifications = () => {
   const { user } = useAuth();
   const previousStatus = useRef<boolean>(true);
   const isFirstCheck = useRef(true);
-  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const checkIntervalRef = useRef<number | null>(null);
 
   const checkConnection = useCallback(async (): Promise<boolean> => {
     try {

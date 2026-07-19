@@ -160,13 +160,13 @@ const Auth = () => {
           <div className="flex items-center gap-3 mb-6">
             <motion.img
               src={robotImage}
-              alt="MarketFlow"
+              alt="Next Pro"
               className="w-16 h-16 object-contain"
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
             <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">MarketFlow</h1>
+              <h1 className="text-3xl font-bold text-white tracking-tight">Next Pro</h1>
               <p className="text-slate-400">Plataforma de IA & Disparos em Massa</p>
             </div>
           </div>
@@ -228,13 +228,13 @@ const Auth = () => {
             <div className="flex justify-center mb-4">
               <motion.img
                 src={robotImage}
-                alt="MarketFlow"
+                alt="Next Pro"
                 className="w-24 h-24 object-contain"
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               />
             </div>
-            <h1 className="text-3xl font-bold text-white">MarketFlow</h1>
+            <h1 className="text-3xl font-bold text-white">Next Pro</h1>
             <p className="text-slate-400 mt-1">IA & Disparos em Massa</p>
           </motion.div>
 
@@ -320,8 +320,8 @@ const Auth = () => {
             <div className="text-center text-sm text-slate-500 mt-6 space-y-1">
               <p>Problemas para acessar? Entre em contato:</p>
               <div className="flex items-center justify-center gap-3 flex-wrap">
-                <a href="mailto:contato@marketflowchat.com.br" className="text-primary hover:underline transition-colors">
-                  contato@marketflowchat.com.br
+                <a href="mailto:contato@nextpro.com.br" className="text-primary hover:underline transition-colors">
+                  contato@nextpro.com.br
                 </a>
                 <span className="text-slate-600">•</span>
                 <a href="https://wa.me/5551992226536" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline transition-colors">
