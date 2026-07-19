@@ -189,15 +189,35 @@ const Auth = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: stat.delay }}
-                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileHover={{ scale: 1.05, y: -4 }}
                   className="relative group"
                 >
-                  <div className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4 hover:border-slate-600/50 transition-all duration-300">
-                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center mb-2 shadow-lg`}>
-                      <stat.icon className="w-5 h-5 text-white" />
+                  {/* Glow externo */}
+                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${stat.color} rounded-2xl opacity-0 group-hover:opacity-60 blur-xl transition-all duration-500`} />
+
+                  <div className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 group-hover:border-white/20 transition-all duration-500 shadow-xl">
+                    {/* Shine effect */}
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 ease-out" />
+
+                    {/* Grid pattern sutil */}
+                    <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] bg-[size:20px_20px]" />
+
+                    {/* Orb decorativo */}
+                    <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${stat.color} opacity-20 blur-2xl group-hover:opacity-40 transition-opacity duration-500`} />
+
+                    <div className="relative">
+                      <motion.div
+                        whileHover={{ rotate: [0, -8, 8, 0] }}
+                        transition={{ duration: 0.5 }}
+                        className={`w-11 h-11 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-3 shadow-lg shadow-black/30 ring-1 ring-white/20`}
+                      >
+                        <stat.icon className="w-5 h-5 text-white drop-shadow" />
+                      </motion.div>
+                      <p className="text-2xl font-bold bg-gradient-to-br from-white to-slate-300 bg-clip-text text-transparent mb-0.5 tracking-tight">
+                        {stat.value}
+                      </p>
+                      <p className="text-slate-400 text-xs font-medium">{stat.label}</p>
                     </div>
-                    <p className="text-2xl font-bold text-white mb-0.5">{stat.value}</p>
-                    <p className="text-slate-400 text-xs">{stat.label}</p>
                   </div>
                 </motion.div>
               ))}
