@@ -60,7 +60,7 @@ const Connections = () => {
   const [connectMethod, setConnectMethod] = useState<'qrcode' | 'paircode'>('qrcode');
   const [selectedProvider, setSelectedProvider] = useState<'uazapi' | 'meta' | 'instagram' | null>(null);
   const [loadingQr, setLoadingQr] = useState(false);
-  const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
+  const [statusCheckInterval, setStatusCheckInterval] = useState<any | null>(null);
   const [pendingConnection, setPendingConnection] = useState<any>(null);
   const [selectedConnection, setSelectedConnection] = useState<any>(null);
   const [_activeTab, _setActiveTab] = useState("conexao"); // kept for compatibility
