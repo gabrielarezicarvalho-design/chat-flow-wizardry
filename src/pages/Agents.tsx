@@ -33,12 +33,12 @@ const aiModels = [
   { value: "gpt-4o", label: "GPT-4o", provider: "openai" },
   { value: "gpt-4o-mini", label: "GPT-4o Mini", provider: "openai" },
   { value: "gpt-4-turbo", label: "GPT-4 Turbo", provider: "openai" },
-  // Google Gemini models (requires user's Google API key)
-  { value: "gemini-3-pro-preview", label: "Gemini 3 Pro (Raciocínio complexo)", provider: "google" },
-  { value: "gemini-3-flash-preview", label: "Gemini 3 Flash", provider: "google" },
-  { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro (Matemática e programação)", provider: "google" },
-  { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash (Ajuda para tudo)", provider: "google" },
-  { value: "gemini-2.5-flash-lite", label: "Gemini 2.5 Flash-Lite (Respostas rápidas)", provider: "google" },
+  // Google Gemini models (requires user's Google API key) - modelos atuais da API
+  { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro (Raciocínio avançado)", provider: "google" },
+  { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash (Equilibrado)", provider: "google" },
+  { value: "gemini-2.5-flash-lite", label: "Gemini 2.5 Flash-Lite (Rápido e econômico)", provider: "google" },
+  { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash (Multimodal)", provider: "google" },
+  { value: "gemini-2.0-flash-lite", label: "Gemini 2.0 Flash-Lite", provider: "google" },
 ];
 
 // ElevenLabs voice options
