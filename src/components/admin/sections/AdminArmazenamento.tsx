@@ -6,7 +6,7 @@ import {
   HardDrive, RefreshCw, Loader2, FileVideo, FileImage, FileText, Trash2, File
 } from "lucide-react";
 import { toast } from "sonner";
-import { listVpsFiles, deleteVpsFile, VpsFileInfo } from "@/lib/vps-storage";
+import { listVpsFiles, deleteVpsFile, VpsFileInfo } from "@/lib/cloud-storage";
 
 const formatBytes = (bytes: number): string => {
   if (bytes === 0) return '0 B';

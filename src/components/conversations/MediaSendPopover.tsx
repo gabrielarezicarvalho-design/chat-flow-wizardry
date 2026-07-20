@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Paperclip, Image, FileText, Loader2, X, Video } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadToVps } from "@/lib/vps-storage";
+import { uploadToVps } from "@/lib/cloud-storage";
 
 interface MediaSendPopoverProps {
   connectionId: string;

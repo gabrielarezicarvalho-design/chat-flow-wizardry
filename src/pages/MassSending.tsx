@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useVpsStorage } from "@/hooks/useVpsStorage";
-import { uploadToVps, uploadBlobToVps } from "@/lib/vps-storage";
+import { uploadToVps, uploadBlobToVps } from "@/lib/cloud-storage";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

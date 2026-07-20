@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { uploadToVps, checkStorageHealth, VpsUploadResult } from '@/lib/vps-storage';
+import { uploadToVps, checkStorageHealth, VpsUploadResult } from '@/lib/cloud-storage';
 import { toast } from 'sonner';
 
 interface UseVpsStorageReturn {
