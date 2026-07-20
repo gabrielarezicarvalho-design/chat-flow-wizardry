@@ -16,6 +16,7 @@ import {
   CalendarClock,
   Workflow
 } from 'lucide-react';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
@@ -64,14 +65,16 @@ export const NodePaletteNew = ({ onDragStart }: NodePaletteNewProps) => {
                   <div className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/10 transition-colors" />
                 </div>
               </TooltipTrigger>
-              <TooltipContent 
-                side="bottom" 
-                className="z-[9999] bg-white border border-gray-300 shadow-xl px-3 py-2"
-                sideOffset={8}
-              >
-                <p className="font-semibold text-sm text-black">{node.label}</p>
-                <p className="text-xs text-gray-600">{node.description}</p>
-              </TooltipContent>
+              <TooltipPrimitive.Portal>
+                <TooltipContent
+                  side="bottom"
+                  className="z-[9999] bg-white border border-gray-300 shadow-xl px-3 py-2"
+                  sideOffset={8}
+                >
+                  <p className="font-semibold text-sm text-black">{node.label}</p>
+                  <p className="text-xs text-gray-600">{node.description}</p>
+                </TooltipContent>
+              </TooltipPrimitive.Portal>
             </Tooltip>
           ))}
         </div>
