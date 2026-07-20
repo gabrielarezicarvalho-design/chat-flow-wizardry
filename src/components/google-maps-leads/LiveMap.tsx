@@ -113,5 +113,50 @@ export function LiveMap({ leads, city }: LiveMapProps) {
     }
   }, [leads]);
 
-  return <div ref={containerRef} className="w-full h-full" aria-label={`Mapa ${city || ""}`} />;
+  return (
+    <>
+      <style>{`
+        .nextpro-map .gm-bundled-control { margin: 16px !important; }
+        .nextpro-map .gmnoprint > div,
+        .nextpro-map .gm-bundled-control > div {
+          background: transparent !important;
+          box-shadow: none !important;
+          border-radius: 14px !important;
+          overflow: hidden;
+        }
+        .nextpro-map button[aria-label="Zoom in"],
+        .nextpro-map button[aria-label="Zoom out"],
+        .nextpro-map button[title="Zoom in"],
+        .nextpro-map button[title="Zoom out"] {
+          width: 40px !important;
+          height: 40px !important;
+          background: hsl(var(--primary)) !important;
+          border: none !important;
+          margin-bottom: 8px !important;
+          border-radius: 12px !important;
+          box-shadow: 0 8px 20px -6px hsl(var(--primary) / 0.55), 0 0 0 1px hsl(var(--primary) / 0.4) inset !important;
+          transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+        }
+        .nextpro-map button[aria-label="Zoom in"]:hover,
+        .nextpro-map button[aria-label="Zoom out"]:hover,
+        .nextpro-map button[title="Zoom in"]:hover,
+        .nextpro-map button[title="Zoom out"]:hover {
+          transform: translateY(-1px) scale(1.04);
+          background: hsl(var(--primary) / 0.9) !important;
+          box-shadow: 0 12px 26px -6px hsl(var(--primary) / 0.7) !important;
+        }
+        .nextpro-map button[aria-label="Zoom in"] img,
+        .nextpro-map button[aria-label="Zoom out"] img,
+        .nextpro-map button[title="Zoom in"] img,
+        .nextpro-map button[title="Zoom out"] img {
+          filter: brightness(0) invert(1) !important;
+          width: 16px !important;
+          height: 16px !important;
+          margin: auto !important;
+        }
+      `}</style>
+      <div ref={containerRef} className="nextpro-map w-full h-full" aria-label={`Mapa ${city || ""}`} />
+    </>
+  );
+
 }
