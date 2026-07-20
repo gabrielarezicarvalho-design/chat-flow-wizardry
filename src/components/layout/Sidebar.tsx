@@ -257,7 +257,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
               </div>
             {!collapsed && (
               <div>
-                <h1 className="text-xl font-bold">MARKETFLOW</h1>
+                <h1 className="text-xl font-bold font-['Space_Grotesk'] tracking-tight">NEXT PRO&nbsp;</h1>
                 <p className="text-xs text-white/70">Automação Inteligente</p>
               </div>
             )}
