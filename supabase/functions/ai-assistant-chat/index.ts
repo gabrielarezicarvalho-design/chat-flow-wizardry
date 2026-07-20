@@ -112,6 +112,39 @@ function extractApiKey(value: unknown): string | null {
   return String(value).trim() || null;
 }
 
+async function callLovableAI(messages: any[], temperature: number) {
+  console.log("📤 Chamando Lovable AI Gateway...");
+
+  const apiKey = extractApiKey(Deno.env.get("LOVABLE_API_KEY"));
+  if (!apiKey) {
+    throw new Error("Lovable AI Gateway não configurado");
+  }
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+      "Lovable-API-Key": apiKey,
+    },
+    body: JSON.stringify({
+      model: "google/gemini-3-flash-preview",
+      messages,
+      temperature,
+      max_tokens: 2000,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("❌ Erro Lovable AI Gateway:", response.status, errorText);
+    throw new Error(`Lovable AI Gateway error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content;
+}
+
 // Call OpenAI API (fallback)
 async function callOpenAI(apiKey: string, model: string, messages: any[], temperature: number) {
   console.log("📤 Chamando OpenAI API...");
@@ -149,13 +182,20 @@ async function callBestAvailableAI(options: {
   messages: any[];
   temperature: number;
 }): Promise<{ response: string; provider: string }> {
-  const attempts: Array<{ provider: "openai" | "google"; key: string; model: string }> = [];
+  const attempts: Array<{ provider: "openai" | "google" | "lovable"; key: string; model: string }> = [];
   const fallbackOpenAIKey = extractApiKey(Deno.env.get("OPENAI_API_KEY"));
+  const lovableKey = extractApiKey(Deno.env.get("LOVABLE_API_KEY"));
 
   const addAttempt = (provider: "openai" | "google", key: string | null, model: string) => {
     if (!key) return;
     if (attempts.some((attempt) => attempt.provider === provider && attempt.key === key)) return;
     attempts.push({ provider, key, model });
+  };
+
+  const addLovableAttempt = () => {
+    if (!lovableKey) return;
+    if (attempts.some((attempt) => attempt.provider === "lovable")) return;
+    attempts.push({ provider: "lovable", key: lovableKey, model: "google/gemini-3-flash-preview" });
   };
 
   if (options.preferredProvider === "openai") {
@@ -167,9 +207,10 @@ async function callBestAvailableAI(options: {
   }
 
   addAttempt("openai", fallbackOpenAIKey, "gpt-4o-mini");
+  addLovableAttempt();
 
   if (attempts.length === 0) {
-    throw new Error("Nenhuma chave de IA configurada. Configure sua chave OpenAI ou Gemini nas configurações.");
+    throw new Error("Nenhuma chave de IA configurada. Configure OpenAI/Gemini nas configurações ou habilite o Lovable AI Gateway.");
   }
 
   let lastError: unknown = null;
@@ -178,7 +219,9 @@ async function callBestAvailableAI(options: {
     try {
       const response = attempt.provider === "openai"
         ? await callOpenAI(attempt.key, attempt.model, options.messages, options.temperature)
-        : await callGemini(attempt.key, attempt.model, options.messages, options.temperature);
+        : attempt.provider === "google"
+          ? await callGemini(attempt.key, attempt.model, options.messages, options.temperature)
+          : await callLovableAI(options.messages, options.temperature);
 
       if (response) {
         return { response, provider: attempt.provider };
@@ -293,7 +336,39 @@ serve(async (req) => {
     console.log("   - Voice ID:", agent.voice_id);
 
     // Get company_id from agent
-    const companyId = agent.company_id;
+    let companyId = agent.company_id as string | null;
+
+    if (!companyId && connectionId) {
+      const { data: connectionCompany } = await supabase
+        .from("connections")
+        .select("company_id, user_id")
+        .eq("id", connectionId)
+        .maybeSingle();
+
+      companyId = connectionCompany?.company_id || null;
+
+      if (!companyId && connectionCompany?.user_id) {
+        const { data: connectionOwnerProfile } = await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", connectionCompany.user_id)
+          .maybeSingle();
+
+        companyId = connectionOwnerProfile?.company_id || null;
+      }
+    }
+
+    if (!companyId && agent.user_id) {
+      const { data: agentOwnerProfile } = await supabase
+        .from("profiles")
+        .select("company_id")
+        .eq("id", agent.user_id)
+        .maybeSingle();
+
+      companyId = agentOwnerProfile?.company_id || null;
+    }
+
+    console.log("🏢 Company ID resolvido:", companyId || "global");
 
     // Buscar chaves de IA da empresa na tabela settings; se o agente for global/admin,
     // usar as configurações globais (company_id nulo) e por último o secret OPENAI_API_KEY.
@@ -353,11 +428,11 @@ serve(async (req) => {
       apiKey = geminiKey;
     }
 
-    if (!apiKey && !Deno.env.get("OPENAI_API_KEY")) {
+    if (!apiKey && !Deno.env.get("OPENAI_API_KEY") && !Deno.env.get("LOVABLE_API_KEY")) {
       console.error("❌ Nenhuma chave de IA configurada");
       return new Response(JSON.stringify({ 
         error: "No AI key configured",
-        message: "Nenhuma chave de IA configurada. Configure sua chave OpenAI ou Gemini nas configurações."
+        message: "Nenhuma chave de IA configurada. Configure OpenAI/Gemini nas configurações ou habilite o Lovable AI Gateway."
       }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -614,10 +689,11 @@ ${asaasContext}`;
         selectedProvider = aiResult.provider;
       } catch (apiError) {
         console.error("❌ Erro na API de IA:", apiError);
+        const apiErrorMessage = apiError instanceof Error ? apiError.message : "Erro desconhecido";
         
         return new Response(JSON.stringify({ 
           error: "AI API error",
-          message: `Erro ao chamar ${selectedProvider}. Verifique sua configuração de IA.`
+          message: `Erro ao chamar IA: ${apiErrorMessage}. Verifique as chaves da empresa e os créditos do fallback.`
         }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
