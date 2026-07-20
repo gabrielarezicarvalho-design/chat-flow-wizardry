@@ -398,8 +398,50 @@ const Departments = () => {
           )}
         </div>
       )}
+
+      {/* Manage Members Dialog */}
+      <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Agentes do departamento</DialogTitle>
+            <DialogDescription>
+              {managingDepartment?.name} — selecione quem faz parte
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+            {loadingUsers ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : companyUsers.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">
+                Nenhum usuário encontrado
+              </p>
+            ) : (
+              companyUsers.map((u: any) => (
+                <label
+                  key={u.id}
+                  className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent cursor-pointer"
+                >
+                  <Checkbox
+                    checked={isMember(u.id)}
+                    onCheckedChange={(checked) => toggleMember(u.id, !!checked)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{u.full_name || u.username || 'Sem nome'}</p>
+                    {u.username && (
+                      <p className="text-xs text-muted-foreground truncate">@{u.username}</p>
+                    )}
+                  </div>
+                </label>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
 
 export default Departments;
