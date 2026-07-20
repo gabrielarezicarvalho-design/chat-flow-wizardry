@@ -60,14 +60,7 @@ export function LiveMap({ leads, city }: LiveMapProps) {
             zoomControlOptions: {
               position: window.google.maps.ControlPosition.RIGHT_TOP,
             },
-            styles: [
-              { elementType: "geometry", stylers: [{ color: "#1f2937" }] },
-              { elementType: "labels.text.stroke", stylers: [{ color: "#1f2937" }] },
-              { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
-              { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f172a" }] },
-              { featureType: "road", elementType: "geometry", stylers: [{ color: "#334155" }] },
-              { featureType: "poi", stylers: [{ visibility: "off" }] },
-            ],
+            backgroundColor: "#e8eef5",
           });
         }
       })
