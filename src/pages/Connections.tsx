@@ -3106,6 +3106,37 @@ const Connections = () => {
                   </p>
                 </div>
 
+                {formData.environment === 'BTZAP' && (
+                  <div className="space-y-3 p-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5">
+                    <div className="text-xs text-emerald-200">
+                      📋 Crie a instância no painel <strong>painel.btzap.com.br</strong>, depois copie os dados abaixo:
+                    </div>
+                    <div>
+                      <Label htmlFor="btzap-instance">Nome da Instância (do painel BTZAP)</Label>
+                      <Input
+                        id="btzap-instance"
+                        value={formData.instance_id}
+                        onChange={(e) => setFormData({ ...formData, instance_id: e.target.value })}
+                        placeholder="Ex: gabriel"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="btzap-token">Token da Instância <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="btzap-token"
+                        type="password"
+                        value={formData.token}
+                        onChange={(e) => setFormData({ ...formData, token: e.target.value })}
+                        placeholder="Cole o token exibido no painel"
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Após importar, use o botão <strong>"Ler QR Code"</strong> na conexão para conectar o WhatsApp.
+                    </p>
+                  </div>
+                )}
+
                 <div>
                   <Label className="mb-3 block">Servidor</Label>
                   <div className="grid grid-cols-2 gap-3">
