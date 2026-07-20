@@ -34,6 +34,7 @@ import { OptimalTimeSuggestions } from "@/components/mass-sending/OptimalTimeSug
 import { FeatureGate } from "@/components/FeatureGate";
 import { WebhookFieldConfig } from "@/components/mass-sending/WebhookFieldConfig";
 import { TelegramNotifications } from "@/components/mass-sending/TelegramNotifications";
+import { useAuth } from "@/hooks/useAuth";
 
 type MessageType = "text" | "image" | "document" | "audio" | "video";
 
@@ -140,6 +141,7 @@ const EMPTY_MASS_SENDING_DATA: MassSendingData = {
 
 function MassSendingContent() {
   const { upload: uploadToCloudStorage } = useCloudStorage();
+  const { user } = useAuth();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
@@ -218,22 +220,19 @@ function MassSendingContent() {
   };
 
   const { data: massSendingData = EMPTY_MASS_SENDING_DATA, isLoading: isDataLoading, refetch: refetchMassSendingData } = useQuery({
-    queryKey: ["mass-sending-data"],
+    queryKey: ["mass-sending-data", user?.id],
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 30,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     queryFn: async (): Promise<MassSendingData> => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return EMPTY_MASS_SENDING_DATA;
-
-      const userId = userData.user.id;
       const [connectionsRes, campaignsRes, tagsRes, leadsRes, templatesRes] = await Promise.all([
         supabase.from("connections").select("id, name, instance_name, status, token, environment, base_url"),
-        supabase.from("campaigns").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-        supabase.from("tags").select("*").eq("user_id", userId),
-        supabase.from("leads").select("*").eq("user_id", userId),
-        supabase.from("campaign_templates").select("*").eq("user_id", userId).order("created_at", { ascending: false })
+        supabase.from("campaigns").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }),
+        supabase.from("tags").select("*").eq("user_id", user!.id),
+        supabase.from("leads").select("*").eq("user_id", user!.id),
+        supabase.from("campaign_templates").select("*").eq("user_id", user!.id).order("created_at", { ascending: false })
       ]);
 
       const queryError = connectionsRes.error || campaignsRes.error || tagsRes.error || leadsRes.error || templatesRes.error;
@@ -1599,7 +1598,7 @@ function MassSendingContent() {
     }
   };
 
-  if (loading) {
+  if (loading || isDataLoading) {
     return (
       <div className="h-[calc(100vh-6rem)] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />

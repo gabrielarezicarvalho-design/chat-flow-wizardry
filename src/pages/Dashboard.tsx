@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import robotImage from "@/assets/marketflow-robot.png";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
 import { ABTesting } from "@/components/mass-sending/ABTesting";
 
@@ -57,15 +58,14 @@ const DEFAULT_STATS: Stats = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: stats = DEFAULT_STATS } = useQuery({
-    queryKey: ["dashboard-stats"],
+    queryKey: ["dashboard-stats", user?.id],
+    enabled: !!user?.id,
     queryFn: async (): Promise<Stats> => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return DEFAULT_STATS;
-
       const [campaignsRes, leadsRes] = await Promise.all([
-        supabase.from("campaigns").select("sent_count, failed_count").eq("user_id", userData.user.id),
-        supabase.from("leads").select("id").eq("user_id", userData.user.id),
+        supabase.from("campaigns").select("sent_count, failed_count").eq("user_id", user!.id),
+        supabase.from("leads").select("id").eq("user_id", user!.id),
       ]);
 
       const campaigns = campaignsRes.data || [];
