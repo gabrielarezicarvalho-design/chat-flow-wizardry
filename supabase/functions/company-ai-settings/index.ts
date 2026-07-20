@@ -56,6 +56,63 @@ const jsonResponse = (body: Record<string, unknown>, status = 200) => {
   });
 };
 
+const findExistingSetting = async (
+  supabaseAdmin: ReturnType<typeof createClient>,
+  companyId: string | null,
+  key: string,
+) => {
+  let query = supabaseAdmin
+    .from("settings")
+    .select("id")
+    .eq("key", key)
+    .order("updated_at", { ascending: false })
+    .limit(1);
+
+  query = companyId === null
+    ? query.is("company_id", null)
+    : query.eq("company_id", companyId);
+
+  const { data, error } = await query.maybeSingle();
+
+  if (error) throw error;
+  return data?.id as string | undefined;
+};
+
+const saveSetting = async (
+  supabaseAdmin: ReturnType<typeof createClient>,
+  companyId: string | null,
+  key: string,
+  value: string,
+) => {
+  const existingId = await findExistingSetting(supabaseAdmin, companyId, key);
+  const payload = {
+    company_id: companyId,
+    key,
+    value,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (existingId) {
+    return supabaseAdmin.from("settings").update(payload).eq("id", existingId);
+  }
+
+  return supabaseAdmin.from("settings").insert(payload);
+};
+
+const deleteSetting = (
+  supabaseAdmin: ReturnType<typeof createClient>,
+  companyId: string | null,
+  key: string,
+) => {
+  let query = supabaseAdmin.from("settings").delete().eq("key", key);
+
+  query = companyId === null
+    ? query.is("company_id", null)
+    : query.eq("company_id", companyId);
+
+  return query;
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -117,7 +174,8 @@ serve(async (req) => {
       let settingsQuery = supabaseAdmin
         .from("settings")
         .select("id, company_id, key, value, created_at, updated_at")
-        .in("key", aiSettingKeys);
+        .in("key", aiSettingKeys)
+        .order("updated_at", { ascending: false });
 
       settingsQuery = companyId === null
         ? settingsQuery.is("company_id", null)
@@ -130,8 +188,15 @@ serve(async (req) => {
         return jsonResponse({ error: "Não foi possível carregar as configurações" }, 500);
       }
 
+      const uniqueSettings = new Map<string, typeof settings[number]>();
+      for (const setting of settings ?? []) {
+        if (!uniqueSettings.has(setting.key)) {
+          uniqueSettings.set(setting.key, setting);
+        }
+      }
+
       return jsonResponse({
-        settings: (settings ?? []).map((setting) => {
+        settings: Array.from(uniqueSettings.values()).map((setting) => {
           const value = extractStringValue(setting.value);
           const isSecretKey = setting.key.endsWith("_key");
 
@@ -158,17 +223,12 @@ serve(async (req) => {
         return jsonResponse({ error: "Informe uma chave de API válida" }, 400);
       }
 
-      const { error } = await supabaseAdmin
-        .from("settings")
-        .upsert(
-          {
-            company_id: companyId,
-            key: keyNameByProvider[body.provider],
-            value: apiKey,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "company_id,key" },
-        );
+      const { error } = await saveSetting(
+        supabaseAdmin,
+        companyId,
+        keyNameByProvider[body.provider],
+        apiKey,
+      );
 
       if (error) {
         console.error("Erro ao salvar chave IA:", error);
@@ -179,11 +239,11 @@ serve(async (req) => {
     }
 
     if (body.action === "delete_key") {
-      const { error } = await supabaseAdmin
-        .from("settings")
-        .delete()
-        .eq("company_id", companyId)
-        .eq("key", keyNameByProvider[body.provider]);
+      const { error } = await deleteSetting(
+        supabaseAdmin,
+        companyId,
+        keyNameByProvider[body.provider],
+      );
 
       if (error) {
         console.error("Erro ao remover chave IA:", error);
@@ -205,17 +265,12 @@ serve(async (req) => {
         return jsonResponse({ error: "Informe um modelo válido" }, 400);
       }
 
-      const { error } = await supabaseAdmin
-        .from("settings")
-        .upsert(
-          {
-            company_id: companyId,
-            key: settingKey,
-            value: model,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "company_id,key" },
-        );
+      const { error } = await saveSetting(
+        supabaseAdmin,
+        companyId,
+        settingKey,
+        model,
+      );
 
       if (error) {
         console.error("Erro ao salvar modelo IA:", error);
