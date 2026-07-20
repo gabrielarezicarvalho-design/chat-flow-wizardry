@@ -734,6 +734,7 @@ export type Database = {
       }
       departments: {
         Row: {
+          business_hours: Json | null
           color: string | null
           company_id: string | null
           created_at: string | null
@@ -744,6 +745,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          business_hours?: Json | null
           color?: string | null
           company_id?: string | null
           created_at?: string | null
@@ -754,6 +756,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          business_hours?: Json | null
           color?: string | null
           company_id?: string | null
           created_at?: string | null
