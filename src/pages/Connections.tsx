@@ -3209,6 +3209,7 @@ const Connections = () => {
                           Digite um código
                         </span>
                       </div>
+                    </div>
                   </div>
                 </div>
                 )}
