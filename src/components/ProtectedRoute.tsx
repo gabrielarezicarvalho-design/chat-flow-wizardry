@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  const [subdomainChecked, setSubdomainChecked] = useState(false);
+  const [subdomainChecked, setSubdomainChecked] = useState(() => !getSubdomainSlug());
   const [subdomainValid, setSubdomainValid] = useState(true);
 
   useEffect(() => {
