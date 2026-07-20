@@ -3209,16 +3209,18 @@ const Connections = () => {
                           Digite um código
                         </span>
                       </div>
-                    </div>
                   </div>
                 </div>
+                )}
 
                 <div className="flex gap-2">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
                     Cancelar
                   </Button>
                   <Button type="submit" className="flex-1">
-                    {connectMethod === 'qrcode' ? 'Gerar QR Code' : 'Gerar Código'}
+                    {formData.environment === 'BTZAP'
+                      ? 'Importar Instância'
+                      : connectMethod === 'qrcode' ? 'Gerar QR Code' : 'Gerar Código'}
                   </Button>
                 </div>
               </form>
