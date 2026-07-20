@@ -662,8 +662,8 @@ const Conversations = () => {
             <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
               <MessageSquare className="w-10 h-10 text-muted-foreground/40" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              MarketFlow Chat
+            <h3 className="text-xl font-semibold text-foreground mb-2 font-['Space_Grotesk'] tracking-tight">
+              NEXT PRO&nbsp;Chat
             </h3>
             <p className="text-sm text-muted-foreground max-w-sm">
               Selecione uma conversa para começar a atender seus clientes
