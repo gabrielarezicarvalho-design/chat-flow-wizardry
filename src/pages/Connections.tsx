@@ -632,8 +632,17 @@ const Connections = () => {
 
     // BTZAP: importa instância já criada no painel (token informado manualmente)
     if (formData.environment === 'BTZAP') {
-      if (!formData.token.trim()) {
+      const tokenClean = formData.token.trim();
+      if (!tokenClean) {
         toast.error("Cole o Token da Instância do painel BTZAP");
+        return;
+      }
+      if (/^https?:\/\//i.test(tokenClean) || tokenClean.includes('/')) {
+        toast.error("Valor inválido: cole apenas o TOKEN da instância (não a URL do painel).");
+        return;
+      }
+      if (tokenClean.length < 20) {
+        toast.error("Token parece curto demais. Copie o token completo do painel BTZAP.");
         return;
       }
 
