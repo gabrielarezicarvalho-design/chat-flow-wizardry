@@ -870,60 +870,76 @@ export default function AttendancePanel() {
           </DialogHeader>
           {selectedConversation && (
             <div className="space-y-4 pt-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xl">
-                    {getInitials(selectedConversation.user_name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold text-lg">
-                    {selectedConversation.user_name || "Desconhecido"}
-                  </h3>
-                  <p className="text-muted-foreground flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    {selectedConversation.user_phone || "Sem telefone"}
-                  </p>
-                </div>
-              </div>
+              {(() => {
+                const contactName = selectedConversation.contact_name || selectedConversation.user_name;
+                const contactPhone = selectedConversation.contact_phone || selectedConversation.user_phone;
+                const assignedId = selectedConversation.assigned_to || selectedConversation.assigned_agent;
+                const agentName = selectedConversation.classification === "ai_agent"
+                  ? getAiAgentName(selectedConversation.aiAgentId)
+                  : getAgentName(assignedId);
+                const lastMsg = selectedConversation.last_message || selectedConversation.last_message_preview;
+                const platform = selectedConversation.platform || selectedConversation.channel || "WhatsApp";
+                return (
+                  <>
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-16 w-16">
+                        <AvatarFallback className="bg-primary/10 text-primary text-xl">
+                          {getInitials(contactName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-semibold text-lg">
+                          {contactName || "Desconhecido"}
+                        </h3>
+                        <p className="text-muted-foreground flex items-center gap-2">
+                          <Phone className="w-4 h-4" />
+                          {contactPhone || "Sem telefone"}
+                        </p>
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-                <div>
-                  <p className="text-xs text-muted-foreground">Status</p>
-                  <Badge variant="outline" className="mt-1">
-                    {selectedConversation.classification === "in_flow" 
-                      ? "Na URA" 
-                      : selectedConversation.classification === "in_attendance"
-                      ? "Em atendimento"
-                      : "Aguardando"}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Atendente</p>
-                  <p className="font-medium mt-1">
-                    {getAgentName(selectedConversation.assigned_agent) || "Não atribuído"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Aberto há</p>
-                  <p className="font-medium mt-1">
-                    {getTimeOpen(selectedConversation.created_at)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Plataforma</p>
-                  <p className="font-medium mt-1">{selectedConversation.platform}</p>
-                </div>
-              </div>
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Status</p>
+                        <Badge variant="outline" className="mt-1">
+                          {selectedConversation.classification === "in_flow"
+                            ? "Na URA"
+                            : selectedConversation.classification === "in_attendance"
+                            ? "Em atendimento"
+                            : selectedConversation.classification === "ai_agent"
+                            ? "Com IA"
+                            : "Aguardando"}
+                        </Badge>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Atendente</p>
+                        <p className="font-medium mt-1">
+                          {agentName || "Não atribuído"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Aberto há</p>
+                        <p className="font-medium mt-1">
+                          {getTimeOpen(selectedConversation.created_at)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Plataforma</p>
+                        <p className="font-medium mt-1">{platform}</p>
+                      </div>
+                    </div>
 
-              {selectedConversation.last_message && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">Última mensagem</p>
-                  <div className="p-3 bg-muted rounded-lg">
-                    <p className="text-sm">{selectedConversation.last_message}</p>
-                  </div>
-                </div>
-              )}
+                    {lastMsg && (
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-2">Última mensagem</p>
+                        <div className="p-3 bg-muted rounded-lg">
+                          <p className="text-sm">{lastMsg}</p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
