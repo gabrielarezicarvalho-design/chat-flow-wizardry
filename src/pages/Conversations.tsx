@@ -45,7 +45,7 @@ const Conversations = () => {
   const { user } = useAuth();
   const { companyId } = useCompanyId();
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState<"agent" | "ai" | "ura">("agent");
+  const [activeTab, setActiveTab] = useState<"agent" | "ai" | "ura">("ura");
   const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
