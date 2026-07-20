@@ -1748,7 +1748,14 @@ const Connections = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.length === 0 ? (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-primary" />
+                      Carregando conexões...
+                    </td>
+                  </tr>
+                ) : filtered.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">
                       {searchQuery ? 'Nenhuma conexão encontrada' : 'Nenhuma conexão cadastrada'}
@@ -2775,15 +2782,6 @@ const Connections = () => {
       )}
     </div>
   );
-
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
