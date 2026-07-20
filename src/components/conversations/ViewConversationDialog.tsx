@@ -159,17 +159,17 @@ export function ViewConversationDialog({
           <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12">
               <AvatarFallback className="bg-primary/10 text-primary">
-                {getInitials(conversation.user_name)}
+                {getInitials(userName)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <DialogTitle className="text-lg">
-                {conversation.user_name || "Desconhecido"}
+                {userName}
               </DialogTitle>
               <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                 <span className="flex items-center gap-1">
                   <Phone className="w-3 h-3" />
-                  {conversation.user_phone || "Sem telefone"}
+                  {userPhone || "Sem telefone"}
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
