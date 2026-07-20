@@ -81,6 +81,10 @@ interface UserAssignment {
   connection_id?: string;
 }
 
+interface CurrentUserProfile {
+  company_id: string | null;
+}
+
 const emptyPermissionsByUser: Record<string, UserPermissions> = {};
 const emptyAssignments: UserAssignment[] = [];
 
@@ -115,7 +119,7 @@ export default function Users() {
   // Get current user's profile to get their company_id
   const { data: currentUserProfile } = useQuery({
     queryKey: ["current-user-profile", user?.id],
-    queryFn: async (): Promise<UserAssignment[]> => {
+    queryFn: async (): Promise<CurrentUserProfile | null> => {
       if (!user?.id) return null;
       const { data, error } = await supabase
         .from("profiles")
@@ -200,7 +204,7 @@ export default function Users() {
   // Fetch department members for all users
   const { data: departmentMembersQueryData } = useQuery({
     queryKey: ["department-members-all"],
-    queryFn: async () => {
+    queryFn: async (): Promise<UserAssignment[]> => {
       const { data, error } = await supabase
         .from("department_members")
         .select("*");
