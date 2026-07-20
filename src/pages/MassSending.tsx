@@ -2414,53 +2414,54 @@ function MassSendingContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
           <h1 className="text-2xl font-bold">Envio em Massa</h1>
           <p className="text-muted-foreground">Gerencie campanhas, templates e teste envios</p>
         </div>
-        <Button onClick={() => setWizard(true)}>
+        <Button onClick={() => setWizard(true)} className="self-start sm:self-auto">
           <Plus className="w-4 h-4 mr-2" />Nova Campanha
         </Button>
       </div>
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="grid w-full grid-cols-12 max-w-7xl">
-          <TabsTrigger value="campaigns" className="flex items-center gap-2">
+        <TabsList className="flex w-full h-auto justify-start overflow-x-auto lg:grid lg:grid-cols-12 lg:max-w-7xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <TabsTrigger value="campaigns" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Megaphone className="w-4 h-4" />Campanhas
           </TabsTrigger>
-          <TabsTrigger value="reports" className="flex items-center gap-2">
+          <TabsTrigger value="reports" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <BarChart className="w-4 h-4" />Relatórios
           </TabsTrigger>
-          <TabsTrigger value="message-templates" className="flex items-center gap-2">
+          <TabsTrigger value="message-templates" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <FileText className="w-4 h-4" />Templates
           </TabsTrigger>
-          <TabsTrigger value="scheduler" className="flex items-center gap-2">
+          <TabsTrigger value="scheduler" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Calendar className="w-4 h-4" />Agendar
           </TabsTrigger>
-          <TabsTrigger value="optimal-times" className="flex items-center gap-2">
+          <TabsTrigger value="optimal-times" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Clock className="w-4 h-4" />Horários
           </TabsTrigger>
-          <TabsTrigger value="webhook" className="flex items-center gap-2">
+          <TabsTrigger value="webhook" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Link className="w-4 h-4" />Webhook
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
+          <TabsTrigger value="notifications" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Bell className="w-4 h-4" />Notificação
           </TabsTrigger>
-          <TabsTrigger value="birthday" className="flex items-center gap-2">
+          <TabsTrigger value="birthday" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Gift className="w-4 h-4" />Aniversário
           </TabsTrigger>
-          <TabsTrigger value="satisfaction" className="flex items-center gap-2">
+          <TabsTrigger value="satisfaction" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Star className="w-4 h-4" />Satisfação
           </TabsTrigger>
-          <TabsTrigger value="templates" className="flex items-center gap-2">
+          <TabsTrigger value="templates" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <BookmarkPlus className="w-4 h-4" />Favoritos
           </TabsTrigger>
-          <TabsTrigger value="tester" className="flex items-center gap-2">
+          <TabsTrigger value="tester" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Terminal className="w-4 h-4" />Tester
           </TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="campaigns" className="mt-6">
           {campaigns.length === 0 ? (
