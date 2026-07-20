@@ -119,34 +119,33 @@ export function LiveMap({ leads, city }: LiveMapProps) {
   return (
     <>
       <style>{`
-        .nextpro-map .gm-bundled-control { margin: 16px !important; }
+        .nextpro-map .gm-bundled-control { margin: 12px !important; margin-top: 60px !important; }
         .nextpro-map .gmnoprint > div,
         .nextpro-map .gm-bundled-control > div {
           background: transparent !important;
           box-shadow: none !important;
-          border-radius: 14px !important;
+          border-radius: 10px !important;
           overflow: hidden;
         }
         .nextpro-map button[aria-label="Zoom in"],
         .nextpro-map button[aria-label="Zoom out"],
         .nextpro-map button[title="Zoom in"],
         .nextpro-map button[title="Zoom out"] {
-          width: 40px !important;
-          height: 40px !important;
-          background: hsl(var(--primary)) !important;
+          width: 30px !important;
+          height: 30px !important;
+          background: hsl(217 91% 60%) !important;
           border: none !important;
-          margin-bottom: 8px !important;
-          border-radius: 12px !important;
-          box-shadow: 0 8px 20px -6px hsl(var(--primary) / 0.55), 0 0 0 1px hsl(var(--primary) / 0.4) inset !important;
-          transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+          margin-bottom: 6px !important;
+          border-radius: 8px !important;
+          box-shadow: 0 4px 12px -4px hsl(217 91% 60% / 0.6) !important;
+          transition: transform .15s ease, background .15s ease;
         }
         .nextpro-map button[aria-label="Zoom in"]:hover,
         .nextpro-map button[aria-label="Zoom out"]:hover,
         .nextpro-map button[title="Zoom in"]:hover,
         .nextpro-map button[title="Zoom out"]:hover {
-          transform: translateY(-1px) scale(1.04);
-          background: hsl(var(--primary) / 0.9) !important;
-          box-shadow: 0 12px 26px -6px hsl(var(--primary) / 0.7) !important;
+          transform: scale(1.06);
+          background: hsl(217 91% 55%) !important;
         }
         .nextpro-map button[aria-label="Zoom in"] img,
         .nextpro-map button[aria-label="Zoom out"] img,
