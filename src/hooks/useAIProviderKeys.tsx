@@ -49,52 +49,54 @@ export const useAIProviderKeys = () => {
     return setting?.value as string | null;
   };
 
-  const upsertKey = {
-    mutate: (data: { provider: string; apiKey: string }) => {
-      upsertKey.mutateAsync(data).catch(() => {});
-    },
-    mutateAsync: async (data: { provider: string; apiKey: string }) => {
-      const companyId = await getCompanyId();
-      const keyName = data.provider === 'openai' ? 'ai_openai_key' 
-        : data.provider === 'google' ? 'ai_gemini_key' 
-        : 'ai_asaas_key';
-      
-      const { error } = await supabase
-        .from('settings')
-        .upsert({ company_id: companyId, key: keyName, value: data.apiKey }, { onConflict: 'company_id,key' });
-      
+  const upsertKeyMutation = useMutation({
+    mutationFn: async (data: { provider: string; apiKey: string }) => {
+      const { data: result, error } = await supabase.functions.invoke('company-ai-settings', {
+        body: {
+          action: 'upsert_key',
+          provider: data.provider,
+          apiKey: data.apiKey,
+        },
+      });
+
       if (error) throw error;
-      
+      if (result?.error) throw new Error(result.error);
+
+      return result;
+    },
+    onSuccess: () => {
       toast.success('Chave salva com sucesso!');
       queryClient.invalidateQueries({ queryKey: ['ai-provider-keys'] });
-      return { data: null, isValid: true };
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
     },
-    isPending: false
-  };
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao salvar chave');
+    },
+  });
 
-  const deleteKey = {
-    mutate: (provider: string) => {
-      deleteKey.mutateAsync(provider).catch(() => {});
-    },
-    mutateAsync: async (provider: string) => {
-      const companyId = await getCompanyId();
-      const keyName = provider === 'openai' ? 'ai_openai_key' 
-        : provider === 'google' ? 'ai_gemini_key' 
-        : 'ai_asaas_key';
-      
-      const { error } = await supabase
-        .from('settings')
-        .delete()
-        .eq('company_id', companyId)
-        .eq('key', keyName);
-      
+  const deleteKeyMutation = useMutation({
+    mutationFn: async (provider: string) => {
+      const { data: result, error } = await supabase.functions.invoke('company-ai-settings', {
+        body: {
+          action: 'delete_key',
+          provider,
+        },
+      });
+
       if (error) throw error;
-      
+      if (result?.error) throw new Error(result.error);
+
+      return result;
+    },
+    onSuccess: () => {
       toast.success('Chave removida!');
       queryClient.invalidateQueries({ queryKey: ['ai-provider-keys'] });
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
     },
-    isPending: false
-  };
+    onError: (error: Error) => {
+      toast.error(error.message || 'Erro ao remover chave');
+    },
+  });
 
   const getKeyStatus = (provider: string) => {
     const keyName = provider === 'openai' ? 'ai_openai_key' 
@@ -113,19 +115,26 @@ export const useAIProviderKeys = () => {
   };
 
   const saveModel = async (provider: string, model: string) => {
-    const companyId = await getCompanyId();
-    const keyName = provider === 'openai' ? 'ai_openai_model' : 'ai_gemini_model';
-    await supabase
-      .from('settings')
-      .upsert({ company_id: companyId, key: keyName, value: model }, { onConflict: 'company_id,key' });
+    const { data: result, error } = await supabase.functions.invoke('company-ai-settings', {
+      body: {
+        action: 'save_model',
+        provider,
+        model,
+      },
+    });
+
+    if (error) throw error;
+    if (result?.error) throw new Error(result.error);
+
     queryClient.invalidateQueries({ queryKey: ['ai-provider-keys'] });
+    queryClient.invalidateQueries({ queryKey: ['settings'] });
   };
 
   return {
     providerKeys,
     isLoading,
-    upsertKey,
-    deleteKey,
+    upsertKey: upsertKeyMutation,
+    deleteKey: deleteKeyMutation,
     getKeyStatus,
     isProviderAvailable,
     getSettingValue,
