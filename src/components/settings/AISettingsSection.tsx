@@ -23,6 +23,11 @@ const OPENAI_MODELS = [
 ];
 
 const GEMINI_MODELS = [
+  { value: "gemini-3-pro-preview", label: "Gemini 3 Pro (Raciocínio complexo)" },
+  { value: "gemini-3-flash-preview", label: "Gemini 3 Flash" },
+  { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro (Matemática e programação)" },
+  { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash (Ajuda para tudo)" },
+  { value: "gemini-2.5-flash-lite", label: "Gemini 2.5 Flash-Lite (Respostas rápidas)" },
   { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
   { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro" },
   { value: "gemini-1.5-flash", label: "Gemini 1.5 Flash" },
