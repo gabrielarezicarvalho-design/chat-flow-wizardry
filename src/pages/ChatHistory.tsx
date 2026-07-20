@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
@@ -132,6 +132,24 @@ const ChatHistory = () => {
     enabled: !isLoadingCompany,
   });
 
+  // Realtime: invalidar histórico quando conversas mudarem (encerramento, transferência, etc.)
+  useEffect(() => {
+    const channel = supabase
+      .channel("chat-history-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "conversations" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["chat-history"] });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+
   // Fetch profiles for assigned_to mapping
   const { data: profilesMap } = useQuery({
     queryKey: ["profiles-map-history", companyId],
@@ -196,14 +214,15 @@ const ChatHistory = () => {
     const avgMins = avgMinutes % 60;
     const avgTimeLabel = avgHours > 0 ? `${avgHours}h ${avgMins}m` : `${avgMins}m`;
 
-    // Attendance by type
+    // Attendance by type (aceita variações: ai/ia, agent/humano)
     const byType = { ura: 0, humano: 0, ia: 0 };
     convs.forEach((c) => {
-      const t = c.attendance_type as string;
+      const t = (c.attendance_type as string || "").toLowerCase();
       if (t === "ura") byType.ura++;
-      else if (t === "humano") byType.humano++;
-      else if (t === "ia") byType.ia++;
+      else if (t === "humano" || t === "agent" || t === "human") byType.humano++;
+      else if (t === "ia" || t === "ai") byType.ia++;
     });
+
 
     // Resolution rate (all are closed, so 100% of fetched)
     // But we show ratio vs total conversations in range
