@@ -1901,7 +1901,7 @@ function MassSendingContent() {
           )}
 
           {step === 3 && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-6">
               {/* Left: Message Configuration */}
               <div className="space-y-5 max-h-[600px] overflow-y-auto pr-2">
                 <div>
