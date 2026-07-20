@@ -41,10 +41,13 @@ const defaultBusinessHours: BusinessHours = {
 };
 
 const Departments = () => {
-  const { departments, isLoading, createDepartment, updateDepartment, deleteDepartment } = useDepartments();
-  
+  const { departments, isLoading, createDepartment, updateDepartment, deleteDepartment, addMember, removeMember } = useDepartments();
+  const { companyId } = useCompanyId();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState<any>(null);
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [managingDepartment, setManagingDepartment] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
