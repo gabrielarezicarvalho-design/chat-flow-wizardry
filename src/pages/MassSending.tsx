@@ -1626,25 +1626,26 @@ function MassSendingContent() {
   if (wizard) {
     return (
       <div className="max-w-3xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div>
             <h1 className="text-2xl font-bold">Nova Campanha</h1>
             <p className="text-muted-foreground">Configure sua campanha de envio em massa</p>
           </div>
-          <Button variant="ghost" onClick={resetForm}>
+          <Button variant="ghost" onClick={resetForm} className="self-start sm:self-auto">
             <ArrowLeft className="w-4 h-4 mr-2" />Cancelar
           </Button>
         </div>
 
+
         {/* Progress Steps */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto -mx-1 px-1 pb-2 sm:pb-0 sm:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {[
             { num: 1, label: "Configuração" },
             { num: 2, label: "Contatos" },
             { num: 3, label: "Mensagem" },
             { num: 4, label: "Ações" }
           ].map((s, idx) => (
-            <div key={s.num} className="flex items-center">
+            <div key={s.num} className="flex items-center flex-shrink-0">
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors ${
                 step >= s.num 
                   ? "bg-primary text-primary-foreground" 
@@ -1653,12 +1654,13 @@ function MassSendingContent() {
                 <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium">
                   {step > s.num ? <Check className="w-3 h-3" /> : s.num}
                 </div>
-                <span className="text-sm font-medium">{s.label}</span>
+                <span className="text-sm font-medium whitespace-nowrap">{s.label}</span>
               </div>
-              {idx < 3 && <div className={`w-8 h-0.5 mx-1 ${step > s.num ? "bg-primary" : "bg-muted"}`} />}
+              {idx < 3 && <div className={`w-8 h-0.5 mx-1 flex-shrink-0 ${step > s.num ? "bg-primary" : "bg-muted"}`} />}
             </div>
           ))}
         </div>
+
 
         <Card className="p-6">
           {step === 1 && (
@@ -2374,11 +2376,12 @@ function MassSendingContent() {
           )}
         </Card>
 
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={() => setStep(s => s - 1)} disabled={step === 1}>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2">
+          <Button variant="outline" onClick={() => setStep(s => s - 1)} disabled={step === 1} className="w-full sm:w-auto">
             <ArrowLeft className="w-4 h-4 mr-2" />Anterior
           </Button>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 [&>button]:w-full sm:[&>button]:w-auto">
+
             {step === 4 && name && (
               <Button 
                 variant="outline" 
@@ -2412,53 +2415,54 @@ function MassSendingContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
           <h1 className="text-2xl font-bold">Envio em Massa</h1>
           <p className="text-muted-foreground">Gerencie campanhas, templates e teste envios</p>
         </div>
-        <Button onClick={() => setWizard(true)}>
+        <Button onClick={() => setWizard(true)} className="self-start sm:self-auto">
           <Plus className="w-4 h-4 mr-2" />Nova Campanha
         </Button>
       </div>
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList className="grid w-full grid-cols-12 max-w-7xl">
-          <TabsTrigger value="campaigns" className="flex items-center gap-2">
+        <TabsList className="flex w-full h-auto justify-start overflow-x-auto lg:grid lg:grid-cols-12 lg:max-w-7xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <TabsTrigger value="campaigns" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Megaphone className="w-4 h-4" />Campanhas
           </TabsTrigger>
-          <TabsTrigger value="reports" className="flex items-center gap-2">
+          <TabsTrigger value="reports" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <BarChart className="w-4 h-4" />Relatórios
           </TabsTrigger>
-          <TabsTrigger value="message-templates" className="flex items-center gap-2">
+          <TabsTrigger value="message-templates" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <FileText className="w-4 h-4" />Templates
           </TabsTrigger>
-          <TabsTrigger value="scheduler" className="flex items-center gap-2">
+          <TabsTrigger value="scheduler" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Calendar className="w-4 h-4" />Agendar
           </TabsTrigger>
-          <TabsTrigger value="optimal-times" className="flex items-center gap-2">
+          <TabsTrigger value="optimal-times" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Clock className="w-4 h-4" />Horários
           </TabsTrigger>
-          <TabsTrigger value="webhook" className="flex items-center gap-2">
+          <TabsTrigger value="webhook" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Link className="w-4 h-4" />Webhook
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
+          <TabsTrigger value="notifications" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Bell className="w-4 h-4" />Notificação
           </TabsTrigger>
-          <TabsTrigger value="birthday" className="flex items-center gap-2">
+          <TabsTrigger value="birthday" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Gift className="w-4 h-4" />Aniversário
           </TabsTrigger>
-          <TabsTrigger value="satisfaction" className="flex items-center gap-2">
+          <TabsTrigger value="satisfaction" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Star className="w-4 h-4" />Satisfação
           </TabsTrigger>
-          <TabsTrigger value="templates" className="flex items-center gap-2">
+          <TabsTrigger value="templates" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <BookmarkPlus className="w-4 h-4" />Favoritos
           </TabsTrigger>
-          <TabsTrigger value="tester" className="flex items-center gap-2">
+          <TabsTrigger value="tester" className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
             <Terminal className="w-4 h-4" />Tester
           </TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="campaigns" className="mt-6">
           {campaigns.length === 0 ? (
@@ -2483,8 +2487,9 @@ function MassSendingContent() {
             
             return (
               <Card key={c.id} className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-start sm:items-center gap-4 min-w-0">
+
                     <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
                       c.status === "completed" ? "bg-green-500/10" : 
                       c.status === "failed" ? "bg-red-500/10" :
@@ -2651,7 +2656,8 @@ function MassSendingContent() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:justify-end">
+
                     {(c.status === "completed" || c.status === "failed") && (
                       <div className="flex items-center gap-3 mr-2">
                         <div className="text-center px-3 py-1 rounded-lg bg-green-500/10">
@@ -2934,7 +2940,7 @@ Content-Type: application/json
           </DialogHeader>
           {selectedCampaign && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Nome</p>
                   <p className="font-medium">{selectedCampaign.name}</p>
