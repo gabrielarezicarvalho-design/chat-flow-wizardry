@@ -387,12 +387,12 @@ export default function AttendancePanel() {
     try {
       await updateConversation.mutateAsync({
         id: selectedConversation.id,
-        updates: { 
-          assigned_agent: selectedAgentForTransfer,
-          status: 'in_attendance', // CRÍTICO: Atualizar status para ir direto pro chat
-          department_id: null, // Limpar departamento
-          assigned_agent_id: null, // Limpar IA
-          flow_state: null, // Limpar estado do fluxo
+        updates: {
+          assigned_to: selectedAgentForTransfer,
+          attendance_type: 'agent',
+          status: 'open',
+          department_id: null,
+          flow_state: null,
         },
       });
       toast.success("Atendimento transferido com sucesso!");
