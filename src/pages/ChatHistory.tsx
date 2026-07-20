@@ -132,6 +132,24 @@ const ChatHistory = () => {
     enabled: !isLoadingCompany,
   });
 
+  // Realtime: invalidar histórico quando conversas mudarem (encerramento, transferência, etc.)
+  useEffect(() => {
+    const channel = supabase
+      .channel("chat-history-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "conversations" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["chat-history"] });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+
   // Fetch profiles for assigned_to mapping
   const { data: profilesMap } = useQuery({
     queryKey: ["profiles-map-history", companyId],
