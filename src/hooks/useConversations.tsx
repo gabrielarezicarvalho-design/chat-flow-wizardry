@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +7,25 @@ import { useCompanyId } from './useCompanyId';
 export const useConversations = () => {
   const queryClient = useQueryClient();
   const { companyId, isLoadingCompany } = useCompanyId();
+
+  // Realtime: manter contadores (Atendente/IA/URA) e status atualizados sem reload
+  useEffect(() => {
+    const channel = supabase
+      .channel('conversations-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'conversations' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['conversations', companyId] });
+          queryClient.invalidateQueries({ queryKey: ['chat-history'] });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient, companyId]);
+
 
   const { data: conversations, isLoading, refetch } = useQuery({
     queryKey: ['conversations', companyId],
