@@ -24,14 +24,6 @@ interface AISettingRow {
   updated_at: string;
 }
 
-const AI_SETTING_KEYS = [
-  'ai_openai_key',
-  'ai_openai_model',
-  'ai_gemini_key',
-  'ai_gemini_model',
-  'ai_asaas_key',
-] as const;
-
 const normalizeSettingValue = (value: unknown): string | null => {
   if (typeof value === 'string') {
     const trimmed = value.trim();
@@ -51,49 +43,17 @@ export const useAIProviderKeys = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const getSettingsScope = async () => {
-    if (!user?.id) throw new Error('Usuário não autenticado');
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('company_id')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (profile?.company_id) {
-      return { companyId: profile.company_id, isGlobalAdminScope: false };
-    }
-
-    const { data: roles, error: rolesError } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id);
-
-    if (rolesError) throw rolesError;
-
-    const isAdmin = roles?.some((row) => row.role === 'admin') ?? false;
-    if (isAdmin) {
-      return { companyId: null, isGlobalAdminScope: true };
-    }
-
-    throw new Error('Empresa não encontrada');
-  };
-
   const { data: providerKeys = [], isLoading } = useQuery({
     queryKey: ['ai-provider-keys', user?.id],
     queryFn: async () => {
-      const { companyId, isGlobalAdminScope } = await getSettingsScope();
-      const baseQuery = supabase
-        .from('settings')
-        .select('*')
-        .in('key', AI_SETTING_KEYS);
+      const { data, error } = await supabase.functions.invoke('company-ai-settings', {
+        body: { action: 'list_settings' },
+      });
 
-      const { data, error } = isGlobalAdminScope
-        ? await baseQuery.is('company_id', null)
-        : await baseQuery.eq('company_id', companyId);
-      
       if (error) throw error;
-      return (data || []) as AISettingRow[];
+      if (data?.error) throw new Error(data.error);
+
+      return (data?.settings || []) as AISettingRow[];
     },
     enabled: !!user?.id,
     staleTime: 30 * 1000,
