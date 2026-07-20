@@ -2486,8 +2486,9 @@ function MassSendingContent() {
             
             return (
               <Card key={c.id} className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-start sm:items-center gap-4 min-w-0">
+
                     <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
                       c.status === "completed" ? "bg-green-500/10" : 
                       c.status === "failed" ? "bg-red-500/10" :
