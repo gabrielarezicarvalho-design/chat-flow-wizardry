@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Play, Loader2, Copy, Check, Trash2, Plus, Terminal, Send, X, Upload, Image as ImageIcon, Link, Video, FileText, Music } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { uploadToVps } from "@/lib/cloud-storage";
+import { uploadToCloud } from "@/lib/cloud-storage";
 
 interface Connection {
   id: string;
@@ -116,7 +116,7 @@ export function ApiTester({ connections }: ApiTesterProps) {
 
     setUploading(true);
     try {
-      const uploadResult = await uploadToVps(file);
+      const uploadResult = await uploadToCloud(file);
       if (!uploadResult.success) throw new Error(uploadResult.error || 'Erro no upload');
 
       setMediaUrl(uploadResult.url);

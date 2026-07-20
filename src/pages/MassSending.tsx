@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useCloudStorage } from "@/hooks/useCloudStorage";
-import { uploadToVps, uploadBlobToVps } from "@/lib/cloud-storage";
+import { uploadToCloud, uploadBlobToCloud } from "@/lib/cloud-storage";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -681,7 +681,7 @@ function MassSendingContent() {
           const byteArray = new Uint8Array(byteNumbers);
           const blob = new Blob([byteArray], { type: mimeType });
           const fileName = `${Date.now()}_campaign.${ext}`;
-          const vpsResult = await uploadBlobToVps(blob, fileName);
+          const vpsResult = await uploadBlobToCloud(blob, fileName);
           if (vpsResult.success) {
             finalMediaUrl = vpsResult.url;
             addLog("success", `Mídia convertida: ${finalMediaUrl}`);
@@ -1231,7 +1231,7 @@ function MassSendingContent() {
           const byteArray = new Uint8Array(byteChars.length);
           for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
           const blob = new Blob([byteArray], { type: mimeMatch ? mimeMatch[1] : "application/octet-stream" });
-          const vpsResult = await uploadBlobToVps(blob, fileName);
+          const vpsResult = await uploadBlobToCloud(blob, fileName);
           if (vpsResult.success) {
             finalMediaUrl = vpsResult.url;
           } else {
@@ -1339,7 +1339,7 @@ function MassSendingContent() {
 
       toast.loading("Enviando imagem...", { id: "carousel-upload" });
 
-      const vpsResult = await uploadToVps(file);
+      const vpsResult = await uploadToCloud(file);
 
       if (!vpsResult.success) {
         toast.error("Erro ao enviar imagem: " + vpsResult.error, { id: "carousel-upload" });

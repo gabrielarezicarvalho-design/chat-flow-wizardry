@@ -3,8 +3,6 @@ import { getSubdomainSlug } from './subdomain';
 
 /**
  * Storage backend: Lovable Cloud (Supabase Storage), bucket `campaign-media`.
- * A API pública deste módulo foi preservada para compatibilidade com o código
- * legado que ainda importa nomes com prefixo "Vps".
  */
 const BUCKET = 'campaign-media';
 
@@ -16,14 +14,14 @@ function sanitize(name: string): string {
   return name.replace(/[^a-zA-Z0-9._-]/g, '_');
 }
 
-export interface VpsUploadResult {
+export interface CloudUploadResult {
   success: boolean;
   url: string;
   fileName: string;
   error?: string;
 }
 
-export interface VpsFileInfo {
+export interface CloudFileInfo {
   name: string;
   size: number;
   createdAt: string;
@@ -41,11 +39,11 @@ export async function checkStorageHealth(): Promise<boolean> {
 }
 
 /** Upload de arquivo para o bucket `campaign-media`, particionado por empresa. */
-export async function uploadToVps(
+export async function uploadToCloud(
   file: File,
   companySlug?: string,
   onProgress?: (progress: number) => void
-): Promise<VpsUploadResult> {
+): Promise<CloudUploadResult> {
   const slug = resolveCompanySlug(companySlug);
   const safeName = sanitize(file.name);
   const path = `${slug}/${Date.now()}-${safeName}`;
@@ -92,20 +90,20 @@ export async function uploadToVps(
 }
 
 /** Upload de Blob (áudio, screenshots, etc.). */
-export async function uploadBlobToVps(
+export async function uploadBlobToCloud(
   blob: Blob,
   fileName: string,
   companySlug?: string,
   onProgress?: (progress: number) => void
-): Promise<VpsUploadResult> {
+): Promise<CloudUploadResult> {
   const file = new File([blob], fileName, { type: blob.type });
-  return uploadToVps(file, companySlug, onProgress);
+  return uploadToCloud(file, companySlug, onProgress);
 }
 
 /** Lista arquivos da empresa dentro do bucket. */
-export async function listVpsFiles(
+export async function listCloudFiles(
   companySlug?: string
-): Promise<{ success: boolean; files: VpsFileInfo[]; error?: string }> {
+): Promise<{ success: boolean; files: CloudFileInfo[]; error?: string }> {
   const slug = resolveCompanySlug(companySlug);
   try {
     const { data, error } = await supabase.storage
@@ -116,7 +114,7 @@ export async function listVpsFiles(
       return { success: false, files: [], error: error.message };
     }
 
-    const files: VpsFileInfo[] = (data || [])
+    const files: CloudFileInfo[] = (data || [])
       .filter((f) => f.name && f.name !== '.emptyFolderPlaceholder')
       .map((f) => ({
         name: f.name,
@@ -132,7 +130,7 @@ export async function listVpsFiles(
 }
 
 /** Remove um arquivo do storage. */
-export async function deleteVpsFile(
+export async function deleteCloudFile(
   fileName: string,
   companySlug?: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -149,13 +147,13 @@ export async function deleteVpsFile(
 }
 
 /** Retorna URL pública de um arquivo. */
-export function getVpsDownloadUrl(companySlug: string, fileName: string): string {
+export function getCloudDownloadUrl(companySlug: string, fileName: string): string {
   const path = fileName.includes('/') ? fileName : `${companySlug}/${fileName}`;
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
   return data.publicUrl;
 }
 
 /** Base URL do storage (mantido para compatibilidade). */
-export function getVpsStorageBaseUrl(): string {
+export function getCloudStorageBaseUrl(): string {
   return `supabase-storage://${BUCKET}`;
 }
