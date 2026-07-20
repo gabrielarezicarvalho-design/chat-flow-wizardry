@@ -147,6 +147,7 @@ function App() {
                                 <Route path="/campaign-reports" element={<CampaignReports />} />
                                 <Route path="/chat-history" element={<ChatHistory />} />
                                 <Route path="/chatgpt-credits" element={<ChatGPTCredits />} />
+                                <Route path="/segmentation" element={<Segmentation />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
                                 <Route path="*" element={<NotFound />} />
