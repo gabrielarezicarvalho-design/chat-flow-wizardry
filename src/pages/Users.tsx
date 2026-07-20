@@ -75,8 +75,14 @@ interface UserWithRole {
   role?: string;
 }
 
+interface UserAssignment {
+  user_id: string;
+  department_id?: string;
+  connection_id?: string;
+}
+
 const emptyPermissionsByUser: Record<string, UserPermissions> = {};
-const emptyAssignments: any[] = [];
+const emptyAssignments: UserAssignment[] = [];
 
 export default function Users() {
   const { user } = useAuth();
@@ -109,7 +115,7 @@ export default function Users() {
   // Get current user's profile to get their company_id
   const { data: currentUserProfile } = useQuery({
     queryKey: ["current-user-profile", user?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<UserAssignment[]> => {
       if (!user?.id) return null;
       const { data, error } = await supabase
         .from("profiles")
@@ -207,7 +213,7 @@ export default function Users() {
   // Fetch user connections assignments
   const { data: userConnectionsQueryData } = useQuery({
     queryKey: ["user-connections-assignments"],
-    queryFn: async () => {
+    queryFn: async (): Promise<UserAssignment[]> => {
       const { data, error } = await supabase
         .from("user_connections")
         .select("*");
@@ -219,7 +225,8 @@ export default function Users() {
 
   useEffect(() => {
     const connectionsMap: Record<string, string[]> = {};
-    userConnectionsData.forEach((uc: any) => {
+    userConnectionsData.forEach((uc) => {
+      if (!uc.connection_id) return;
       if (!connectionsMap[uc.user_id]) connectionsMap[uc.user_id] = [];
       connectionsMap[uc.user_id].push(uc.connection_id);
     });
@@ -228,7 +235,8 @@ export default function Users() {
 
   useEffect(() => {
     const departmentsMap: Record<string, string[]> = {};
-    departmentMembersData.forEach((dm: any) => {
+    departmentMembersData.forEach((dm) => {
+      if (!dm.department_id) return;
       if (!departmentsMap[dm.user_id]) departmentsMap[dm.user_id] = [];
       departmentsMap[dm.user_id].push(dm.department_id);
     });
