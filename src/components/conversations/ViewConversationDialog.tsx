@@ -32,11 +32,14 @@ export function ViewConversationDialog({
   const { messages, isLoading } = useMessages(open ? conversation?.id : undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const userName = conversation?.contact_name || conversation?.user_name || conversation?.leads?.name || "Desconhecido";
+  const userPhone = conversation?.contact_phone || conversation?.user_phone || conversation?.leads?.phone || "";
+
   useEffect(() => {
     if (open && conversation) {
-      console.log('📋 [ViewDialog] Opening conversation:', conversation.id, 'User:', conversation.user_name);
+      console.log('📋 [ViewDialog] Opening conversation:', conversation.id, 'User:', userName);
     }
-  }, [open, conversation]);
+  }, [open, conversation, userName]);
 
   useEffect(() => {
     if (messages.length > 0) {
