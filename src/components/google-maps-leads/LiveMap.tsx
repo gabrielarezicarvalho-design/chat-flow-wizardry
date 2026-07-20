@@ -57,6 +57,9 @@ export function LiveMap({ leads, city }: LiveMapProps) {
             zoom: 4,
             disableDefaultUI: true,
             zoomControl: true,
+            zoomControlOptions: {
+              position: window.google.maps.ControlPosition.RIGHT_TOP,
+            },
             styles: [
               { elementType: "geometry", stylers: [{ color: "#1f2937" }] },
               { elementType: "labels.text.stroke", stylers: [{ color: "#1f2937" }] },
