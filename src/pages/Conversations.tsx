@@ -228,7 +228,7 @@ const Conversations = () => {
     if (!selectedConversationId || transferring) return;
     setTransferring(true);
     try {
-      const updates: any = {};
+      const updates: any = { attendance_type: "agent" };
       if (humanAgentId) updates.assigned_to = humanAgentId;
       if (departmentId) updates.department_id = departmentId;
       
@@ -237,6 +237,7 @@ const Conversations = () => {
         updates,
       });
       toast.success("Conversa transferida com sucesso!");
+      setActiveTab("agent");
     } catch {
       toast.error("Erro ao transferir conversa");
     } finally {
