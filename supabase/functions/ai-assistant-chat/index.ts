@@ -174,6 +174,111 @@ async function callOpenAI(apiKey: string, model: string, messages: any[], temper
   return data.choices?.[0]?.message?.content;
 }
 
+// Parse tool call tags like [[TOOL:name|{"json":"args"}]] from AI response
+interface ToolCall { name: string; args: Record<string, any>; raw: string }
+function parseToolCalls(text: string): ToolCall[] {
+  const calls: ToolCall[] = [];
+  const regex = /\[\[TOOL:([a-z_]+)\|(\{[\s\S]*?\})\]\]/gi;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    try {
+      calls.push({ name: match[1], args: JSON.parse(match[2]), raw: match[0] });
+    } catch {
+      calls.push({ name: match[1], args: {}, raw: match[0] });
+    }
+  }
+  return calls;
+}
+
+function stripToolTags(text: string): string {
+  return text.replace(/\[\[TOOL:[a-z_]+\|\{[\s\S]*?\}\]\]/gi, "").trim();
+}
+
+async function executeToolCall(
+  call: ToolCall,
+  ctx: {
+    supabase: any;
+    conversationId: string;
+    connectionId: string;
+    agentId: string;
+    agentUserId: string;
+    contactName: string;
+    contactPhone: string;
+  }
+): Promise<{ result: string; sideEffect?: { transferToHuman?: boolean; ticketId?: string } }> {
+  console.log(`🛠️ Executando tool: ${call.name}`, call.args);
+
+  try {
+    if (call.name === "transferir_para_humano") {
+      const motivo = call.args.motivo || "Solicitação do cliente";
+      await ctx.supabase
+        .from("conversations")
+        .update({ attendance_type: "agent", status: "open" })
+        .eq("id", ctx.conversationId);
+      return {
+        result: `Transferência realizada. Motivo: ${motivo}`,
+        sideEffect: { transferToHuman: true },
+      };
+    }
+
+    if (call.name === "criar_ticket") {
+      const motivo = call.args.motivo || "Solicitação de suporte";
+      const resumo = call.args.resumo || motivo;
+      const prio = String(call.args.prioridade || "media").toLowerCase();
+      const dissatisfactionLevel = prio.startsWith("alta") || prio === "high" ? "high"
+        : prio.startsWith("baix") || prio === "low" ? "low" : "medium";
+      const { data: ticket, error } = await ctx.supabase
+        .from("ai_tickets")
+        .insert({
+          user_id: ctx.agentUserId,
+          conversation_id: ctx.conversationId,
+          connection_id: ctx.connectionId,
+          agent_id: ctx.agentId,
+          contact_name: ctx.contactName || "Cliente",
+          contact_phone: ctx.contactPhone,
+          reason: motivo,
+          dissatisfaction_level: dissatisfactionLevel,
+          ai_summary: resumo,
+          status: "pending",
+          priority: dissatisfactionLevel === "high" ? "high" : "normal",
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      const code = ticket.id.substring(0, 8).toUpperCase();
+      return {
+        result: `Chamado criado. Protocolo: ${code}. Prioridade: ${dissatisfactionLevel}.`,
+        sideEffect: { ticketId: ticket.id },
+      };
+    }
+
+    if (call.name === "buscar_pedido") {
+      const ident = String(call.args.identificador || "").trim() || ctx.contactPhone;
+      // Try lead by id, phone, or name match
+      let query = ctx.supabase.from("leads").select("id,name,phone,email,status,notes,created_at").limit(1);
+      if (/^[0-9a-f-]{8,}$/i.test(ident)) {
+        query = query.eq("id", ident);
+      } else if (/^\+?\d{6,}$/.test(ident.replace(/\D/g, ""))) {
+        query = query.eq("phone", ident.replace(/\D/g, ""));
+      } else {
+        query = query.ilike("name", `%${ident}%`);
+      }
+      const { data: lead } = await query.maybeSingle();
+      if (!lead) return { result: `Nenhum pedido/lead encontrado para "${ident}".` };
+      return {
+        result: `Pedido/Lead encontrado:\n- Nome: ${lead.name}\n- Telefone: ${lead.phone || "-"}\n- Email: ${lead.email || "-"}\n- Status: ${lead.status || "-"}\n- Notas: ${lead.notes || "-"}\n- Criado em: ${lead.created_at}`,
+      };
+    }
+
+    return { result: `Ferramenta desconhecida: ${call.name}` };
+  } catch (err) {
+    console.error(`❌ Erro executando tool ${call.name}:`, err);
+    return { result: `Erro ao executar ${call.name}: ${err instanceof Error ? err.message : String(err)}` };
+  }
+}
+
+
+
 async function callBestAvailableAI(options: {
   preferredProvider: string;
   agentModel: string;
@@ -628,6 +733,36 @@ ABRIR CHAMADO AUTOMÁTICO:
 - Se estiver FORA do horário comercial e precisar escalar, um chamado será aberto automaticamente.
 - Informe ao cliente que o chamado foi registrado e que alguém entrará em contato.`;
 
+    const functionCallingInstructions = `
+FERRAMENTAS DISPONÍVEIS (FUNCTION CALLING):
+Você pode executar ações reais usando ferramentas. Para chamar uma ferramenta, inclua em QUALQUER lugar da sua resposta uma linha exatamente no formato:
+[[TOOL:nome_da_ferramenta|{"chave":"valor"}]]
+
+Use JSON válido nos argumentos. Você pode chamar múltiplas ferramentas na mesma resposta. Depois de invocar uma ferramenta, o sistema executa e (se necessário) devolve o resultado numa próxima rodada.
+
+Ferramentas:
+
+1. transferir_para_humano — Transfere a conversa para um atendente humano.
+   Args: {"motivo": "descrição curta"}
+   Use quando: cliente pedir humano, estiver frustrado, ou pedido fora do seu escopo.
+   Exemplo: [[TOOL:transferir_para_humano|{"motivo":"Cliente pediu falar com vendedor"}]]
+
+2. buscar_pedido — Consulta um pedido/lead pelo protocolo, ID ou telefone do cliente.
+   Args: {"identificador": "ID, código ou telefone"} — se vazio usa o telefone do contato atual.
+   Use quando: cliente perguntar status, valor, dados ou situação de um pedido/orçamento/lead.
+   Exemplo: [[TOOL:buscar_pedido|{"identificador":"12345"}]]
+   O resultado voltará como mensagem de sistema para você usar na resposta seguinte.
+
+3. criar_ticket — Abre um chamado de suporte formal.
+   Args: {"motivo": "assunto", "resumo": "descrição detalhada", "prioridade": "baixa|media|alta"}
+   Use quando: problema complexo, cliente insatisfeito, ou solicitação exige acompanhamento.
+   Exemplo: [[TOOL:criar_ticket|{"motivo":"Cobrança indevida","resumo":"Cliente contesta fatura de R$ 200","prioridade":"alta"}]]
+
+REGRAS:
+- Chame ferramentas apenas quando fizer sentido; nunca invente dados.
+- NÃO escreva a tag [[TOOL:...]] entre aspas ou como exemplo — sempre que aparecer no texto será executada.
+- Após buscar_pedido, aguarde o resultado antes de responder ao cliente com os dados.`;
+
     // ============ RAG: busca semântica na base de conhecimento ============
     let knowledgeContent = "";
     try {
@@ -695,6 +830,8 @@ ${visionInstructions}
 
 ${escalationInstructions}
 
+${functionCallingInstructions}
+
 ${asaasContext}`;
 
     const messages = [
@@ -757,17 +894,78 @@ ${asaasContext}`;
 
     console.log("✅ Resposta IA:", aiResponse.substring(0, 100));
 
-    // Check if AI is requesting escalation or ticket creation
+    let ticketCreated = false;
+    let transferToHuman = false;
+    let ticketId: string | null = null;
+    const toolsExecuted: string[] = [];
+
+    // ============ Function Calling: parse & execute tool tags (max 2 rodadas) ============
+    for (let round = 0; round < 2; round++) {
+      const toolCalls = parseToolCalls(aiResponse);
+      if (toolCalls.length === 0) break;
+
+      console.log(`🛠️ ${toolCalls.length} tool call(s) detectado(s) na rodada ${round + 1}`);
+      const toolResults: string[] = [];
+      let needsFollowUp = false;
+
+      for (const call of toolCalls) {
+        const { result, sideEffect } = await executeToolCall(call, {
+          supabase,
+          conversationId,
+          connectionId,
+          agentId,
+          agentUserId: agent.user_id,
+          contactName,
+          contactPhone,
+        });
+        toolsExecuted.push(call.name);
+        toolResults.push(`Resultado de ${call.name}: ${result}`);
+        if (sideEffect?.transferToHuman) transferToHuman = true;
+        if (sideEffect?.ticketId) { ticketCreated = true; ticketId = sideEffect.ticketId; }
+        // buscar_pedido devolve dados que a IA precisa usar → nova rodada
+        if (call.name === "buscar_pedido") needsFollowUp = true;
+      }
+
+      // Remove tags do texto para não vazar ao cliente
+      aiResponse = stripToolTags(aiResponse);
+
+      if (!needsFollowUp) break;
+
+      // Nova rodada: passa resultados como system msg e re-chama a IA
+      const followUpMessages = [
+        ...messages,
+        { role: "assistant", content: aiResponse || "(chamando ferramenta)" },
+        { role: "system", content: `RESULTADO DAS FERRAMENTAS:\n${toolResults.join("\n\n")}\n\nUse esses dados para responder ao cliente de forma clara e objetiva. NÃO chame buscar_pedido novamente.` },
+      ];
+      try {
+        const followUp = await callBestAvailableAI({
+          preferredProvider: selectedProvider,
+          agentModel,
+          openaiKey,
+          geminiKey,
+          messages: followUpMessages,
+          temperature: agent.temperature || 0.7,
+        });
+        aiResponse = followUp.response || aiResponse;
+      } catch (e) {
+        console.error("❌ Falha na rodada de follow-up:", e);
+        aiResponse = aiResponse || "Consegui as informações, mas houve um erro ao formatá-las. Um atendente pode ajudar?";
+        break;
+      }
+    }
+
+    if (toolsExecuted.length > 0) {
+      console.log("🛠️ Tools executadas:", toolsExecuted.join(", "));
+    }
+
+    // Check if AI is requesting escalation or ticket creation (legacy tags)
     const isEscalating = aiResponse.includes("[ESCALAR]") || aiResponse.includes("[TRANSFERIR]");
     const wantsToCreateTicket = aiResponse.includes("{{abrir_chamado}}") || 
                                  aiResponse.includes("{{criar_chamado}}") ||
                                  aiResponse.includes("{{open_ticket}}") ||
                                  aiResponse.toLowerCase().includes("vou abrir um chamado") ||
                                  aiResponse.toLowerCase().includes("abrir chamado de suporte");
-    
-    let ticketCreated = false;
-    let transferToHuman = false;
-    let ticketId = null;
+
 
     if (isEscalating || wantsToCreateTicket) {
       console.log("⚠️ IA solicitou escalação/chamado");
