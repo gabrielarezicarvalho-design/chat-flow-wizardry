@@ -28,10 +28,10 @@ export const useConversations = () => {
       return data;
     },
     enabled: !isLoadingCompany,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
-    refetchOnMount: true
+    refetchOnMount: false
   });
 
   const updateConversation = useMutation({
