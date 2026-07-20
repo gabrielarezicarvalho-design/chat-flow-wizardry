@@ -359,6 +359,15 @@ const Departments = () => {
                   variant="outline"
                   size="sm"
                   className="flex-1"
+                  onClick={() => openMembersDialog(department)}
+                >
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Agentes
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
                   onClick={() => handleEdit(department)}
                 >
                   Editar
