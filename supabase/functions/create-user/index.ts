@@ -111,11 +111,10 @@ serve(async (req) => {
       const { data: list } = await supabaseAdmin.auth.admin.listUsers();
       const authUser = list?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
       if (authUser) {
-        // Ensure profile has the username set
+        // Upsert profile so it always exists after this call
         await supabaseAdmin
           .from('profiles')
-          .update({ username, full_name })
-          .eq('id', authUser.id);
+          .upsert({ id: authUser.id, username, full_name }, { onConflict: 'id' });
         existingProfile = { id: authUser.id, username };
       }
     }
