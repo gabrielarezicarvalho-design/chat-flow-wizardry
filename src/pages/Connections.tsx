@@ -912,11 +912,21 @@ const Connections = () => {
 
     try {
       if (showToast) toast.info("Configurando webhook...");
-      
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        if (showToast) toast.error("Sessão expirada. Faça login novamente.");
+        return false;
+      }
+
       const { data, error } = await supabase.functions.invoke('wa-set-webhook', {
         body: {
           connection_id: connection.id
-        }
+        },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       if (error) throw error;
