@@ -225,8 +225,8 @@ export function ViewConversationDialog({
                       className={cn(
                         "max-w-[75%] rounded-lg px-4 py-2 text-sm",
                         isReceived
-                          ? "bg-card border"
-                          : "bg-[hsl(142_70%_40%)] text-white"
+                          ? "bg-[hsl(142_70%_40%)] text-white"
+                          : "bg-primary text-primary-foreground"
                       )}
                     >
                       <MessageContent 
@@ -237,7 +237,7 @@ export function ViewConversationDialog({
                       <p
                         className={cn(
                           "text-xs mt-1 text-right",
-                          isReceived ? "text-muted-foreground" : "text-white/80"
+                          isReceived ? "text-white/80" : "text-primary-foreground/70"
                         )}
                       >
                         {rawDate && !isNaN(new Date(rawDate).getTime())
