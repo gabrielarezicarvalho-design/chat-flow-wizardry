@@ -314,7 +314,11 @@ export default function GoogleMapsLeads() {
                 <>
                   <div className="flex-1 overflow-y-auto space-y-2 pr-1">
                     {results.map((lead, i) => (
-                      <div key={i} className="p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors space-y-1">
+                      <div
+                        key={i}
+                        onClick={() => setSelectedLead(lead)}
+                        className="p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 hover:border-primary/40 hover:shadow-md hover:shadow-primary/10 transition-all cursor-pointer space-y-1"
+                      >
                         <div className="flex justify-between items-start gap-2">
                           <p className="font-semibold text-sm">{lead.name}</p>
                           {lead.rating && (
@@ -335,7 +339,15 @@ export default function GoogleMapsLeads() {
                             <Phone className="w-3 h-3" /> {lead.phone}
                           </p>
                         )}
-                        <Button size="sm" variant="ghost" className="h-7 text-xs w-full mt-1" onClick={() => saveAsLead(lead)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs w-full mt-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            saveAsLead(lead);
+                          }}
+                        >
                           Salvar como lead <ArrowRight className="w-3 h-3 ml-1" />
                         </Button>
                       </div>
