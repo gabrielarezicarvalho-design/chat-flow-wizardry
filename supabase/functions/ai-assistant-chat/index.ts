@@ -647,6 +647,8 @@ REGRAS ABSOLUTAS DA BASE DE CONHECIMENTO:
 Responda de forma ${agent.response_style === 'formal' ? 'formal e profissional' : agent.response_style === 'casual' ? 'casual e descontraída' : 'amigável e prestativa'}.
 Seja conciso e objetivo nas respostas. Responda sempre em português brasileiro.
 
+${whatsappFormattingRules}
+
 ${knowledgeSection}
 
 ${visionInstructions}
