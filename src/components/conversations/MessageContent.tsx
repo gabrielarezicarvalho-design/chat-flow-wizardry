@@ -3,8 +3,8 @@ import { Download, FileText, Image as ImageIcon, Mic } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface MessageContentProps {
-  content: string;
-  type: string;
+  content?: string | null;
+  type?: string | null;
   isSent: boolean;
 }
 
@@ -16,6 +16,8 @@ interface MediaData {
 }
 
 export const MessageContent = ({ content, type, isSent }: MessageContentProps) => {
+  const safeContent = typeof content === "string" ? content : "";
+  const safeType = typeof type === "string" && type.trim().length > 0 ? type : "text";
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [transcription, setTranscription] = useState<string | null>(null);
@@ -25,17 +27,17 @@ export const MessageContent = ({ content, type, isSent }: MessageContentProps) =
 
   // Try to parse media data from JSON content
   const parseMediaData = (): MediaData | null => {
-    if (!content || typeof content !== 'string') return null;
+    if (!safeContent) return null;
     try {
-      const data = JSON.parse(content);
+      const data = JSON.parse(safeContent);
       // Handle WhatsApp format with uppercase URL
-      if (data.URL) {
+      if (typeof data?.URL === 'string' && data.URL.length > 0) {
         const isAudio = data.mimetype?.includes('audio') || data.PTT === true;
         const isImage = data.mimetype?.includes('image');
         const isVideo = data.mimetype?.includes('video');
         const isDocument = data.mimetype && !isAudio && !isImage && !isVideo;
         
-        let detectedType = type;
+        let detectedType = safeType;
         if (isAudio) detectedType = 'audio';
         else if (isImage) detectedType = 'image';
         else if (isVideo) detectedType = 'video';
@@ -49,16 +51,16 @@ export const MessageContent = ({ content, type, isSent }: MessageContentProps) =
         };
       }
       // Handle lowercase url format
-      if (data.url) {
-        return data as MediaData;
+      if (typeof data?.url === 'string' && data.url.length > 0) {
+        return { ...data, type: typeof data.type === 'string' ? data.type : safeType } as MediaData;
       }
     } catch {
       // Not JSON, might be old format like "[image] caption" or just a URL
-      if (content.startsWith('http')) {
-        return { url: content, type };
+      if (safeContent.startsWith('http')) {
+        return { url: safeContent, type: safeType };
       }
       // Check for old format [type] content
-      const match = content.match(/^\[(\w+)\]\s*(.*)?$/);
+      const match = safeContent.match(/^\[(\w+)\]\s*(.*)?$/);
       if (match) {
         return { url: '', caption: match[2] || '', type: match[1] };
       }
@@ -107,7 +109,7 @@ export const MessageContent = ({ content, type, isSent }: MessageContentProps) =
   }, [mediaData?.url, mediaData?.type]);
 
   // Render based on type (use mediaData.type if available for auto-detection)
-  const renderType = mediaData?.type || type;
+  const renderType = mediaData?.type || safeType;
 
   if (renderType === 'image' && mediaData?.url) {
     return (
@@ -222,7 +224,7 @@ export const MessageContent = ({ content, type, isSent }: MessageContentProps) =
           <FileText className={`w-8 h-8 ${isSent ? 'text-primary-foreground' : 'text-primary'}`} />
           <div className="flex-1 min-w-0">
             <p className={`text-sm font-medium truncate ${isSent ? 'text-primary-foreground' : 'text-foreground'}`}>
-              {type === 'video' ? 'Vídeo' : 'Documento'}
+              {safeType === 'video' ? 'Vídeo' : 'Documento'}
             </p>
             <p className={`text-xs truncate ${isSent ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
               Clique para abrir
@@ -240,7 +242,7 @@ export const MessageContent = ({ content, type, isSent }: MessageContentProps) =
   }
 
   // Default text rendering - but check if it looks like JSON we shouldn't display
-  const looksLikeMediaJson = content.startsWith('{"URL"') || content.startsWith('{"url"');
+  const looksLikeMediaJson = safeContent.startsWith('{"URL"') || safeContent.startsWith('{"url"');
   if (looksLikeMediaJson) {
     // It's media JSON that wasn't parsed - show as audio fallback
     return (
@@ -255,7 +257,7 @@ export const MessageContent = ({ content, type, isSent }: MessageContentProps) =
 
   return (
     <p className={`text-sm whitespace-pre-wrap break-words leading-relaxed ${isSent ? "text-primary-foreground" : "text-foreground"}`}>
-      {content}
+      {safeContent}
     </p>
   );
 };
