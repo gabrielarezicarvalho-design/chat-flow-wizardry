@@ -103,7 +103,16 @@ const Segmentation = () => {
       
       const { data, error } = await query;
       if (error) throw error;
-      return data || [];
+      // Dedupe by phone (keep most recent — list is already ordered desc)
+      const seen = new Set<string>();
+      const deduped = (data || []).filter((c: any) => {
+        const key = (c.phone || c.email || c.id)?.toString().trim();
+        if (!key) return true;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      return deduped;
     },
   });
 
