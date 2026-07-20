@@ -5,11 +5,12 @@ import { Send, Sparkles, Zap, ArrowRight, Rocket, Target, BarChart3, Users, Cale
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import robotImage from "@/assets/marketflow-robot.png";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
 import { ABTesting } from "@/components/mass-sending/ABTesting";
+import { useEffect } from "react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
