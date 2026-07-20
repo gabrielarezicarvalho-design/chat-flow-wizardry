@@ -174,6 +174,111 @@ async function callOpenAI(apiKey: string, model: string, messages: any[], temper
   return data.choices?.[0]?.message?.content;
 }
 
+// Parse tool call tags like [[TOOL:name|{"json":"args"}]] from AI response
+interface ToolCall { name: string; args: Record<string, any>; raw: string }
+function parseToolCalls(text: string): ToolCall[] {
+  const calls: ToolCall[] = [];
+  const regex = /\[\[TOOL:([a-z_]+)\|(\{[\s\S]*?\})\]\]/gi;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    try {
+      calls.push({ name: match[1], args: JSON.parse(match[2]), raw: match[0] });
+    } catch {
+      calls.push({ name: match[1], args: {}, raw: match[0] });
+    }
+  }
+  return calls;
+}
+
+function stripToolTags(text: string): string {
+  return text.replace(/\[\[TOOL:[a-z_]+\|\{[\s\S]*?\}\]\]/gi, "").trim();
+}
+
+async function executeToolCall(
+  call: ToolCall,
+  ctx: {
+    supabase: any;
+    conversationId: string;
+    connectionId: string;
+    agentId: string;
+    agentUserId: string;
+    contactName: string;
+    contactPhone: string;
+  }
+): Promise<{ result: string; sideEffect?: { transferToHuman?: boolean; ticketId?: string } }> {
+  console.log(`🛠️ Executando tool: ${call.name}`, call.args);
+
+  try {
+    if (call.name === "transferir_para_humano") {
+      const motivo = call.args.motivo || "Solicitação do cliente";
+      await ctx.supabase
+        .from("conversations")
+        .update({ attendance_type: "agent", status: "open" })
+        .eq("id", ctx.conversationId);
+      return {
+        result: `Transferência realizada. Motivo: ${motivo}`,
+        sideEffect: { transferToHuman: true },
+      };
+    }
+
+    if (call.name === "criar_ticket") {
+      const motivo = call.args.motivo || "Solicitação de suporte";
+      const resumo = call.args.resumo || motivo;
+      const prio = String(call.args.prioridade || "media").toLowerCase();
+      const dissatisfactionLevel = prio.startsWith("alta") || prio === "high" ? "high"
+        : prio.startsWith("baix") || prio === "low" ? "low" : "medium";
+      const { data: ticket, error } = await ctx.supabase
+        .from("ai_tickets")
+        .insert({
+          user_id: ctx.agentUserId,
+          conversation_id: ctx.conversationId,
+          connection_id: ctx.connectionId,
+          agent_id: ctx.agentId,
+          contact_name: ctx.contactName || "Cliente",
+          contact_phone: ctx.contactPhone,
+          reason: motivo,
+          dissatisfaction_level: dissatisfactionLevel,
+          ai_summary: resumo,
+          status: "pending",
+          priority: dissatisfactionLevel === "high" ? "high" : "normal",
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      const code = ticket.id.substring(0, 8).toUpperCase();
+      return {
+        result: `Chamado criado. Protocolo: ${code}. Prioridade: ${dissatisfactionLevel}.`,
+        sideEffect: { ticketId: ticket.id },
+      };
+    }
+
+    if (call.name === "buscar_pedido") {
+      const ident = String(call.args.identificador || "").trim() || ctx.contactPhone;
+      // Try lead by id, phone, or name match
+      let query = ctx.supabase.from("leads").select("id,name,phone,email,status,notes,created_at").limit(1);
+      if (/^[0-9a-f-]{8,}$/i.test(ident)) {
+        query = query.eq("id", ident);
+      } else if (/^\+?\d{6,}$/.test(ident.replace(/\D/g, ""))) {
+        query = query.eq("phone", ident.replace(/\D/g, ""));
+      } else {
+        query = query.ilike("name", `%${ident}%`);
+      }
+      const { data: lead } = await query.maybeSingle();
+      if (!lead) return { result: `Nenhum pedido/lead encontrado para "${ident}".` };
+      return {
+        result: `Pedido/Lead encontrado:\n- Nome: ${lead.name}\n- Telefone: ${lead.phone || "-"}\n- Email: ${lead.email || "-"}\n- Status: ${lead.status || "-"}\n- Notas: ${lead.notes || "-"}\n- Criado em: ${lead.created_at}`,
+      };
+    }
+
+    return { result: `Ferramenta desconhecida: ${call.name}` };
+  } catch (err) {
+    console.error(`❌ Erro executando tool ${call.name}:`, err);
+    return { result: `Erro ao executar ${call.name}: ${err instanceof Error ? err.message : String(err)}` };
+  }
+}
+
+
+
 async function callBestAvailableAI(options: {
   preferredProvider: string;
   agentModel: string;
