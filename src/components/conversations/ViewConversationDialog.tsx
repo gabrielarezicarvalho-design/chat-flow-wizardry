@@ -209,7 +209,10 @@ export function ViewConversationDialog({
               </div>
             ) : (
               messages.map((msg: any) => {
-                const isReceived = msg.recebido === true;
+                const isReceived = msg.sender_type === 'contact' || msg.recebido === true;
+                const body = msg.content ?? msg.conteudo ?? "";
+                const type = msg.type || msg.tipo || 'text';
+                const rawDate = msg.created_at || msg.criado_em;
                 return (
                   <div
                     key={msg.id}
@@ -227,8 +230,8 @@ export function ViewConversationDialog({
                       )}
                     >
                       <MessageContent 
-                        content={msg.conteudo} 
-                        type={msg.tipo || 'text'} 
+                        content={body} 
+                        type={type} 
                         isSent={!isReceived} 
                       />
                       <p
@@ -237,8 +240,8 @@ export function ViewConversationDialog({
                           isReceived ? "text-muted-foreground" : "text-primary-foreground/70"
                         )}
                       >
-                        {msg.criado_em && !isNaN(new Date(msg.criado_em).getTime())
-                          ? format(new Date(msg.criado_em), "HH:mm")
+                        {rawDate && !isNaN(new Date(rawDate).getTime())
+                          ? format(new Date(rawDate), "HH:mm")
                           : "--:--"}
                       </p>
                     </div>
