@@ -17,7 +17,7 @@ export default function AdminWhatsAppMeta() {
   const [apiVersion, setApiVersion] = useState("v22.0");
   const [environment, setEnvironment] = useState("PROD");
 
-  const webhookUrl = `https://usxpwndgjlnhbdxxoujf.supabase.co/functions/v1/whatsapp-webhook`;
+  const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/whatsapp-webhook`;
 
   useEffect(() => {
     fetchSettings();
