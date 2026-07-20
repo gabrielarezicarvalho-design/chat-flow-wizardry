@@ -3068,6 +3068,38 @@ const Connections = () => {
                 </div>
 
                 <div>
+                  <Label className="mb-3 block">Servidor</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div
+                      onClick={() => setFormData({ ...formData, environment: 'PROD' })}
+                      className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
+                        formData.environment === 'PROD'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <p className={`text-sm font-medium ${formData.environment === 'PROD' ? 'text-primary' : ''}`}>
+                        UAZAPI padrão
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Servidor UAZAPI oficial</p>
+                    </div>
+                    <div
+                      onClick={() => setFormData({ ...formData, environment: 'BTZAP' })}
+                      className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
+                        formData.environment === 'BTZAP'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <p className={`text-sm font-medium ${formData.environment === 'BTZAP' ? 'text-primary' : ''}`}>
+                        BTZAP
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1 break-all">server.btzap.com.br</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
                   <Label className="mb-3 block">Método de Conexão</Label>
                   <div className="grid grid-cols-2 gap-3">
                     <div 

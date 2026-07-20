@@ -17,13 +17,19 @@ serve(async (req) => {
     console.log("📋 Listing instances for environment:", environment);
 
     // Get admin token and base url based on environment
-    const ADMIN_TOKEN = environment?.toUpperCase() === "PROD"
-      ? Deno.env.get("UZAPI_ADMIN_TOKEN_PROD")
-      : Deno.env.get("UZAPI_ADMIN_TOKEN_TESTE");
-
-    const BASE_URL = environment?.toUpperCase() === "PROD"
-      ? Deno.env.get("UZAPI_BASE_URL_PROD")
-      : Deno.env.get("UZAPI_BASE_URL_TESTE");
+    const envUpper = environment?.toUpperCase();
+    let ADMIN_TOKEN: string | undefined;
+    let BASE_URL: string | undefined;
+    if (envUpper === "BTZAP") {
+      ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_BTZAP");
+      BASE_URL = Deno.env.get("UZAPI_BASE_URL_BTZAP") || "https://server.btzap.com.br";
+    } else if (envUpper === "PROD") {
+      ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_PROD");
+      BASE_URL = Deno.env.get("UZAPI_BASE_URL_PROD");
+    } else {
+      ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_TESTE");
+      BASE_URL = Deno.env.get("UZAPI_BASE_URL_TESTE");
+    }
 
     if (!ADMIN_TOKEN || !BASE_URL) {
       return new Response(JSON.stringify({ 

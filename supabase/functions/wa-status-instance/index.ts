@@ -28,9 +28,14 @@ serve(async (req) => {
     // Use provided base_url if available, otherwise fall back to environment-based secrets
     let BASE_URL = base_url;
     if (!BASE_URL) {
-      BASE_URL = environment?.toUpperCase() === "PROD"
-        ? Deno.env.get("UZAPI_BASE_URL_PROD")
-        : Deno.env.get("UZAPI_BASE_URL_TESTE");
+      const envUpper = environment?.toUpperCase();
+      if (envUpper === "BTZAP") {
+        BASE_URL = Deno.env.get("UZAPI_BASE_URL_BTZAP") || "https://server.btzap.com.br";
+      } else if (envUpper === "PROD") {
+        BASE_URL = Deno.env.get("UZAPI_BASE_URL_PROD");
+      } else {
+        BASE_URL = Deno.env.get("UZAPI_BASE_URL_TESTE");
+      }
     }
 
     if (!BASE_URL) {
