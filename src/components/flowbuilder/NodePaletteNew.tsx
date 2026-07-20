@@ -16,6 +16,7 @@ import {
   CalendarClock,
   Workflow
 } from 'lucide-react';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
