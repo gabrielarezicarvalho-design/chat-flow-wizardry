@@ -13,7 +13,7 @@ interface UseVpsStorageReturn {
  * Hook para upload de arquivos na VPS storage.
  * Gerencia estado de upload, progresso e erros automaticamente.
  */
-export const useVpsStorage = (): UseVpsStorageReturn => {
+export const useCloudStorage = (): UseVpsStorageReturn => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
