@@ -513,11 +513,37 @@ const AgentsContent = () => {
             </TabsContent>
 
             <TabsContent value="conhecimento" className="space-y-6">
-              <div>
-                <h3 className="font-medium text-foreground">Base de Conhecimento</h3>
-                <p className="text-sm text-muted-foreground">
-                  Adicione informações e contexto que o assistente pode usar para responder perguntas.
-                </p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-medium text-foreground">Base de Conhecimento</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Adicione informações e contexto que o assistente pode usar para responder perguntas.
+                  </p>
+                </div>
+                {selectedAgent && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      const { supabase } = await import("@/integrations/supabase/client");
+                      toast.loading("Indexando base de conhecimento (RAG)...", { id: "rag" });
+                      // Salva antes de indexar
+                      await updateAgent.mutateAsync({ id: selectedAgent, updates: { knowledge_text: formData.knowledgeText } as any });
+                      const { data, error } = await supabase.functions.invoke("index-agent-knowledge", {
+                        body: { agentId: selectedAgent },
+                      });
+                      if (error || data?.error) {
+                        toast.error(`Falha ao indexar: ${error?.message || data?.error}`, { id: "rag" });
+                      } else {
+                        toast.success(`✅ Base indexada em ${data.chunks} trechos. IA agora responderá com busca semântica.`, { id: "rag" });
+                      }
+                    }}
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    Indexar (RAG)
+                  </Button>
+                )}
               </div>
 
               <div>
@@ -530,9 +556,10 @@ const AgentsContent = () => {
                   className="mt-1 min-h-[200px]"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  {formData.knowledgeText.length} caracteres
+                  {formData.knowledgeText.length} caracteres · Após editar, clique em <strong>Indexar (RAG)</strong> para a IA usar busca semântica.
                 </p>
               </div>
+
 
               {/* Configurações gerais - toggle style like reference */}
               <div className="border-t pt-6 space-y-1">

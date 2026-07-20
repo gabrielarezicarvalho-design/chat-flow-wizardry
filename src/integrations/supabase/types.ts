@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_knowledge_chunks: {
+        Row: {
+          agent_id: string
+          chunk_index: number
+          company_id: string | null
+          content: string
+          created_at: string
+          embedding: string
+          id: string
+          token_count: number | null
+        }
+        Insert: {
+          agent_id: string
+          chunk_index: number
+          company_id?: string | null
+          content: string
+          created_at?: string
+          embedding: string
+          id?: string
+          token_count?: number | null
+        }
+        Update: {
+          agent_id?: string
+          chunk_index?: number
+          company_id?: string | null
+          content?: string
+          created_at?: string
+          embedding?: string
+          id?: string
+          token_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_knowledge_chunks_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_knowledge_chunks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agents: {
         Row: {
           ai_provider_for_audio: string | null
@@ -1756,6 +1804,19 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      match_agent_knowledge: {
+        Args: {
+          match_count?: number
+          min_similarity?: number
+          p_agent_id: string
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          id: string
+          similarity: number
+        }[]
       }
     }
     Enums: {

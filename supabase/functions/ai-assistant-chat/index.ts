@@ -628,11 +628,50 @@ ABRIR CHAMADO AUTOMÁTICO:
 - Se estiver FORA do horário comercial e precisar escalar, um chamado será aberto automaticamente.
 - Informe ao cliente que o chamado foi registrado e que alguém entrará em contato.`;
 
-    // Include knowledge base if available
-    const knowledgeSection = agent.knowledge_text ? `
+    // ============ RAG: busca semântica na base de conhecimento ============
+    let knowledgeContent = "";
+    try {
+      const lovableKey = extractApiKey(Deno.env.get("LOVABLE_API_KEY"));
+      if (lovableKey && message) {
+        const embRes = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${lovableKey}` },
+          body: JSON.stringify({
+            model: "openai/text-embedding-3-small",
+            input: message.slice(0, 4000),
+            dimensions: 1536,
+          }),
+        });
+        if (embRes.ok) {
+          const embData = await embRes.json();
+          const queryEmbedding = embData.data?.[0]?.embedding;
+          if (queryEmbedding) {
+            const { data: matches } = await supabase.rpc("match_agent_knowledge", {
+              p_agent_id: agentId,
+              query_embedding: `[${queryEmbedding.join(",")}]` as any,
+              match_count: 5,
+              min_similarity: 0.3,
+            });
+            if (matches && matches.length > 0) {
+              knowledgeContent = matches.map((m: any, i: number) => `[Trecho ${i + 1} · relevância ${(m.similarity * 100).toFixed(0)}%]\n${m.content}`).join("\n\n---\n\n");
+              console.log(`🔎 RAG: ${matches.length} trechos recuperados`);
+            }
+          }
+        }
+      }
+    } catch (ragErr) {
+      console.error("⚠️ RAG falhou, usando fallback:", ragErr);
+    }
+
+    // Fallback: se RAG não retornou nada, usa knowledge_text completo (comportamento antigo)
+    if (!knowledgeContent && agent.knowledge_text) {
+      knowledgeContent = agent.knowledge_text;
+    }
+
+    const knowledgeSection = knowledgeContent ? `
 
 BASE DE CONHECIMENTO (USE ESTAS INFORMAÇÕES PARA RESPONDER):
-${agent.knowledge_text}
+${knowledgeContent}
 
 REGRAS ABSOLUTAS DA BASE DE CONHECIMENTO:
 1. SEMPRE que o cliente fizer uma PERGUNTA (com "?" ou palavras como "qual", "quanto", "quais", "como", etc), você DEVE responder DIRETAMENTE usando as informações da base de conhecimento acima.
@@ -642,6 +681,7 @@ REGRAS ABSOLUTAS DA BASE DE CONHECIMENTO:
 5. Se o cliente perguntou "quais os valores" ou "quanto custa", liste os planos e preços disponíveis na base.
 6. Não invente dados. Use exatamente o que está na base.
 7. PRIORIDADE: Responder a pergunta do cliente > Seguir fluxo de apresentação.` : "";
+
 
     const fullSystemPrompt = `${baseSystemPrompt}
 Responda de forma ${agent.response_style === 'formal' ? 'formal e profissional' : agent.response_style === 'casual' ? 'casual e descontraída' : 'amigável e prestativa'}.
