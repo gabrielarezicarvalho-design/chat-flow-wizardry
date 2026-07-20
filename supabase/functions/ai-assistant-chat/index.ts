@@ -725,6 +725,8 @@ ${visionInstructions}
 
 ${escalationInstructions}
 
+${functionCallingInstructions}
+
 ${asaasContext}`;
 
     const messages = [
