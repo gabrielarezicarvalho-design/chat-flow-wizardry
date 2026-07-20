@@ -108,7 +108,7 @@ export function ViewConversationDialog({
     `;
 
     messages.forEach((msg: any) => {
-      const isReceived = msg.sender_type === 'contact' || msg.recebido === true;
+      const isReceived = msg.sender_type === 'customer' || msg.sender_type === 'contact' || msg.recebido === true;
       const rawDate = msg.created_at || msg.criado_em;
       const dateObj = rawDate ? new Date(rawDate) : new Date(NaN);
       const time = !isNaN(dateObj.getTime())
@@ -209,7 +209,7 @@ export function ViewConversationDialog({
               </div>
             ) : (
               messages.map((msg: any) => {
-                const isReceived = msg.sender_type === 'contact' || msg.recebido === true;
+                const isReceived = msg.sender_type === 'customer' || msg.sender_type === 'contact' || msg.recebido === true;
                 const body = msg.content ?? msg.conteudo ?? "";
                 const type = msg.type || msg.tipo || 'text';
                 const rawDate = msg.created_at || msg.criado_em;
