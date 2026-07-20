@@ -188,7 +188,7 @@ serve(async (req) => {
         return jsonResponse({ error: "Não foi possível carregar as configurações" }, 500);
       }
 
-      const uniqueSettings = new Map<string, typeof settings[number]>();
+      const uniqueSettings = new Map<string, NonNullable<typeof settings>[number]>();
       for (const setting of settings ?? []) {
         if (!uniqueSettings.has(setting.key)) {
           uniqueSettings.set(setting.key, setting);
