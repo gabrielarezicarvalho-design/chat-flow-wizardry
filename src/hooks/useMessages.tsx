@@ -123,11 +123,10 @@ export const useMessages = (conversationId?: string) => {
       return data || [];
     },
     enabled: !!conversationId,
-    staleTime: 0,
-    gcTime: 0,
-    refetchInterval: 5000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false
   });
 
   const addMessageToCache = useCallback((newMessage: any) => {
