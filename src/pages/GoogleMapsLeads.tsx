@@ -385,6 +385,74 @@ export default function GoogleMapsLeads() {
           </Card>
         </div>
       </div>
+
+      {/* Lead details popup */}
+      <Dialog open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
+        <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl">
+          {selectedLead && (
+            <div className="p-6 space-y-4">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-left">{selectedLead.name}</DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-3">
+                {selectedLead.phone && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <Phone className="w-4 h-4 text-primary flex-shrink-0" />
+                    <a href={`tel:${selectedLead.phone}`} className="text-foreground hover:text-primary transition-colors">
+                      {selectedLead.phone}
+                    </a>
+                  </div>
+                )}
+
+                {selectedLead.website && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <Globe className="w-4 h-4 text-primary flex-shrink-0" />
+                    <a
+                      href={selectedLead.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline truncate"
+                    >
+                      {selectedLead.website}
+                    </a>
+                  </div>
+                )}
+
+                {selectedLead.address && (
+                  <div className="flex items-start gap-3 text-sm">
+                    <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-foreground">{selectedLead.address}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t pt-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  <span>Email: N/A</span>
+                </div>
+                <div className="flex items-center gap-2 truncate">
+                  <Share2 className="w-4 h-4" />
+                  <span className="truncate">Social: Lead Misto (Pessoal...)</span>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full font-bold tracking-wide"
+                onClick={() => {
+                  const q = encodeURIComponent(`${selectedLead.name} ${selectedLead.address ?? ""}`);
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
+                }}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                GOOGLE MAPS
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
