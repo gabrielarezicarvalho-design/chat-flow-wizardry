@@ -26,6 +26,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
 import { toast } from "sonner";
 
+import { LiveMap } from "@/components/google-maps-leads/LiveMap";
+
 interface MapLead {
   name: string;
   address: string;
@@ -34,6 +36,8 @@ interface MapLead {
   rating?: number;
   reviews?: number;
   category?: string;
+  lat?: number;
+  lng?: number;
 }
 
 const QUICK_AMOUNTS = [50, 100, 250, 500];
@@ -264,7 +268,7 @@ export default function GoogleMapsLeads() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Map placeholder */}
           <Card className="lg:col-span-2 overflow-hidden border-primary/10">
-            <div className="relative h-[500px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+            <div className="relative h-[500px] bg-slate-900">
               {/* Header overlay */}
               <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/60 backdrop-blur px-3 py-1.5 rounded-full">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
@@ -274,30 +278,11 @@ export default function GoogleMapsLeads() {
                 {results.length} leads encontrados
               </div>
 
-              {/* Map SVG (Brasil silhueta simplificada) */}
-              <svg viewBox="0 0 400 400" className="w-full h-full opacity-30" preserveAspectRatio="xMidYMid meet">
-                <path
-                  d="M180 60 Q220 55 260 80 Q290 110 300 160 Q320 200 310 250 Q290 310 240 340 Q200 355 160 340 Q110 310 100 260 Q90 200 110 150 Q140 90 180 60 Z"
-                  fill="#1e293b"
-                  stroke="#334155"
-                  strokeWidth="1.5"
-                />
-              </svg>
-
-              {/* Pins simulados */}
-              {results.slice(0, 20).map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-3 h-3 rounded-full bg-primary shadow-lg shadow-primary/50 animate-pulse"
-                  style={{
-                    left: `${20 + Math.random() * 60}%`,
-                    top: `${20 + Math.random() * 60}%`,
-                  }}
-                />
-              ))}
+              {/* Google Map real */}
+              <LiveMap leads={results} city={city} />
 
               {/* Progress footer */}
-              <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur p-4 space-y-2">
+              <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur p-4 space-y-2 z-10">
                 <div className="flex justify-between text-sm text-white">
                   <span>{status}</span>
                   <span className="text-yellow-400 font-semibold">{progress}%</span>

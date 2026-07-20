@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
           "X-Connection-Api-Key": GOOGLE_MAPS_API_KEY,
           "Content-Type": "application/json",
           "X-Goog-FieldMask":
-            "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.primaryTypeDisplayName,nextPageToken",
+            "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.primaryTypeDisplayName,places.location,nextPageToken",
         },
         body: JSON.stringify(body),
       });
@@ -64,6 +64,8 @@ Deno.serve(async (req) => {
           rating: p.rating,
           reviews: p.userRatingCount,
           category: p.primaryTypeDisplayName?.text || "",
+          lat: p.location?.latitude,
+          lng: p.location?.longitude,
         });
       }
 
