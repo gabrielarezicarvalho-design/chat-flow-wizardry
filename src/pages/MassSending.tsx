@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useVpsStorage } from "@/hooks/useVpsStorage";
+import { useCloudStorage } from "@/hooks/useCloudStorage";
 import { uploadToVps, uploadBlobToVps } from "@/lib/cloud-storage";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -122,7 +122,7 @@ interface CampaignTemplate {
 }
 
 function MassSendingContent() {
-  const { upload: uploadToVpsStorage } = useVpsStorage();
+  const { upload: uploadToCloudStorage } = useCloudStorage();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
@@ -421,7 +421,7 @@ function MassSendingContent() {
       setIsUploading(true);
       
       try {
-        const result = await uploadToVpsStorage(file, undefined);
+        const result = await uploadToCloudStorage(file, undefined);
         
         if (!result.success) {
           toast.error(result.error || "Erro ao enviar arquivo");

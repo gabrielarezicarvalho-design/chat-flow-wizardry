@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { uploadToVps, checkStorageHealth, VpsUploadResult } from '@/lib/cloud-storage';
 import { toast } from 'sonner';
 
-interface UseVpsStorageReturn {
+interface UseCloudStorageReturn {
   upload: (file: File, companySlug?: string) => Promise<VpsUploadResult>;
   isUploading: boolean;
   progress: number;
@@ -13,7 +13,7 @@ interface UseVpsStorageReturn {
  * Hook para upload de arquivos na VPS storage.
  * Gerencia estado de upload, progresso e erros automaticamente.
  */
-export const useVpsStorage = (): UseVpsStorageReturn => {
+export const useCloudStorage = (): UseCloudStorageReturn => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
