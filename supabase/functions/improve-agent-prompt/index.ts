@@ -374,19 +374,43 @@ ${configInfo}`;
 
     let result: string | null = null;
 
+    const tryLovable = async () => {
+      try {
+        return await callLovableAI(sysPrompt, userMessage, formattedHistory, images);
+      } catch (e) {
+        console.error("Lovable AI fallback failed:", e);
+        return null;
+      }
+    };
+
     if (openaiKey) {
       try {
         result = await callOpenAI(openaiKey, sysPrompt, userMessage, formattedHistory, images);
       } catch (e) {
-        console.error("OpenAI failed, trying Gemini fallback:", e);
+        console.error("OpenAI failed, trying Gemini:", e);
         if (geminiKey) {
-          result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
+          try {
+            result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
+          } catch (e2) {
+            console.error("Gemini failed, trying Lovable AI:", e2);
+            result = await tryLovable();
+            if (!result) throw e2;
+          }
         } else {
-          throw e;
+          result = await tryLovable();
+          if (!result) throw e;
         }
       }
     } else if (geminiKey) {
-      result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
+      try {
+        result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
+      } catch (e) {
+        console.error("Gemini failed, trying Lovable AI:", e);
+        result = await tryLovable();
+        if (!result) throw e;
+      }
+    } else {
+      result = await callLovableAI(sysPrompt, userMessage, formattedHistory, images);
     }
 
     return new Response(JSON.stringify({ result }), {
