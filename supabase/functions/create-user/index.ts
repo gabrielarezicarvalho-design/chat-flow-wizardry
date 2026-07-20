@@ -100,11 +100,25 @@ serve(async (req) => {
     const email = isEmail ? username : `${safeLocal}@internal.marketflow.app`;
 
     // Check if username already exists in profiles
-    const { data: existingProfile } = await supabaseAdmin
+    let { data: existingProfile } = await supabaseAdmin
       .from('profiles')
       .select('id, username')
       .eq('username', username)
       .maybeSingle();
+
+    // Fallback: check auth by email (user may exist in auth without a matching profile username)
+    if (!existingProfile) {
+      const { data: list } = await supabaseAdmin.auth.admin.listUsers();
+      const authUser = list?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+      if (authUser) {
+        // Ensure profile has the username set
+        await supabaseAdmin
+          .from('profiles')
+          .update({ username, full_name })
+          .eq('id', authUser.id);
+        existingProfile = { id: authUser.id, username };
+      }
+    }
 
     if (existingProfile) {
       // User exists - update password instead of creating new
