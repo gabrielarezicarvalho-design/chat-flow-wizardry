@@ -71,8 +71,6 @@ export function ViewConversationDialog({
       return;
     }
 
-    const userName = conversation.user_name || conversation.leads?.name || "Desconhecido";
-    const userPhone = conversation.user_phone || conversation.leads?.phone || "Sem telefone";
     const createdAt = conversation.created_at 
       ? format(new Date(conversation.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })
       : "N/A";
