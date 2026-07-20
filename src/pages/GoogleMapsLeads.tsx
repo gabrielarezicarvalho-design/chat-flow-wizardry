@@ -374,20 +374,27 @@ export default function GoogleMapsLeads() {
 
 function StatCard({ color, icon, value, label }: { color: string; icon: React.ReactNode; value: string; label: string }) {
   return (
-    <div className={`rounded-xl p-4 bg-gradient-to-br ${color} border border-border/50`}>
-      <div className="mb-2">{icon}</div>
-      <p className="text-lg font-bold">{value}</p>
-      <p className="text-xs text-muted-foreground leading-tight">{label}</p>
+    <div
+      className={`group relative rounded-xl p-4 bg-gradient-to-br ${color} border border-border/50 overflow-hidden cursor-default transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/40`}
+    >
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.15),transparent_60%)]" />
+      <div className="relative">
+        <div className="mb-2 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">{icon}</div>
+        <p className="text-lg font-bold">{value}</p>
+        <p className="text-xs text-muted-foreground leading-tight">{label}</p>
+      </div>
     </div>
   );
 }
 
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <Card>
-      <CardContent className="p-5 space-y-1">
-        <div className="text-primary">{icon}</div>
-        <p className="font-semibold text-sm">{title}</p>
+    <Card className="group relative overflow-hidden cursor-default transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/20 hover:border-primary/40">
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
+      <div className="absolute -inset-px rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[conic-gradient(from_var(--angle,0deg),transparent_70%,hsl(var(--primary)/0.4))] blur-sm -z-10" />
+      <CardContent className="relative p-5 space-y-1">
+        <div className="text-primary transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6">{icon}</div>
+        <p className="font-semibold text-sm group-hover:text-primary transition-colors">{title}</p>
         <p className="text-xs text-muted-foreground">{desc}</p>
       </CardContent>
     </Card>
