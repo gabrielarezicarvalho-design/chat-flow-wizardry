@@ -529,7 +529,7 @@ const AgentsContent = () => {
                       const { supabase } = await import("@/integrations/supabase/client");
                       toast.loading("Indexando base de conhecimento (RAG)...", { id: "rag" });
                       // Salva antes de indexar
-                      await updateAgent(selectedAgent, { knowledge_text: formData.knowledgeText });
+                      await updateAgent.mutateAsync({ id: selectedAgent, updates: { knowledge_text: formData.knowledgeText } as any });
                       const { data, error } = await supabase.functions.invoke("index-agent-knowledge", {
                         body: { agentId: selectedAgent },
                       });
