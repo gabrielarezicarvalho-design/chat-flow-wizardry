@@ -129,26 +129,34 @@ serve(async (req) => {
     let openaiKey: string | null = null;
     let geminiKey: string | null = null;
 
+    const extractKey = (v: any): string | null => {
+      if (!v) return null;
+      if (typeof v === "string") return v.trim() || null;
+      if (typeof v === "object" && v.key) return String(v.key).trim() || null;
+      return String(v).trim() || null;
+    };
+
+    const applySettings = (rows: any[] | null) => {
+      if (!rows) return;
+      for (const s of rows) {
+        if (s.key === "ai_openai_key" && !openaiKey) openaiKey = extractKey(s.value);
+        if (s.key === "ai_gemini_key" && !geminiKey) geminiKey = extractKey(s.value);
+      }
+    };
+
     if (companyId) {
-      const { data: aiSettings } = await supabase
-        .from("settings")
-        .select("key, value")
+      const { data } = await supabase
+        .from("settings").select("key, value")
         .eq("company_id", companyId)
         .in("key", ["ai_openai_key", "ai_gemini_key"]);
-
-      if (aiSettings) {
-        for (const setting of aiSettings) {
-          const val = setting.value;
-          const extractKey = (v: any): string | null => {
-            if (!v) return null;
-            if (typeof v === "string") return v;
-            if (typeof v === "object" && v.key) return v.key;
-            return String(v);
-          };
-          if (setting.key === "ai_openai_key") openaiKey = extractKey(val);
-          if (setting.key === "ai_gemini_key") geminiKey = extractKey(val);
-        }
-      }
+      applySettings(data);
+    }
+    if (!openaiKey && !geminiKey) {
+      const { data } = await supabase
+        .from("settings").select("key, value")
+        .is("company_id", null)
+        .in("key", ["ai_openai_key", "ai_gemini_key"]);
+      applySettings(data);
     }
 
     if (!openaiKey && !geminiKey) {
