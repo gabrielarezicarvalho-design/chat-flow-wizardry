@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 async function configureWebhook(baseUrl: string, token: string) {
-  const webhookUrl = `https://usxpwndgjlnhbdxxoujf.supabase.co/functions/v1/wa-webhook-listener`;
+  const webhookUrl = `${Deno.env.get("SUPABASE_URL") ?? ""}/functions/v1/wa-webhook-listener`;
   console.log("🔧 Auto-configuring webhook to:", webhookUrl);
 
   const allEvents = [
