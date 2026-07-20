@@ -32,11 +32,14 @@ export function ViewConversationDialog({
   const { messages, isLoading } = useMessages(open ? conversation?.id : undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const userName = conversation?.contact_name || conversation?.user_name || conversation?.leads?.name || "Desconhecido";
+  const userPhone = conversation?.contact_phone || conversation?.user_phone || conversation?.leads?.phone || "";
+
   useEffect(() => {
     if (open && conversation) {
-      console.log('📋 [ViewDialog] Opening conversation:', conversation.id, 'User:', conversation.user_name);
+      console.log('📋 [ViewDialog] Opening conversation:', conversation.id, 'User:', userName);
     }
-  }, [open, conversation]);
+  }, [open, conversation, userName]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -68,8 +71,6 @@ export function ViewConversationDialog({
       return;
     }
 
-    const userName = conversation.user_name || conversation.leads?.name || "Desconhecido";
-    const userPhone = conversation.user_phone || conversation.leads?.phone || "Sem telefone";
     const createdAt = conversation.created_at 
       ? format(new Date(conversation.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })
       : "N/A";
@@ -99,7 +100,7 @@ export function ViewConversationDialog({
         <h1>📱 Histórico de Conversa</h1>
         <div class="info">
           <p><strong>Cliente:</strong> ${userName}</p>
-          <p><strong>Telefone:</strong> ${userPhone}</p>
+          <p><strong>Telefone:</strong> ${userPhone || "Sem telefone"}</p>
           <p><strong>Data de Início:</strong> ${createdAt}</p>
           <p><strong>Total de Mensagens:</strong> ${messages.length}</p>
         </div>
@@ -107,17 +108,19 @@ export function ViewConversationDialog({
     `;
 
     messages.forEach((msg: any) => {
-      const isReceived = msg.recebido === true;
-      const dateObj = new Date(msg.criado_em);
-      const time = !isNaN(dateObj.getTime()) 
+      const isReceived = msg.sender_type === 'contact' || msg.recebido === true;
+      const rawDate = msg.created_at || msg.criado_em;
+      const dateObj = rawDate ? new Date(rawDate) : new Date(NaN);
+      const time = !isNaN(dateObj.getTime())
         ? format(dateObj, "dd/MM/yyyy HH:mm", { locale: ptBR })
         : "Data inválida";
       const sender = isReceived ? userName : "Atendente";
-      
+      const body = (msg.content ?? msg.conteudo ?? "").toString();
+
       htmlContent += `
         <div class="message ${isReceived ? 'received' : 'sent'}">
           <div class="sender">${sender}</div>
-          <div>${msg.conteudo.replace(/\n/g, '<br>')}</div>
+          <div>${body.replace(/\n/g, '<br>')}</div>
           <div class="time">${time}</div>
         </div>
       `;
@@ -156,17 +159,17 @@ export function ViewConversationDialog({
           <div className="flex items-center gap-4">
             <Avatar className="h-12 w-12">
               <AvatarFallback className="bg-primary/10 text-primary">
-                {getInitials(conversation.user_name)}
+                {getInitials(userName)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <DialogTitle className="text-lg">
-                {conversation.user_name || "Desconhecido"}
+                {userName}
               </DialogTitle>
               <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                 <span className="flex items-center gap-1">
                   <Phone className="w-3 h-3" />
-                  {conversation.user_phone || "Sem telefone"}
+                  {userPhone || "Sem telefone"}
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
@@ -206,7 +209,10 @@ export function ViewConversationDialog({
               </div>
             ) : (
               messages.map((msg: any) => {
-                const isReceived = msg.recebido === true;
+                const isReceived = msg.sender_type === 'contact' || msg.recebido === true;
+                const body = msg.content ?? msg.conteudo ?? "";
+                const type = msg.type || msg.tipo || 'text';
+                const rawDate = msg.created_at || msg.criado_em;
                 return (
                   <div
                     key={msg.id}
@@ -224,8 +230,8 @@ export function ViewConversationDialog({
                       )}
                     >
                       <MessageContent 
-                        content={msg.conteudo} 
-                        type={msg.tipo || 'text'} 
+                        content={body} 
+                        type={type} 
                         isSent={!isReceived} 
                       />
                       <p
@@ -234,8 +240,8 @@ export function ViewConversationDialog({
                           isReceived ? "text-muted-foreground" : "text-primary-foreground/70"
                         )}
                       >
-                        {msg.criado_em && !isNaN(new Date(msg.criado_em).getTime())
-                          ? format(new Date(msg.criado_em), "HH:mm")
+                        {rawDate && !isNaN(new Date(rawDate).getTime())
+                          ? format(new Date(rawDate), "HH:mm")
                           : "--:--"}
                       </p>
                     </div>
