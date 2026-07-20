@@ -389,13 +389,15 @@ function StatCard({ color, icon, value, label }: { color: string; icon: React.Re
 
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <Card className="group relative overflow-hidden cursor-default transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/20 hover:border-primary/40">
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
-      <div className="absolute -inset-px rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[conic-gradient(from_var(--angle,0deg),transparent_70%,hsl(var(--primary)/0.4))] blur-sm -z-10" />
+    <Card className="group relative overflow-hidden cursor-default border-border/60 transition-all duration-500 hover:border-primary/60">
+      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute -left-1/2 top-0 h-full w-1/2 skew-x-12 bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:translate-x-[300%] transition-all duration-1000" />
       <CardContent className="relative p-5 space-y-1">
-        <div className="text-primary transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6">{icon}</div>
-        <p className="font-semibold text-sm group-hover:text-primary transition-colors">{title}</p>
-        <p className="text-xs text-muted-foreground">{desc}</p>
+        <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 text-primary transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-lg group-hover:shadow-primary/40">
+          {icon}
+        </div>
+        <p className="font-semibold text-sm pt-1 transition-transform duration-300 group-hover:translate-x-1">{title}</p>
+        <p className="text-xs text-muted-foreground transition-transform duration-300 group-hover:translate-x-1">{desc}</p>
       </CardContent>
     </Card>
   );
