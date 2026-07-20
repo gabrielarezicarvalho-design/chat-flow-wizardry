@@ -36,7 +36,7 @@ export const MainLayout = ({ children, noPadding = false }: MainLayoutProps) => 
       <TopBar sidebarCollapsed={collapsed} />
       <main className={cn(
         "pt-16 h-full transition-all duration-300",
-        collapsed ? "ml-20" : "ml-64",
+        collapsed ? "ml-20" : "ml-56",
         !noPadding && "overflow-auto"
       )}>
         <div className={noPadding ? 'h-[calc(100vh-4rem)]' : 'p-6'}>
