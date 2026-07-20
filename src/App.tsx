@@ -50,6 +50,7 @@ const InternalChat = lazy(() => import("./pages/InternalChat"));
 const AutoProspecting = lazy(() => import("./pages/AutoProspecting"));
 const CampaignReports = lazy(() => import("./pages/CampaignReports"));
 const ChatHistory = lazy(() => import("./pages/ChatHistory"));
+const Segmentation = lazy(() => import("./pages/Segmentation"));
 
 const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
