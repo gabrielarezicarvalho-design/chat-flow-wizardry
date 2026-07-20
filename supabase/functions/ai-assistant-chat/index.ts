@@ -628,6 +628,36 @@ ABRIR CHAMADO AUTOMÁTICO:
 - Se estiver FORA do horário comercial e precisar escalar, um chamado será aberto automaticamente.
 - Informe ao cliente que o chamado foi registrado e que alguém entrará em contato.`;
 
+    const functionCallingInstructions = `
+FERRAMENTAS DISPONÍVEIS (FUNCTION CALLING):
+Você pode executar ações reais usando ferramentas. Para chamar uma ferramenta, inclua em QUALQUER lugar da sua resposta uma linha exatamente no formato:
+[[TOOL:nome_da_ferramenta|{"chave":"valor"}]]
+
+Use JSON válido nos argumentos. Você pode chamar múltiplas ferramentas na mesma resposta. Depois de invocar uma ferramenta, o sistema executa e (se necessário) devolve o resultado numa próxima rodada.
+
+Ferramentas:
+
+1. transferir_para_humano — Transfere a conversa para um atendente humano.
+   Args: {"motivo": "descrição curta"}
+   Use quando: cliente pedir humano, estiver frustrado, ou pedido fora do seu escopo.
+   Exemplo: [[TOOL:transferir_para_humano|{"motivo":"Cliente pediu falar com vendedor"}]]
+
+2. buscar_pedido — Consulta um pedido/lead pelo protocolo, ID ou telefone do cliente.
+   Args: {"identificador": "ID, código ou telefone"} — se vazio usa o telefone do contato atual.
+   Use quando: cliente perguntar status, valor, dados ou situação de um pedido/orçamento/lead.
+   Exemplo: [[TOOL:buscar_pedido|{"identificador":"12345"}]]
+   O resultado voltará como mensagem de sistema para você usar na resposta seguinte.
+
+3. criar_ticket — Abre um chamado de suporte formal.
+   Args: {"motivo": "assunto", "resumo": "descrição detalhada", "prioridade": "baixa|media|alta"}
+   Use quando: problema complexo, cliente insatisfeito, ou solicitação exige acompanhamento.
+   Exemplo: [[TOOL:criar_ticket|{"motivo":"Cobrança indevida","resumo":"Cliente contesta fatura de R$ 200","prioridade":"alta"}]]
+
+REGRAS:
+- Chame ferramentas apenas quando fizer sentido; nunca invente dados.
+- NÃO escreva a tag [[TOOL:...]] entre aspas ou como exemplo — sempre que aparecer no texto será executada.
+- Após buscar_pedido, aguarde o resultado antes de responder ao cliente com os dados.`;
+
     // ============ RAG: busca semântica na base de conhecimento ============
     let knowledgeContent = "";
     try {
