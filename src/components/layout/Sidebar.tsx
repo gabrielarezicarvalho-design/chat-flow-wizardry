@@ -40,6 +40,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import nextProLogo from "@/assets/next-pro-logo.png.asset.json";
+
 
 // Create context for sidebar state
 interface SidebarContextType {
@@ -250,11 +252,12 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
         <div className={cn("border-b border-white/10", collapsed ? "p-4" : "p-6")}>
           <div className="flex items-center gap-3">
             <div className={cn(
-                "rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0",
+                "rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white/10 backdrop-blur-sm",
                 collapsed ? "w-10 h-10" : "w-10 h-10"
               )}>
-                <Sparkles className="w-6 h-6" />
+                <img src={nextProLogo.url} alt="Next Pro" className="w-full h-full object-contain" />
               </div>
+
             {!collapsed && (
               <div>
                 <h1 className="text-xl font-bold font-['Space_Grotesk'] tracking-tight">NEXT PRO&nbsp;</h1>
