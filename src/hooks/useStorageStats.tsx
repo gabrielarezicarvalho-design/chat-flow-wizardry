@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { listVpsFiles } from '@/lib/vps-storage';
+import { listVpsFiles } from '@/lib/cloud-storage';
 
 interface BucketStats {
   name: string;

@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Plus, Trash2, Upload, Calendar, Clock, Users, Gift, Eye, Edit, FileSpreadsheet, Image, Play, Pause, Video, List, MessageSquare, Cake, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { uploadToVps } from "@/lib/vps-storage";
+import { uploadToVps } from "@/lib/cloud-storage";
 import { format, isToday, addDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BirthdayImportDialog } from "./BirthdayImportDialog";

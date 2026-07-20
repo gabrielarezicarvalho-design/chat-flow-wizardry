@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Play, Loader2, Copy, Check, Trash2, Plus, Terminal, Send, X, Upload, Image as ImageIcon, Link, Video, FileText, Music } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { uploadToVps } from "@/lib/vps-storage";
+import { uploadToVps } from "@/lib/cloud-storage";
 
 interface Connection {
   id: string;
