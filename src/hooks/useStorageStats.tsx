@@ -54,8 +54,13 @@ export const useStorageStats = () => {
         planLimit
       };
     },
-    staleTime: 60000,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 15,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: false,
   });
+
 
   return {
     stats,
