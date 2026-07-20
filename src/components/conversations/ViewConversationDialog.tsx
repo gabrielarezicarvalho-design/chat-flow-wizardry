@@ -108,17 +108,19 @@ export function ViewConversationDialog({
     `;
 
     messages.forEach((msg: any) => {
-      const isReceived = msg.recebido === true;
-      const dateObj = new Date(msg.criado_em);
-      const time = !isNaN(dateObj.getTime()) 
+      const isReceived = msg.sender_type === 'contact' || msg.recebido === true;
+      const rawDate = msg.created_at || msg.criado_em;
+      const dateObj = rawDate ? new Date(rawDate) : new Date(NaN);
+      const time = !isNaN(dateObj.getTime())
         ? format(dateObj, "dd/MM/yyyy HH:mm", { locale: ptBR })
         : "Data inválida";
       const sender = isReceived ? userName : "Atendente";
-      
+      const body = (msg.content ?? msg.conteudo ?? "").toString();
+
       htmlContent += `
         <div class="message ${isReceived ? 'received' : 'sent'}">
           <div class="sender">${sender}</div>
-          <div>${msg.conteudo.replace(/\n/g, '<br>')}</div>
+          <div>${body.replace(/\n/g, '<br>')}</div>
           <div class="time">${time}</div>
         </div>
       `;
