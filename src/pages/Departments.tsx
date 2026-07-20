@@ -112,6 +112,46 @@ const Departments = () => {
     return `${daysStr} • ${bh.start} - ${bh.end}`;
   };
 
+  // Fetch users of the same company for the members dialog
+  const { data: companyUsers = [], isLoading: loadingUsers } = useQuery({
+    queryKey: ['company-users', companyId],
+    queryFn: async () => {
+      let q = supabase.from('profiles').select('id, full_name, username');
+      if (companyId) q = q.eq('company_id', companyId);
+      const { data, error } = await q.order('full_name', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: membersDialogOpen,
+  });
+
+  const openMembersDialog = (department: any) => {
+    setManagingDepartment(department);
+    setMembersDialogOpen(true);
+  };
+
+  const isMember = (userId: string) => {
+    return managingDepartment?.department_members?.some((m: any) => m.user_id === userId);
+  };
+
+  const toggleMember = async (userId: string, checked: boolean) => {
+    if (!managingDepartment) return;
+    if (checked) {
+      await addMember.mutateAsync({ departmentId: managingDepartment.id, userId });
+    } else {
+      await removeMember.mutateAsync({ departmentId: managingDepartment.id, userId });
+    }
+    // refresh local managingDepartment from refetched list
+    setManagingDepartment((prev: any) => {
+      if (!prev) return prev;
+      const members = checked
+        ? [...(prev.department_members || []), { id: crypto.randomUUID(), user_id: userId }]
+        : (prev.department_members || []).filter((m: any) => m.user_id !== userId);
+      return { ...prev, department_members: members };
+    });
+  };
+
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
