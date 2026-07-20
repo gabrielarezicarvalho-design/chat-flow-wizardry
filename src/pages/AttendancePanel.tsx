@@ -612,7 +612,14 @@ export default function AttendancePanel() {
                       </TableCell>
 
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setAgentFilter(agent.id);
+                            setActiveTab("attendances");
+                          }}
+                        >
                           Ver atendimentos
                         </Button>
                       </TableCell>
