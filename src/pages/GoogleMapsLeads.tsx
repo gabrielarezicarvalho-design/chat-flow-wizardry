@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Search,
   Building2,
@@ -21,6 +22,9 @@ import {
   Crown,
   ArrowRight,
   CheckCircle2,
+  Mail,
+  Share2,
+  ExternalLink,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
