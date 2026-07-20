@@ -148,30 +148,31 @@ export default function AttendancePanel() {
     enabled: !!user?.id,
   });
 
-  // Fetch profiles - ONLY from the same company
+  // Fetch profiles - filter by company when user has one; admins (sem company) veem todos
   const { data: attendants = [] } = useQuery({
-    queryKey: ["attendants", currentProfile?.company_id],
+    queryKey: ["attendants", currentProfile?.company_id ?? "all"],
     queryFn: async () => {
-      if (!currentProfile?.company_id) return [];
-      
-      const { data, error } = await supabase
+      let query = supabase
         .from("profiles")
         .select("id, full_name, created_at, is_online, last_seen_at, company_id")
-        .eq("company_id", currentProfile.company_id)
         .order("created_at", { ascending: false });
 
+      if (currentProfile?.company_id) {
+        query = query.eq("company_id", currentProfile.company_id);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
-      
+
       // Enrich with conversation counts and calculate online time
       return (data || []).map((profile) => {
         const activeConvs = conversations.filter(
           (c) => c.assigned_to === profile.id
         ).length;
-        
-        // Use is_online field directly
+
         const isOnline = profile.is_online === true;
         const profileStatus: AgentStatus = isOnline ? "online" : "offline";
-        
+
         return {
           id: profile.id,
           full_name: profile.full_name,
@@ -185,7 +186,7 @@ export default function AttendancePanel() {
         } as UserProfile;
       });
     },
-    enabled: !!currentProfile?.company_id && conversations.length >= 0,
+    enabled: !!user?.id,
   });
 
   // Classify conversations
