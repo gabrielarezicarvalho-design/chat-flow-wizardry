@@ -100,7 +100,7 @@ export function ViewConversationDialog({
         <h1>📱 Histórico de Conversa</h1>
         <div class="info">
           <p><strong>Cliente:</strong> ${userName}</p>
-          <p><strong>Telefone:</strong> ${userPhone}</p>
+          <p><strong>Telefone:</strong> ${userPhone || "Sem telefone"}</p>
           <p><strong>Data de Início:</strong> ${createdAt}</p>
           <p><strong>Total de Mensagens:</strong> ${messages.length}</p>
         </div>
