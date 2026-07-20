@@ -124,17 +124,22 @@ export async function listVpsFiles(companySlug?: string): Promise<{ success: boo
   if (!slug) {
     return { success: false, files: [], error: 'Empresa não identificada.' };
   }
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
   try {
-    const res = await fetch(`${VPS_STORAGE_BASE_URL}/files/${slug}`);
+    const res = await fetch(`${VPS_STORAGE_BASE_URL}/files/${slug}`, { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (!res.ok) {
       return { success: false, files: [], error: `Erro: ${res.status}` };
     }
     const data = await res.json();
     return { success: true, files: data.files || [] };
   } catch (error: any) {
-    return { success: false, files: [], error: error.message };
+    clearTimeout(timeoutId);
+    return { success: false, files: [], error: error?.name === 'AbortError' ? 'Timeout' : error.message };
   }
 }
+
 
 export interface VpsFileInfo {
   name: string;
