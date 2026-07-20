@@ -593,6 +593,14 @@ IMPORTANTE:
 
     // System prompt com instruções para escalar e abrir chamados
     const baseSystemPrompt = agent.system_prompt || `Você é um assistente virtual amigável chamado ${agent.name}.`;
+
+    const whatsappFormattingRules = `
+REGRAS DE FORMATAÇÃO PARA WHATSAPP (OBRIGATÓRIAS):
+- As respostas serão enviadas pelo WhatsApp, portanto NUNCA utilize Markdown com títulos (#, ##, ###).
+- NUNCA utilize listas com "*" ou "-" para formatação de itens.
+- Utilize apenas texto simples, emojis, marcadores "•" e separadores como "━━━━━━━━━━━━━━".
+- Use negrito apenas com *texto* quando realmente necessário, pois é o único formato suportado pelo WhatsApp.
+- As mensagens devem ficar limpas, organizadas e fáceis de ler.`;
     
     const visionInstructions = `
 CAPACIDADES DE VISÃO E DOCUMENTOS:
@@ -638,6 +646,8 @@ REGRAS ABSOLUTAS DA BASE DE CONHECIMENTO:
     const fullSystemPrompt = `${baseSystemPrompt}
 Responda de forma ${agent.response_style === 'formal' ? 'formal e profissional' : agent.response_style === 'casual' ? 'casual e descontraída' : 'amigável e prestativa'}.
 Seja conciso e objetivo nas respostas. Responda sempre em português brasileiro.
+
+${whatsappFormattingRules}
 
 ${knowledgeSection}
 
