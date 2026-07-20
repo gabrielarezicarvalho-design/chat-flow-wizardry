@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
-};
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 serve(async (req) => {
   if (req.method === "OPTIONS")
@@ -22,7 +18,9 @@ serve(async (req) => {
       const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
       const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
-      if (!authHeader || !serviceRoleKey || !anonKey || !supabaseUrl) {
+      const bearerToken = authHeader?.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+
+      if (!bearerToken || !serviceRoleKey || !anonKey || !supabaseUrl) {
         return new Response(JSON.stringify({
           success: false,
           error: "Sessão inválida para configurar webhook da conexão"
@@ -35,9 +33,10 @@ serve(async (req) => {
       const supabaseUser = createClient(supabaseUrl, anonKey, {
         global: { headers: { Authorization: authHeader } }
       });
-      const { data: userData, error: userError } = await supabaseUser.auth.getUser();
+      const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(bearerToken);
+      const userId = claimsData?.claims?.sub;
 
-      if (userError || !userData.user) {
+      if (claimsError || !userId) {
         return new Response(JSON.stringify({
           success: false,
           error: "Usuário não autenticado"
@@ -68,16 +67,16 @@ serve(async (req) => {
       const { data: profile } = await supabaseAdmin
         .from("profiles")
         .select("company_id")
-        .eq("id", userData.user.id)
+        .eq("id", userId)
         .maybeSingle();
 
       const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
-        _user_id: userData.user.id,
+        _user_id: userId,
         _role: "admin"
       });
 
       const canManageConnection = Boolean(isAdmin)
-        || connection.user_id === userData.user.id
+        || connection.user_id === userId
         || (connection.company_id && profile?.company_id === connection.company_id);
 
       if (!canManageConnection) {
