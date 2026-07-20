@@ -25,6 +25,7 @@ export const MessageContent = ({ content, type, isSent }: MessageContentProps) =
 
   // Try to parse media data from JSON content
   const parseMediaData = (): MediaData | null => {
+    if (!content || typeof content !== 'string') return null;
     try {
       const data = JSON.parse(content);
       // Handle WhatsApp format with uppercase URL
