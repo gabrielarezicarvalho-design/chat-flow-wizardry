@@ -894,17 +894,78 @@ ${asaasContext}`;
 
     console.log("✅ Resposta IA:", aiResponse.substring(0, 100));
 
-    // Check if AI is requesting escalation or ticket creation
+    let ticketCreated = false;
+    let transferToHuman = false;
+    let ticketId: string | null = null;
+    const toolsExecuted: string[] = [];
+
+    // ============ Function Calling: parse & execute tool tags (max 2 rodadas) ============
+    for (let round = 0; round < 2; round++) {
+      const toolCalls = parseToolCalls(aiResponse);
+      if (toolCalls.length === 0) break;
+
+      console.log(`🛠️ ${toolCalls.length} tool call(s) detectado(s) na rodada ${round + 1}`);
+      const toolResults: string[] = [];
+      let needsFollowUp = false;
+
+      for (const call of toolCalls) {
+        const { result, sideEffect } = await executeToolCall(call, {
+          supabase,
+          conversationId,
+          connectionId,
+          agentId,
+          agentUserId: agent.user_id,
+          contactName,
+          contactPhone,
+        });
+        toolsExecuted.push(call.name);
+        toolResults.push(`Resultado de ${call.name}: ${result}`);
+        if (sideEffect?.transferToHuman) transferToHuman = true;
+        if (sideEffect?.ticketId) { ticketCreated = true; ticketId = sideEffect.ticketId; }
+        // buscar_pedido devolve dados que a IA precisa usar → nova rodada
+        if (call.name === "buscar_pedido") needsFollowUp = true;
+      }
+
+      // Remove tags do texto para não vazar ao cliente
+      aiResponse = stripToolTags(aiResponse);
+
+      if (!needsFollowUp) break;
+
+      // Nova rodada: passa resultados como system msg e re-chama a IA
+      const followUpMessages = [
+        ...messages,
+        { role: "assistant", content: aiResponse || "(chamando ferramenta)" },
+        { role: "system", content: `RESULTADO DAS FERRAMENTAS:\n${toolResults.join("\n\n")}\n\nUse esses dados para responder ao cliente de forma clara e objetiva. NÃO chame buscar_pedido novamente.` },
+      ];
+      try {
+        const followUp = await callBestAvailableAI({
+          preferredProvider: selectedProvider,
+          agentModel,
+          openaiKey,
+          geminiKey,
+          messages: followUpMessages,
+          temperature: agent.temperature || 0.7,
+        });
+        aiResponse = followUp.response || aiResponse;
+      } catch (e) {
+        console.error("❌ Falha na rodada de follow-up:", e);
+        aiResponse = aiResponse || "Consegui as informações, mas houve um erro ao formatá-las. Um atendente pode ajudar?";
+        break;
+      }
+    }
+
+    if (toolsExecuted.length > 0) {
+      console.log("🛠️ Tools executadas:", toolsExecuted.join(", "));
+    }
+
+    // Check if AI is requesting escalation or ticket creation (legacy tags)
     const isEscalating = aiResponse.includes("[ESCALAR]") || aiResponse.includes("[TRANSFERIR]");
     const wantsToCreateTicket = aiResponse.includes("{{abrir_chamado}}") || 
                                  aiResponse.includes("{{criar_chamado}}") ||
                                  aiResponse.includes("{{open_ticket}}") ||
                                  aiResponse.toLowerCase().includes("vou abrir um chamado") ||
                                  aiResponse.toLowerCase().includes("abrir chamado de suporte");
-    
-    let ticketCreated = false;
-    let transferToHuman = false;
-    let ticketId = null;
+
 
     if (isEscalating || wantsToCreateTicket) {
       console.log("⚠️ IA solicitou escalação/chamado");
