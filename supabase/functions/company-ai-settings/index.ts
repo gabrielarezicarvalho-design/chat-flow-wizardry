@@ -75,7 +75,14 @@ serve(async (req) => {
       return jsonResponse({ error: "Erro ao buscar empresa do usuário" }, 500);
     }
 
-    if (!profile?.company_id) {
+    const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
+      _user_id: userData.user.id,
+      _role: "admin",
+    });
+
+    let companyId: string | null = profile?.company_id ?? null;
+
+    if (!companyId && !isAdmin) {
       return jsonResponse({ error: "Empresa não encontrada para este usuário" }, 400);
     }
 
