@@ -96,7 +96,21 @@ function buildMessageContent(text: string, mediaUrl?: string, mediaType?: string
   return content;
 }
 
-// Removed: Lovable AI Gateway is discontinued. Using user's own API keys only.
+function extractApiKey(value: unknown): string | null {
+  if (!value) return null;
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed && trimmed !== "null" && trimmed !== "__configured__" ? trimmed : null;
+  }
+
+  if (typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return extractApiKey(record.apiKey ?? record.key ?? record.value);
+  }
+
+  return String(value).trim() || null;
+}
 
 // Call OpenAI API (fallback)
 async function callOpenAI(apiKey: string, model: string, messages: any[], temperature: number) {
@@ -125,6 +139,57 @@ async function callOpenAI(apiKey: string, model: string, messages: any[], temper
 
   const data = await response.json();
   return data.choices?.[0]?.message?.content;
+}
+
+async function callBestAvailableAI(options: {
+  preferredProvider: string;
+  agentModel: string;
+  openaiKey: string | null;
+  geminiKey: string | null;
+  messages: any[];
+  temperature: number;
+}): Promise<{ response: string; provider: string }> {
+  const attempts: Array<{ provider: "openai" | "google"; key: string; model: string }> = [];
+  const fallbackOpenAIKey = extractApiKey(Deno.env.get("OPENAI_API_KEY"));
+
+  const addAttempt = (provider: "openai" | "google", key: string | null, model: string) => {
+    if (!key) return;
+    if (attempts.some((attempt) => attempt.provider === provider && attempt.key === key)) return;
+    attempts.push({ provider, key, model });
+  };
+
+  if (options.preferredProvider === "openai") {
+    addAttempt("openai", options.openaiKey, options.agentModel.includes("gpt") ? options.agentModel : "gpt-4o-mini");
+    addAttempt("google", options.geminiKey, options.agentModel.includes("gemini") ? options.agentModel : "gemini-2.0-flash");
+  } else {
+    addAttempt("google", options.geminiKey, options.agentModel.includes("gemini") ? options.agentModel : "gemini-2.0-flash");
+    addAttempt("openai", options.openaiKey, options.agentModel.includes("gpt") ? options.agentModel : "gpt-4o-mini");
+  }
+
+  addAttempt("openai", fallbackOpenAIKey, "gpt-4o-mini");
+
+  if (attempts.length === 0) {
+    throw new Error("Nenhuma chave de IA configurada. Configure sua chave OpenAI ou Gemini nas configurações.");
+  }
+
+  let lastError: unknown = null;
+
+  for (const attempt of attempts) {
+    try {
+      const response = attempt.provider === "openai"
+        ? await callOpenAI(attempt.key, attempt.model, options.messages, options.temperature)
+        : await callGemini(attempt.key, attempt.model, options.messages, options.temperature);
+
+      if (response) {
+        return { response, provider: attempt.provider };
+      }
+    } catch (error) {
+      lastError = error;
+      console.error(`❌ Falha no provider ${attempt.provider}; tentando próximo se disponível:`, error);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Falha ao chamar provedores de IA");
 }
 
 // Call Google Gemini API (fallback)
@@ -229,32 +294,37 @@ serve(async (req) => {
 
     // Get company_id from agent
     const companyId = agent.company_id;
-    
-    // Buscar chaves de IA da empresa na tabela settings
+
+    // Buscar chaves de IA da empresa na tabela settings; se o agente for global/admin,
+    // usar as configurações globais (company_id nulo) e por último o secret OPENAI_API_KEY.
     let openaiKey: string | null = null;
     let geminiKey: string | null = null;
-    
+
+    const applyAiSettings = (settings: Array<{ key: string; value: unknown }> | null) => {
+      for (const setting of settings ?? []) {
+        if (setting.key === "ai_openai_key" && !openaiKey) openaiKey = extractApiKey(setting.value);
+        if (setting.key === "ai_gemini_key" && !geminiKey) geminiKey = extractApiKey(setting.value);
+      }
+    };
+
     if (companyId) {
       const { data: aiSettings } = await supabase
         .from("settings")
         .select("key, value")
         .eq("company_id", companyId)
         .in("key", ["ai_openai_key", "ai_gemini_key"]);
-      
-      if (aiSettings) {
-        for (const setting of aiSettings) {
-          const val = setting.value;
-          // Value can be stored as plain string or as JSON string
-          const extractKey = (v: any): string | null => {
-            if (!v) return null;
-            if (typeof v === 'string') return v;
-            if (typeof v === 'object' && v.key) return v.key;
-            return String(v);
-          };
-          if (setting.key === "ai_openai_key") openaiKey = extractKey(val);
-          if (setting.key === "ai_gemini_key") geminiKey = extractKey(val);
-        }
-      }
+
+      applyAiSettings(aiSettings);
+    }
+
+    if (!openaiKey && !geminiKey) {
+      const { data: globalAiSettings } = await supabase
+        .from("settings")
+        .select("key, value")
+        .is("company_id", null)
+        .in("key", ["ai_openai_key", "ai_gemini_key"]);
+
+      applyAiSettings(globalAiSettings);
     }
 
     console.log("🔑 OpenAI key disponível:", !!openaiKey);
@@ -283,7 +353,7 @@ serve(async (req) => {
       apiKey = geminiKey;
     }
 
-    if (!apiKey) {
+    if (!apiKey && !Deno.env.get("OPENAI_API_KEY")) {
       console.error("❌ Nenhuma chave de IA configurada");
       return new Response(JSON.stringify({ 
         error: "No AI key configured",
@@ -294,7 +364,7 @@ serve(async (req) => {
       });
     }
 
-    console.log("✅ Usando provider:", selectedProvider);
+    console.log("✅ Usando provider preferencial:", selectedProvider || "fallback");
 
     // Buscar funções do agente
     const { data: agentFunctions } = await supabase
@@ -417,18 +487,27 @@ IMPORTANTE:
       content: msg.content || ""
     }));
 
-    // Adicionar mensagem atual com suporte a mídia (imagem/documento)
+    // Adicionar mensagem atual com suporte a mídia (imagem/documento).
+    // O webhook já salva a mensagem recebida antes de chamar esta função; evitar duplicar
+    // a mesma fala do cliente no contexto da IA.
     const currentMessageText = mediaCaption || message || "";
     const currentMessageContent = buildMessageContent(
       currentMessageText,
       mediaUrl,
       mediaType
     );
-    
-    conversationMessages.push({
-      role: "user",
-      content: currentMessageContent
-    });
+
+    const lastConversationMessage = conversationMessages[conversationMessages.length - 1];
+    const currentMessageAlreadyInHistory = !mediaUrl
+      && lastConversationMessage?.role === "user"
+      && String(lastConversationMessage.content || "").trim() === currentMessageText.trim();
+
+    if (!currentMessageAlreadyInHistory) {
+      conversationMessages.push({
+        role: "user",
+        content: currentMessageContent
+      });
+    }
     
     // Log para debug de mídia
     if (mediaUrl) {
@@ -519,23 +598,20 @@ ${asaasContext}`;
       // RESPOSTA FIXA - NÃO CHAMA IA
       aiResponse = `Olá, ${asaasData.customerName}! 👋 Encontrei sua fatura. Estou enviando os dados de pagamento agora...`;
     } else {
-      // Chamar IA normalmente
+      // Chamar IA normalmente, com fallback automático entre chave da empresa,
+      // chave global e secret OPENAI_API_KEY quando alguma chave estiver inválida/sem cota.
       try {
-        if (selectedProvider === "openai") {
-          aiResponse = await callOpenAI(
-            apiKey!,
-            agentModel.includes("gpt") ? agentModel : "gpt-4o-mini",
-            messages,
-            agent.temperature || 0.7
-          );
-        } else {
-          aiResponse = await callGemini(
-            apiKey!,
-            agentModel.includes("gemini") ? agentModel : "gemini-2.0-flash",
-            messages,
-            agent.temperature || 0.7
-          );
-        }
+        const aiResult = await callBestAvailableAI({
+          preferredProvider: selectedProvider,
+          agentModel,
+          openaiKey,
+          geminiKey,
+          messages,
+          temperature: agent.temperature || 0.7,
+        });
+
+        aiResponse = aiResult.response;
+        selectedProvider = aiResult.provider;
       } catch (apiError) {
         console.error("❌ Erro na API de IA:", apiError);
         
@@ -959,7 +1035,8 @@ ${asaasContext}`;
         .from("conversations")
         .update({ 
           status: "waiting",
-          agent_id: null, // Remove AI agent
+          assigned_to: null,
+          attendance_type: "agent",
           updated_at: new Date().toISOString()
         })
         .eq("id", conversationId);
