@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { Fragment, useMemo, useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -74,6 +74,9 @@ interface UserWithRole {
   is_company_admin: boolean | null;
   role?: string;
 }
+
+const emptyPermissionsByUser: Record<string, UserPermissions> = {};
+const emptyAssignments: any[] = [];
 
 export default function Users() {
   const { user } = useAuth();
@@ -171,8 +174,9 @@ export default function Users() {
   });
 
   // Fetch permissions from database for all users
-  const userIds = users.map(u => u.id);
-  const { data: allPermissions = {} } = useAllUserPermissions(userIds);
+  const userIds = useMemo(() => users.map(u => u.id), [users]);
+  const { data: allPermissionsData } = useAllUserPermissions(userIds);
+  const allPermissions = allPermissionsData ?? emptyPermissionsByUser;
 
   // Local state for optimistic permission updates
   const [localPermissions, setLocalPermissions] = useState<Record<string, UserPermissions>>({});
@@ -188,7 +192,7 @@ export default function Users() {
   };
 
   // Fetch department members for all users
-  const { data: departmentMembersData = [] } = useQuery({
+  const { data: departmentMembersQueryData } = useQuery({
     queryKey: ["department-members-all"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -198,9 +202,10 @@ export default function Users() {
       return data || [];
     },
   });
+  const departmentMembersData = departmentMembersQueryData ?? emptyAssignments;
 
   // Fetch user connections assignments
-  const { data: userConnectionsData = [] } = useQuery({
+  const { data: userConnectionsQueryData } = useQuery({
     queryKey: ["user-connections-assignments"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -210,6 +215,7 @@ export default function Users() {
       return data || [];
     },
   });
+  const userConnectionsData = userConnectionsQueryData ?? emptyAssignments;
 
   useEffect(() => {
     const connectionsMap: Record<string, string[]> = {};
@@ -662,8 +668,8 @@ export default function Users() {
               </TableRow>
             ) : (
               filteredUsers.map((u, index) => (
-                <>
-                  <TableRow key={u.id} className={expandedUserId === u.id ? "border-b-0" : ""}>
+                <Fragment key={u.id}>
+                  <TableRow className={expandedUserId === u.id ? "border-b-0" : ""}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <input type="checkbox" className="w-4 h-4 rounded border-muted-foreground" />
@@ -795,7 +801,7 @@ export default function Users() {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))
             )}
           </TableBody>

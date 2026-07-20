@@ -30,6 +30,8 @@ export const defaultPermissions: UserPermissions = {
   always_online: false,
 };
 
+const emptyPermissionsByUser: Record<string, UserPermissions> = {};
+
 export function useUserPermissions(targetUserId?: string) {
   const { user } = useAuth();
   const userId = targetUserId || user?.id;
@@ -113,19 +115,21 @@ export function useUserPermissions(targetUserId?: string) {
 
 // Bulk fetch permissions for multiple users (admin use)
 export function useAllUserPermissions(userIds: string[]) {
+  const stableUserIds = [...userIds].sort();
+
   return useQuery({
-    queryKey: ["all-user-permissions", userIds.sort().join(",")],
+    queryKey: ["all-user-permissions", stableUserIds.join(",")],
     queryFn: async () => {
-      if (!userIds.length) return {};
+      if (!stableUserIds.length) return emptyPermissionsByUser;
 
       const { data, error } = await supabase
         .from("user_permissions")
         .select("*")
-        .in("user_id", userIds);
+        .in("user_id", stableUserIds);
 
       if (error) {
         console.error("Error fetching all permissions:", error);
-        return {};
+        return emptyPermissionsByUser;
       }
 
       const map: Record<string, UserPermissions> = {};
@@ -147,7 +151,8 @@ export function useAllUserPermissions(userIds: string[]) {
 
       return map;
     },
-    enabled: userIds.length > 0,
+    enabled: stableUserIds.length > 0,
+    placeholderData: emptyPermissionsByUser,
     staleTime: 2 * 60 * 1000,
   });
 }
