@@ -60,6 +60,7 @@ const DEFAULT_STATS: Stats = {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { data: stats = DEFAULT_STATS } = useQuery({
     queryKey: ["dashboard-stats", user?.id],
     enabled: !!user?.id,
@@ -81,11 +82,27 @@ const Dashboard = () => {
         deliveryRate: Math.round(deliveryRate),
       };
     },
-    staleTime: 1000 * 60 * 10,
-    gcTime: 1000 * 60 * 30,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 30,
+    gcTime: 1000 * 60 * 10,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const invalidate = () =>
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats", user.id] });
+
+    const channel = supabase
+      .channel(`dashboard-stats-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "campaigns", filter: `user_id=eq.${user.id}` }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads", filter: `user_id=eq.${user.id}` }, invalidate)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
 
   const features = [
     {
