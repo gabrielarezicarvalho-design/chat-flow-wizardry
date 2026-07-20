@@ -2376,11 +2376,12 @@ function MassSendingContent() {
           )}
         </Card>
 
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={() => setStep(s => s - 1)} disabled={step === 1}>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-2">
+          <Button variant="outline" onClick={() => setStep(s => s - 1)} disabled={step === 1} className="w-full sm:w-auto">
             <ArrowLeft className="w-4 h-4 mr-2" />Anterior
           </Button>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 [&>button]:w-full sm:[&>button]:w-auto">
+
             {step === 4 && name && (
               <Button 
                 variant="outline" 
