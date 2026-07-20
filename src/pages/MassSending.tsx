@@ -122,7 +122,7 @@ interface CampaignTemplate {
 }
 
 function MassSendingContent() {
-  const { upload: uploadToVpsStorage } = useCloudStorage();
+  const { upload: uploadToCloudStorage } = useCloudStorage();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
@@ -421,7 +421,7 @@ function MassSendingContent() {
       setIsUploading(true);
       
       try {
-        const result = await uploadToVpsStorage(file, undefined);
+        const result = await uploadToCloudStorage(file, undefined);
         
         if (!result.success) {
           toast.error(result.error || "Erro ao enviar arquivo");
