@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,11 @@ import {
   Mail,
   Share2,
   ExternalLink,
+  Loader2,
+  Instagram,
+  Facebook,
+  Linkedin,
+  Youtube,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
@@ -57,6 +62,43 @@ export default function GoogleMapsLeads() {
   const [status, setStatus] = useState("Pronto para buscar");
   const [results, setResults] = useState<MapLead[]>([]);
   const [selectedLead, setSelectedLead] = useState<MapLead | null>(null);
+  const [enrichment, setEnrichment] = useState<{
+    loading: boolean;
+    emails: string[];
+    socials: Record<string, string>;
+    error?: string;
+  }>({ loading: false, emails: [], socials: {} });
+  const [enrichCache, setEnrichCache] = useState<Record<string, { emails: string[]; socials: Record<string, string> }>>({});
+
+  useEffect(() => {
+    if (!selectedLead) return;
+    const website = selectedLead.website;
+    if (!website) {
+      setEnrichment({ loading: false, emails: [], socials: {}, error: "Sem site para enriquecer" });
+      return;
+    }
+    if (enrichCache[website]) {
+      setEnrichment({ loading: false, ...enrichCache[website] });
+      return;
+    }
+    let cancelled = false;
+    setEnrichment({ loading: true, emails: [], socials: {} });
+    supabase.functions
+      .invoke("enrich-lead", { body: { website } })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          setEnrichment({ loading: false, emails: [], socials: {}, error: "Não foi possível enriquecer" });
+          return;
+        }
+        const result = { emails: data?.emails || [], socials: data?.socials || {} };
+        setEnrichCache((c) => ({ ...c, [website]: result }));
+        setEnrichment({ loading: false, ...result });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedLead, enrichCache]);
 
   const totalTarget = maxMode ? 1000 : amount;
 
