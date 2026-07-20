@@ -194,27 +194,39 @@ export default function AttendancePanel() {
     return conversations.map((conv) => {
       const convAny = conv as any;
       const flowState = convAny.flow_state;
-      const hasFlowState = flowState && Object.keys(flowState).length > 0;
-      const hasAssignedAgent = conv.assigned_to;
-      const isAiAgent = hasFlowState && flowState.waiting_for === "aiAgent";
+      const hasFlowState = flowState && typeof flowState === "object" && Object.keys(flowState).length > 0;
+      const hasAssignedAgent = !!conv.assigned_to;
+      const attendanceType = (convAny.attendance_type || "").toLowerCase();
+
+      const isAiAgent =
+        attendanceType === "ai" ||
+        attendanceType === "ia" ||
+        (hasFlowState && flowState.waiting_for === "aiAgent");
+
+      const isInFlow =
+        !isAiAgent &&
+        (attendanceType === "ura" ||
+          attendanceType === "flow" ||
+          (hasFlowState && !hasAssignedAgent));
 
       let classification: "in_flow" | "waiting" | "in_attendance" | "ai_agent" = "waiting";
 
       if (isAiAgent) {
         classification = "ai_agent";
-      } else if (hasFlowState && !hasAssignedAgent) {
+      } else if (isInFlow) {
         classification = "in_flow";
-      } else if (hasAssignedAgent) {
+      } else if (hasAssignedAgent && (attendanceType === "agent" || attendanceType === "human" || attendanceType === "")) {
         classification = "in_attendance";
       }
 
       return {
         ...conv,
         classification,
-        aiAgentId: isAiAgent ? flowState.ai_agent_id : null,
+        aiAgentId: isAiAgent ? flowState?.ai_agent_id ?? convAny.ai_agent_id ?? null : null,
       };
     });
   }, [conversations]);
+
 
   // Filter conversations
   const filteredConversations = useMemo(() => {
