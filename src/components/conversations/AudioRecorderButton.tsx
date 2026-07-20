@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, Square, Loader2, Send, Play, Pause, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadBlobToVps } from "@/lib/cloud-storage";
+import { uploadBlobToCloud } from "@/lib/cloud-storage";
 
 interface AudioRecorderButtonProps {
   connectionId: string;
@@ -159,7 +159,7 @@ export const AudioRecorderButton = ({
     try {
       // Upload to VPS storage
       const fileName = `${Date.now()}-audio.webm`;
-      const uploadResult = await uploadBlobToVps(audioBlob, fileName);
+      const uploadResult = await uploadBlobToCloud(audioBlob, fileName);
       if (!uploadResult.success) throw new Error(uploadResult.error || 'Erro no upload');
       const publicUrl = uploadResult.url;
 

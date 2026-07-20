@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Paperclip, Image, FileText, Loader2, X, Video } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadToVps } from "@/lib/cloud-storage";
+import { uploadToCloud } from "@/lib/cloud-storage";
 
 interface MediaSendPopoverProps {
   connectionId: string;
@@ -94,7 +94,7 @@ export const MediaSendPopover = ({
     
     try {
       // Upload to VPS storage
-      const uploadResult = await uploadToVps(selectedFile);
+      const uploadResult = await uploadToCloud(selectedFile);
       
       if (!uploadResult.success) {
         throw new Error(uploadResult.error || 'Erro no upload para o servidor');

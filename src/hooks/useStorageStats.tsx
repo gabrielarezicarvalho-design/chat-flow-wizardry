@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { listVpsFiles } from '@/lib/cloud-storage';
+import { listCloudFiles } from '@/lib/cloud-storage';
 
 interface BucketStats {
   name: string;
@@ -26,7 +26,7 @@ export const useStorageStats = () => {
   const { data: stats, isLoading, error, refetch } = useQuery({
     queryKey: ['storage-stats'],
     queryFn: async (): Promise<StorageStats> => {
-      const result = await listVpsFiles();
+      const result = await listCloudFiles();
       
       let totalSize = 0;
       let fileCount = 0;

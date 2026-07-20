@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
-import { uploadToVps, checkStorageHealth, VpsUploadResult } from '@/lib/cloud-storage';
+import { uploadToCloud, checkStorageHealth, CloudUploadResult } from '@/lib/cloud-storage';
 import { toast } from 'sonner';
 
 interface UseCloudStorageReturn {
-  upload: (file: File, companySlug?: string) => Promise<VpsUploadResult>;
+  upload: (file: File, companySlug?: string) => Promise<CloudUploadResult>;
   isUploading: boolean;
   progress: number;
   checkHealth: () => Promise<boolean>;
@@ -17,11 +17,11 @@ export const useCloudStorage = (): UseCloudStorageReturn => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const upload = useCallback(async (file: File, companySlug?: string): Promise<VpsUploadResult> => {
+  const upload = useCallback(async (file: File, companySlug?: string): Promise<CloudUploadResult> => {
     setIsUploading(true);
     setProgress(0);
 
-    const result = await uploadToVps(file, companySlug, (p) => setProgress(p));
+    const result = await uploadToCloud(file, companySlug, (p) => setProgress(p));
 
     if (!result.success) {
       toast.error(result.error || 'Erro ao enviar arquivo');

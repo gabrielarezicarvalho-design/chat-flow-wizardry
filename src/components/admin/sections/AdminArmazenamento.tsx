@@ -6,7 +6,7 @@ import {
   HardDrive, RefreshCw, Loader2, FileVideo, FileImage, FileText, Trash2, File
 } from "lucide-react";
 import { toast } from "sonner";
-import { listVpsFiles, deleteVpsFile, VpsFileInfo } from "@/lib/cloud-storage";
+import { listCloudFiles, deleteCloudFile, CloudFileInfo } from "@/lib/cloud-storage";
 
 const formatBytes = (bytes: number): string => {
   if (bytes === 0) return '0 B';
@@ -25,7 +25,7 @@ const getFileIcon = (mimetype?: string) => {
 
 export function AdminArmazenamento() {
   const [loading, setLoading] = useState(true);
-  const [files, setFiles] = useState<VpsFileInfo[]>([]);
+  const [files, setFiles] = useState<CloudFileInfo[]>([]);
   const [totalSize, setTotalSize] = useState(0);
   const [deleting, setDeleting] = useState<string | null>(null);
   const planLimit = 9 * 1024 * 1024 * 1024; // 9GB (VPS default)
@@ -33,7 +33,7 @@ export function AdminArmazenamento() {
   const fetchStorage = async () => {
     setLoading(true);
     try {
-      const result = await listVpsFiles();
+      const result = await listCloudFiles();
       if (result.success) {
         setFiles(result.files);
         setTotalSize(result.files.reduce((a, b) => a + (b.size || 0), 0));
@@ -53,7 +53,7 @@ export function AdminArmazenamento() {
     if (!confirm(`Excluir "${fileName}"?`)) return;
     setDeleting(fileName);
     try {
-      const result = await deleteVpsFile(fileName);
+      const result = await deleteCloudFile(fileName);
       if (!result.success) throw new Error(result.error);
       toast.success('Arquivo excluído');
       fetchStorage();
