@@ -105,7 +105,7 @@ serve(async (req) => {
         .from("settings")
         .upsert(
           {
-            company_id: profile.company_id,
+            company_id: companyId,
             key: keyNameByProvider[body.provider],
             value: apiKey,
             updated_at: new Date().toISOString(),
@@ -125,7 +125,7 @@ serve(async (req) => {
       const { error } = await supabaseAdmin
         .from("settings")
         .delete()
-        .eq("company_id", profile.company_id)
+        .eq("company_id", companyId)
         .eq("key", keyNameByProvider[body.provider]);
 
       if (error) {
@@ -152,7 +152,7 @@ serve(async (req) => {
         .from("settings")
         .upsert(
           {
-            company_id: profile.company_id,
+            company_id: companyId,
             key: settingKey,
             value: model,
             updated_at: new Date().toISOString(),
