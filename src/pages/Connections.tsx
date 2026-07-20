@@ -913,8 +913,19 @@ const Connections = () => {
     try {
       if (showToast) toast.info("Configurando webhook...");
 
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
+        if (showToast) toast.error("Sessão expirada. Faça login novamente.");
+        return false;
+      }
+
       const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
+      let accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        const { data: refreshedSession } = await supabase.auth.refreshSession();
+        accessToken = refreshedSession.session?.access_token;
+      }
+
       if (!accessToken) {
         if (showToast) toast.error("Sessão expirada. Faça login novamente.");
         return false;

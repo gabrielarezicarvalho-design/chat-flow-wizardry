@@ -34,9 +34,18 @@ serve(async (req) => {
         global: { headers: { Authorization: authHeader } }
       });
       const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(bearerToken);
-      const userId = claimsData?.claims?.sub;
+      let userId = claimsData?.claims?.sub;
 
+      // Compatibilidade defensiva: se a validação local por claims não estiver disponível
+      // para o token atual, revalida no serviço de autenticação usando o mesmo JWT.
       if (claimsError || !userId) {
+        const { data: userData, error: userError } = await supabaseUser.auth.getUser(bearerToken);
+        if (!userError) {
+          userId = userData.user?.id;
+        }
+      }
+
+      if (!userId) {
         return new Response(JSON.stringify({
           success: false,
           error: "Usuário não autenticado"
