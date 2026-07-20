@@ -242,10 +242,10 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
 
   return (
     <aside className={cn(
-      "fixed left-0 top-0 h-screen max-h-screen overflow-hidden bg-gradient-to-b from-primary to-primary-dark text-white shadow-xl z-50 transition-all duration-300",
+      "fixed left-0 top-0 h-screen bg-gradient-to-b from-primary to-primary-dark text-white shadow-xl z-50 transition-all duration-300",
       collapsed ? "w-20" : "w-64"
     )}>
-      <div className="flex flex-col h-full min-h-0 overflow-hidden">
+      <div className="flex flex-col h-full">
         {/* Logo */}
         <div className={cn("border-b border-white/10", collapsed ? "p-4" : "p-6")}>
           <div className="flex items-center gap-3">
@@ -285,7 +285,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 min-h-0 p-2 space-y-1 overflow-y-auto overscroll-contain scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <nav className="flex-1 p-2 space-y-1 overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {navItems.map((item) => (
             item.children ? (
               <NavItemWithChildren 
