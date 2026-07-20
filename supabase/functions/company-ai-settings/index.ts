@@ -75,7 +75,14 @@ serve(async (req) => {
       return jsonResponse({ error: "Erro ao buscar empresa do usuário" }, 500);
     }
 
-    if (!profile?.company_id) {
+    const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
+      _user_id: userData.user.id,
+      _role: "admin",
+    });
+
+    let companyId: string | null = profile?.company_id ?? null;
+
+    if (!companyId && !isAdmin) {
       return jsonResponse({ error: "Empresa não encontrada para este usuário" }, 400);
     }
 
@@ -98,7 +105,7 @@ serve(async (req) => {
         .from("settings")
         .upsert(
           {
-            company_id: profile.company_id,
+            company_id: companyId,
             key: keyNameByProvider[body.provider],
             value: apiKey,
             updated_at: new Date().toISOString(),
@@ -118,7 +125,7 @@ serve(async (req) => {
       const { error } = await supabaseAdmin
         .from("settings")
         .delete()
-        .eq("company_id", profile.company_id)
+        .eq("company_id", companyId)
         .eq("key", keyNameByProvider[body.provider]);
 
       if (error) {
@@ -145,7 +152,7 @@ serve(async (req) => {
         .from("settings")
         .upsert(
           {
-            company_id: profile.company_id,
+            company_id: companyId,
             key: settingKey,
             value: model,
             updated_at: new Date().toISOString(),
