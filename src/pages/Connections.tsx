@@ -630,6 +630,41 @@ const Connections = () => {
       return;
     }
 
+    // BTZAP: importa instância já criada no painel (token informado manualmente)
+    if (formData.environment === 'BTZAP') {
+      if (!formData.token.trim()) {
+        toast.error("Cole o Token da Instância do painel BTZAP");
+        return;
+      }
+
+      setLoadingQr(true);
+      try {
+        const baseUrl = 'https://server.btzap.com.br';
+        const tempConnection = await createConnection.mutateAsync({
+          name: formData.name,
+          platform: 'whatsapp',
+          environment: 'BTZAP',
+          status: 'connecting',
+          instance_id: formData.instance_id.trim() || formData.name,
+          token: formData.token.trim(),
+          base_url: baseUrl
+        });
+
+        toast.success("Instância BTZAP importada! Verificando status...");
+        setDialogOpen(false);
+
+        // Verifica status imediatamente
+        await checkInstanceStatus(tempConnection.id, formData.token.trim(), 'BTZAP', baseUrl);
+      } catch (err: any) {
+        console.error("Erro ao importar BTZAP:", err);
+        toast.error(err.message || "Erro ao importar instância BTZAP");
+      } finally {
+        setLoadingQr(false);
+        resetForm();
+      }
+      return;
+    }
+
     // Phone is required for pairing code method
     if (connectMethod === 'paircode' && !formData.phone) {
       toast.error("Digite o número de telefone para usar o código de pareamento");
