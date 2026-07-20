@@ -22,7 +22,7 @@ const formatBytes = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-export const useStorageStats = () => {
+export const useStorageStats = (enabled = true) => {
   const { data: stats, isLoading, error, refetch } = useQuery({
     queryKey: ['storage-stats'],
     queryFn: async (): Promise<StorageStats> => {
@@ -58,6 +58,7 @@ export const useStorageStats = () => {
     gcTime: 1000 * 60 * 15,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    enabled,
     retry: false,
   });
 

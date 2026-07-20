@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
@@ -40,52 +41,41 @@ interface FeatureAccessResult {
 
 export function useFeatureAccess(): FeatureAccessResult {
   const { user } = useAuth();
-  const [plan, setPlan] = useState<PlanInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const fallbackPlan: PlanInfo = {
+    id: 'free',
+    name: 'Plano Livre',
+    features: ['chat', 'flows_basic', 'ai_agents', 'mass_sending', 'smart_forms', 'reports', 'tags', 'departments', 'leads_management'],
+    max_users: 10,
+    max_connections: 3
+  };
 
-  const fetchPlanFeatures = useCallback(async () => {
-    if (!user?.id) {
-      setPlan(null);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
+  const { data: plan = null, isLoading, error, refetch } = useQuery({
+    queryKey: ["feature-access", user?.id],
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    queryFn: async (): Promise<PlanInfo> => {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("company_id")
-        .eq("id", user.id)
+        .eq("id", user!.id)
         .single();
 
       if (profileError || !profile?.company_id) {
-        // User without company - grant all features by default
-        setPlan({
-          id: 'free',
-          name: 'Plano Livre',
-          features: ['chat', 'flows_basic', 'ai_agents', 'mass_sending', 'smart_forms', 'reports', 'tags', 'departments', 'leads_management'],
-          max_users: 10,
-          max_connections: 3
-        });
-        setIsLoading(false);
-        return;
+        return fallbackPlan;
       }
 
-      // Fetch company and its plan slug
       const { data: company, error: companyError } = await supabase
         .from("companies")
-        .select('plan, max_users, max_connections')
+        .select('plan, features, max_users, max_connections')
         .eq("id", profile.company_id)
         .single();
 
       if (companyError) throw companyError;
 
       const planSlug = company?.plan || 'basic';
-
-      // Fetch real plan features from subscription_plans
       const { data: subscriptionPlan } = await supabase
         .from("subscription_plans")
         .select('name, features, max_users, max_connections')
@@ -93,45 +83,29 @@ export function useFeatureAccess(): FeatureAccessResult {
         .eq("is_active", true)
         .maybeSingle();
 
-      // Check for company-level feature overrides
-      const { data: companyFull } = await supabase
-        .from("companies")
-        .select('features')
-        .eq("id", profile.company_id)
-        .single();
-
-      const companyFeatures = (companyFull as any)?.features as string[] | null;
+      const companyFeatures = Array.isArray((company as { features?: unknown })?.features)
+        ? ((company as { features: string[] }).features)
+        : null;
 
       if (subscriptionPlan) {
-        setPlan({
+        return {
           id: planSlug,
           name: subscriptionPlan.name,
           features: companyFeatures || subscriptionPlan.features || [],
           max_users: company?.max_users || subscriptionPlan.max_users,
           max_connections: company?.max_connections || subscriptionPlan.max_connections
-        });
-      } else {
-        // Fallback if plan not found in subscription_plans
-        setPlan({
-          id: planSlug,
-          name: planSlug,
-          features: companyFeatures || ['chat', 'flows_basic', 'tags', 'departments'],
-          max_users: company?.max_users || 10,
-          max_connections: company?.max_connections || 3
-        });
+        };
       }
-    } catch (err) {
-      console.error("Error fetching plan features:", err);
-      setError("Erro ao carregar plano");
-      setPlan(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.id]);
 
-  useEffect(() => {
-    fetchPlanFeatures();
-  }, [fetchPlanFeatures]);
+      return {
+        id: planSlug,
+        name: planSlug,
+        features: companyFeatures || ['chat', 'flows_basic', 'tags', 'departments'],
+        max_users: company?.max_users || 10,
+        max_connections: company?.max_connections || 3
+      };
+    },
+  });
 
   const hasAccess = useCallback(
     (featureId: FeatureId): boolean => {
@@ -161,7 +135,7 @@ export function useFeatureAccess(): FeatureAccessResult {
     hasAllAccess,
     plan,
     isLoading,
-    error,
-    refetch: fetchPlanFeatures,
+    error: error ? "Erro ao carregar plano" : null,
+    refetch: async () => { await refetch(); },
   };
 }

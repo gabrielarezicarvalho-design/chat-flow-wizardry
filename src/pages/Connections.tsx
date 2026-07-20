@@ -125,12 +125,12 @@ const Connections = () => {
     sessionStorage.setItem('meta_connections_cache', JSON.stringify(metaConnections));
   }, [metaConnections, metaCacheKey]);
 
-  // Poll every second to keep Meta Cloud API always visible and updated
+  // Keep Meta Cloud API visible without flooding the app during navigation.
   useEffect(() => {
     if (!companyId) return;
 
     fetchMetaConnections();
-    const interval = setInterval(fetchMetaConnections, 1000);
+    const interval = setInterval(fetchMetaConnections, 30000);
     return () => clearInterval(interval);
   }, [companyId, fetchMetaConnections]);
 
