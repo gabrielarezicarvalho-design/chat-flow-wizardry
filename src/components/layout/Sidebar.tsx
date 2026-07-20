@@ -247,7 +247,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
   return (
     <aside className={cn(
       "fixed left-0 top-0 h-screen bg-gradient-to-b from-primary to-primary-dark text-white shadow-xl z-50 transition-all duration-300",
-      collapsed ? "w-20" : "w-64"
+      collapsed ? "w-20" : "w-56"
     )}>
       <div className="flex flex-col h-full">
         {/* Logo */}
