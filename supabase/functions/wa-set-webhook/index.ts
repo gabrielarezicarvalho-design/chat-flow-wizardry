@@ -232,14 +232,11 @@ serve(async (req) => {
         if (response.ok) {
           // UZAPI pode retornar array
           const webhookData = Array.isArray(result) ? result[0] : result;
-          
+
           console.log("=".repeat(80));
           console.log("✅ WEBHOOK CONFIGURADO COM SUCESSO!");
-          console.log("  Método:", method);
-          console.log("  Endpoint:", endpoint);
-          console.log("  Webhook URL:", webhookData?.url || webhookData?.webhookURL || webhookData?.webhook || webhookUrl);
           console.log("=".repeat(80));
-          
+
           if (connection_id) {
             const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
             if (serviceRoleKey && supabaseUrl) {
@@ -253,9 +250,9 @@ serve(async (req) => {
                 .eq("id", connection_id);
             }
           }
-          
-          return new Response(JSON.stringify({ 
-            success: true, 
+
+          return new Response(JSON.stringify({
+            success: true,
             webhookUrl: webhookData?.url || webhookData?.webhookURL || webhookData?.webhook || webhookUrl,
             events: webhookData?.events || ["messages"],
             enabled: webhookData?.enabled !== false,
@@ -266,10 +263,26 @@ serve(async (req) => {
             headers: { ...corsHeaders, "Content-Type": "application/json" }
           });
         }
-        
+
+        // Se recebemos 401 num endpoint válido, o token da instância está inválido/expirado.
+        // Não adianta tentar os outros endpoints — parar e pedir reconexão.
+        if (response.status === 401) {
+          console.log("🚫 Token UAZAPI inválido/expirado — abortando tentativas");
+          return new Response(JSON.stringify({
+            success: false,
+            needsReconnect: true,
+            error: "Token da instância WhatsApp inválido ou expirado. Reconecte escaneando o QR Code novamente na aba Conexões.",
+            endpoint,
+            method
+          }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+
         lastError = `${method} ${endpoint}: HTTP ${response.status} - ${responseText.substring(0, 200)}`;
         console.log(`❌ Falha: ${lastError}`);
-        
+
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : "Unknown error";
         console.log(`❌ Exceção ${method} ${endpoint}:`, errorMsg);
