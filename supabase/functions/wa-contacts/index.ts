@@ -97,12 +97,18 @@ serve(async (req) => {
       });
 
       if (!response.ok) {
-        console.error("Failed to fetch contacts from WhatsApp");
-        return new Response(JSON.stringify({ 
+        const errText = await response.text().catch(() => "");
+        console.error("Failed to fetch contacts from WhatsApp:", response.status, errText);
+        const isAuth = response.status === 401 || /invalid token/i.test(errText);
+        return new Response(JSON.stringify({
           success: false,
-          error: "Failed to fetch contacts from WhatsApp"
+          error: isAuth
+            ? "Token da instância WhatsApp inválido ou expirado. Reconecte a instância em Conexões (escaneie o QR Code novamente)."
+            : `Falha ao buscar contatos do WhatsApp (HTTP ${response.status})`,
+          details: errText?.slice(0, 300),
+          needsReconnect: isAuth,
         }), {
-          status: response.status,
+          status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
       }
