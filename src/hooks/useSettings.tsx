@@ -11,28 +11,27 @@ export const useSettings = () => {
     queryKey: ['settings', user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      // Buscar company_id do perfil
       const { data: profile } = await supabase
         .from('profiles')
         .select('company_id')
         .eq('id', user!.id)
         .maybeSingle();
 
-      if (!profile?.company_id) return null;
+      let query = supabase.from('settings').select('*');
+      if (profile?.company_id) {
+        query = query.eq('company_id', profile.company_id);
+      } else {
+        // Admin sem empresa: usa configurações globais (company_id null)
+        query = query.is('company_id', null);
+      }
 
-      const { data, error } = await supabase
-        .from('settings')
-        .select('*')
-        .eq('company_id', profile.company_id);
-      
+      const { data, error } = await query;
       if (error && error.code !== 'PGRST116') throw error;
-      
-      // Converter array de configurações para objeto
+
       const settingsObj: Record<string, any> = {};
       data?.forEach(item => {
         settingsObj[item.key] = item.value;
       });
-      
       return settingsObj;
     },
     staleTime: 1000 * 60 * 10,
@@ -46,30 +45,44 @@ export const useSettings = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Buscar company_id do perfil
       const { data: profile } = await supabase
         .from('profiles')
         .select('company_id')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (!profile?.company_id) throw new Error('Empresa não encontrada');
+      const companyId = profile?.company_id ?? null;
 
-      // Upsert cada configuração
       for (const [key, value] of Object.entries(updates)) {
-        const { error } = await supabase
-          .from('settings')
-          .upsert({
-            company_id: profile.company_id,
-            key,
-            value
-          }, {
-            onConflict: 'company_id,key'
-          });
-        
-        if (error) throw error;
+        if (companyId) {
+          const { error } = await supabase
+            .from('settings')
+            .upsert({ company_id: companyId, key, value }, { onConflict: 'company_id,key' });
+          if (error) throw error;
+        } else {
+          // Global (admin sem empresa): null não faz match em unique, então manual
+          const { data: existing } = await supabase
+            .from('settings')
+            .select('id')
+            .is('company_id', null)
+            .eq('key', key)
+            .maybeSingle();
+
+          if (existing?.id) {
+            const { error } = await supabase
+              .from('settings')
+              .update({ value })
+              .eq('id', existing.id);
+            if (error) throw error;
+          } else {
+            const { error } = await supabase
+              .from('settings')
+              .insert({ company_id: null, key, value });
+            if (error) throw error;
+          }
+        }
       }
-      
+
       return updates;
     },
     onSuccess: () => {
