@@ -78,7 +78,9 @@ const Connections = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    environment: 'PROD'
+    environment: 'PROD',
+    token: '',
+    instance_id: ''
   });
 
   const metaCacheKey = companyId ? `meta_connections_cache_${companyId}` : null;
@@ -613,7 +615,9 @@ const Connections = () => {
     setFormData({
       name: '',
       phone: '',
-      environment: 'PROD'
+      environment: 'PROD',
+      token: '',
+      instance_id: ''
     });
     setSelectedProvider(null);
   };
