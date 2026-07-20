@@ -27,10 +27,18 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 // All available AI models
 const aiModels = [
   // OpenAI models (requires user's OpenAI API key)
+  { value: "gpt-5", label: "GPT-5", provider: "openai" },
+  { value: "gpt-5-mini", label: "GPT-5 Mini", provider: "openai" },
+  { value: "gpt-5-nano", label: "GPT-5 Nano", provider: "openai" },
   { value: "gpt-4o", label: "GPT-4o", provider: "openai" },
   { value: "gpt-4o-mini", label: "GPT-4o Mini", provider: "openai" },
   { value: "gpt-4-turbo", label: "GPT-4 Turbo", provider: "openai" },
   // Google Gemini models (requires user's Google API key)
+  { value: "gemini-3-pro-preview", label: "Gemini 3 Pro (Raciocínio complexo)", provider: "google" },
+  { value: "gemini-3-flash-preview", label: "Gemini 3 Flash", provider: "google" },
+  { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro (Matemática e programação)", provider: "google" },
+  { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash (Ajuda para tudo)", provider: "google" },
+  { value: "gemini-2.5-flash-lite", label: "Gemini 2.5 Flash-Lite (Respostas rápidas)", provider: "google" },
   { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash", provider: "google" },
   { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro", provider: "google" },
   { value: "gemini-1.5-flash", label: "Gemini 1.5 Flash", provider: "google" },
