@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,11 @@ import {
   Mail,
   Share2,
   ExternalLink,
+  Loader2,
+  Instagram,
+  Facebook,
+  Linkedin,
+  Youtube,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
@@ -57,6 +62,43 @@ export default function GoogleMapsLeads() {
   const [status, setStatus] = useState("Pronto para buscar");
   const [results, setResults] = useState<MapLead[]>([]);
   const [selectedLead, setSelectedLead] = useState<MapLead | null>(null);
+  const [enrichment, setEnrichment] = useState<{
+    loading: boolean;
+    emails: string[];
+    socials: Record<string, string>;
+    error?: string;
+  }>({ loading: false, emails: [], socials: {} });
+  const [enrichCache, setEnrichCache] = useState<Record<string, { emails: string[]; socials: Record<string, string> }>>({});
+
+  useEffect(() => {
+    if (!selectedLead) return;
+    const website = selectedLead.website;
+    if (!website) {
+      setEnrichment({ loading: false, emails: [], socials: {}, error: "Sem site para enriquecer" });
+      return;
+    }
+    if (enrichCache[website]) {
+      setEnrichment({ loading: false, ...enrichCache[website] });
+      return;
+    }
+    let cancelled = false;
+    setEnrichment({ loading: true, emails: [], socials: {} });
+    supabase.functions
+      .invoke("enrich-lead", { body: { website } })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          setEnrichment({ loading: false, emails: [], socials: {}, error: "Não foi possível enriquecer" });
+          return;
+        }
+        const result = { emails: data?.emails || [], socials: data?.socials || {} };
+        setEnrichCache((c) => ({ ...c, [website]: result }));
+        setEnrichment({ loading: false, ...result });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedLead, enrichCache]);
 
   const totalTarget = maxMode ? 1000 : amount;
 
@@ -427,15 +469,65 @@ export default function GoogleMapsLeads() {
                 )}
               </div>
 
-              <div className="border-t pt-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  <span>Email: N/A</span>
+              <div className="border-t pt-4 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  Enriquecimento automático
                 </div>
-                <div className="flex items-center gap-2 truncate">
-                  <Share2 className="w-4 h-4" />
-                  <span className="truncate">Social: Lead Misto (Pessoal...)</span>
-                </div>
+
+                {enrichment.loading ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    Buscando emails e redes sociais no site...
+                  </div>
+                ) : enrichment.error ? (
+                  <p className="text-sm text-muted-foreground">{enrichment.error}</p>
+                ) : (
+                  <>
+                    <div className="flex items-start gap-3 text-sm">
+                      <Mail className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        {enrichment.emails.length === 0 ? (
+                          <span className="text-muted-foreground">Nenhum email encontrado</span>
+                        ) : (
+                          <div className="flex flex-col gap-1">
+                            {enrichment.emails.map((e) => (
+                              <a key={e} href={`mailto:${e}`} className="text-foreground hover:text-primary transition-colors truncate">
+                                {e}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 text-sm">
+                      <Share2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 flex flex-wrap gap-2">
+                        {Object.keys(enrichment.socials).length === 0 ? (
+                          <span className="text-muted-foreground">Nenhuma rede social encontrada</span>
+                        ) : (
+                          Object.entries(enrichment.socials).map(([key, url]) => (
+                            <a
+                              key={key}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors text-xs font-medium capitalize"
+                            >
+                              {key === "instagram" && <Instagram className="w-3 h-3" />}
+                              {key === "facebook" && <Facebook className="w-3 h-3" />}
+                              {key === "linkedin" && <Linkedin className="w-3 h-3" />}
+                              {key === "youtube" && <Youtube className="w-3 h-3" />}
+                              {!["instagram", "facebook", "linkedin", "youtube"].includes(key) && <ExternalLink className="w-3 h-3" />}
+                              {key}
+                            </a>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               <Button
