@@ -265,7 +265,7 @@ const FlowForm = () => {
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
             <Send className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">MarketFlow</h1>
+          <h1 className="text-2xl font-bold text-white mb-2 font-['Space_Grotesk'] tracking-tight">NEXT PRO&nbsp;</h1>
           {form?.initial_message && (
             <p className="text-slate-400">{form.initial_message}</p>
           )}
@@ -398,7 +398,7 @@ const FlowForm = () => {
 
         {/* Footer */}
         <p className="text-center text-slate-500 text-sm mt-6">
-          Powered by MarketFlow
+          Powered by NEXT PRO&nbsp;
         </p>
       </div>
     </div>
