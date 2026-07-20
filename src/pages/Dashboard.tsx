@@ -5,11 +5,12 @@ import { Send, Sparkles, Zap, ArrowRight, Rocket, Target, BarChart3, Users, Cale
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import robotImage from "@/assets/marketflow-robot.png";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
 import { ABTesting } from "@/components/mass-sending/ABTesting";
+import { useEffect } from "react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -59,6 +60,7 @@ const DEFAULT_STATS: Stats = {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { data: stats = DEFAULT_STATS } = useQuery({
     queryKey: ["dashboard-stats", user?.id],
     enabled: !!user?.id,
@@ -80,11 +82,27 @@ const Dashboard = () => {
         deliveryRate: Math.round(deliveryRate),
       };
     },
-    staleTime: 1000 * 60 * 10,
-    gcTime: 1000 * 60 * 30,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 30,
+    gcTime: 1000 * 60 * 10,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const invalidate = () =>
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats", user.id] });
+
+    const channel = supabase
+      .channel(`dashboard-stats-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "campaigns", filter: `user_id=eq.${user.id}` }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads", filter: `user_id=eq.${user.id}` }, invalidate)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
 
   const features = [
     {
