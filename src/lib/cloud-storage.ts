@@ -3,8 +3,6 @@ import { getSubdomainSlug } from './subdomain';
 
 /**
  * Storage backend: Lovable Cloud (Supabase Storage), bucket `campaign-media`.
- * A API pública deste módulo foi preservada para compatibilidade com o código
- * legado que ainda importa nomes com prefixo "Vps".
  */
 const BUCKET = 'campaign-media';
 
