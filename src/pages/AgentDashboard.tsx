@@ -8,10 +8,31 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const AgentDashboard = () => {
   const { connections, isLoading, refetch } = useAgentConnections();
+  const queryClient = useQueryClient();
+
+  // Realtime: manter cards de conversas (abertas, atendidas hoje, por conexão) atualizados
+  useEffect(() => {
+    const channel = supabase
+      .channel('agent-dashboard-conversations')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'conversations' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['agent-open-chats'] });
+          queryClient.invalidateQueries({ queryKey: ['agent-attended-today'] });
+          queryClient.invalidateQueries({ queryKey: ['conversation-counts-by-connection'] });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
