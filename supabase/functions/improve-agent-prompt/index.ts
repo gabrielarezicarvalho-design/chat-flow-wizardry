@@ -98,6 +98,34 @@ async function callGemini(apiKey: string, systemPrompt: string, userMessage: str
   return data.candidates?.[0]?.content?.parts?.[0]?.text;
 }
 
+async function callLovableAI(systemPrompt: string, userMessage: string, chatHistory?: any[], images?: string[]) {
+  const key = Deno.env.get("LOVABLE_API_KEY");
+  if (!key) throw new Error("LOVABLE_API_KEY não configurada");
+  const messages: any[] = [{ role: "system", content: systemPrompt }];
+  if (chatHistory && chatHistory.length > 0) messages.push(...chatHistory);
+  if (images && images.length > 0) {
+    const content: any[] = [{ type: "text", text: userMessage }];
+    for (const img of images) content.push({ type: "image_url", image_url: { url: img } });
+    messages.push({ role: "user", content });
+  } else {
+    messages.push({ role: "user", content: userMessage });
+  }
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "google/gemini-2.5-flash", messages }),
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    console.error("Lovable AI error:", response.status, t);
+    if (response.status === 429) throw new Error("Limite de requisições atingido. Tente novamente em instantes.");
+    if (response.status === 402) throw new Error("Créditos insuficientes no workspace Lovable.");
+    throw new Error(`Lovable AI error: ${response.status}`);
+  }
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
