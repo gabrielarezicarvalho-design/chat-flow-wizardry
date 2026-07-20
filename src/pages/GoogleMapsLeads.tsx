@@ -56,6 +56,7 @@ export default function GoogleMapsLeads() {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("Pronto para buscar");
   const [results, setResults] = useState<MapLead[]>([]);
+  const [selectedLead, setSelectedLead] = useState<MapLead | null>(null);
 
   const totalTarget = maxMode ? 1000 : amount;
 
