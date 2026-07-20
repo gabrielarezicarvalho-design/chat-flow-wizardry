@@ -20,7 +20,7 @@ export const TopBar = ({ sidebarCollapsed = false }: TopBarProps) => {
   return (
     <header className={cn(
       "fixed right-0 top-0 h-16 bg-card border-b border-border z-40 px-6 transition-all duration-300",
-      sidebarCollapsed ? "left-20" : "left-64"
+      sidebarCollapsed ? "left-20" : "left-56"
     )}>
       <div className="flex items-center justify-between h-full">
         {/* Search */}
