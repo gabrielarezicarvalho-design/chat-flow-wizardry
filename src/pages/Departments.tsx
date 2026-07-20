@@ -421,16 +421,16 @@ const Departments = () => {
               companyUsers.map((u: any) => (
                 <label
                   key={u.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent cursor-pointer"
+                  className="group flex items-center gap-3 p-3 rounded-lg border hover:bg-primary hover:text-primary-foreground hover:border-primary cursor-pointer transition-colors"
                 >
                   <Checkbox
                     checked={isMember(u.id)}
                     onCheckedChange={(checked) => toggleMember(u.id, !!checked)}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{u.full_name || u.username || 'Sem nome'}</p>
+                    <p className="text-sm font-medium truncate group-hover:text-primary-foreground">{u.full_name || u.username || 'Sem nome'}</p>
                     {u.username && (
-                      <p className="text-xs text-muted-foreground truncate">@{u.username}</p>
+                      <p className="text-xs text-muted-foreground truncate group-hover:text-primary-foreground/80">@{u.username}</p>
                     )}
                   </div>
                 </label>
