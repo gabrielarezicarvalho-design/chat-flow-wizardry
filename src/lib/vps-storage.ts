@@ -1,25 +1,19 @@
+import { supabase } from '@/integrations/supabase/client';
 import { getSubdomainSlug } from './subdomain';
 
-const VPS_STORAGE_BASE_URL = 'https://marketflowchat.com.br/api/storage';
-
 /**
- * Resolves the company slug for storage operations.
- * Uses subdomain if available, otherwise falls back to provided companySlug.
+ * Storage backend: Lovable Cloud (Supabase Storage), bucket `campaign-media`.
+ * A API pública deste módulo foi preservada para compatibilidade com o código
+ * legado que ainda importa nomes com prefixo "Vps".
  */
-function resolveCompanySlug(companySlug?: string): string | null {
-  return getSubdomainSlug() || companySlug || null;
+const BUCKET = 'campaign-media';
+
+function resolveCompanySlug(companySlug?: string): string {
+  return getSubdomainSlug() || companySlug || 'default';
 }
 
-/**
- * Check if the VPS storage API is healthy.
- */
-export async function checkStorageHealth(): Promise<boolean> {
-  try {
-    const res = await fetch(`${VPS_STORAGE_BASE_URL}/health`);
-    return res.ok;
-  } catch {
-    return false;
-  }
+function sanitize(name: string): string {
+  return name.replace(/[^a-zA-Z0-9._-]/g, '_');
 }
 
 export interface VpsUploadResult {
@@ -29,83 +23,75 @@ export interface VpsUploadResult {
   error?: string;
 }
 
-/**
- * Upload a file to the VPS storage API.
- * @param file - The file to upload
- * @param companySlug - Company slug (auto-detected from subdomain if not provided)
- * @param onProgress - Optional progress callback (0-100)
- */
+export interface VpsFileInfo {
+  name: string;
+  size: number;
+  createdAt: string;
+  mimetype?: string;
+}
+
+/** Ping do storage — sempre disponível via Lovable Cloud. */
+export async function checkStorageHealth(): Promise<boolean> {
+  try {
+    const { error } = await supabase.storage.from(BUCKET).list('', { limit: 1 });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/** Upload de arquivo para o bucket `campaign-media`, particionado por empresa. */
 export async function uploadToVps(
   file: File,
   companySlug?: string,
   onProgress?: (progress: number) => void
 ): Promise<VpsUploadResult> {
   const slug = resolveCompanySlug(companySlug);
-  if (!slug) {
-    return {
-      success: false,
-      url: '',
-      fileName: '',
-      error: 'Empresa não identificada. Não é possível fazer upload.',
-    };
-  }
+  const safeName = sanitize(file.name);
+  const path = `${slug}/${Date.now()}-${safeName}`;
 
-  const formData = new FormData();
-  formData.append('file', file);
+  // Progresso simulado — Supabase JS não expõe upload progress nativo.
+  let progressValue = 0;
+  const progressInterval = setInterval(() => {
+    progressValue = Math.min(progressValue + 8, 90);
+    onProgress?.(progressValue);
+  }, 150);
 
   try {
-    // Simulate progress since fetch doesn't provide native upload progress
-    let progressValue = 0;
-    const progressInterval = setInterval(() => {
-      progressValue = Math.min(progressValue + 8, 90);
-      onProgress?.(progressValue);
-    }, 150);
-
-    const res = await fetch(`${VPS_STORAGE_BASE_URL}/upload`, {
-      method: 'POST',
-      headers: {
-        'X-Company': slug,
-      },
-      body: formData,
-    });
+    const { error } = await supabase.storage
+      .from(BUCKET)
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type || undefined,
+      });
 
     clearInterval(progressInterval);
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      return {
-        success: false,
-        url: '',
-        fileName: '',
-        error: `Erro no upload: ${res.status} - ${errorText}`,
-      };
+    if (error) {
+      return { success: false, url: '', fileName: '', error: error.message };
     }
 
     onProgress?.(100);
-
-    const data = await res.json();
-
-    // Build the download URL
-    const downloadUrl = `${VPS_STORAGE_BASE_URL}/download/${slug}/${data.fileName || file.name}`;
+    const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
     return {
       success: true,
-      url: downloadUrl,
-      fileName: data.fileName || file.name,
+      url: data.publicUrl,
+      fileName: path,
     };
   } catch (error: any) {
+    clearInterval(progressInterval);
     return {
       success: false,
       url: '',
       fileName: '',
-      error: error.message || 'Erro desconhecido no upload',
+      error: error?.message || 'Erro desconhecido no upload',
     };
   }
 }
 
-/**
- * Upload a Blob (e.g. audio recording) to the VPS storage API.
- */
+/** Upload de Blob (áudio, screenshots, etc.). */
 export async function uploadBlobToVps(
   blob: Blob,
   fileName: string,
@@ -116,67 +102,60 @@ export async function uploadBlobToVps(
   return uploadToVps(file, companySlug, onProgress);
 }
 
-/**
- * List files stored on the VPS for a given company.
- */
-export async function listVpsFiles(companySlug?: string): Promise<{ success: boolean; files: VpsFileInfo[]; error?: string }> {
+/** Lista arquivos da empresa dentro do bucket. */
+export async function listVpsFiles(
+  companySlug?: string
+): Promise<{ success: boolean; files: VpsFileInfo[]; error?: string }> {
   const slug = resolveCompanySlug(companySlug);
-  if (!slug) {
-    return { success: false, files: [], error: 'Empresa não identificada.' };
-  }
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6000);
   try {
-    const res = await fetch(`${VPS_STORAGE_BASE_URL}/files/${slug}`, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!res.ok) {
-      return { success: false, files: [], error: `Erro: ${res.status}` };
+    const { data, error } = await supabase.storage
+      .from(BUCKET)
+      .list(slug, { limit: 1000, sortBy: { column: 'created_at', order: 'desc' } });
+
+    if (error) {
+      return { success: false, files: [], error: error.message };
     }
-    const data = await res.json();
-    return { success: true, files: data.files || [] };
+
+    const files: VpsFileInfo[] = (data || [])
+      .filter((f) => f.name && f.name !== '.emptyFolderPlaceholder')
+      .map((f) => ({
+        name: f.name,
+        size: (f.metadata as any)?.size ?? 0,
+        createdAt: f.created_at ?? new Date().toISOString(),
+        mimetype: (f.metadata as any)?.mimetype,
+      }));
+
+    return { success: true, files };
   } catch (error: any) {
-    clearTimeout(timeoutId);
-    return { success: false, files: [], error: error?.name === 'AbortError' ? 'Timeout' : error.message };
+    return { success: false, files: [], error: error?.message || 'Erro ao listar arquivos' };
   }
 }
 
-
-export interface VpsFileInfo {
-  name: string;
-  size: number;
-  createdAt: string;
-  mimetype?: string;
-}
-
-/**
- * Delete a file from VPS storage.
- */
-export async function deleteVpsFile(fileName: string, companySlug?: string): Promise<{ success: boolean; error?: string }> {
+/** Remove um arquivo do storage. */
+export async function deleteVpsFile(
+  fileName: string,
+  companySlug?: string
+): Promise<{ success: boolean; error?: string }> {
   const slug = resolveCompanySlug(companySlug);
-  if (!slug) {
-    return { success: false, error: 'Empresa não identificada.' };
-  }
+  // Aceita tanto o path completo ({slug}/arquivo) quanto só o nome.
+  const path = fileName.includes('/') ? fileName : `${slug}/${fileName}`;
   try {
-    const res = await fetch(`${VPS_STORAGE_BASE_URL}/delete/${slug}/${fileName}`, { method: 'DELETE' });
-    if (!res.ok) {
-      return { success: false, error: `Erro: ${res.status}` };
-    }
+    const { error } = await supabase.storage.from(BUCKET).remove([path]);
+    if (error) return { success: false, error: error.message };
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    return { success: false, error: error?.message || 'Erro ao remover arquivo' };
   }
 }
 
-/**
- * Get the public download URL for a file on the VPS.
- */
+/** Retorna URL pública de um arquivo. */
 export function getVpsDownloadUrl(companySlug: string, fileName: string): string {
-  return `${VPS_STORAGE_BASE_URL}/download/${companySlug}/${fileName}`;
+  const path = fileName.includes('/') ? fileName : `${companySlug}/${fileName}`;
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return data.publicUrl;
 }
 
-/**
- * Get the VPS storage base URL (for reference).
- */
+/** Base URL do storage (mantido para compatibilidade). */
 export function getVpsStorageBaseUrl(): string {
-  return VPS_STORAGE_BASE_URL;
+  return `supabase-storage://${BUCKET}`;
 }

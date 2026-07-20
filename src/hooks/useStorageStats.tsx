@@ -39,13 +39,13 @@ export const useStorageStats = () => {
       }
 
       const bucketStats: BucketStats[] = [{
-        name: 'vps-storage',
+        name: 'campaign-media',
         size: totalSize,
         fileCount
       }];
 
-      // VPS plan limit: 9GB default
-      const planLimit = 9 * 1024 * 1024 * 1024;
+      // Lovable Cloud storage limit (ajuste conforme plano)
+      const planLimit = 5 * 1024 * 1024 * 1024;
 
       return {
         buckets: bucketStats,
