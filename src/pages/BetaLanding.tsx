@@ -257,11 +257,11 @@ const BetaLanding = () => {
   }];
   return <>
       <Helmet>
-        <title>MarketFlow Chat Beta | Automatize seu WhatsApp com IA</title>
-        <meta name="description" content="Inscreva-se no beta exclusivo do MarketFlow Chat. Automatize conversas, capture leads e escale seu atendimento com Inteligência Artificial." />
-        <meta property="og:title" content="MarketFlow Chat Beta | Automatize seu WhatsApp com IA" />
+        <title>Next Pro Chat Beta | Automatize seu WhatsApp com IA</title>
+        <meta name="description" content="Inscreva-se no beta exclusivo do Next Pro Chat. Automatize conversas, capture leads e escale seu atendimento com Inteligência Artificial." />
+        <meta property="og:title" content="Next Pro Chat Beta | Automatize seu WhatsApp com IA" />
         <meta property="og:description" content="Seja um dos primeiros a revolucionar seu atendimento com IA. Vagas limitadas!" />
-        <meta property="og:url" content="https://ia.marketflowchat.com.br/testar-beta" />
+        <meta property="og:url" content="https://ia.nextpro.com.br/testar-beta" />
         <meta property="og:type" content="website" />
       </Helmet>
 
@@ -312,8 +312,8 @@ const BetaLanding = () => {
                 <Sparkles className="w-7 h-7 text-white" />
               </div>
               <div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent">
-                  MarketFlow
+                <span className="text-2xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent font-['Space_Grotesk'] tracking-tight">
+                  NEXT PRO&nbsp;
                 </span>
                 <span className="text-2xl font-light text-blue-400 ml-1">Chat</span>
               </div>
