@@ -180,18 +180,19 @@ const Conversations = () => {
         })
         .eq("id", selectedConversationId);
 
-      // Send via WhatsApp if conversation has phone and company
-      if (selectedConversation?.contact_phone && (selectedConversation as any)?.company_id) {
-        const { error: sendError } = await supabase.functions.invoke("whatsapp-send", {
+      // Send via WhatsApp using the conversation's connection
+      const connId = (selectedConversation as any)?.connection_id;
+      if (selectedConversation?.contact_phone && connId) {
+        const { data: sendData, error: sendError } = await supabase.functions.invoke("wa-send-text", {
           body: {
-            company_id: (selectedConversation as any).company_id,
-            to: selectedConversation.contact_phone,
+            connectionId: connId,
+            phone: selectedConversation.contact_phone,
             text: text,
           },
         });
 
-        if (sendError) {
-          console.error("Erro ao enviar via WhatsApp:", sendError);
+        if (sendError || (sendData && sendData.success === false)) {
+          console.error("Erro ao enviar via WhatsApp:", sendError || sendData);
           toast.warning("Mensagem salva, mas falha ao enviar via WhatsApp");
         }
       }
