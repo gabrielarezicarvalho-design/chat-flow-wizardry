@@ -2655,7 +2655,8 @@ function MassSendingContent() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:justify-end">
+
                     {(c.status === "completed" || c.status === "failed") && (
                       <div className="flex items-center gap-3 mr-2">
                         <div className="text-center px-3 py-1 rounded-lg bg-green-500/10">
