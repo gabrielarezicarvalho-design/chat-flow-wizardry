@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,7 +11,91 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
 
   try {
-    const { instance_id, base_url, token } = await req.json();
+    const body = await req.json();
+    let { instance_id, base_url, token } = body;
+    const { connection_id } = body;
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+
+    if (connection_id) {
+      const authHeader = req.headers.get("Authorization");
+      const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+
+      if (!authHeader || !serviceRoleKey || !anonKey || !supabaseUrl) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Sessão inválida para configurar webhook da conexão"
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+
+      const supabaseUser = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
+      const { data: userData, error: userError } = await supabaseUser.auth.getUser();
+
+      if (userError || !userData.user) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Usuário não autenticado"
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+
+      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+
+      const { data: connection, error: connectionError } = await supabaseAdmin
+        .from("connections")
+        .select("id, user_id, company_id, instance_id, base_url, token, environment")
+        .eq("id", connection_id)
+        .maybeSingle();
+
+      if (connectionError || !connection) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Conexão WhatsApp não encontrada"
+        }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("company_id")
+        .eq("id", userData.user.id)
+        .maybeSingle();
+
+      const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
+        _user_id: userData.user.id,
+        _role: "admin"
+      });
+
+      const canManageConnection = Boolean(isAdmin)
+        || connection.user_id === userData.user.id
+        || (connection.company_id && profile?.company_id === connection.company_id);
+
+      if (!canManageConnection) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Você não tem permissão para configurar esta conexão"
+        }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+
+      instance_id = connection.instance_id;
+      token = connection.token;
+      base_url = connection.base_url || (connection.environment === "PROD"
+        ? "https://app.uazapi.com"
+        : "https://free.uazapi.com");
+    }
 
     console.log("=".repeat(80));
     console.log("🔧 CONFIGURANDO WEBHOOK UZAPI → MARKETFLOW");
@@ -24,7 +109,6 @@ serve(async (req) => {
       throw new Error("Campos obrigatórios ausentes: instance_id, base_url, token");
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const webhookUrl = `${supabaseUrl}/functions/v1/wa-webhook-listener`;
 
     console.log("🎯 Webhook URL destino:", webhookUrl);
@@ -147,6 +231,20 @@ serve(async (req) => {
           console.log("  Endpoint:", endpoint);
           console.log("  Webhook URL:", webhookData?.url || webhookData?.webhookURL || webhookData?.webhook || webhookUrl);
           console.log("=".repeat(80));
+          
+          if (connection_id) {
+            const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+            if (serviceRoleKey && supabaseUrl) {
+              const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+              await supabaseAdmin
+                .from("connections")
+                .update({
+                  webhook_url: webhookData?.url || webhookData?.webhookURL || webhookData?.webhook || webhookUrl,
+                  updated_at: new Date().toISOString()
+                })
+                .eq("id", connection_id);
+            }
+          }
           
           return new Response(JSON.stringify({ 
             success: true, 

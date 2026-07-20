@@ -4062,7 +4062,7 @@ ${safeTelegramText}`;
         const shouldTrigger = 
           trigger === "message" || 
           trigger === "keyword" || 
-          trigger === "first_message" ||
+          (trigger === "first_message" && isNewConversation) ||
           trigger === "all";
 
         if (!shouldTrigger) {

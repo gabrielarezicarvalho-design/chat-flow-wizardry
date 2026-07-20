@@ -905,7 +905,7 @@ const Connections = () => {
   };
 
   const handleConfigureWebhook = async (connection: any, showToast = false) => {
-    if (!connection.instance_id || !connection.base_url || !connection.token) {
+    if (!connection.id) {
       if (showToast) toast.error("Dados da conexão incompletos");
       return false;
     }
@@ -915,9 +915,7 @@ const Connections = () => {
       
       const { data, error } = await supabase.functions.invoke('wa-set-webhook', {
         body: {
-          instance_id: connection.instance_id,
-          base_url: connection.base_url,
-          token: connection.token
+          connection_id: connection.id
         }
       });
 
