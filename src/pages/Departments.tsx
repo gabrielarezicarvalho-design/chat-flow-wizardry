@@ -1,14 +1,18 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDepartments } from "@/hooks/useDepartments";
-import { Users, Plus, Loader2, Clock } from "lucide-react";
+import { useCompanyId } from "@/hooks/useCompanyId";
+import { supabase } from "@/integrations/supabase/client";
+import { Users, Plus, Loader2, Clock, UserPlus } from "lucide-react";
 
 const daysOfWeek = [
   { value: 0, label: 'Dom' },
@@ -37,10 +41,13 @@ const defaultBusinessHours: BusinessHours = {
 };
 
 const Departments = () => {
-  const { departments, isLoading, createDepartment, updateDepartment, deleteDepartment } = useDepartments();
-  
+  const { departments, isLoading, createDepartment, updateDepartment, deleteDepartment, addMember, removeMember } = useDepartments();
+  const { companyId } = useCompanyId();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState<any>(null);
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [managingDepartment, setManagingDepartment] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -104,6 +111,46 @@ const Departments = () => {
       .join(', ');
     return `${daysStr} • ${bh.start} - ${bh.end}`;
   };
+
+  // Fetch users of the same company for the members dialog
+  const { data: companyUsers = [], isLoading: loadingUsers } = useQuery({
+    queryKey: ['company-users', companyId],
+    queryFn: async () => {
+      let q = supabase.from('profiles').select('id, full_name, username');
+      if (companyId) q = q.eq('company_id', companyId);
+      const { data, error } = await q.order('full_name', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: membersDialogOpen,
+  });
+
+  const openMembersDialog = (department: any) => {
+    setManagingDepartment(department);
+    setMembersDialogOpen(true);
+  };
+
+  const isMember = (userId: string) => {
+    return managingDepartment?.department_members?.some((m: any) => m.user_id === userId);
+  };
+
+  const toggleMember = async (userId: string, checked: boolean) => {
+    if (!managingDepartment) return;
+    if (checked) {
+      await addMember.mutateAsync({ departmentId: managingDepartment.id, userId });
+    } else {
+      await removeMember.mutateAsync({ departmentId: managingDepartment.id, userId });
+    }
+    // refresh local managingDepartment from refetched list
+    setManagingDepartment((prev: any) => {
+      if (!prev) return prev;
+      const members = checked
+        ? [...(prev.department_members || []), { id: crypto.randomUUID(), user_id: userId }]
+        : (prev.department_members || []).filter((m: any) => m.user_id !== userId);
+      return { ...prev, department_members: members };
+    });
+  };
+
 
   return (
     <div className="space-y-6">
@@ -312,6 +359,15 @@ const Departments = () => {
                   variant="outline"
                   size="sm"
                   className="flex-1"
+                  onClick={() => openMembersDialog(department)}
+                >
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Agentes
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
                   onClick={() => handleEdit(department)}
                 >
                   Editar
@@ -342,8 +398,50 @@ const Departments = () => {
           )}
         </div>
       )}
+
+      {/* Manage Members Dialog */}
+      <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Agentes do departamento</DialogTitle>
+            <DialogDescription>
+              {managingDepartment?.name} — selecione quem faz parte
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+            {loadingUsers ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : companyUsers.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">
+                Nenhum usuário encontrado
+              </p>
+            ) : (
+              companyUsers.map((u: any) => (
+                <label
+                  key={u.id}
+                  className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent cursor-pointer"
+                >
+                  <Checkbox
+                    checked={isMember(u.id)}
+                    onCheckedChange={(checked) => toggleMember(u.id, !!checked)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{u.full_name || u.username || 'Sem nome'}</p>
+                    {u.username && (
+                      <p className="text-xs text-muted-foreground truncate">@{u.username}</p>
+                    )}
+                  </div>
+                </label>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
 
 export default Departments;
