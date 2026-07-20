@@ -1638,14 +1638,14 @@ function MassSendingContent() {
 
 
         {/* Progress Steps */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto -mx-1 px-1 pb-2 sm:pb-0 sm:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {[
             { num: 1, label: "Configuração" },
             { num: 2, label: "Contatos" },
             { num: 3, label: "Mensagem" },
             { num: 4, label: "Ações" }
           ].map((s, idx) => (
-            <div key={s.num} className="flex items-center">
+            <div key={s.num} className="flex items-center flex-shrink-0">
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors ${
                 step >= s.num 
                   ? "bg-primary text-primary-foreground" 
@@ -1654,12 +1654,13 @@ function MassSendingContent() {
                 <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium">
                   {step > s.num ? <Check className="w-3 h-3" /> : s.num}
                 </div>
-                <span className="text-sm font-medium">{s.label}</span>
+                <span className="text-sm font-medium whitespace-nowrap">{s.label}</span>
               </div>
-              {idx < 3 && <div className={`w-8 h-0.5 mx-1 ${step > s.num ? "bg-primary" : "bg-muted"}`} />}
+              {idx < 3 && <div className={`w-8 h-0.5 mx-1 flex-shrink-0 ${step > s.num ? "bg-primary" : "bg-muted"}`} />}
             </div>
           ))}
         </div>
+
 
         <Card className="p-6">
           {step === 1 && (
