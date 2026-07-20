@@ -30,7 +30,7 @@ const GEMINI_MODELS = [
 ];
 
 export const AISettingsSection = () => {
-  const { providerKeys, isLoading, upsertKey, deleteKey, getKeyStatus } = useAIProviderKeys();
+  const { isLoading, upsertKey, deleteKey, getKeyStatus, saveModel } = useAIProviderKeys();
   
   const [openaiKey, setOpenaiKey] = useState("");
   const [openaiModel, setOpenaiModel] = useState("gpt-4o-mini");
@@ -58,6 +58,7 @@ export const AISettingsSection = () => {
     setSavingOpenai(true);
     try {
       await upsertKey.mutateAsync({ provider: 'openai', apiKey: openaiKey });
+      await saveModel('openai', openaiModel);
       setOpenaiKey("");
     } finally {
       setSavingOpenai(false);
@@ -72,6 +73,7 @@ export const AISettingsSection = () => {
     setSavingGemini(true);
     try {
       await upsertKey.mutateAsync({ provider: 'google', apiKey: geminiKey });
+      await saveModel('google', geminiModel);
       setGeminiKey("");
     } finally {
       setSavingGemini(false);
