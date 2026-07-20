@@ -251,10 +251,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
         {/* Logo */}
         <div className={cn("border-b border-white/10", collapsed ? "p-4" : "p-6")}>
           <div className="flex items-center gap-3">
-            <div className={cn(
-                "rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 bg-white/10 backdrop-blur-sm",
-                collapsed ? "w-10 h-10" : "w-10 h-10"
-              )}>
+            <div className="w-10 h-10 flex items-center justify-center flex-shrink-0">
                 <img src={nextProLogo.url} alt="Next Pro" className="w-full h-full object-contain" />
               </div>
 
