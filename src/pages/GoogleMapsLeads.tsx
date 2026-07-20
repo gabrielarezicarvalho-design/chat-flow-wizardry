@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Search,
   Building2,
@@ -21,6 +22,9 @@ import {
   Crown,
   ArrowRight,
   CheckCircle2,
+  Mail,
+  Share2,
+  ExternalLink,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanyId } from "@/hooks/useCompanyId";
@@ -52,6 +56,7 @@ export default function GoogleMapsLeads() {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("Pronto para buscar");
   const [results, setResults] = useState<MapLead[]>([]);
+  const [selectedLead, setSelectedLead] = useState<MapLead | null>(null);
 
   const totalTarget = maxMode ? 1000 : amount;
 
@@ -309,7 +314,11 @@ export default function GoogleMapsLeads() {
                 <>
                   <div className="flex-1 overflow-y-auto space-y-2 pr-1">
                     {results.map((lead, i) => (
-                      <div key={i} className="p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors space-y-1">
+                      <div
+                        key={i}
+                        onClick={() => setSelectedLead(lead)}
+                        className="p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 hover:border-primary/40 hover:shadow-md hover:shadow-primary/10 transition-all cursor-pointer space-y-1"
+                      >
                         <div className="flex justify-between items-start gap-2">
                           <p className="font-semibold text-sm">{lead.name}</p>
                           {lead.rating && (
@@ -330,7 +339,15 @@ export default function GoogleMapsLeads() {
                             <Phone className="w-3 h-3" /> {lead.phone}
                           </p>
                         )}
-                        <Button size="sm" variant="ghost" className="h-7 text-xs w-full mt-1" onClick={() => saveAsLead(lead)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs w-full mt-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            saveAsLead(lead);
+                          }}
+                        >
                           Salvar como lead <ArrowRight className="w-3 h-3 ml-1" />
                         </Button>
                       </div>
@@ -368,6 +385,74 @@ export default function GoogleMapsLeads() {
           </Card>
         </div>
       </div>
+
+      {/* Lead details popup */}
+      <Dialog open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
+        <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl">
+          {selectedLead && (
+            <div className="p-6 space-y-4">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-left">{selectedLead.name}</DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-3">
+                {selectedLead.phone && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <Phone className="w-4 h-4 text-primary flex-shrink-0" />
+                    <a href={`tel:${selectedLead.phone}`} className="text-foreground hover:text-primary transition-colors">
+                      {selectedLead.phone}
+                    </a>
+                  </div>
+                )}
+
+                {selectedLead.website && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <Globe className="w-4 h-4 text-primary flex-shrink-0" />
+                    <a
+                      href={selectedLead.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline truncate"
+                    >
+                      {selectedLead.website}
+                    </a>
+                  </div>
+                )}
+
+                {selectedLead.address && (
+                  <div className="flex items-start gap-3 text-sm">
+                    <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-foreground">{selectedLead.address}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t pt-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  <span>Email: N/A</span>
+                </div>
+                <div className="flex items-center gap-2 truncate">
+                  <Share2 className="w-4 h-4" />
+                  <span className="truncate">Social: Lead Misto (Pessoal...)</span>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full font-bold tracking-wide"
+                onClick={() => {
+                  const q = encodeURIComponent(`${selectedLead.name} ${selectedLead.address ?? ""}`);
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
+                }}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                GOOGLE MAPS
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
