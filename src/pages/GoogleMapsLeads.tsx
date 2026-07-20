@@ -268,7 +268,7 @@ export default function GoogleMapsLeads() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Map placeholder */}
           <Card className="lg:col-span-2 overflow-hidden border-primary/10">
-            <div className="relative h-[500px] bg-slate-900">
+            <div className="relative h-[500px] bg-[#e8eef5]">
               {/* Header overlay */}
               <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/60 backdrop-blur px-3 py-1.5 rounded-full">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
