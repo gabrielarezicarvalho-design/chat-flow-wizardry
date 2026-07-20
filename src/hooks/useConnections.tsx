@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from './useCompanyId';
@@ -8,7 +8,7 @@ export const useConnections = () => {
   const { companyId, isLoadingCompany } = useCompanyId();
   const client = supabase;
 
-  const { data: connections, isLoading } = useQuery({
+  const { data: connections = [], isLoading, isFetching } = useQuery({
     queryKey: ['connections', companyId],
     queryFn: async () => {
       let query = client
@@ -26,6 +26,11 @@ export const useConnections = () => {
       return data;
     },
     enabled: !isLoadingCompany,
+    placeholderData: keepPreviousData,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const createConnection = useMutation({
@@ -103,8 +108,9 @@ export const useConnections = () => {
   });
 
   return {
-    connections: connections || [],
-    isLoading: isLoading || isLoadingCompany,
+    connections,
+    isLoading: (isLoading || isLoadingCompany) && connections.length === 0,
+    isFetching,
     createConnection,
     updateConnection,
     deleteConnection

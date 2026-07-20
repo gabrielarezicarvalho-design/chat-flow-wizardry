@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useCloudStorage } from "@/hooks/useCloudStorage";
 import { uploadToCloud, uploadBlobToCloud } from "@/lib/cloud-storage";
 import { Card } from "@/components/ui/card";
@@ -33,6 +34,7 @@ import { OptimalTimeSuggestions } from "@/components/mass-sending/OptimalTimeSug
 import { FeatureGate } from "@/components/FeatureGate";
 import { WebhookFieldConfig } from "@/components/mass-sending/WebhookFieldConfig";
 import { TelegramNotifications } from "@/components/mass-sending/TelegramNotifications";
+import { useAuth } from "@/hooks/useAuth";
 
 type MessageType = "text" | "image" | "document" | "audio" | "video";
 
@@ -121,14 +123,31 @@ interface CampaignTemplate {
   created_at: string;
 }
 
+interface MassSendingData {
+  connections: Connection[];
+  campaigns: Campaign[];
+  tags: TagItem[];
+  leads: Lead[];
+  templates: CampaignTemplate[];
+}
+
+const EMPTY_MASS_SENDING_DATA: MassSendingData = {
+  connections: [],
+  campaigns: [],
+  tags: [],
+  leads: [],
+  templates: [],
+};
+
 function MassSendingContent() {
   const { upload: uploadToCloudStorage } = useCloudStorage();
+  const { user } = useAuth();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
   const [tags, setTags] = useState<TagItem[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"campaigns" | "templates" | "message-templates" | "scheduler" | "optimal-times" | "webhook" | "birthday" | "satisfaction" | "tester" | "reports" | "notifications">("campaigns");
 
   const [wizard, setWizard] = useState(false);
@@ -200,9 +219,52 @@ function MassSendingContent() {
     setDebugLogs(prev => [...prev.slice(-50), { time, type, message }]);
   };
 
+  const { data: massSendingData = EMPTY_MASS_SENDING_DATA, isLoading: isDataLoading, refetch: refetchMassSendingData } = useQuery({
+    queryKey: ["mass-sending-data", user?.id],
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    queryFn: async (): Promise<MassSendingData> => {
+      const [connectionsRes, campaignsRes, tagsRes, leadsRes, templatesRes] = await Promise.all([
+        supabase.from("connections").select("id, name, instance_name, status, token, environment, base_url"),
+        supabase.from("campaigns").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }),
+        supabase.from("tags").select("*").eq("user_id", user!.id),
+        supabase.from("leads").select("*").eq("user_id", user!.id),
+        supabase.from("campaign_templates").select("*").eq("user_id", user!.id).order("created_at", { ascending: false })
+      ]);
+
+      const queryError = connectionsRes.error || campaignsRes.error || tagsRes.error || leadsRes.error || templatesRes.error;
+      if (queryError) throw queryError;
+
+      return {
+        connections: (connectionsRes.data || []).map((c: any) => ({
+          id: c.id,
+          name: c.name || c.instance_name || 'Sem nome',
+          status: c.status,
+          token: c.token,
+          environment: c.environment,
+          base_url: c.base_url
+        })) as Connection[],
+        campaigns: (campaignsRes.data || []).map((c: any) => ({
+          ...c,
+          started_at: null
+        })) as Campaign[],
+        tags: (tagsRes.data as TagItem[]) || [],
+        leads: (leadsRes.data as Lead[]) || [],
+        templates: (templatesRes.data as CampaignTemplate[]) || [],
+      };
+    },
+  });
+
   useEffect(() => {
-    loadData();
-  }, []);
+    setConnections(massSendingData.connections);
+    setCampaigns(massSendingData.campaigns);
+    setTags(massSendingData.tags);
+    setLeads(massSendingData.leads);
+    setTemplates(massSendingData.templates);
+  }, [massSendingData]);
 
   // Real-time subscription for campaign progress updates
   useEffect(() => {
@@ -310,44 +372,15 @@ function MassSendingContent() {
     }
   }, [debugLogs]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData.user) {
-        const userId = userData.user.id;
-        const [connectionsRes, campaignsRes, tagsRes, leadsRes, templatesRes] = await Promise.all([
-          supabase.from("connections").select("id, name, instance_name, status, token, environment, base_url"),
-          supabase.from("campaigns").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-          supabase.from("tags").select("*").eq("user_id", userId),
-          supabase.from("leads").select("*").eq("user_id", userId),
-          supabase.from("campaign_templates").select("*").eq("user_id", userId).order("created_at", { ascending: false })
-        ]);
-        // Map connections to expected interface - use name or instance_name as fallback
-        const mappedConnections = (connectionsRes.data || []).map((c: any) => ({
-          id: c.id,
-          name: c.name || c.instance_name || 'Sem nome',
-          status: c.status,
-          token: c.token,
-          environment: c.environment,
-          base_url: c.base_url
-        })) as Connection[];
-        setConnections(mappedConnections);
-        // Map campaigns without started_at
-        const mappedCampaigns = (campaignsRes.data || []).map((c: any) => ({
-          ...c,
-          started_at: null
-        })) as Campaign[];
-        setCampaigns(mappedCampaigns);
-        setTags((tagsRes.data as TagItem[]) || []);
-        setLeads((leadsRes.data as Lead[]) || []);
-        setTemplates((templatesRes.data as CampaignTemplate[]) || []);
-      }
+      await refetchMassSendingData();
     } catch (err) {
       console.error("Error loading data:", err);
     }
     setLoading(false);
-  };
+  }, [refetchMassSendingData]);
 
   const getContactsFromTags = (): string[] => {
     if (selectedTags.length === 0) return [];
@@ -1565,7 +1598,7 @@ function MassSendingContent() {
     }
   };
 
-  if (loading) {
+  if (loading || isDataLoading) {
     return (
       <div className="h-[calc(100vh-6rem)] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />

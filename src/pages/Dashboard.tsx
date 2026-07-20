@@ -5,8 +5,9 @@ import { Send, Sparkles, Zap, ArrowRight, Rocket, Target, BarChart3, Users, Cale
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import robotImage from "@/assets/marketflow-robot.png";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
 import { ABTesting } from "@/components/mass-sending/ABTesting";
 
@@ -48,45 +49,42 @@ interface Stats {
   deliveryRate: number;
 }
 
+const DEFAULT_STATS: Stats = {
+  totalCampaigns: 0,
+  messagesSent: 0,
+  totalContacts: 0,
+  deliveryRate: 0,
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
-  
-  const [stats, setStats] = useState<Stats>({
-    totalCampaigns: 0,
-    messagesSent: 0,
-    totalContacts: 0,
-    deliveryRate: 0,
+  const { user } = useAuth();
+  const { data: stats = DEFAULT_STATS } = useQuery({
+    queryKey: ["dashboard-stats", user?.id],
+    enabled: !!user?.id,
+    queryFn: async (): Promise<Stats> => {
+      const [campaignsRes, leadsRes] = await Promise.all([
+        supabase.from("campaigns").select("sent_count, failed_count").eq("user_id", user!.id),
+        supabase.from("leads").select("id").eq("user_id", user!.id),
+      ]);
+
+      const campaigns = campaignsRes.data || [];
+      const totalSent = campaigns.reduce((acc, c) => acc + (c.sent_count || 0), 0);
+      const totalFailed = campaigns.reduce((acc, c) => acc + (c.failed_count || 0), 0);
+      const deliveryRate = totalSent > 0 ? ((totalSent - totalFailed) / totalSent) * 100 : 0;
+
+      return {
+        totalCampaigns: campaigns.length,
+        messagesSent: totalSent,
+        totalContacts: leadsRes.data?.length || 0,
+        deliveryRate: Math.round(deliveryRate),
+      };
+    },
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data: userData } = await supabase.auth.getUser();
-        if (!userData.user) return;
-
-        const [campaignsRes, leadsRes] = await Promise.all([
-          supabase.from("campaigns").select("*").eq("user_id", userData.user.id),
-          supabase.from("leads").select("id").eq("user_id", userData.user.id),
-        ]);
-
-        const campaigns = campaignsRes.data || [];
-        const totalSent = campaigns.reduce((acc, c) => acc + (c.sent_count || 0), 0);
-        const totalFailed = campaigns.reduce((acc, c) => acc + (c.failed_count || 0), 0);
-        const deliveryRate = totalSent > 0 ? ((totalSent - totalFailed) / totalSent) * 100 : 0;
-
-        setStats({
-          totalCampaigns: campaigns.length,
-          messagesSent: totalSent,
-          totalContacts: leadsRes.data?.length || 0,
-          deliveryRate: Math.round(deliveryRate),
-        });
-      } catch (err) {
-        console.error("Error fetching stats:", err);
-      }
-    };
-
-    fetchStats();
-  }, []);
 
   const features = [
     {

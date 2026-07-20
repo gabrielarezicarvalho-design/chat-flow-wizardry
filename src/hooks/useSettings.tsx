@@ -1,21 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useSettings = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: settings, isLoading } = useQuery({
-    queryKey: ['settings'],
+    queryKey: ['settings', user?.id],
+    enabled: !!user?.id,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
-
       // Buscar company_id do perfil
       const { data: profile } = await supabase
         .from('profiles')
         .select('company_id')
-        .eq('id', user.id)
+        .eq('id', user!.id)
         .maybeSingle();
 
       if (!profile?.company_id) return null;
@@ -34,7 +34,11 @@ export const useSettings = () => {
       });
       
       return settingsObj;
-    }
+    },
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const updateSettings = useMutation({

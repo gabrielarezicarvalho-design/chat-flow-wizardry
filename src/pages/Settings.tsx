@@ -1,13 +1,10 @@
-import { useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Building, User, Key, Webhook, Link as LinkIcon, CreditCard, Eye, EyeOff, Check, AlertCircle, Loader2, HardDrive, RefreshCw, FileText, Image, Database, Shield, X, Trash2 } from "lucide-react";
-import PrivacyPolicyContent from "@/components/settings/PrivacyPolicyContent";
-import { AISettingsSection } from "@/components/settings/AISettingsSection";
-import TermsOfServiceContent from "@/components/settings/TermsOfServiceContent";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -22,13 +19,24 @@ import { useStorageStats } from "@/hooks/useStorageStats";
 
 import { toast } from "sonner";
 
+const AISettingsSection = lazy(() => import("@/components/settings/AISettingsSection").then((module) => ({ default: module.AISettingsSection })));
+const PrivacyPolicyContent = lazy(() => import("@/components/settings/PrivacyPolicyContent"));
+const TermsOfServiceContent = lazy(() => import("@/components/settings/TermsOfServiceContent"));
+
+const SettingsSectionFallback = () => (
+  <Card className="p-6">
+    <div className="flex items-center justify-center py-12">
+      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+    </div>
+  </Card>
+);
 
 const Settings = () => {
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
   
-  const { stats: storageStats, isLoading: storageLoading, refetch: refetchStorage, formatBytes } = useStorageStats();
   const [activeTab, setActiveTab] = useState("geral");
+  const { stats: storageStats, isLoading: storageLoading, refetch: refetchStorage, formatBytes } = useStorageStats(activeTab === "armazenamento");
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
   const [showTermsDialog, setShowTermsDialog] = useState(false);
   
@@ -470,7 +478,9 @@ const Settings = () => {
           )}
 
           {activeTab === "apikeys" && (
-            <AISettingsSection />
+            <Suspense fallback={<SettingsSectionFallback />}>
+              <AISettingsSection />
+            </Suspense>
           )}
 
           {activeTab === "webhooks" && (
@@ -619,7 +629,9 @@ const Settings = () => {
                   </Button>
                 </div>
                 <ScrollArea className="h-[70vh] p-6">
-                  <PrivacyPolicyContent />
+                  <Suspense fallback={<SettingsSectionFallback />}>
+                    <PrivacyPolicyContent />
+                  </Suspense>
                 </ScrollArea>
               </div>
             </div>
@@ -639,7 +651,9 @@ const Settings = () => {
                   </Button>
                 </div>
                 <ScrollArea className="h-[70vh] p-6">
-                  <TermsOfServiceContent />
+                  <Suspense fallback={<SettingsSectionFallback />}>
+                    <TermsOfServiceContent />
+                  </Suspense>
                 </ScrollArea>
               </div>
             </div>
