@@ -98,6 +98,34 @@ async function callGemini(apiKey: string, systemPrompt: string, userMessage: str
   return data.candidates?.[0]?.content?.parts?.[0]?.text;
 }
 
+async function callLovableAI(systemPrompt: string, userMessage: string, chatHistory?: any[], images?: string[]) {
+  const key = Deno.env.get("LOVABLE_API_KEY");
+  if (!key) throw new Error("LOVABLE_API_KEY não configurada");
+  const messages: any[] = [{ role: "system", content: systemPrompt }];
+  if (chatHistory && chatHistory.length > 0) messages.push(...chatHistory);
+  if (images && images.length > 0) {
+    const content: any[] = [{ type: "text", text: userMessage }];
+    for (const img of images) content.push({ type: "image_url", image_url: { url: img } });
+    messages.push({ role: "user", content });
+  } else {
+    messages.push({ role: "user", content: userMessage });
+  }
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "google/gemini-2.5-flash", messages }),
+  });
+  if (!response.ok) {
+    const t = await response.text();
+    console.error("Lovable AI error:", response.status, t);
+    if (response.status === 429) throw new Error("Limite de requisições atingido. Tente novamente em instantes.");
+    if (response.status === 402) throw new Error("Créditos insuficientes no workspace Lovable.");
+    throw new Error(`Lovable AI error: ${response.status}`);
+  }
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -159,12 +187,7 @@ serve(async (req) => {
       applySettings(data);
     }
 
-    if (!openaiKey && !geminiKey) {
-      return new Response(
-        JSON.stringify({ error: "Nenhuma chave de IA configurada. Vá em Configurações → IA para adicionar sua chave OpenAI ou Gemini." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // Sem chaves de empresa/globais? Usaremos o Lovable AI Gateway como fallback automático.
 
     let sysPrompt = "";
     let userMessage = "";
@@ -346,19 +369,43 @@ ${configInfo}`;
 
     let result: string | null = null;
 
+    const tryLovable = async () => {
+      try {
+        return await callLovableAI(sysPrompt, userMessage, formattedHistory, images);
+      } catch (e) {
+        console.error("Lovable AI fallback failed:", e);
+        return null;
+      }
+    };
+
     if (openaiKey) {
       try {
         result = await callOpenAI(openaiKey, sysPrompt, userMessage, formattedHistory, images);
       } catch (e) {
-        console.error("OpenAI failed, trying Gemini fallback:", e);
+        console.error("OpenAI failed, trying Gemini:", e);
         if (geminiKey) {
-          result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
+          try {
+            result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
+          } catch (e2) {
+            console.error("Gemini failed, trying Lovable AI:", e2);
+            result = await tryLovable();
+            if (!result) throw e2;
+          }
         } else {
-          throw e;
+          result = await tryLovable();
+          if (!result) throw e;
         }
       }
     } else if (geminiKey) {
-      result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
+      try {
+        result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
+      } catch (e) {
+        console.error("Gemini failed, trying Lovable AI:", e);
+        result = await tryLovable();
+        if (!result) throw e;
+      }
+    } else {
+      result = await callLovableAI(sysPrompt, userMessage, formattedHistory, images);
     }
 
     return new Response(JSON.stringify({ result }), {
