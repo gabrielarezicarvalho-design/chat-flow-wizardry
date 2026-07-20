@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-type Action = "upsert_key" | "delete_key" | "save_model";
+type Action = "list_settings" | "upsert_key" | "delete_key" | "save_model";
 type Provider = "openai" | "google" | "asaas";
 
 interface RequestBody {
@@ -25,6 +25,28 @@ const keyNameByProvider: Record<Provider, string> = {
 const modelNameByProvider: Partial<Record<Provider, string>> = {
   openai: "ai_openai_model",
   google: "ai_gemini_model",
+};
+
+const aiSettingKeys = [
+  "ai_openai_key",
+  "ai_openai_model",
+  "ai_gemini_key",
+  "ai_gemini_model",
+  "ai_asaas_key",
+];
+
+const extractStringValue = (value: unknown): string | null => {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed && trimmed !== "null" ? trimmed : null;
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return extractStringValue(record.apiKey ?? record.key ?? record.value);
+  }
+
+  return null;
 };
 
 const jsonResponse = (body: Record<string, unknown>, status = 200) => {
@@ -87,8 +109,43 @@ serve(async (req) => {
     }
 
     const body = (await req.json()) as RequestBody;
-    if (!body.action || !body.provider) {
-      return jsonResponse({ error: "Ação e provedor são obrigatórios" }, 400);
+    if (!body.action) {
+      return jsonResponse({ error: "Ação é obrigatória" }, 400);
+    }
+
+    if (body.action === "list_settings") {
+      let settingsQuery = supabaseAdmin
+        .from("settings")
+        .select("id, company_id, key, value, created_at, updated_at")
+        .in("key", aiSettingKeys);
+
+      settingsQuery = companyId === null
+        ? settingsQuery.is("company_id", null)
+        : settingsQuery.eq("company_id", companyId);
+
+      const { data: settings, error } = await settingsQuery;
+
+      if (error) {
+        console.error("Erro ao listar configurações IA:", error);
+        return jsonResponse({ error: "Não foi possível carregar as configurações" }, 500);
+      }
+
+      return jsonResponse({
+        settings: (settings ?? []).map((setting) => {
+          const value = extractStringValue(setting.value);
+          const isSecretKey = setting.key.endsWith("_key");
+
+          return {
+            ...setting,
+            value: isSecretKey ? (value ? "__configured__" : null) : value,
+            is_configured: Boolean(value),
+          };
+        }),
+      });
+    }
+
+    if (!body.provider) {
+      return jsonResponse({ error: "Provedor é obrigatório" }, 400);
     }
 
     if (!(body.provider in keyNameByProvider)) {
