@@ -30,7 +30,8 @@ import {
   Webhook,
   CalendarClock,
   HardDrive,
-  History
+  History,
+  MapPin
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +73,7 @@ const adminNavItems: NavItem[] = [
   { to: "/mass-sending", icon: Megaphone, label: "Disparos em Massa", feature: "mass_sending" },
   { to: "/campaign-reports", icon: BarChart3, label: "Relatórios", feature: "reports" },
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
+  { to: "/google-maps-leads", icon: MapPin, label: "Leads Google Maps" },
   
   { to: "/flows", icon: Workflow, label: "Fluxos", feature: "flows_basic" },
   { to: "/agents", icon: Bot, label: "Agentes IA", feature: "ai_agents" },
