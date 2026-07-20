@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ const GEMINI_MODELS = [
 ];
 
 export const AISettingsSection = () => {
-  const { providerKeys, isLoading, upsertKey, deleteKey, getKeyStatus } = useAIProviderKeys();
+  const { isLoading, upsertKey, deleteKey, getKeyStatus, getSettingValue, saveModel } = useAIProviderKeys();
   
   const [openaiKey, setOpenaiKey] = useState("");
   const [openaiModel, setOpenaiModel] = useState("gpt-4o-mini");
@@ -49,6 +49,16 @@ export const AISettingsSection = () => {
   const openaiStatus = getKeyStatus('openai');
   const geminiStatus = getKeyStatus('google');
   const asaasStatus = getKeyStatus('asaas');
+  const savedOpenaiModel = getSettingValue('ai_openai_model');
+  const savedGeminiModel = getSettingValue('ai_gemini_model');
+
+  useEffect(() => {
+    if (savedOpenaiModel) setOpenaiModel(savedOpenaiModel);
+  }, [savedOpenaiModel]);
+
+  useEffect(() => {
+    if (savedGeminiModel) setGeminiModel(savedGeminiModel);
+  }, [savedGeminiModel]);
 
   const handleSaveOpenAI = async () => {
     if (!openaiKey.trim()) {
@@ -58,6 +68,7 @@ export const AISettingsSection = () => {
     setSavingOpenai(true);
     try {
       await upsertKey.mutateAsync({ provider: 'openai', apiKey: openaiKey });
+      await saveModel('openai', openaiModel);
       setOpenaiKey("");
     } finally {
       setSavingOpenai(false);
@@ -72,6 +83,7 @@ export const AISettingsSection = () => {
     setSavingGemini(true);
     try {
       await upsertKey.mutateAsync({ provider: 'google', apiKey: geminiKey });
+      await saveModel('google', geminiModel);
       setGeminiKey("");
     } finally {
       setSavingGemini(false);

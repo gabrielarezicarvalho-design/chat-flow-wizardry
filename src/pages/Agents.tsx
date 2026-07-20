@@ -65,7 +65,7 @@ const functionIcons: Record<string, any> = {
 const AgentsContent = () => {
   const navigate = useNavigate();
   const { agents, isLoading, updateAgent, deleteAgent, createAgent } = useAgents();
-  const { isProviderAvailable } = useAIProviderKeys();
+  const { isProviderAvailable, isLoading: isLoadingKeys } = useAIProviderKeys();
   const { flows } = useFlows();
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -305,7 +305,7 @@ const AgentsContent = () => {
   };
 
 
-  if (isLoading) {
+  if (isLoading || isLoadingKeys) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from './useAuth';
 
 export interface AIProviderKey {
   id: string;
@@ -14,39 +15,53 @@ export interface AIProviderKey {
   updated_at: string;
 }
 
+interface AISettingRow {
+  id: string;
+  company_id: string | null;
+  key: string;
+  value: unknown;
+  created_at: string;
+  updated_at: string;
+}
+
+const normalizeSettingValue = (value: unknown): string | null => {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length > 0 && trimmed !== 'null' ? trimmed : null;
+  }
+
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    const possibleValue = record.apiKey ?? record.key ?? record.value;
+    return normalizeSettingValue(possibleValue);
+  }
+
+  return null;
+};
+
 export const useAIProviderKeys = () => {
   const queryClient = useQueryClient();
-
-  const getCompanyId = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Usuário não autenticado');
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('company_id')
-      .eq('id', user.id)
-      .maybeSingle();
-    if (!profile?.company_id) throw new Error('Empresa não encontrada');
-    return profile.company_id;
-  };
+  const { user } = useAuth();
 
   const { data: providerKeys = [], isLoading } = useQuery({
-    queryKey: ['ai-provider-keys'],
+    queryKey: ['ai-provider-keys', user?.id],
     queryFn: async () => {
-      const companyId = await getCompanyId();
-      const { data, error } = await supabase
-        .from('settings')
-        .select('*')
-        .eq('company_id', companyId)
-        .in('key', ['ai_openai_key', 'ai_openai_model', 'ai_gemini_key', 'ai_gemini_model', 'ai_asaas_key']);
-      
+      const { data, error } = await supabase.functions.invoke('company-ai-settings', {
+        body: { action: 'list_settings' },
+      });
+
       if (error) throw error;
-      return data || [];
-    }
+      if (data?.error) throw new Error(data.error);
+
+      return (data?.settings || []) as AISettingRow[];
+    },
+    enabled: !!user?.id,
+    staleTime: 30 * 1000,
   });
 
   const getSettingValue = (key: string) => {
-    const setting = providerKeys.find((s: any) => s.key === key);
-    return setting?.value as string | null;
+    const setting = providerKeys.find((s) => s.key === key);
+    return normalizeSettingValue(setting?.value);
   };
 
   const upsertKeyMutation = useMutation({
