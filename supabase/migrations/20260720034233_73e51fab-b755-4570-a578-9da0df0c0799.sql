@@ -1,0 +1,1 @@
+CREATE POLICY "Users can manage settings of their company" ON public.settings FOR ALL TO authenticated USING (company_id = public.get_user_company_id(auth.uid())) WITH CHECK (company_id = public.get_user_company_id(auth.uid()));
