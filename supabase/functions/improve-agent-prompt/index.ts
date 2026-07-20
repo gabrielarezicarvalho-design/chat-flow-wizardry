@@ -187,12 +187,7 @@ serve(async (req) => {
       applySettings(data);
     }
 
-    if (!openaiKey && !geminiKey) {
-      return new Response(
-        JSON.stringify({ error: "Nenhuma chave de IA configurada. Vá em Configurações → IA para adicionar sua chave OpenAI ou Gemini." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // Sem chaves de empresa/globais? Usaremos o Lovable AI Gateway como fallback automático.
 
     let sysPrompt = "";
     let userMessage = "";
