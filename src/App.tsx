@@ -154,6 +154,7 @@ function App() {
                                 <Route path="/segmentation" element={<Segmentation />} />
                                 <Route path="/google-maps-leads" element={<GoogleMapsLeads />} />
                                 <Route path="/instagram-leads" element={<InstagramLeads />} />
+                                <Route path="/facebook-ads-spy" element={<FacebookAdsSpy />} />
                                 <Route path="/tiktok-leads" element={<TikTokLeads />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
