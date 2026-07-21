@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AdDetailDialog } from "@/components/facebook-ads/AdDetailDialog";
+import { MediaLightbox, type LightboxMedia } from "@/components/facebook-ads/MediaLightbox";
 import {
   Eye, Search, Loader2, ExternalLink, Facebook, Instagram,
   Sparkles, Target, Zap, PlayCircle, Image as ImageIcon,
@@ -76,7 +77,21 @@ function AdMediaPreview({ ad }: { ad: FacebookAd }) {
   const [idx, setIdx] = useState(0);
   const [imgError, setImgError] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const lightboxMedia: LightboxMedia[] = useMemo(() => {
+    const items: LightboxMedia[] = [];
+    videos.forEach((url) => items.push({ type: "video", url, poster: images[0] }));
+    images.forEach((url) => items.push({ type: "image", url }));
+    return items;
+  }, [videos, images]);
+
+  const openLightbox = (startIndex = 0) => {
+    setLightboxIndex(startIndex);
+    setLightboxOpen(true);
+  };
 
   // No media at all → friendly fallback
   if (!hasVideo && !hasImage) {
@@ -97,75 +112,112 @@ function AdMediaPreview({ ad }: { ad: FacebookAd }) {
   if (hasVideo && !videoError) {
     const poster = images[0];
     return (
-      <div
-        className="relative aspect-square bg-black overflow-hidden group/media"
-        onMouseEnter={() => videoRef.current?.play().catch(() => {})}
-        onMouseLeave={() => { const v = videoRef.current; if (v) { v.pause(); v.currentTime = 0; } }}
-      >
-        <video
-          ref={videoRef}
-          src={videos[0]}
-          poster={poster}
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          controls
-          className="w-full h-full object-cover"
-          onError={() => setVideoError(true)}
-        />
-        <div className="absolute top-2 left-2 bg-background/80 backdrop-blur text-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium pointer-events-none">
-          <PlayCircle className="h-3.5 w-3.5" /> Vídeo
+      <>
+        <div
+          className="relative aspect-square bg-black overflow-hidden group/media cursor-zoom-in"
+          onMouseEnter={() => videoRef.current?.play().catch(() => {})}
+          onMouseLeave={() => { const v = videoRef.current; if (v) { v.pause(); v.currentTime = 0; } }}
+          onClick={() => openLightbox(0)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(0); } }}
+          aria-label="Abrir vídeo em tela cheia"
+        >
+          <video
+            ref={videoRef}
+            src={videos[0]}
+            poster={poster}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="w-full h-full object-cover pointer-events-none"
+            onError={() => setVideoError(true)}
+          />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/media:opacity-100 transition-opacity bg-black/20 pointer-events-none">
+            <div className="h-14 w-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+              <PlayCircle className="h-8 w-8 text-black" />
+            </div>
+          </div>
+          <div className="absolute top-2 left-2 bg-background/80 backdrop-blur text-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium pointer-events-none">
+            <PlayCircle className="h-3.5 w-3.5" /> Vídeo
+          </div>
+          {videos.length > 1 && (
+            <Badge className="absolute top-2 right-2 gap-1 bg-background/80 backdrop-blur text-foreground border-border">
+              <PlayCircle className="h-3 w-3" /> {videos.length}
+            </Badge>
+          )}
         </div>
-        {videos.length > 1 && (
-          <Badge className="absolute top-2 right-2 gap-1 bg-background/80 backdrop-blur text-foreground border-border">
-            <PlayCircle className="h-3 w-3" /> {videos.length}
-          </Badge>
-        )}
-      </div>
+        <MediaLightbox
+          open={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          media={lightboxMedia}
+          initialIndex={lightboxIndex}
+          title={ad.title || ad.page_name}
+          externalUrl={ad.ad_library_url}
+        />
+      </>
     );
   }
 
   // Image carousel
   if (hasImage && !imgError) {
     const src = images[idx] || images[0];
+    const videoOffset = videos.length; // videos come first in lightboxMedia
     return (
-      <div className="relative aspect-square bg-muted overflow-hidden group/media">
-        <img
-          src={src}
-          alt={ad.title || ad.page_name || "Criativo"}
-          loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={() => setImgError(true)}
+      <>
+        <div
+          className="relative aspect-square bg-muted overflow-hidden group/media cursor-zoom-in"
+          onClick={() => openLightbox(videoOffset + idx)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLightbox(videoOffset + idx); } }}
+          aria-label="Abrir imagem em tela cheia"
+        >
+          <img
+            src={src}
+            alt={ad.title || ad.page_name || "Criativo"}
+            loading="lazy"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover/media:scale-105"
+            onError={() => setImgError(true)}
+          />
+          {images.length > 1 && (
+            <>
+              <div className="absolute inset-x-0 bottom-2 flex justify-center gap-1.5 pointer-events-none">
+                {images.slice(0, 8).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all ${i === idx ? "w-4 bg-white" : "w-1.5 bg-white/60"}`}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setIdx((idx - 1 + images.length) % images.length); }}
+                className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 backdrop-blur flex items-center justify-center opacity-0 group-hover/media:opacity-100 transition-opacity hover:bg-background"
+                aria-label="Imagem anterior"
+              >‹</button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setIdx((idx + 1) % images.length); }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 backdrop-blur flex items-center justify-center opacity-0 group-hover/media:opacity-100 transition-opacity hover:bg-background"
+                aria-label="Próxima imagem"
+              >›</button>
+              <Badge className="absolute top-2 right-2 gap-1 bg-background/80 backdrop-blur text-foreground border-border">
+                <ImageIcon className="h-3 w-3" /> {images.length}
+              </Badge>
+            </>
+          )}
+        </div>
+        <MediaLightbox
+          open={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          media={lightboxMedia}
+          initialIndex={lightboxIndex}
+          title={ad.title || ad.page_name}
+          externalUrl={ad.ad_library_url}
         />
-        {images.length > 1 && (
-          <>
-            <div className="absolute inset-x-0 bottom-2 flex justify-center gap-1.5 pointer-events-none">
-              {images.slice(0, 8).map((_, i) => (
-                <span
-                  key={i}
-                  className={`h-1.5 rounded-full transition-all ${i === idx ? "w-4 bg-white" : "w-1.5 bg-white/60"}`}
-                />
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setIdx((idx - 1 + images.length) % images.length); }}
-              className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 backdrop-blur flex items-center justify-center opacity-0 group-hover/media:opacity-100 transition-opacity hover:bg-background"
-              aria-label="Imagem anterior"
-            >‹</button>
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setIdx((idx + 1) % images.length); }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 backdrop-blur flex items-center justify-center opacity-0 group-hover/media:opacity-100 transition-opacity hover:bg-background"
-              aria-label="Próxima imagem"
-            >›</button>
-            <Badge className="absolute top-2 right-2 gap-1 bg-background/80 backdrop-blur text-foreground border-border">
-              <ImageIcon className="h-3 w-3" /> {images.length}
-            </Badge>
-          </>
-        )}
-      </div>
+      </>
     );
   }
 
