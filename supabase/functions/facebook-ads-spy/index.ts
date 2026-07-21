@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
     const limit = Math.min(Math.max(Number(quantity) || 30, 1), 200);
     const searchUrl = buildSearchUrl({ query, pageId, country, activeStatus, adType, platform });
 
-    const items = await runActorSync({
+    const { items, status } = await runActorAsync({
       startUrls: [{ url: searchUrl }],
       resultsLimit: limit,
       activeStatus,
