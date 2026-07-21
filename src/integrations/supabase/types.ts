@@ -628,6 +628,8 @@ export type Database = {
           last_message: string | null
           last_message_at: string | null
           protocol: string | null
+          sla_flagged: boolean
+          sla_flagged_at: string | null
           status: string | null
           tags: string[] | null
           unread_count: number | null
@@ -649,6 +651,8 @@ export type Database = {
           last_message?: string | null
           last_message_at?: string | null
           protocol?: string | null
+          sla_flagged?: boolean
+          sla_flagged_at?: string | null
           status?: string | null
           tags?: string[] | null
           unread_count?: number | null
@@ -670,6 +674,8 @@ export type Database = {
           last_message?: string | null
           last_message_at?: string | null
           protocol?: string | null
+          sla_flagged?: boolean
+          sla_flagged_at?: string | null
           status?: string | null
           tags?: string[] | null
           unread_count?: number | null
@@ -1609,6 +1615,7 @@ export type Database = {
           created_at: string
           id: string
           last_assigned_at: string | null
+          monthly_goal: number
           sales: boolean
           updated_at: string
           user_id: string
@@ -1629,6 +1636,7 @@ export type Database = {
           created_at?: string
           id?: string
           last_assigned_at?: string | null
+          monthly_goal?: number
           sales?: boolean
           updated_at?: string
           user_id: string
@@ -1649,6 +1657,7 @@ export type Database = {
           created_at?: string
           id?: string
           last_assigned_at?: string | null
+          monthly_goal?: number
           sales?: boolean
           updated_at?: string
           user_id?: string
