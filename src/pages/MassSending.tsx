@@ -390,6 +390,20 @@ function MassSendingContent() {
       .filter(Boolean);
   };
 
+  // Normaliza número BR: garante o 9º dígito em mobiles (55 + DDD + 8 dígitos -> 55 + DDD + 9 + 8 dígitos)
+  // Contatos sincronizados do WhatsApp costumam vir sem o "9", causando falha silenciosa na entrega.
+  const normalizePhone = (raw: string): string => {
+    const digits = raw.replace(/\D/g, "");
+    if (digits.startsWith("55") && digits.length === 12) {
+      const ddd = parseInt(digits.slice(2, 4), 10);
+      // DDDs válidos no Brasil: 11-99. Todos mobiles hoje exigem o 9 na frente.
+      if (ddd >= 11 && ddd <= 99) {
+        return `55${digits.slice(2, 4)}9${digits.slice(4)}`;
+      }
+    }
+    return digits;
+  };
+
   const getAllContacts = (): string[] => {
     let contacts: string[] = [];
     if (contactSource === "manual") {
@@ -401,7 +415,7 @@ function MassSendingContent() {
     } else if (contactSource === "leads") {
       contacts = selectedLeads;
     }
-    return contacts.map(n => n.replace(/\D/g, "") + "@s.whatsapp.net");
+    return contacts.map(n => normalizePhone(n) + "@s.whatsapp.net");
   };
 
   const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
