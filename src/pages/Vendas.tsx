@@ -354,14 +354,6 @@ export default function Vendas() {
                 </p>
               </div>
 
-              <div className="rounded-lg border border-dashed border-border/60 p-8 text-center space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Você ainda não tem vendedores com permissão de{" "}
-                  <span className="font-medium text-foreground">Vendas</span>.
-                  Convide alguém em{" "}
-                  <span className="font-medium text-foreground">Equipe</span> e
-                  marque a permissão "sales" para começar a distribuir leads.
-                </p>
               {salespeople.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border/60 p-8 text-center space-y-3">
                   <p className="text-sm text-muted-foreground">
