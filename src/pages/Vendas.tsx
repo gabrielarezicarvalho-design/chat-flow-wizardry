@@ -245,7 +245,7 @@ export default function Vendas() {
     } finally {
       setDistributing(false);
     }
-    void nowIso;
+    };
   };
 
   const stats = useMemo(() => {
