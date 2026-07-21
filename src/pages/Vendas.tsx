@@ -378,6 +378,58 @@ export default function Vendas() {
     toast.success(`Exportado ${rows.length} lead(s)`);
   };
 
+  const exportMonthlyReport = () => {
+    if (salespeople.length === 0) return toast.info("Nenhum vendedor para exportar");
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    const monthLabel = now.toLocaleDateString("pt-BR", { month: "2-digit", year: "numeric" });
+
+    const header = [
+      "Vendedor",
+      "Mês",
+      "Leads atribuídos",
+      "Em andamento",
+      "Ganhos",
+      "Perdidos",
+      "Meta",
+      "Atingimento (%)",
+    ];
+
+    const body = salespeople.map((s) => {
+      const mine = leads.filter(
+        (l: any) => l.user_id === s.user_id && new Date(l.created_at).getTime() >= monthStart,
+      );
+      const assigned = mine.length;
+      const won = mine.filter((l: any) => l.status === "converted").length;
+      const lost = mine.filter((l: any) => l.status === "lost").length;
+      const inProgress = mine.filter((l: any) =>
+        ["new", "contacted", "qualified", "negotiating"].includes(l.status),
+      ).length;
+      const goal = s.monthly_goal || 0;
+      const pct = goal > 0 ? ((won / goal) * 100).toFixed(1) : "—";
+      return [
+        s.full_name || s.username || s.user_id.slice(0, 8),
+        monthLabel,
+        assigned,
+        inProgress,
+        won,
+        lost,
+        goal,
+        pct,
+      ];
+    });
+
+    const csv = [header, ...body].map((r) => r.map(escapeCsv).join(",")).join("\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relatorio-vendedores-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Relatório mensal exportado (${body.length} vendedor(es))`);
+  };
+
   const saveGoal = async (userId: string, value: number) => {
     const { error } = await supabase
       .from("user_permissions")
