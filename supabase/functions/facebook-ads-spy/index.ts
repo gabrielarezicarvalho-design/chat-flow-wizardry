@@ -1,13 +1,12 @@
 // Facebook Ad Library scraper via Apify
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const APIFY_TOKEN = Deno.env.get("APIFY_TOKEN");
 const ACTOR = "apify~facebook-ads-scraper";
 
-async function runActorAsync(input: Record<string, unknown>, maxWaitMs = 130_000) {
+type JsonRecord = Record<string, unknown>;
+
+async function runActorAsync(input: JsonRecord, maxWaitMs = 130_000) {
   // Start run asynchronously
   const startUrl = `https://api.apify.com/v2/acts/${ACTOR}/runs?token=${APIFY_TOKEN}&memory=1024`;
   const startRes = await fetch(startUrl, {
@@ -75,63 +74,159 @@ function buildSearchUrl(params: {
   return `${base}?${qs.toString()}`;
 }
 
-function normalize(item: any) {
-  const snap = item.snapshot || item.ad_snapshot || {};
-  const body = snap.body?.text || snap.body?.markdown?.[0] || snap.body || item.ad_creative_body || item.text;
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
-  // Collect media from snapshot.images, snapshot.videos and snapshot.cards (carousel)
+function asRecord(value: unknown): JsonRecord {
+  return isRecord(value) ? value : {};
+}
+
+function asArray(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function cleanUrl(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim().replaceAll("&amp;", "&");
+  if (!/^https?:\/\//i.test(trimmed)) return undefined;
+  return trimmed;
+}
+
+function firstString(...values: unknown[]): string | undefined {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return undefined;
+}
+
+function textFrom(value: unknown): string | undefined {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  const record = asRecord(value);
+  return firstString(record.text, asArray(record.markdown)[0], record.value);
+}
+
+function pushUnique(target: string[], value: unknown) {
+  const url = cleanUrl(value);
+  if (url && !target.includes(url)) target.push(url);
+}
+
+function looksLikeImageKey(key: string, hint: string) {
+  const lower = `${hint}.${key}`.toLowerCase();
+  if (lower.includes("profilepicture") || lower.includes("profile_picture")) return false;
+  return lower.includes("image") || lower.includes("thumbnail") || lower.includes("preview");
+}
+
+function looksLikeVideoKey(key: string, hint: string) {
+  const lower = `${hint}.${key}`.toLowerCase();
+  return lower.includes("video") && !lower.includes("previewimage") && !lower.includes("preview_image");
+}
+
+function collectMedia(value: unknown, images: string[], videos: string[], hint = "", depth = 0) {
+  if (depth > 6) return;
+
+  const lowerHint = hint.toLowerCase();
+  const url = cleanUrl(value);
+  if (url) {
+    if (lowerHint.includes("video") && !lowerHint.includes("preview")) pushUnique(videos, url);
+    if (lowerHint.includes("image") || lowerHint.includes("thumbnail") || lowerHint.includes("preview")) pushUnique(images, url);
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) collectMedia(item, images, videos, hint, depth + 1);
+    return;
+  }
+
+  if (!isRecord(value)) return;
+
+  for (const [key, child] of Object.entries(value)) {
+    const childUrl = cleanUrl(child);
+    const childHint = hint ? `${hint}.${key}` : key;
+    const lowerKey = key.toLowerCase();
+
+    if (childUrl) {
+      if (looksLikeImageKey(key, hint) || ((lowerKey === "url" || lowerKey === "src" || lowerKey === "uri") && lowerHint.includes("image"))) {
+        pushUnique(images, childUrl);
+        continue;
+      }
+      if (looksLikeVideoKey(key, hint) || ((lowerKey === "url" || lowerKey === "src" || lowerKey === "uri") && lowerHint.includes("video"))) {
+        pushUnique(videos, childUrl);
+        continue;
+      }
+    }
+
+    collectMedia(child, images, videos, childHint, depth + 1);
+  }
+}
+
+function normalize(rawItem: unknown) {
+  const item = asRecord(rawItem);
+  const snap = asRecord(item.snapshot || item.ad_snapshot);
+  const cards = asArray(snap.cards);
+  const firstCard = asRecord(cards[0]);
+  const body = textFrom(snap.body) || firstString(item.ad_creative_body, item.text);
+
   const images: string[] = [];
   const videos: string[] = [];
 
-  for (const i of (snap.images || [])) {
-    const u = i?.original_image_url || i?.resized_image_url || i?.watermarked_resized_image_url;
-    if (u) images.push(u);
-  }
-  for (const v of (snap.videos || [])) {
-    const vu = v?.video_hd_url || v?.video_sd_url;
-    if (vu) videos.push(vu);
-    else if (v?.video_preview_image_url) images.push(v.video_preview_image_url);
-  }
-  for (const c of (snap.cards || [])) {
-    const cu = c?.original_image_url || c?.resized_image_url;
-    const cv = c?.video_hd_url || c?.video_sd_url;
-    if (cu) images.push(cu);
-    if (cv) videos.push(cv);
-  }
-  // Fallbacks
-  if (!images.length && item.imageUrl) images.push(item.imageUrl);
-  if (!videos.length && item.videoUrl) videos.push(item.videoUrl);
+  // Apify returns the official Facebook fields in camelCase. Older actors may return snake_case.
+  // The recursive collector covers both formats, root creatives, carousels, extraImages and extraVideos.
+  collectMedia(snap.images, images, videos, "snapshot.images");
+  collectMedia(snap.videos, images, videos, "snapshot.videos");
+  collectMedia(snap.cards, images, videos, "snapshot.cards");
+  collectMedia(snap.extraImages, images, videos, "snapshot.extraImages");
+  collectMedia(snap.extraVideos, images, videos, "snapshot.extraVideos");
+  collectMedia(item.images, images, videos, "item.images");
+  collectMedia(item.videos, images, videos, "item.videos");
+  collectMedia(item.media, images, videos, "item.media");
+  collectMedia(item.creative, images, videos, "item.creative");
 
-  // Extract CTA / link from first card if not on snapshot root
-  const firstCard = snap.cards?.[0] || {};
-  const cta_text = snap.cta_text || snap.call_to_action?.value || firstCard.cta_text;
-  const link_url = snap.link_url || firstCard.link_url || item.link_url;
-  const title = snap.title || firstCard.title || item.title;
+  pushUnique(images, item.imageUrl || item.image_url);
+  pushUnique(videos, item.videoUrl || item.video_url);
+
+  const cta_text = firstString(snap.ctaText, snap.cta_text, asRecord(snap.call_to_action).value, firstCard.ctaText, firstCard.cta_text);
+  const link_url = firstString(snap.linkUrl, snap.link_url, firstCard.linkUrl, firstCard.link_url, item.linkUrl, item.link_url);
+  const title = firstString(snap.title, firstCard.title, item.title);
+
+  if (!images.length && !videos.length) {
+    console.log("No media mapped for ad:", JSON.stringify({
+      adArchiveID: item.adArchiveID || item.adArchiveId || item.ad_archive_id,
+      displayFormat: snap.displayFormat || snap.display_format,
+      snapshotMediaKeys: {
+        images: asArray(snap.images).length,
+        videos: asArray(snap.videos).length,
+        cards: cards.length,
+        extraImages: asArray(snap.extraImages).length,
+        extraVideos: asArray(snap.extraVideos).length,
+      },
+    }));
+  }
 
   return {
-    ad_archive_id: item.ad_archive_id || item.adArchiveID || item.id,
-    page_id: item.page_id || snap.page_id,
-    page_name: item.page_name || snap.page_name,
-    page_profile_pic: snap.page_profile_picture_url || item.page_profile_picture_url,
-    page_categories: snap.page_categories || item.page_categories,
-    page_likes: snap.page_like_count || item.page_like_count,
+    ad_archive_id: item.ad_archive_id || item.adArchiveID || item.adArchiveId || item.id,
+    page_id: item.page_id || item.pageId || item.pageID || snap.pageId || snap.page_id,
+    page_name: item.page_name || item.pageName || snap.pageName || snap.page_name,
+    page_profile_pic: snap.pageProfilePictureUrl || snap.page_profile_picture_url || item.page_profile_picture_url,
+    page_categories: snap.pageCategories || snap.page_categories || item.page_categories,
+    page_likes: snap.pageLikeCount || snap.page_like_count || item.page_like_count,
     body,
     title,
     cta_text,
-    cta_type: snap.cta_type || firstCard.cta_type,
+    cta_type: snap.ctaType || snap.cta_type || firstCard.ctaType || firstCard.cta_type,
     link_url,
-    display_format: snap.display_format || item.display_format,
+    display_format: snap.displayFormat || snap.display_format || item.display_format,
     images: Array.from(new Set(images)),
     videos: Array.from(new Set(videos)),
-    start_date: item.start_date || item.ad_delivery_start_time,
-    end_date: item.end_date || item.ad_delivery_stop_time,
-    is_active: item.is_active ?? (item.ad_delivery_stop_time ? false : true),
-    platforms: item.publisher_platform || item.publisher_platforms,
-    impressions: item.impressions || item.impressions_with_index,
+    start_date: item.start_date || item.startDate || item.startDateFormatted || item.ad_delivery_start_time,
+    end_date: item.end_date || item.endDate || item.endDateFormatted || item.ad_delivery_stop_time,
+    is_active: item.is_active ?? item.isActive ?? (item.ad_delivery_stop_time ? false : true),
+    platforms: item.publisher_platform || item.publisherPlatform || item.publisher_platforms,
+    impressions: item.impressions || item.impressionsWithIndex || item.impressions_with_index,
     spend: item.spend,
     currency: item.currency,
-    reach_estimate: item.reach_estimate || item.eu_total_reach,
-    ad_library_url: item.url || (item.ad_archive_id ? `https://www.facebook.com/ads/library/?id=${item.ad_archive_id}` : undefined),
+    reach_estimate: item.reach_estimate || item.reachEstimate || item.eu_total_reach,
+    ad_library_url: item.url || (item.adArchiveID || item.adArchiveId || item.ad_archive_id ? `https://www.facebook.com/ads/library/?id=${item.adArchiveID || item.adArchiveId || item.ad_archive_id}` : undefined),
   };
 }
 
@@ -182,10 +277,10 @@ Deno.serve(async (req) => {
       JSON.stringify({ ads, count: ads.length, searchUrl, status }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("facebook-ads-spy error:", err);
     return new Response(
-      JSON.stringify({ error: err.message || "erro inesperado" }),
+      JSON.stringify({ error: err instanceof Error ? err.message : "erro inesperado" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
