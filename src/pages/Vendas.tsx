@@ -288,12 +288,18 @@ export default function Vendas() {
         <TabsContent value="configuracoes">
           <Card className="bg-card/60 border-border/60">
             <CardContent className="p-6 space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold">Configurações do time</h2>
-                <p className="text-sm text-muted-foreground">
-                  Como o sistema se comporta quando há vários vendedores.
-                </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Configurações do time</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Como o sistema se comporta quando há vários vendedores.
+                  </p>
+                </div>
+                {loadingSettings && (
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                )}
               </div>
+
 
               <div className="flex items-start justify-between gap-4">
                 <div>
