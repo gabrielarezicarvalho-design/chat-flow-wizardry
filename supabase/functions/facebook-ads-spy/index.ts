@@ -293,7 +293,10 @@ Deno.serve(async (req) => {
       console.log("Sample first item:", JSON.stringify(items[0]).slice(0, 2000));
     }
 
-    const ads = (Array.isArray(items) ? items : []).slice(0, limit).map(normalize);
+    const ads = (Array.isArray(items) ? items : [])
+      .slice(0, limit)
+      .map(normalize)
+      .filter((a) => a.page_name || a.body || (a.images && a.images.length) || (a.videos && a.videos.length));
 
     return new Response(
       JSON.stringify({ ads, count: ads.length, status }),
