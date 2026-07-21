@@ -52,6 +52,7 @@ const CampaignReports = lazy(() => import("./pages/CampaignReports"));
 const ChatHistory = lazy(() => import("./pages/ChatHistory"));
 const Segmentation = lazy(() => import("./pages/Segmentation"));
 const GoogleMapsLeads = lazy(() => import("./pages/GoogleMapsLeads"));
+const InstagramLeads = lazy(() => import("./pages/InstagramLeads"));
 
 const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -150,6 +151,7 @@ function App() {
                                 <Route path="/chatgpt-credits" element={<ChatGPTCredits />} />
                                 <Route path="/segmentation" element={<Segmentation />} />
                                 <Route path="/google-maps-leads" element={<GoogleMapsLeads />} />
+                                <Route path="/instagram-leads" element={<InstagramLeads />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
                                 <Route path="*" element={<NotFound />} />
