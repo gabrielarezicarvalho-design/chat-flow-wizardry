@@ -74,6 +74,17 @@ const AD_TEMPLATES = [
   },
 ];
 
+const STYLE_OPTIONS = [
+  { id: "none", label: "Sem estilo (livre)" },
+  { id: "photorealistic", label: "Fotorrealista" },
+  { id: "premium_product", label: "Produto Premium" },
+  { id: "cinematic", label: "Cinematográfico" },
+  { id: "minimalist", label: "Minimalista" },
+  { id: "editorial_magazine", label: "Editorial / Revista" },
+  { id: "vibrant_pop", label: "Pop Vibrante" },
+  { id: "luxury_dark", label: "Luxo Dark" },
+];
+
 interface GeneratedImage {
   id: string;
   prompt: string;
