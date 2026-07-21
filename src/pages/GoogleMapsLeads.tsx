@@ -435,20 +435,20 @@ export default function GoogleMapsLeads() {
           <FeatureCard icon={<SlidersHorizontal className="w-5 h-5" />} title="Filtros avançados" desc="Encontre exatamente o que precisa" />
           <FeatureCard icon={<Download className="w-5 h-5" />} title="Exportação fácil" desc="Exporte e use onde quiser" />
           <FeatureCard icon={<Headphones className="w-5 h-5" />} title="Suporte humanizado" desc="Estamos aqui pra ajudar" />
-          <Card className="border-0 shadow-lg shadow-primary/30 overflow-hidden relative bg-gradient-to-br from-[hsl(217_91%_55%)] via-[hsl(221_83%_45%)] to-[hsl(224_76%_35%)] text-white">
-            <CardContent className="p-5 flex items-center justify-between gap-3 relative">
-              <div className="flex items-center gap-3">
-                <Crown className="w-7 h-7 flex-shrink-0" strokeWidth={2} />
-                <div>
-                  <p className="font-bold text-base leading-tight whitespace-nowrap">Plano Profissional</p>
-                  <p className="text-xs text-white/80 mt-0.5">Acesso completo a tudo</p>
-                </div>
+          <Card className="group relative overflow-hidden border-0 shadow-lg shadow-primary/30 bg-gradient-to-br from-[hsl(217_91%_55%)] via-[hsl(221_83%_45%)] to-[hsl(224_76%_35%)] text-white transition-all duration-500 hover:shadow-primary/50">
+            <div className="absolute -left-1/2 top-0 h-full w-1/2 skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:translate-x-[300%] transition-all duration-1000" />
+            <CardContent className="relative p-5 space-y-1">
+              <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/15 text-white transition-all duration-500 group-hover:bg-white group-hover:text-primary group-hover:shadow-lg group-hover:shadow-white/40">
+                <Crown className="w-5 h-5" strokeWidth={2} />
               </div>
-              <Button size="sm" className="bg-white text-primary hover:bg-white/90 font-semibold rounded-lg shadow-md flex-shrink-0">
-                Ver planos <ArrowRight className="w-3.5 h-3.5 ml-1" />
-              </Button>
+              <p className="font-semibold text-sm pt-1 transition-transform duration-300 group-hover:translate-x-1">Plano Profissional</p>
+              <p className="text-xs text-white/80 transition-transform duration-300 group-hover:translate-x-1">Acesso completo a tudo</p>
+              <button className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-white/90 hover:text-white transition-colors">
+                Ver planos <ArrowRight className="w-3 h-3" />
+              </button>
             </CardContent>
           </Card>
+
 
         </div>
       </div>
