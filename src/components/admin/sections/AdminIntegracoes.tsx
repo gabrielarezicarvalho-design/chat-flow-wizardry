@@ -10,6 +10,7 @@ import {
   Plug, Webhook, Cloud, RefreshCw, CheckCircle, XCircle,
   Key, Save, Copy, Loader2, Shield, MessageSquare, Bell, Bot,
 } from "lucide-react";
+import { ApifyUsageCard } from "@/components/admin/ApifyUsageCard";
 
 interface SecretItem {
   name: string;
@@ -119,6 +120,11 @@ export function AdminIntegracoes() {
         <StatCard icon={XCircle} value={missingCount} label="Faltando Configurar" color="red" />
         <StatCard icon={Plug} value={webhooks.length} label="Webhooks Ativos" color="purple" />
       </div>
+
+      {/* Apify usage */}
+      <ApifyUsageCard />
+
+
 
       <Tabs defaultValue="apis" className="w-full">
         <TabsList className="bg-white/5 border border-white/10">
