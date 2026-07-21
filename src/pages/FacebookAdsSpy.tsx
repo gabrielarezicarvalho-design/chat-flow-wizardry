@@ -7,15 +7,14 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AdDetailDialog } from "@/components/facebook-ads/AdDetailDialog";
 import {
   Eye, Search, Loader2, ExternalLink, Facebook, Instagram,
-  Sparkles, Zap, PlayCircle, Image as ImageIcon,
-  CalendarDays, TrendingUp, Download, Building2, Radar,
-  Globe2, ShieldCheck, LineChart, Layers, ChevronRight,
+  Sparkles, Target, Zap, PlayCircle, Image as ImageIcon,
+  CalendarDays, TrendingUp, Download, Building2, Radar, Flame,
+  Globe2, Filter,
 } from "lucide-react";
 
 interface FacebookAd {
@@ -48,7 +47,7 @@ const POPULAR = [
 ];
 
 const COUNTRIES = [
-  { code: "BR", label: "Brasil" }, { code: "US", label: "Estados Unidos" },
+  { code: "BR", label: "Brasil" }, { code: "US", label: "EUA" },
   { code: "PT", label: "Portugal" }, { code: "ES", label: "Espanha" },
   { code: "MX", label: "México" }, { code: "AR", label: "Argentina" },
   { code: "ALL", label: "Todos os países" },
@@ -85,10 +84,7 @@ export default function FacebookAdsSpy() {
     const active = ads.filter(a => a.is_active).length;
     const withVideo = ads.filter(a => a.videos?.length).length;
     const uniquePages = new Set(ads.map(a => a.page_id).filter(Boolean)).size;
-    const avgDays = ads.length
-      ? Math.round(ads.reduce((s, a) => s + (daysRunning(a.start_date, a.end_date) || 0), 0) / ads.length)
-      : 0;
-    return { active, withVideo, uniquePages, avgDays };
+    return { active, withVideo, uniquePages };
   }, [ads]);
 
   const handleSearch = async () => {
@@ -144,365 +140,358 @@ export default function FacebookAdsSpy() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Executive header — dark, corporate */}
-      <header className="relative overflow-hidden bg-[hsl(222_47%_11%)] text-white border-b border-white/5">
+      {/* Hero */}
+      <div className="relative overflow-hidden border-b border-border/40">
+        {/* Ambient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-background to-background" />
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-32 -left-24 w-96 h-96 rounded-full bg-primary/10 blur-3xl" />
         <div
-          className="absolute inset-0 opacity-[0.07]"
+          className="absolute inset-0 opacity-[0.04]"
           style={{
             backgroundImage:
-              "linear-gradient(hsl(0 0% 100% / 0.4) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / 0.4) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
+              "radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)",
+            backgroundSize: "24px 24px",
           }}
         />
-        <div className="absolute top-0 right-0 w-[520px] h-[520px] rounded-full bg-primary/25 blur-[120px]" />
 
-        <div className="relative container mx-auto px-8 py-10">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-xs text-white/50 mb-6">
-            <span>Next Pro</span>
-            <ChevronRight className="h-3 w-3" />
-            <span>Inteligência</span>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-white/80 font-medium">Espionagem de Anúncios</span>
-          </nav>
-
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+        <div className="relative container mx-auto px-6 py-14">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-white/80 uppercase tracking-wider mb-5">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                Meta Ad Library · Dados oficiais
-              </div>
-              <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.05]">
-                Central de Inteligência<br />
-                <span className="text-white/60">Competitiva</span>
+              <Badge variant="secondary" className="mb-4 gap-1.5 backdrop-blur bg-background/60 border-border/60">
+                <Radar className="h-3 w-3 text-primary" />
+                Inteligência competitiva em tempo real
+              </Badge>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">
+                Espionar Anúncios
               </h1>
-              <p className="text-white/60 mt-4 text-base max-w-xl leading-relaxed">
-                Monitore criativos, ofertas e estratégias de campanha da concorrência em tempo real.
-                Extraia insights acionáveis diretamente da Biblioteca de Anúncios da Meta.
+              <p className="text-muted-foreground mt-3 text-lg">
+                Descubra criativos vencedores, ofertas e copies que seus concorrentes estão rodando na Meta.
               </p>
+              <div className="flex flex-wrap gap-2 mt-6">
+                <Badge variant="outline" className="gap-1.5 py-1.5 px-3 backdrop-blur bg-background/40"><Facebook className="h-3.5 w-3.5" /> Facebook</Badge>
+                <Badge variant="outline" className="gap-1.5 py-1.5 px-3 backdrop-blur bg-background/40"><Instagram className="h-3.5 w-3.5" /> Instagram</Badge>
+                <Badge variant="outline" className="gap-1.5 py-1.5 px-3 backdrop-blur bg-background/40"><Target className="h-3.5 w-3.5" /> Segmentação</Badge>
+                <Badge variant="outline" className="gap-1.5 py-1.5 px-3 backdrop-blur bg-background/40"><Sparkles className="h-3.5 w-3.5" /> Criativos IA</Badge>
+              </div>
             </div>
 
-            {/* KPI strip */}
-            <div className="grid grid-cols-3 gap-px bg-white/10 rounded-xl overflow-hidden border border-white/10 min-w-[420px]">
-              {[
-                { label: "Fontes", value: "2", sub: "Facebook · Instagram" },
-                { label: "Países", value: "40+", sub: "Cobertura global" },
-                { label: "Latência", value: "< 2min", sub: "Dados atualizados" },
-              ].map((k) => (
-                <div key={k.label} className="bg-[hsl(222_47%_11%)] p-4">
-                  <p className="text-[10px] uppercase tracking-widest text-white/40">{k.label}</p>
-                  <p className="text-2xl font-semibold mt-1">{k.value}</p>
-                  <p className="text-[11px] text-white/50 mt-0.5">{k.sub}</p>
-                </div>
-              ))}
+            <div className="hidden md:flex relative">
+              <div className="relative h-32 w-32 rounded-3xl bg-gradient-to-br from-primary to-primary-dark shadow-2xl shadow-primary/40 flex items-center justify-center rotate-3 hover:rotate-0 transition-transform">
+                <Eye className="h-16 w-16 text-primary-foreground" strokeWidth={1.5} />
+                <div className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-success animate-pulse ring-4 ring-background" />
+              </div>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <div className="container mx-auto px-8 py-8 space-y-6">
-        {/* Search console */}
-        <Card className="border-border/60 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border/60 bg-muted/30">
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center">
-                <Radar className="h-4 w-4 text-primary" />
+      <div className="container mx-auto px-6 py-8 space-y-6 -mt-6 relative">
+        {/* Search Card */}
+        <Card className="p-6 md:p-8 shadow-xl shadow-primary/5 border-border/60 backdrop-blur-sm bg-card/95">
+          <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
+            <TabsList className="grid w-full max-w-md grid-cols-2 mb-6 h-11 p-1">
+              <TabsTrigger value="keyword" className="gap-2 h-full"><Search className="h-4 w-4" /> Palavra-chave</TabsTrigger>
+              <TabsTrigger value="page" className="gap-2 h-full"><Building2 className="h-4 w-4" /> Página</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="keyword" className="space-y-4 mt-0">
+              <div>
+                <Label className="text-sm font-medium">O que você quer espionar?</Label>
+                <div className="relative mt-2">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                  <Input
+                    placeholder="Ex: emagrecimento, curso de inglês, dropshipping..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    className="h-14 pl-12 text-base"
+                  />
+                </div>
               </div>
               <div>
-                <h2 className="text-sm font-semibold">Nova pesquisa</h2>
-                <p className="text-xs text-muted-foreground">Configure os parâmetros para iniciar a análise</p>
+                <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
+                  <Flame className="h-3 w-3" /> Nichos em alta
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {POPULAR.map(t => (
+                    <Badge
+                      key={t}
+                      variant="outline"
+                      className="cursor-pointer transition-all hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-md hover:shadow-primary/20 hover:-translate-y-0.5"
+                      onClick={() => setQuery(t)}
+                    >
+                      {t}
+                    </Badge>
+                  ))}
+                </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="page" className="space-y-4 mt-0">
+              <div>
+                <Label className="text-sm font-medium">ID da página do Facebook</Label>
+                <div className="relative mt-2">
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                  <Input
+                    placeholder="Ex: 123456789012345"
+                    value={pageId}
+                    onChange={(e) => setPageId(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    className="h-14 pl-12 text-base"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Encontre em: facebook.com/[página] → Sobre → ID da página
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* Filters */}
+          <div className="mt-6 p-4 rounded-xl bg-muted/40 border border-border/40">
+            <div className="flex items-center gap-2 mb-4 text-sm font-medium text-muted-foreground">
+              <Filter className="h-4 w-4" /> Filtros avançados
             </div>
-            <Badge variant="outline" className="gap-1.5 font-normal">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-              API operacional
-            </Badge>
-          </div>
-
-          <div className="p-6 space-y-6">
-            <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
-              <TabsList className="grid w-full max-w-md grid-cols-2 h-10">
-                <TabsTrigger value="keyword" className="gap-2 text-sm"><Search className="h-3.5 w-3.5" /> Por palavra-chave</TabsTrigger>
-                <TabsTrigger value="page" className="gap-2 text-sm"><Building2 className="h-3.5 w-3.5" /> Por página</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="keyword" className="space-y-5 mt-6">
-                <div>
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Termo de pesquisa</Label>
-                  <div className="relative mt-2">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    <Input
-                      placeholder="Digite um nicho, produto ou marca..."
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                      className="h-12 pl-11 text-sm bg-background border-input"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">Sugestões de nichos populares</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {POPULAR.map(t => (
-                      <button
-                        key={t}
-                        onClick={() => setQuery(t)}
-                        className="text-xs px-3 py-1.5 rounded-md border border-border bg-background hover:bg-muted hover:border-primary/40 transition-colors text-foreground/80 hover:text-foreground"
-                      >
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="page" className="space-y-5 mt-6">
-                <div>
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">ID da página</Label>
-                  <div className="relative mt-2">
-                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    <Input
-                      placeholder="Ex: 123456789012345"
-                      value={pageId}
-                      onChange={(e) => setPageId(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                      className="h-12 pl-11 text-sm bg-background border-input"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Localize em: <span className="font-mono text-foreground/70">facebook.com/[página] → Sobre → ID da página</span>
-                  </p>
-                </div>
-              </TabsContent>
-            </Tabs>
-
-            <Separator />
-
-            {/* Filters — corporate grid */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Parâmetros da consulta</Label>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1"><Globe2 className="h-3 w-3" /> País</Label>
+                <Select value={country} onValueChange={setCountry}>
+                  <SelectTrigger className="mt-2"><SelectValue /></SelectTrigger>
+                  <SelectContent>{COUNTRIES.map(c => <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>)}</SelectContent>
+                </Select>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1.5"><Globe2 className="h-3 w-3" /> Região</Label>
-                  <Select value={country} onValueChange={setCountry}>
-                    <SelectTrigger className="h-10 text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent>{COUNTRIES.map(c => <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>)}</SelectContent>
-                  </Select>
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Status</Label>
+                <Select value={activeStatus} onValueChange={setActiveStatus}>
+                  <SelectTrigger className="mt-2"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Ativos</SelectItem>
+                    <SelectItem value="inactive">Inativos</SelectItem>
+                    <SelectItem value="all">Todos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Plataforma</Label>
+                <Select value={platform || "all"} onValueChange={(v) => setPlatform(v === "all" ? "" : v)}>
+                  <SelectTrigger className="mt-2"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    <SelectItem value="facebook">Facebook</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="messenger">Messenger</SelectItem>
+                    <SelectItem value="audience_network">Audience Network</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <div className="flex items-baseline justify-between">
+                  <Label className="text-xs uppercase tracking-wide text-muted-foreground">Quantidade</Label>
+                  <span className="text-sm font-semibold text-primary">{quantity}</span>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Status do anúncio</Label>
-                  <Select value={activeStatus} onValueChange={setActiveStatus}>
-                    <SelectTrigger className="h-10 text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Somente ativos</SelectItem>
-                      <SelectItem value="inactive">Somente inativos</SelectItem>
-                      <SelectItem value="all">Todos os status</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Plataforma</Label>
-                  <Select value={platform || "all"} onValueChange={(v) => setPlatform(v === "all" ? "" : v)}>
-                    <SelectTrigger className="h-10 text-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas plataformas</SelectItem>
-                      <SelectItem value="facebook">Facebook</SelectItem>
-                      <SelectItem value="instagram">Instagram</SelectItem>
-                      <SelectItem value="messenger">Messenger</SelectItem>
-                      <SelectItem value="audience_network">Audience Network</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex items-baseline justify-between">
-                    <Label className="text-xs text-muted-foreground">Volume de resultados</Label>
-                    <span className="text-sm font-semibold tabular-nums">{quantity}</span>
-                  </div>
-                  <div className="h-10 flex items-center">
-                    <Slider min={10} max={200} step={10} value={[quantity]} onValueChange={([v]) => setQuantity(v)} />
-                  </div>
-                </div>
+                <Slider min={10} max={200} step={10} value={[quantity]} onValueChange={([v]) => setQuantity(v)} className="mt-4" />
               </div>
             </div>
           </div>
 
-          <div className="px-6 py-4 border-t border-border/60 bg-muted/30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5"><Facebook className="h-3.5 w-3.5" /> Facebook</div>
-              <div className="flex items-center gap-1.5"><Instagram className="h-3.5 w-3.5" /> Instagram</div>
-              <div className="flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Análise IA inclusa</div>
-            </div>
-            <Button
-              onClick={handleSearch}
-              disabled={loading}
-              className="h-11 px-6 font-medium gap-2 min-w-[180px]"
-            >
-              {loading ? (
-                <><Loader2 className="h-4 w-4 animate-spin" /> Processando...</>
-              ) : (
-                <><Zap className="h-4 w-4" /> Executar pesquisa</>
-              )}
-            </Button>
-          </div>
+          <Button
+            onClick={handleSearch}
+            disabled={loading}
+            size="lg"
+            className="w-full mt-6 h-14 text-base font-semibold bg-gradient-to-r from-primary to-primary-dark hover:opacity-90 shadow-lg shadow-primary/25"
+          >
+            {loading ? (
+              <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Analisando anúncios...</>
+            ) : (
+              <><Zap className="h-5 w-5 mr-2" /> Espionar agora</>
+            )}
+          </Button>
         </Card>
 
-        {/* Metrics dashboard */}
+        {/* Stats bar */}
         {ads.length > 0 && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { label: "Total analisado", value: ads.length, icon: Layers, tone: "primary" },
-              { label: "Campanhas ativas", value: stats.active, icon: TrendingUp, tone: "success", suffix: `${Math.round((stats.active / ads.length) * 100)}%` },
-              { label: "Criativos em vídeo", value: stats.withVideo, icon: PlayCircle, tone: "warning" },
-              { label: "Anunciantes únicos", value: stats.uniquePages, icon: Building2, tone: "primary", suffix: `${stats.avgDays}d médio` },
-            ].map((k) => (
-              <Card key={k.label} className="p-5 border-border/60 hover:border-border transition-colors">
-                <div className="flex items-start justify-between">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{k.label}</p>
-                  <k.icon className={`h-4 w-4 text-${k.tone}`} />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Card className="p-4 border-border/60 bg-gradient-to-br from-card to-primary/5">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-primary/10"><TrendingUp className="h-5 w-5 text-primary" /></div>
+                <div>
+                  <p className="text-2xl font-bold">{ads.length}</p>
+                  <p className="text-xs text-muted-foreground">Anúncios</p>
                 </div>
-                <p className="text-3xl font-semibold mt-3 tabular-nums">{k.value.toLocaleString("pt-BR")}</p>
-                {k.suffix && <p className="text-xs text-muted-foreground mt-1">{k.suffix}</p>}
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {/* Results header */}
-        {ads.length > 0 && (
-          <div className="flex items-center justify-between border-b border-border/60 pb-3">
-            <div className="flex items-center gap-3">
-              <LineChart className="h-5 w-5 text-primary" />
-              <div>
-                <h2 className="text-base font-semibold">Resultados da análise</h2>
-                <p className="text-xs text-muted-foreground">Exibindo {ads.length} criativos ordenados por relevância</p>
               </div>
-            </div>
-            <Button variant="outline" size="sm" onClick={exportCSV} className="gap-2">
-              <Download className="h-3.5 w-3.5" /> Exportar relatório
-            </Button>
+            </Card>
+            <Card className="p-4 border-border/60">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-success/10"><Zap className="h-5 w-5 text-success" /></div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.active}</p>
+                  <p className="text-xs text-muted-foreground">Ativos</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="p-4 border-border/60">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-warning/10"><PlayCircle className="h-5 w-5 text-warning" /></div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.withVideo}</p>
+                  <p className="text-xs text-muted-foreground">Com vídeo</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="p-4 border-border/60">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-primary/10"><Building2 className="h-5 w-5 text-primary" /></div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.uniquePages}</p>
+                  <p className="text-xs text-muted-foreground">Páginas</p>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
 
-        {/* Cards grid */}
+        {/* Results */}
         {ads.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {ads.map((ad, i) => {
-              const media = ad.videos?.[0] || ad.images?.[0];
-              const isVideo = !!ad.videos?.[0];
-              const days = daysRunning(ad.start_date, ad.end_date);
-              return (
-                <Card
-                  key={ad.ad_archive_id || i}
-                  className="overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-200 flex flex-col group border-border/60"
-                >
-                  <div className="flex items-center gap-3 p-4 border-b border-border/60">
-                    {ad.page_profile_pic ? (
-                      <img src={ad.page_profile_pic} alt="" className="h-10 w-10 rounded-md object-cover ring-1 ring-border" />
-                    ) : (
-                      <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center ring-1 ring-border">
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
+          <>
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-1 rounded-full bg-gradient-to-b from-primary to-primary-dark" />
+                <h2 className="text-xl font-semibold">Criativos encontrados</h2>
+              </div>
+              <Button variant="outline" onClick={exportCSV} className="gap-2">
+                <Download className="h-4 w-4" /> Exportar CSV
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {ads.map((ad, i) => {
+                const media = ad.videos?.[0] || ad.images?.[0];
+                const isVideo = !!ad.videos?.[0];
+                const days = daysRunning(ad.start_date, ad.end_date);
+                return (
+                  <Card
+                    key={ad.ad_archive_id || i}
+                    className="overflow-hidden hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 flex flex-col group border-border/60"
+                  >
+                    {/* Page header */}
+                    <div className="flex items-center gap-3 p-4 border-b border-border/60">
+                      {ad.page_profile_pic ? (
+                        <img src={ad.page_profile_pic} alt="" className="h-11 w-11 rounded-full object-cover ring-2 ring-border" />
+                      ) : (
+                        <div className="h-11 w-11 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-border">
+                          <Building2 className="h-5 w-5 text-primary" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">{ad.page_name || "Página"}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span className="inline-block h-1 w-1 rounded-full bg-muted-foreground/60" />
+                          Patrocinado
+                        </p>
+                      </div>
+                      {ad.is_active && (
+                        <Badge className="bg-success/15 text-success border-success/30 hover:bg-success/20 gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                          Ativo
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Body text */}
+                    {ad.body && (
+                      <div className="p-4 text-sm whitespace-pre-wrap line-clamp-4 break-words text-foreground/90 leading-relaxed">
+                        {ad.body}
                       </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{ad.page_name || "Página"}</p>
-                      <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Anunciante verificado</p>
-                    </div>
-                    {ad.is_active && (
-                      <Badge variant="outline" className="border-success/40 text-success bg-success/5 gap-1 font-normal">
-                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                        Ativo
-                      </Badge>
+
+                    {/* Media */}
+                    {media && (
+                      <div className="relative aspect-square bg-muted overflow-hidden">
+                        {isVideo ? (
+                          <>
+                            <video src={media} className="w-full h-full object-cover" controls preload="metadata" />
+                            <div className="absolute top-2 left-2 bg-background/80 backdrop-blur text-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium">
+                              <PlayCircle className="h-3.5 w-3.5" /> Vídeo
+                            </div>
+                          </>
+                        ) : (
+                          <img src={media} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                        )}
+                        {(ad.images?.length || 0) > 1 && (
+                          <Badge className="absolute top-2 right-2 gap-1 bg-background/80 backdrop-blur text-foreground border-border">
+                            <ImageIcon className="h-3 w-3" /> {ad.images?.length}
+                          </Badge>
+                        )}
+                      </div>
                     )}
-                  </div>
 
-                  {ad.body && (
-                    <div className="p-4 text-sm line-clamp-4 break-words text-foreground/85 leading-relaxed whitespace-pre-wrap">
-                      {ad.body}
-                    </div>
-                  )}
+                    {/* CTA */}
+                    {(ad.cta_text || ad.link_url) && (
+                      <div className="p-3 bg-muted/40 border-t border-border/60 flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Link patrocinado</p>
+                          <p className="text-xs text-foreground/80 truncate">{ad.link_url}</p>
+                        </div>
+                        {ad.cta_text && (
+                          <Button size="sm" variant="secondary" className="shrink-0 font-semibold">
+                            {ad.cta_text}
+                          </Button>
+                        )}
+                      </div>
+                    )}
 
-                  {media && (
-                    <div className="relative aspect-[4/3] bg-muted overflow-hidden">
-                      {isVideo ? (
-                        <>
-                          <video src={media} className="w-full h-full object-cover" controls preload="metadata" />
-                          <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground rounded-md px-2 py-1 flex items-center gap-1 text-[11px] font-medium border border-border/50">
-                            <PlayCircle className="h-3 w-3" /> Vídeo
-                          </div>
-                        </>
-                      ) : (
-                        <img src={media} alt="" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" loading="lazy" />
-                      )}
-                      {(ad.images?.length || 0) > 1 && (
-                        <div className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm text-foreground rounded-md px-2 py-1 flex items-center gap-1 text-[11px] font-medium border border-border/50">
-                          <ImageIcon className="h-3 w-3" /> {ad.images?.length}
+                    {/* Meta */}
+                    <div className="p-3 border-t border-border/60 space-y-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <CalendarDays className="h-3.5 w-3.5" />
+                        <span>Desde {formatDate(ad.start_date)}</span>
+                        {days && (
+                          <Badge variant="outline" className="ml-auto text-[10px] py-0 h-4 font-medium">
+                            {days}d rodando
+                          </Badge>
+                        )}
+                      </div>
+                      {Array.isArray(ad.platforms) && ad.platforms.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {ad.platforms.map(p => (
+                            <Badge key={p} variant="outline" className="text-[10px] py-0 h-4 capitalize">{p}</Badge>
+                          ))}
                         </div>
                       )}
                     </div>
-                  )}
 
-                  {(ad.cta_text || ad.link_url) && (
-                    <div className="p-3 bg-muted/40 border-t border-border/60 flex items-center justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Destino</p>
-                        <p className="text-xs text-foreground/80 truncate font-mono">{ad.link_url || "—"}</p>
-                      </div>
-                      {ad.cta_text && (
-                        <Button size="sm" variant="secondary" className="shrink-0 h-8 font-medium">
-                          {ad.cta_text}
+                    {/* Actions */}
+                    <div className="p-3 border-t border-border/60 mt-auto flex gap-2 bg-muted/20">
+                      <Button
+                        size="sm"
+                        className="flex-1 gap-1.5 bg-gradient-to-r from-primary to-primary-dark hover:opacity-90"
+                        onClick={() => setSelectedAd(ad)}
+                      >
+                        <Sparkles className="h-3.5 w-3.5" /> Analisar & Reutilizar
+                      </Button>
+                      {ad.ad_library_url && (
+                        <Button size="sm" variant="outline" asChild>
+                          <a href={ad.ad_library_url} target="_blank" rel="noreferrer" aria-label="Abrir na Biblioteca de Anúncios">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
                         </Button>
                       )}
                     </div>
-                  )}
-
-                  <div className="px-4 py-3 border-t border-border/60 space-y-2 text-xs">
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span className="flex items-center gap-1.5"><CalendarDays className="h-3 w-3" /> Início {formatDate(ad.start_date)}</span>
-                      {days && (
-                        <span className="font-semibold text-foreground tabular-nums">
-                          {days}d <span className="text-muted-foreground font-normal">em veiculação</span>
-                        </span>
-                      )}
-                    </div>
-                    {Array.isArray(ad.platforms) && ad.platforms.length > 0 && (
-                      <div className="flex flex-wrap gap-1 pt-1">
-                        {ad.platforms.map(p => (
-                          <span key={p} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground capitalize">{p}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-3 border-t border-border/60 mt-auto flex gap-2 bg-background">
-                    <Button
-                      size="sm"
-                      className="flex-1 gap-1.5 h-9 font-medium"
-                      onClick={() => setSelectedAd(ad)}
-                    >
-                      <Sparkles className="h-3.5 w-3.5" /> Analisar criativo
-                    </Button>
-                    {ad.ad_library_url && (
-                      <Button size="sm" variant="outline" className="h-9" asChild>
-                        <a href={ad.ad_library_url} target="_blank" rel="noreferrer" aria-label="Abrir na Biblioteca de Anúncios">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
         )}
 
+        {/* Loading skeleton */}
         {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="overflow-hidden border-border/60 animate-pulse">
                 <div className="flex items-center gap-3 p-4 border-b border-border/60">
-                  <div className="h-10 w-10 rounded-md bg-muted" />
+                  <div className="h-11 w-11 rounded-full bg-muted" />
                   <div className="flex-1 space-y-2">
                     <div className="h-3 w-2/3 rounded bg-muted" />
                     <div className="h-2 w-1/3 rounded bg-muted" />
@@ -512,49 +501,21 @@ export default function FacebookAdsSpy() {
                   <div className="h-3 w-full rounded bg-muted" />
                   <div className="h-3 w-4/5 rounded bg-muted" />
                 </div>
-                <div className="aspect-[4/3] bg-muted" />
+                <div className="aspect-square bg-muted" />
               </Card>
             ))}
           </div>
         )}
 
         {!loading && ads.length === 0 && (
-          <Card className="border-border/60 bg-gradient-to-br from-card via-card to-muted/30">
-            <div className="grid md:grid-cols-2 gap-8 p-10">
-              <div className="flex flex-col justify-center">
-                <div className="inline-flex w-fit items-center gap-2 px-2.5 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-semibold uppercase tracking-wider mb-4">
-                  <Eye className="h-3.5 w-3.5" /> Módulo pronto para uso
-                </div>
-                <h3 className="text-2xl font-semibold mb-3">Inicie sua primeira análise competitiva</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  Configure os parâmetros no painel acima e obtenha em segundos um relatório completo com os
-                  criativos, copies e ofertas que os concorrentes estão veiculando na Meta.
-                </p>
-                <div className="space-y-2.5">
-                  {[
-                    "Análise de criativos ativos e histórico completo",
-                    "Copies, CTAs e páginas de destino",
-                    "Duração da veiculação e plataformas",
-                    "Extração assistida por IA generativa",
-                  ].map(item => (
-                    <div key={item} className="flex items-center gap-2.5 text-sm text-foreground/80">
-                      <div className="h-4 w-4 rounded-full bg-success/15 flex items-center justify-center shrink-0">
-                        <div className="h-1.5 w-1.5 rounded-full bg-success" />
-                      </div>
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="hidden md:flex items-center justify-center">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-                  <div className="relative h-56 w-56 rounded-2xl bg-gradient-to-br from-primary to-primary-dark shadow-2xl shadow-primary/30 flex items-center justify-center">
-                    <Radar className="h-24 w-24 text-primary-foreground/90" strokeWidth={1.25} />
-                  </div>
-                </div>
-              </div>
+          <Card className="p-16 text-center border-dashed border-2 bg-gradient-to-br from-card to-primary/5">
+            <div className="mx-auto mb-6 h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Radar className="h-10 w-10 text-primary" />
             </div>
+            <h3 className="text-lg font-semibold mb-2">Pronto para espionar a concorrência?</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Digite uma palavra-chave ou ID de página acima e descubra em segundos quais criativos estão bombando na Meta.
+            </p>
           </Card>
         )}
       </div>
