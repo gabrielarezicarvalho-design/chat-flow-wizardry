@@ -58,9 +58,37 @@ function buildSearchUrl(params: {
 
 function normalize(item: any) {
   const snap = item.snapshot || item.ad_snapshot || {};
-  const body = snap.body?.text || snap.body || item.ad_creative_body || item.text;
-  const images = (snap.images || []).map((i: any) => i?.original_image_url || i?.resized_image_url).filter(Boolean);
-  const videos = (snap.videos || []).map((v: any) => v?.video_hd_url || v?.video_sd_url || v?.video_preview_image_url).filter(Boolean);
+  const body = snap.body?.text || snap.body?.markdown?.[0] || snap.body || item.ad_creative_body || item.text;
+
+  // Collect media from snapshot.images, snapshot.videos and snapshot.cards (carousel)
+  const images: string[] = [];
+  const videos: string[] = [];
+
+  for (const i of (snap.images || [])) {
+    const u = i?.original_image_url || i?.resized_image_url || i?.watermarked_resized_image_url;
+    if (u) images.push(u);
+  }
+  for (const v of (snap.videos || [])) {
+    const vu = v?.video_hd_url || v?.video_sd_url;
+    if (vu) videos.push(vu);
+    else if (v?.video_preview_image_url) images.push(v.video_preview_image_url);
+  }
+  for (const c of (snap.cards || [])) {
+    const cu = c?.original_image_url || c?.resized_image_url;
+    const cv = c?.video_hd_url || c?.video_sd_url;
+    if (cu) images.push(cu);
+    if (cv) videos.push(cv);
+  }
+  // Fallbacks
+  if (!images.length && item.imageUrl) images.push(item.imageUrl);
+  if (!videos.length && item.videoUrl) videos.push(item.videoUrl);
+
+  // Extract CTA / link from first card if not on snapshot root
+  const firstCard = snap.cards?.[0] || {};
+  const cta_text = snap.cta_text || snap.call_to_action?.value || firstCard.cta_text;
+  const link_url = snap.link_url || firstCard.link_url || item.link_url;
+  const title = snap.title || firstCard.title || item.title;
+
   return {
     ad_archive_id: item.ad_archive_id || item.adArchiveID || item.id,
     page_id: item.page_id || snap.page_id,
@@ -69,13 +97,13 @@ function normalize(item: any) {
     page_categories: snap.page_categories || item.page_categories,
     page_likes: snap.page_like_count || item.page_like_count,
     body,
-    title: snap.title || item.title,
-    cta_text: snap.cta_text || snap.call_to_action?.value,
-    cta_type: snap.cta_type,
-    link_url: snap.link_url || item.link_url,
+    title,
+    cta_text,
+    cta_type: snap.cta_type || firstCard.cta_type,
+    link_url,
     display_format: snap.display_format || item.display_format,
-    images,
-    videos,
+    images: Array.from(new Set(images)),
+    videos: Array.from(new Set(videos)),
     start_date: item.start_date || item.ad_delivery_start_time,
     end_date: item.end_date || item.ad_delivery_stop_time,
     is_active: item.is_active ?? (item.ad_delivery_stop_time ? false : true),
