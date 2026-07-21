@@ -259,6 +259,9 @@ Deno.serve(async (req) => {
       sourceImageBase64,
       aspectRatio = "1:1",
       enhance = true,
+      style,
+      referenceImagesBase64,
+      keepComposition = false,
     } = (await req.json()) as {
       prompt?: string;
       mode?: Mode;
@@ -267,6 +270,9 @@ Deno.serve(async (req) => {
       sourceImageBase64?: string;
       aspectRatio?: AspectRatio;
       enhance?: boolean;
+      style?: string;
+      referenceImagesBase64?: string[];
+      keepComposition?: boolean;
     };
 
     const rawUserPrompt = (prompt || "").trim();
@@ -275,18 +281,44 @@ Deno.serve(async (req) => {
     // and we shouldn't run the enhancer — the mode prefix already encodes the intent.
     const isTechnicalMode = mode === "remove_bg" || mode === "upscale";
 
+    // Parse reference images (limit 4 to keep the enhancer request lean)
+    const references: { b64: string; mime: string }[] = [];
+    if (referenceImagesBase64 && referenceImagesBase64.length > 0) {
+      for (const raw of referenceImagesBase64.slice(0, 4)) {
+        const b64 = raw.replace(/^data:[^;]+;base64,/, "");
+        const m = /^data:([^;]+);base64,/.exec(raw);
+        references.push({ b64, mime: m?.[1] || "image/png" });
+      }
+    }
+
     let workingIdea = rawUserPrompt;
     if (!isTechnicalMode && enhance && rawUserPrompt) {
       try {
-        workingIdea = await enhancePrompt(rawUserPrompt, mode as Mode, aspectRatio);
+        workingIdea = await enhancePrompt(
+          rawUserPrompt,
+          mode as Mode,
+          aspectRatio,
+          style,
+          references.length > 0 ? references : undefined,
+          keepComposition,
+        );
       } catch (err) {
         console.warn("[image-designer] enhance error, falling back", err);
       }
     }
 
+    const styleFallback =
+      !enhance && style && STYLE_PRESETS[style] ? ` ${STYLE_PRESETS[style]}` : "";
+    const compositionFallback =
+      !enhance && keepComposition
+        ? " Keep the exact same composition, framing and subject placement as the source image; only vary lighting and small details."
+        : "";
+
     const finalPrompt =
       (MODE_PROMPT_PREFIX[mode as Mode] || "") +
       workingIdea +
+      styleFallback +
+      compositionFallback +
       (isTechnicalMode
         ? ""
         : ` Aspect ratio ${aspectRatio}. Render in ultra high definition, 4K resolution, professional designer quality, sharp focus, ultra detailed.`);
