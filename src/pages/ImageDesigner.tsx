@@ -393,6 +393,82 @@ export default function ImageDesigner() {
             )}
 
             {mode !== "remove_bg" && mode !== "upscale" && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5">
+                  <Palette className="h-3.5 w-3.5 text-primary" />
+                  Estilo visual
+                </Label>
+                <Select value={style} onValueChange={setStyle}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STYLE_OPTIONS.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground">
+                  O estilo é injetado automaticamente no prompt final.
+                </p>
+              </div>
+            )}
+
+            {mode !== "remove_bg" && mode !== "upscale" && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5">
+                  <Images className="h-3.5 w-3.5 text-primary" />
+                  Referências visuais (opcional, até 4)
+                </Label>
+                <div
+                  onClick={() => refFileRef.current?.click()}
+                  className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border bg-muted/30 p-3 transition hover:bg-muted/50"
+                >
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    A IA extrai paleta, iluminação e elementos das referências
+                  </p>
+                </div>
+                <input
+                  ref={refFileRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files ?? []).slice(0, 4);
+                    setReferenceFiles(files);
+                    if (refFileRef.current) refFileRef.current.value = "";
+                  }}
+                />
+                {referencePreviews.length > 0 && (
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {referencePreviews.map((src, i) => (
+                      <div key={i} className="relative group">
+                        <img
+                          src={src}
+                          alt={`Ref ${i + 1}`}
+                          className="aspect-square w-full rounded border border-border object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setReferenceFiles((prev) => prev.filter((_, idx) => idx !== i))
+                          }
+                          className="absolute -right-1 -top-1 rounded-full bg-destructive p-0.5 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
+                          aria-label="Remover referência"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+            {mode !== "remove_bg" && mode !== "upscale" && (
               <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-muted/30 p-3 transition hover:bg-muted/50">
                 <input
                   type="checkbox"
