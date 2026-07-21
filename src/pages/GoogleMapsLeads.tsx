@@ -440,7 +440,7 @@ export default function GoogleMapsLeads() {
               <div className="flex items-center gap-3">
                 <Crown className="w-7 h-7 flex-shrink-0" strokeWidth={2} />
                 <div>
-                  <p className="font-bold text-base leading-tight">Plano Profissional</p>
+                  <p className="font-bold text-base leading-tight whitespace-nowrap">Plano Profissional</p>
                   <p className="text-xs text-white/80 mt-0.5">Acesso completo a tudo</p>
                 </div>
               </div>
