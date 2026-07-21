@@ -55,11 +55,69 @@ const StatCard = ({
 
 export default function Vendas() {
   const { leads } = useLeads();
+  const { companyId } = useCompanyId();
   const [signMessages, setSignMessages] = useState(true);
   const [format, setFormat] = useState("*{nome}*:\n{msg}");
   const [autoDistribute, setAutoDistribute] = useState(false);
   const [lockConversation, setLockConversation] = useState(true);
   const [sla, setSla] = useState(30);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  useEffect(() => {
+    if (!companyId) return;
+    let active = true;
+    (async () => {
+      setLoadingSettings(true);
+      const { data, error } = await supabase
+        .from("sales_settings")
+        .select("*")
+        .eq("company_id", companyId)
+        .maybeSingle();
+      if (!active) return;
+      if (error) {
+        toast.error("Erro ao carregar configurações");
+      } else if (data) {
+        setSignMessages(data.sign_messages);
+        setFormat(data.message_format);
+        setAutoDistribute(data.auto_distribute);
+        setLockConversation(data.lock_conversation);
+        setSla(data.sla_minutes);
+      }
+      setLoadingSettings(false);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [companyId]);
+
+  const handleSaveSettings = async () => {
+    if (!companyId) {
+      toast.error("Nenhuma empresa vinculada ao usuário");
+      return;
+    }
+    setSavingSettings(true);
+    const { error } = await supabase
+      .from("sales_settings")
+      .upsert(
+        {
+          company_id: companyId,
+          sign_messages: signMessages,
+          message_format: format,
+          auto_distribute: autoDistribute,
+          lock_conversation: lockConversation,
+          sla_minutes: sla,
+        },
+        { onConflict: "company_id" }
+      );
+    setSavingSettings(false);
+    if (error) {
+      toast.error(error.message || "Erro ao salvar configurações");
+    } else {
+      toast.success("Configurações salvas!");
+    }
+  };
+
 
   const stats = useMemo(() => {
     const total = leads.length;
