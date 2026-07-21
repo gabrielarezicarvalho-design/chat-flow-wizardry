@@ -160,12 +160,21 @@ export default function ImageDesigner() {
     enabled: !!user,
   });
 
-  const handleGenerate = async () => {
-    if (!prompt.trim() && mode !== "remove_bg" && mode !== "upscale") {
+  const runGeneration = async (opts?: {
+    keepComposition?: boolean;
+    sourceImageUrl?: string;
+    overrideMode?: Mode;
+  }) => {
+    const effMode = opts?.overrideMode ?? mode;
+    if (!prompt.trim() && effMode !== "remove_bg" && effMode !== "upscale") {
       toast.error("Descreva o que você quer gerar");
       return;
     }
-    if ((mode === "edit" || mode === "remove_bg" || mode === "upscale") && !sourceFile) {
+    if (
+      (effMode === "edit" || effMode === "remove_bg" || effMode === "upscale") &&
+      !sourceFile &&
+      !opts?.sourceImageUrl
+    ) {
       toast.error("Envie uma imagem de origem");
       return;
     }
@@ -173,14 +182,23 @@ export default function ImageDesigner() {
     setLoading(true);
     try {
       const sourceImageBase64 = sourceFile ? await fileToBase64(sourceFile) : undefined;
+      const referenceImagesBase64 =
+        referenceFiles.length > 0
+          ? await Promise.all(referenceFiles.map(fileToBase64))
+          : undefined;
+
       const { data, error } = await supabase.functions.invoke("image-designer", {
         body: {
           prompt: prompt.trim() || "image",
-          mode,
+          mode: effMode,
           model,
           aspectRatio,
           enhance,
           sourceImageBase64,
+          sourceImageUrl: opts?.sourceImageUrl,
+          referenceImagesBase64,
+          style: style !== "none" ? style : undefined,
+          keepComposition: opts?.keepComposition ?? false,
         },
       });
       if (error) throw error;
@@ -197,6 +215,17 @@ export default function ImageDesigner() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGenerate = () => runGeneration();
+
+  const handleRegenerateVariation = () => {
+    if (!latest) return;
+    runGeneration({
+      keepComposition: true,
+      sourceImageUrl: latest.image_url,
+      overrideMode: "edit",
+    });
   };
 
   const handleDelete = async (img: GeneratedImage) => {
