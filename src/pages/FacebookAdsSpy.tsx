@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AdDetailDialog } from "@/components/facebook-ads/AdDetailDialog";
 import {
   Eye, Search, Loader2, ExternalLink, Facebook, Instagram,
   Sparkles, Target, Zap, PlayCircle, Image as ImageIcon,
@@ -76,6 +77,7 @@ export default function FacebookAdsSpy() {
   const [quantity, setQuantity] = useState(30);
   const [loading, setLoading] = useState(false);
   const [ads, setAds] = useState<FacebookAd[]>([]);
+  const [selectedAd, setSelectedAd] = useState<FacebookAd | null>(null);
 
   const handleSearch = async () => {
     const input = mode === "keyword" ? query : pageId;
@@ -261,7 +263,7 @@ export default function FacebookAdsSpy() {
                 const isVideo = !!ad.videos?.[0];
                 const days = daysRunning(ad.start_date, ad.end_date);
                 return (
-                  <Card key={ad.ad_archive_id || i} className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
+                  <Card key={ad.ad_archive_id || i} className="overflow-hidden hover:shadow-xl transition-shadow flex flex-col group">
                     {/* Page header */}
                     <div className="flex items-center gap-3 p-4 border-b">
                       {ad.page_profile_pic ? (
@@ -311,17 +313,24 @@ export default function FacebookAdsSpy() {
                     )}
 
                     {/* Meta */}
-                    <div className="p-3 border-t mt-auto space-y-1 text-xs text-muted-foreground">
+                    <div className="p-3 border-t space-y-1 text-xs text-muted-foreground">
                       <div className="flex items-center gap-1"><CalendarDays className="h-3 w-3" /> Iniciado em {formatDate(ad.start_date)} {days && `· ${days} dias`}</div>
                       {Array.isArray(ad.platforms) && ad.platforms.length > 0 && (
                         <div className="flex flex-wrap gap-1 pt-1">
                           {ad.platforms.map(p => <Badge key={p} variant="outline" className="text-[10px] py-0">{p}</Badge>)}
                         </div>
                       )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="p-3 border-t mt-auto flex gap-2">
+                      <Button size="sm" className="flex-1 gap-1" onClick={() => setSelectedAd(ad)}>
+                        <Sparkles className="h-3 w-3" /> Analisar & Reutilizar
+                      </Button>
                       {ad.ad_library_url && (
-                        <a href={ad.ad_library_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline pt-1">
-                          Ver na Biblioteca <ExternalLink className="h-3 w-3" />
-                        </a>
+                        <Button size="sm" variant="outline" asChild>
+                          <a href={ad.ad_library_url} target="_blank" rel="noreferrer"><ExternalLink className="h-3 w-3" /></a>
+                        </Button>
                       )}
                     </div>
                   </Card>
@@ -337,6 +346,12 @@ export default function FacebookAdsSpy() {
             <p className="text-muted-foreground">Digite uma palavra-chave ou ID de página e clique em espionar</p>
           </Card>
         )}
+      </div>
+
+      <AdDetailDialog ad={selectedAd} open={!!selectedAd} onOpenChange={(o) => !o && setSelectedAd(null)} />
+    </div>
+  );
+}
       </div>
     </div>
   );
