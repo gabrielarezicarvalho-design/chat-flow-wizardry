@@ -161,6 +161,7 @@ function App() {
                                 <Route path="/tiktok-leads" element={<TikTokLeads />} />
                                 <Route path="/image-designer" element={<ImageDesigner />} />
                                 <Route path="/vendas" element={<Vendas />} />
+                                <Route path="/pagamentos" element={<Pagamentos />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
                                 <Route path="*" element={<NotFound />} />
