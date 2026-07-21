@@ -766,7 +766,19 @@ export default function Vendas() {
         {/* Por Vendedor */}
         <TabsContent value="por-vendedor">
           <Card className="bg-card/60 border-border/60">
-            <CardContent className="p-6">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold">Desempenho por vendedor</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Exporte o relatório mensal com leads, ganhos, perdidos e cumprimento das metas.
+                  </p>
+                </div>
+                <Button size="sm" variant="outline" onClick={exportMonthlyReport}>
+                  <Download className="w-4 h-4 mr-1" />
+                  Relatório mensal CSV
+                </Button>
+              </div>
               {salespeople.length === 0 ? (
                 <div className="p-10 text-center text-sm text-muted-foreground">
                   Nenhum vendedor com permissão de Vendas.
