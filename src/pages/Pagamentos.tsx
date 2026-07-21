@@ -706,12 +706,32 @@ function MercadoPagoPanel({
 }) {
   const [apelido, setApelido] = useState("");
   const [token, setToken] = useState("");
+  const [pixTemplate, setPixTemplate] = useState("");
+  const [autoSend, setAutoSend] = useState(true);
+  const [defaultConnId, setDefaultConnId] = useState<string>("");
   const [saving, setSaving] = useState(false);
+
+  const { data: connections = [] } = useQuery({
+    queryKey: ["wa-connections-mp", companyId],
+    queryFn: async () => {
+      if (!companyId) return [];
+      const { data } = await supabase
+        .from("connections")
+        .select("id, name, instance_name, phone_number, status")
+        .eq("company_id", companyId)
+        .eq("is_active", true);
+      return data || [];
+    },
+    enabled: !!companyId,
+  });
 
   useEffect(() => {
     if (config) {
       setApelido(config.apelido || "");
       setToken("");
+      setPixTemplate(config.pix_template || "");
+      setAutoSend(config.auto_send !== false);
+      setDefaultConnId(config.default_connection_id || "");
     }
   }, [config]);
 
@@ -723,13 +743,16 @@ function MercadoPagoPanel({
       const payload: any = {
         company_id: companyId,
         apelido: apelido || null,
+        pix_template: pixTemplate || null,
+        auto_send: autoSend,
+        default_connection_id: defaultConnId || null,
       };
       if (token) payload.access_token = token;
       const { error } = await supabase
         .from("mercado_pago_configs")
         .upsert(payload, { onConflict: "company_id" });
       if (error) throw error;
-      toast.success("Mercado Pago conectado!");
+      toast.success("Configurações salvas!");
       setToken("");
       onSaved();
     } catch (e: any) {
@@ -745,6 +768,7 @@ function MercadoPagoPanel({
     toast.success("Desconectado");
     onSaved();
   };
+
 
   return (
     <div className="space-y-4">
