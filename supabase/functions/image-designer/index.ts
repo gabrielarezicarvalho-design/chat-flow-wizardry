@@ -98,10 +98,10 @@ async function enhancePrompt(
 async function callGateway(
   model: string,
   prompt: string,
+  aspect: AspectRatio,
   sourceImageBase64?: string,
   sourceMime?: string,
 ): Promise<string> {
-  // google/gemini-3-pro-image uses Vertex generateContent body via /v1/images/generations
   const isVertex = model === "google/gemini-3.1-flash-lite-image";
   const isGeminiChat = model.startsWith("google/") && !isVertex;
   const isOpenAI = model.startsWith("openai/");
@@ -112,8 +112,8 @@ async function callGateway(
     body = {
       model,
       prompt,
-      size: "1024x1024",
-      quality: "low",
+      size: ASPECT_TO_OPENAI_SIZE[aspect] || "1024x1024",
+      quality: "high",
       n: 1,
     };
   } else if (isVertex) {
