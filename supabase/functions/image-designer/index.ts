@@ -113,7 +113,7 @@ async function callGateway(
       model,
       prompt,
       size: ASPECT_TO_OPENAI_SIZE[aspect] || "1024x1024",
-      quality: "high",
+      quality: "low",
       n: 1,
     };
   } else if (isVertex) {
