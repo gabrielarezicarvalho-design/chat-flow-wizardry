@@ -244,6 +244,7 @@ Deno.serve(async (req) => {
     const {
       query,
       pageId,
+      username,
       country = "BR",
       activeStatus = "active",
       adType = "all",
@@ -251,12 +252,23 @@ Deno.serve(async (req) => {
       quantity = 30,
     } = await req.json();
 
-    if (!query && !pageId) {
-      throw new Error("Informe uma palavra-chave (query) ou o ID da página (pageId).");
+    // Normalize @handle: aceitar "@nome", "nome", "https://instagram.com/nome", "https://facebook.com/nome"
+    let handle: string | undefined;
+    if (typeof username === "string" && username.trim()) {
+      let u = username.trim();
+      const urlMatch = u.match(/(?:facebook\.com|instagram\.com|fb\.com)\/([^/?#]+)/i);
+      if (urlMatch) u = urlMatch[1];
+      handle = u.replace(/^@+/, "").replace(/\/+$/, "").trim();
+    }
+
+    if (!query && !pageId && !handle) {
+      throw new Error("Informe uma palavra-chave (query), o ID da página (pageId) ou um @usuário (username).");
     }
 
     const limit = Math.min(Math.max(Number(quantity) || 30, 1), 200);
-    const searchUrl = buildSearchUrl({ query, pageId, country, activeStatus, adType, platform });
+    // Ad Library aceita busca por nome/handle da página via keyword
+    const effectiveQuery = query || handle;
+    const searchUrl = buildSearchUrl({ query: effectiveQuery, pageId, country, activeStatus, adType, platform });
 
     const { items, status } = await runActorAsync({
       startUrls: [{ url: searchUrl }],
