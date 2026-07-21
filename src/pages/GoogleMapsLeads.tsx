@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -615,11 +615,23 @@ function StatCard({ color, icon, start, label }: { color: string; icon: React.Re
 }
 
 function RollingNumber({ text }: { text: string }) {
+  const chars = text.split("");
+  // Count digits to compute stagger delay from right to left
+  const digitPositions: number[] = [];
+  let dIdx = 0;
+  for (let i = 0; i < chars.length; i++) {
+    digitPositions.push(/\d/.test(chars[i]) ? dIdx++ : -1);
+  }
+  const totalDigits = dIdx;
   return (
-    <p className="text-lg font-bold flex items-center leading-none h-[1.4em]">
-      {text.split("").map((ch, i) =>
+    <p className="text-lg font-bold flex items-center leading-none h-[1.4em] tracking-tight tabular-nums">
+      {chars.map((ch, i) =>
         /\d/.test(ch) ? (
-          <RollingDigit key={i} digit={parseInt(ch, 10)} />
+          <RollingDigit
+            key={i}
+            digit={parseInt(ch, 10)}
+            delay={(totalDigits - 1 - digitPositions[i]) * 60}
+          />
         ) : (
           <span key={i} className="inline-block">{ch}</span>
         )
@@ -628,17 +640,66 @@ function RollingNumber({ text }: { text: string }) {
   );
 }
 
-function RollingDigit({ digit }: { digit: number }) {
+function RollingDigit({ digit, delay }: { digit: number; delay: number }) {
+  const prevRef = useRef(digit);
+  const [offset, setOffset] = useState(digit); // cumulative offset (can exceed 9)
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    if (prevRef.current === digit) return;
+    // forward distance modulo 10, min 1 full rotation for spin feel
+    const forward = ((digit - (prevRef.current % 10)) + 10) % 10 || 10;
+    const newOffset = offset + forward;
+    const timer = setTimeout(() => {
+      setAnimating(true);
+      setOffset(newOffset);
+    }, delay);
+    prevRef.current = digit;
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [digit]);
+
+  // After animation ends, snap back (no transition) to equivalent position mod 10
+  useEffect(() => {
+    if (!animating) return;
+    const t = setTimeout(() => {
+      setAnimating(false);
+      setOffset((o) => o % 10);
+    }, 900);
+    return () => clearTimeout(t);
+  }, [offset, animating]);
+
   return (
-    <span className="inline-block overflow-hidden h-[1.2em] leading-[1.2em] align-middle" style={{ width: "0.62em" }}>
+    <span
+      className="inline-block overflow-hidden h-[1.2em] leading-[1.2em] align-middle relative"
+      style={{ width: "0.62em" }}
+    >
       <span
-        className="flex flex-col transition-transform duration-700 ease-out"
-        style={{ transform: `translateY(-${digit * 1.2}em)` }}
+        className="flex flex-col"
+        style={{
+          transform: `translateY(-${offset * 1.2}em)`,
+          transition: animating
+            ? "transform 900ms cubic-bezier(0.22, 1, 0.36, 1)"
+            : "none",
+          filter: animating ? "blur(0.4px)" : "none",
+        }}
       >
-        {Array.from({ length: 10 }).map((_, n) => (
-          <span key={n} className="h-[1.2em] leading-[1.2em] text-center">{n}</span>
+        {Array.from({ length: offset + 11 }).map((_, n) => (
+          <span key={n} className="h-[1.2em] leading-[1.2em] text-center">
+            {n % 10}
+          </span>
         ))}
       </span>
+      {/* fade mask top/bottom for depth */}
+      <span
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 25%, transparent 75%, hsl(var(--background)) 100%)",
+          opacity: animating ? 0.6 : 0,
+          transition: "opacity 200ms",
+        }}
+      />
     </span>
   );
 }
