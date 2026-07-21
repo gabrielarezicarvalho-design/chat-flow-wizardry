@@ -81,7 +81,7 @@ const adminNavItems: NavItem[] = [
   { to: "/instagram-leads", icon: Instagram, label: "Leads Instagram" },
   { to: "/tiktok-leads", icon: Music2, label: "Leads TikTok" },
   { to: "/facebook-ads-spy", icon: Eye, label: "Espionar Anúncios" },
-  { to: "/image-designer", icon: Palette, label: "Designer de Imagens" },
+  { to: "/image-designer", icon: Palette, label: "Criador de Imagem" },
   
   { to: "/flows", icon: Workflow, label: "Fluxos", feature: "flows_basic" },
   { to: "/agents", icon: Bot, label: "Agentes IA", feature: "ai_agents" },
