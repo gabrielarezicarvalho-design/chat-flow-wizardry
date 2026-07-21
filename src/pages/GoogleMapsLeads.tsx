@@ -630,7 +630,7 @@ function RollingNumber({ text }: { text: string }) {
           <RollingDigit
             key={i}
             digit={parseInt(ch, 10)}
-            delay={(totalDigits - 1 - digitPositions[i]) * 60}
+            delay={(totalDigits - 1 - digitPositions[i]) * 130}
           />
         ) : (
           <span key={i} className="inline-block">{ch}</span>
@@ -665,7 +665,7 @@ function RollingDigit({ digit, delay }: { digit: number; delay: number }) {
     const t = setTimeout(() => {
       setAnimating(false);
       setOffset((o) => o % 10);
-    }, 900);
+    }, 1400);
     return () => clearTimeout(t);
   }, [offset, animating]);
 
@@ -679,9 +679,9 @@ function RollingDigit({ digit, delay }: { digit: number; delay: number }) {
         style={{
           transform: `translateY(-${offset * 1.2}em)`,
           transition: animating
-            ? "transform 900ms cubic-bezier(0.22, 1, 0.36, 1)"
+            ? "transform 1400ms cubic-bezier(0.16, 1, 0.3, 1)"
             : "none",
-          filter: animating ? "blur(0.4px)" : "none",
+          filter: animating ? "blur(0.6px)" : "none",
         }}
       >
         {Array.from({ length: offset + 11 }).map((_, n) => (
