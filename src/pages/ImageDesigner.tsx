@@ -308,6 +308,47 @@ export default function ImageDesigner() {
               </div>
             )}
 
+            {mode !== "remove_bg" && mode !== "upscale" && (
+              <div className="space-y-2">
+                <Label>Formato</Label>
+                <div className="grid grid-cols-5 gap-1">
+                  {ASPECT_RATIOS.map((a) => (
+                    <Button
+                      key={a.id}
+                      type="button"
+                      variant={aspectRatio === a.id ? "default" : "outline"}
+                      size="sm"
+                      className="px-1 text-[11px]"
+                      onClick={() => setAspectRatio(a.id)}
+                    >
+                      {a.id}
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {ASPECT_RATIOS.find((a) => a.id === aspectRatio)?.label}
+                </p>
+              </div>
+            )}
+
+            {mode !== "remove_bg" && mode !== "upscale" && (
+              <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-muted/30 p-3 transition hover:bg-muted/50">
+                <input
+                  type="checkbox"
+                  checked={enhance}
+                  onChange={(e) => setEnhance(e.target.checked)}
+                  className="mt-1 h-4 w-4 accent-primary"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">Designer IA (recomendado)</p>
+                  <p className="text-xs text-muted-foreground">
+                    Reescreve seu prompt em nível de designer gráfico profissional, com iluminação,
+                    tipografia, paleta e composição de anúncio 4K.
+                  </p>
+                </div>
+              </label>
+            )}
+
             <div className="space-y-2">
               <Label>Modelo</Label>
               <Select value={model} onValueChange={setModel}>
