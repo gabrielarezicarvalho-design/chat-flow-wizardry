@@ -630,7 +630,7 @@ function RollingNumber({ text }: { text: string }) {
           <RollingDigit
             key={i}
             digit={parseInt(ch, 10)}
-            delay={(totalDigits - 1 - digitPositions[i]) * 60}
+            delay={(totalDigits - 1 - digitPositions[i]) * 130}
           />
         ) : (
           <span key={i} className="inline-block">{ch}</span>
