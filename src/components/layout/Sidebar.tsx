@@ -85,6 +85,7 @@ const adminNavItems: NavItem[] = [
   { to: "/facebook-ads-spy", icon: Eye, label: "Espionar Anúncios" },
   { to: "/image-designer", icon: Palette, label: "Criador de Imagem" },
   { to: "/vendas", icon: DollarSign, label: "Vendas" },
+  { to: "/pagamentos", icon: CreditCard, label: "Cobranças" },
   
   { to: "/flows", icon: Workflow, label: "Fluxos", feature: "flows_basic" },
   { to: "/agents", icon: Bot, label: "Agentes IA", feature: "ai_agents" },
