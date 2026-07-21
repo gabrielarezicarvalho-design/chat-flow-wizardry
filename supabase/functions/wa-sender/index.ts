@@ -6,27 +6,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
 
-// Normaliza número BR: adiciona o "9" após o DDD em celulares com 12 dígitos
-// Ex: 554891213202 -> 5548991213202 (necessário p/ entrega real no WhatsApp)
+// Preserva o número real vindo do WhatsApp/JID.
+// Importante: contatos sincronizados do WhatsApp podem vir sem o nono dígito no JID,
+// e adicionar "9" automaticamente pode enviar para outro destino que não recebe.
 function normalizeBrNumber(raw: string): string {
   const digits = (raw || "").replace("@s.whatsapp.net", "").replace(/\D/g, "");
-  if (!digits) return digits;
-  // Só normaliza números BR (55 + DDD 2 dígitos + local)
-  if (!digits.startsWith("55")) return digits;
-  const rest = digits.slice(2);
-  // Mobile BR com 9 já presente = 11 dígitos (DDD 2 + 9 celulares)
-  if (rest.length === 11) return digits;
-  // Mobile BR sem o 9 = 10 dígitos (DDD 2 + 8), primeiro dígito do local 6-9 (celular)
-  if (rest.length === 10) {
-    const ddd = rest.slice(0, 2);
-    const local = rest.slice(2);
-    const dddNum = parseInt(ddd, 10);
-    const firstLocal = local.charAt(0);
-    if (dddNum >= 11 && dddNum <= 99 && ["6", "7", "8", "9"].includes(firstLocal)) {
-      return `55${ddd}9${local}`;
-    }
-  }
   return digits;
+}
+
+function isValidSendNumber(raw: string): boolean {
+  const digits = normalizeBrNumber(raw);
+  return digits.length >= 10 && digits.length <= 15;
 }
 
 const sendCampaignStartTelegramNotification = async ({
@@ -297,13 +287,23 @@ serve(async (req) => {
         // For single message, we use scheduled_for to add delay
         endpoint = `${base_url}/sender/advanced`;
         
-        const simpleNumbers = params.numbers || [];
+        const simpleNumbers = (params.numbers || []).filter(isValidSendNumber);
         const simpleTypeRaw = params.type || "text";
         const simpleType = simpleTypeRaw === "buttons" ? "button" : simpleTypeRaw;
         const simpleMedia = params.media || params.file;
         const requestedDelayMin = params.delayMin || 10;
         const requestedDelayMax = params.delayMax || 30;
         
+        if (simpleNumbers.length === 0) {
+          return new Response(JSON.stringify({
+            success: false,
+            error: "Nenhum número válido para envio"
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+
         console.log(`[wa-sender] ViewOnce param received: ${params.viewOnce}`);
         
         // Build messages array for /sender/advanced
