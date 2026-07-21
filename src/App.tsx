@@ -55,6 +55,7 @@ const GoogleMapsLeads = lazy(() => import("./pages/GoogleMapsLeads"));
 const InstagramLeads = lazy(() => import("./pages/InstagramLeads"));
 const FacebookAdsSpy = lazy(() => import("./pages/FacebookAdsSpy"));
 const TikTokLeads = lazy(() => import("./pages/TikTokLeads"));
+const ImageDesigner = lazy(() => import("./pages/ImageDesigner"));
 
 const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -156,6 +157,7 @@ function App() {
                                 <Route path="/instagram-leads" element={<InstagramLeads />} />
                                 <Route path="/facebook-ads-spy" element={<FacebookAdsSpy />} />
                                 <Route path="/tiktok-leads" element={<TikTokLeads />} />
+                                <Route path="/image-designer" element={<ImageDesigner />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
                                 <Route path="*" element={<NotFound />} />
