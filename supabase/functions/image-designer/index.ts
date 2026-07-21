@@ -213,16 +213,40 @@ Deno.serve(async (req) => {
       model = "google/gemini-3-pro-image",
       sourceImageUrl,
       sourceImageBase64,
+      aspectRatio = "1:1",
+      enhance = true,
     } = (await req.json()) as {
       prompt?: string;
       mode?: Mode;
       model?: string;
       sourceImageUrl?: string;
       sourceImageBase64?: string;
+      aspectRatio?: AspectRatio;
+      enhance?: boolean;
     };
 
+    const rawUserPrompt = (prompt || "").trim();
+
+    // For remove_bg and upscale we don't need the user prompt to have content,
+    // and we shouldn't run the enhancer — the mode prefix already encodes the intent.
+    const isTechnicalMode = mode === "remove_bg" || mode === "upscale";
+
+    let workingIdea = rawUserPrompt;
+    if (!isTechnicalMode && enhance && rawUserPrompt) {
+      try {
+        workingIdea = await enhancePrompt(rawUserPrompt, mode as Mode, aspectRatio);
+      } catch (err) {
+        console.warn("[image-designer] enhance error, falling back", err);
+      }
+    }
+
     const finalPrompt =
-      (MODE_PROMPT_PREFIX[mode as Mode] || "") + (prompt || "");
+      (MODE_PROMPT_PREFIX[mode as Mode] || "") +
+      workingIdea +
+      (isTechnicalMode
+        ? ""
+        : ` Aspect ratio ${aspectRatio}. Render in ultra high definition, 4K resolution, professional designer quality, sharp focus, ultra detailed.`);
+
     if (!finalPrompt.trim()) {
       return new Response(JSON.stringify({ error: "Prompt vazio" }), {
         status: 400,
@@ -252,7 +276,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const b64 = await callGateway(model, finalPrompt, srcB64, srcMime);
+    const b64 = await callGateway(model, finalPrompt, aspectRatio, srcB64, srcMime);
 
     // Get company id
     const { data: profile } = await supabase
