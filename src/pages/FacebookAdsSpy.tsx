@@ -38,7 +38,7 @@ interface FacebookAd {
   ad_library_url?: string;
 }
 
-type Mode = "keyword" | "page";
+type Mode = "keyword" | "page" | "username";
 
 const POPULAR = [
   "Emagrecimento", "Curso Online", "E-commerce", "Infoproduto",
