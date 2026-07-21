@@ -853,6 +853,76 @@ function MercadoPagoPanel({
       </Card>
 
       <Card>
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-emerald-500" />
+            <h3 className="font-semibold text-lg">Envio automático por WhatsApp</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Ao gerar o Pix de uma cobrança com telefone, o sistema envia
+            automaticamente a mensagem abaixo para o cliente pelo WhatsApp.
+          </p>
+
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <p className="font-medium text-sm">Enviar automaticamente após gerar o Pix</p>
+              <p className="text-xs text-muted-foreground">
+                Você também pode enviar manualmente clicando no ícone <MessageSquare className="w-3 h-3 inline" /> em cada cobrança.
+              </p>
+            </div>
+            <Switch checked={autoSend} onCheckedChange={setAutoSend} />
+          </div>
+
+          <div>
+            <Label>Conexão WhatsApp padrão</Label>
+            <Select value={defaultConnId || "none"} onValueChange={(v) => setDefaultConnId(v === "none" ? "" : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma conexão" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— Nenhuma (usar a da cobrança) —</SelectItem>
+                {connections.map((cn: any) => (
+                  <SelectItem key={cn.id} value={cn.id}>
+                    {cn.name || cn.instance_name || cn.phone_number || cn.id.slice(0, 8)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Modelo da mensagem</Label>
+            <Textarea
+              value={pixTemplate}
+              onChange={(e) => setPixTemplate(e.target.value)}
+              rows={10}
+              className="font-mono text-xs"
+              placeholder="Digite o texto que será enviado..."
+            />
+            <div className="mt-2 text-xs text-muted-foreground">
+              <p className="font-medium mb-1">Variáveis disponíveis:</p>
+              <div className="flex flex-wrap gap-1">
+                {["{cliente}", "{valor}", "{descricao}", "{vencimento}", "{pix_copia_cola}", "{link_pagamento}", "{telefone}"].map((v) => (
+                  <code
+                    key={v}
+                    className="px-1.5 py-0.5 rounded bg-muted cursor-pointer hover:bg-muted/70"
+                    onClick={() => setPixTemplate((t) => (t || "") + v)}
+                  >
+                    {v}
+                  </code>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <Button onClick={save} disabled={saving}>
+            Salvar configurações de envio
+          </Button>
+        </CardContent>
+      </Card>
+
+
+      <Card>
         <CardContent className="p-6 space-y-2 text-sm">
           <h4 className="font-semibold">Como funciona</h4>
           <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
