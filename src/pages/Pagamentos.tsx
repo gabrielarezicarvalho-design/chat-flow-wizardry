@@ -374,8 +374,11 @@ export default function Pagamentos() {
                       onDelete={() => deleteCobranca.mutate(c.id)}
                       onPaid={() => markPaid.mutate(c.id)}
                       onGenPix={() => generatePix.mutate(c.id)}
+                      onSendWhats={() => sendPixWhats.mutate(c.id)}
                       generating={generatePix.isPending}
+                      sending={sendPixWhats.isPending}
                     />
+
                   ))}
                 </div>
               )}
