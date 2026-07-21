@@ -437,17 +437,21 @@ export default function GoogleMapsLeads() {
           <FeatureCard icon={<Headphones className="w-5 h-5" />} title="Suporte humanizado" desc="Estamos aqui pra ajudar" />
           <Card className="group relative overflow-hidden border-0 shadow-lg shadow-primary/30 bg-gradient-to-br from-[hsl(217_91%_55%)] via-[hsl(221_83%_45%)] to-[hsl(224_76%_35%)] text-white transition-all duration-500 hover:shadow-primary/50">
             <div className="absolute -left-1/2 top-0 h-full w-1/2 skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:translate-x-[300%] transition-all duration-1000" />
-            <CardContent className="relative p-5 space-y-1">
-              <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/15 text-white transition-all duration-500 group-hover:bg-white group-hover:text-primary group-hover:shadow-lg group-hover:shadow-white/40">
-                <Crown className="w-5 h-5" strokeWidth={2} />
+            <CardContent className="relative p-5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/15 text-white transition-all duration-500 group-hover:bg-white group-hover:text-primary group-hover:shadow-lg group-hover:shadow-white/40 flex-shrink-0">
+                  <Crown className="w-5 h-5" strokeWidth={2} />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm leading-tight whitespace-nowrap">Plano Profissional</p>
+                  <p className="text-xs text-white/80 mt-0.5">Acesso completo a tudo</p>
+                </div>
               </div>
-              <p className="font-semibold text-sm pt-1 transition-transform duration-300 group-hover:translate-x-1">Plano Profissional</p>
-              <p className="text-xs text-white/80 transition-transform duration-300 group-hover:translate-x-1">Acesso completo a tudo</p>
-              <Button size="sm" className="mt-2 bg-white text-primary hover:bg-white/90 font-semibold rounded-lg shadow-md">
+              <Button size="sm" className="bg-white text-primary hover:bg-white/90 font-semibold rounded-lg shadow-md flex-shrink-0">
                 Ver planos <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
-
             </CardContent>
+
           </Card>
 
 
