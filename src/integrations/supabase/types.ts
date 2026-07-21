@@ -1203,25 +1203,34 @@ export type Database = {
         Row: {
           access_token: string
           apelido: string | null
+          auto_send: boolean
           company_id: string
           created_at: string
+          default_connection_id: string | null
           id: string
+          pix_template: string
           updated_at: string
         }
         Insert: {
           access_token: string
           apelido?: string | null
+          auto_send?: boolean
           company_id: string
           created_at?: string
+          default_connection_id?: string | null
           id?: string
+          pix_template?: string
           updated_at?: string
         }
         Update: {
           access_token?: string
           apelido?: string | null
+          auto_send?: boolean
           company_id?: string
           created_at?: string
+          default_connection_id?: string | null
           id?: string
+          pix_template?: string
           updated_at?: string
         }
         Relationships: [
@@ -1230,6 +1239,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: true
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mercado_pago_configs_default_connection_id_fkey"
+            columns: ["default_connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
             referencedColumns: ["id"]
           },
         ]

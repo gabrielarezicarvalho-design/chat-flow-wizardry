@@ -18,7 +18,9 @@ import {
   ExternalLink,
   Trash2,
   ShieldCheck,
+  MessageSquare,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -244,12 +246,31 @@ export default function Pagamentos() {
       if ((data as any)?.error) throw new Error((data as any).error);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       invalidateAll();
-      toast.success("Pix gerado com sucesso!");
+      if (data?.whatsapp_sent) {
+        toast.success("Pix gerado e enviado por WhatsApp!");
+      } else {
+        toast.success("Pix gerado com sucesso!");
+      }
     },
     onError: (e: any) => toast.error(e.message || "Erro ao gerar Pix"),
   });
+
+  const sendPixWhats = useMutation({
+    mutationFn: async (cobrancaId: string) => {
+      const { data, error } = await supabase.functions.invoke(
+        "send-pix-whatsapp",
+        { body: { cobrancaId } }
+      );
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data;
+    },
+    onSuccess: () => toast.success("Pix enviado por WhatsApp!"),
+    onError: (e: any) => toast.error(e.message || "Erro ao enviar Pix"),
+  });
+
 
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-5">
@@ -353,8 +374,11 @@ export default function Pagamentos() {
                       onDelete={() => deleteCobranca.mutate(c.id)}
                       onPaid={() => markPaid.mutate(c.id)}
                       onGenPix={() => generatePix.mutate(c.id)}
+                      onSendWhats={() => sendPixWhats.mutate(c.id)}
                       generating={generatePix.isPending}
+                      sending={sendPixWhats.isPending}
                     />
+
                   ))}
                 </div>
               )}
@@ -535,14 +559,19 @@ function CobrancaRow({
   onDelete,
   onPaid,
   onGenPix,
+  onSendWhats,
   generating,
+  sending,
 }: {
   c: any;
   onDelete: () => void;
   onPaid: () => void;
   onGenPix: () => void;
+  onSendWhats: () => void;
   generating: boolean;
+  sending: boolean;
 }) {
+
   const [showPix, setShowPix] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
   const isOverdue = c.status === "pending" && c.vencimento < today;
@@ -592,20 +621,34 @@ function CobrancaRow({
             <QrCode className="w-4 h-4" />
           </Button>
           {c.pix_copia_cola && (
-            <Button
-              size="icon"
-              variant="ghost"
-              title="Ver Pix"
-              onClick={() => setShowPix((s) => !s)}
-            >
-              <ExternalLink className="w-4 h-4" />
-            </Button>
+            <>
+              <Button
+                size="icon"
+                variant="ghost"
+                title="Ver Pix"
+                onClick={() => setShowPix((s) => !s)}
+              >
+                <ExternalLink className="w-4 h-4" />
+              </Button>
+              {c.telefone && c.status !== "paid" && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  title="Enviar Pix por WhatsApp"
+                  onClick={onSendWhats}
+                  disabled={sending}
+                >
+                  <MessageSquare className="w-4 h-4 text-emerald-500" />
+                </Button>
+              )}
+            </>
           )}
           {c.status !== "paid" && (
             <Button size="sm" variant="outline" onClick={onPaid}>
               <CheckCircle2 className="w-4 h-4 mr-1" /> Pago
             </Button>
           )}
+
           <Button size="icon" variant="ghost" onClick={onDelete}>
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -663,12 +706,32 @@ function MercadoPagoPanel({
 }) {
   const [apelido, setApelido] = useState("");
   const [token, setToken] = useState("");
+  const [pixTemplate, setPixTemplate] = useState("");
+  const [autoSend, setAutoSend] = useState(true);
+  const [defaultConnId, setDefaultConnId] = useState<string>("");
   const [saving, setSaving] = useState(false);
+
+  const { data: connections = [] } = useQuery({
+    queryKey: ["wa-connections-mp", companyId],
+    queryFn: async () => {
+      if (!companyId) return [];
+      const { data } = await supabase
+        .from("connections")
+        .select("id, name, instance_name, phone_number, status")
+        .eq("company_id", companyId)
+        .eq("is_active", true);
+      return data || [];
+    },
+    enabled: !!companyId,
+  });
 
   useEffect(() => {
     if (config) {
       setApelido(config.apelido || "");
       setToken("");
+      setPixTemplate(config.pix_template || "");
+      setAutoSend(config.auto_send !== false);
+      setDefaultConnId(config.default_connection_id || "");
     }
   }, [config]);
 
@@ -680,13 +743,16 @@ function MercadoPagoPanel({
       const payload: any = {
         company_id: companyId,
         apelido: apelido || null,
+        pix_template: pixTemplate || null,
+        auto_send: autoSend,
+        default_connection_id: defaultConnId || null,
       };
       if (token) payload.access_token = token;
       const { error } = await supabase
         .from("mercado_pago_configs")
         .upsert(payload, { onConflict: "company_id" });
       if (error) throw error;
-      toast.success("Mercado Pago conectado!");
+      toast.success("Configurações salvas!");
       setToken("");
       onSaved();
     } catch (e: any) {
@@ -702,6 +768,7 @@ function MercadoPagoPanel({
     toast.success("Desconectado");
     onSaved();
   };
+
 
   return (
     <div className="space-y-4">
@@ -784,6 +851,76 @@ function MercadoPagoPanel({
           </div>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-emerald-500" />
+            <h3 className="font-semibold text-lg">Envio automático por WhatsApp</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Ao gerar o Pix de uma cobrança com telefone, o sistema envia
+            automaticamente a mensagem abaixo para o cliente pelo WhatsApp.
+          </p>
+
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <p className="font-medium text-sm">Enviar automaticamente após gerar o Pix</p>
+              <p className="text-xs text-muted-foreground">
+                Você também pode enviar manualmente clicando no ícone <MessageSquare className="w-3 h-3 inline" /> em cada cobrança.
+              </p>
+            </div>
+            <Switch checked={autoSend} onCheckedChange={setAutoSend} />
+          </div>
+
+          <div>
+            <Label>Conexão WhatsApp padrão</Label>
+            <Select value={defaultConnId || "none"} onValueChange={(v) => setDefaultConnId(v === "none" ? "" : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma conexão" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— Nenhuma (usar a da cobrança) —</SelectItem>
+                {connections.map((cn: any) => (
+                  <SelectItem key={cn.id} value={cn.id}>
+                    {cn.name || cn.instance_name || cn.phone_number || cn.id.slice(0, 8)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Modelo da mensagem</Label>
+            <Textarea
+              value={pixTemplate}
+              onChange={(e) => setPixTemplate(e.target.value)}
+              rows={10}
+              className="font-mono text-xs"
+              placeholder="Digite o texto que será enviado..."
+            />
+            <div className="mt-2 text-xs text-muted-foreground">
+              <p className="font-medium mb-1">Variáveis disponíveis:</p>
+              <div className="flex flex-wrap gap-1">
+                {["{cliente}", "{valor}", "{descricao}", "{vencimento}", "{pix_copia_cola}", "{link_pagamento}", "{telefone}"].map((v) => (
+                  <code
+                    key={v}
+                    className="px-1.5 py-0.5 rounded bg-muted cursor-pointer hover:bg-muted/70"
+                    onClick={() => setPixTemplate((t) => (t || "") + v)}
+                  >
+                    {v}
+                  </code>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <Button onClick={save} disabled={saving}>
+            Salvar configurações de envio
+          </Button>
+        </CardContent>
+      </Card>
+
 
       <Card>
         <CardContent className="p-6 space-y-2 text-sm">
