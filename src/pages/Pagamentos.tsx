@@ -18,7 +18,9 @@ import {
   ExternalLink,
   Trash2,
   ShieldCheck,
+  MessageSquare,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -244,12 +246,31 @@ export default function Pagamentos() {
       if ((data as any)?.error) throw new Error((data as any).error);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       invalidateAll();
-      toast.success("Pix gerado com sucesso!");
+      if (data?.whatsapp_sent) {
+        toast.success("Pix gerado e enviado por WhatsApp!");
+      } else {
+        toast.success("Pix gerado com sucesso!");
+      }
     },
     onError: (e: any) => toast.error(e.message || "Erro ao gerar Pix"),
   });
+
+  const sendPixWhats = useMutation({
+    mutationFn: async (cobrancaId: string) => {
+      const { data, error } = await supabase.functions.invoke(
+        "send-pix-whatsapp",
+        { body: { cobrancaId } }
+      );
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data;
+    },
+    onSuccess: () => toast.success("Pix enviado por WhatsApp!"),
+    onError: (e: any) => toast.error(e.message || "Erro ao enviar Pix"),
+  });
+
 
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-5">
