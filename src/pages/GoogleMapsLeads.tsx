@@ -459,18 +459,18 @@ export default function GoogleMapsLeads() {
 
       {/* Lead details popup */}
       <Dialog open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
-        <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl">
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md max-h-[calc(100vh-2rem)] p-0 overflow-hidden rounded-2xl">
           {selectedLead && (
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-2rem)]">
               <DialogHeader>
-                <DialogTitle className="text-xl font-bold text-left">{selectedLead.name}</DialogTitle>
+                <DialogTitle className="text-xl font-bold text-left break-words pr-6">{selectedLead.name}</DialogTitle>
               </DialogHeader>
 
-              <div className="space-y-3">
+              <div className="space-y-3 min-w-0">
                 {selectedLead.phone && (
-                  <div className="flex items-center gap-3 text-sm">
+                  <div className="flex items-center gap-3 text-sm min-w-0">
                     <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                    <a href={`tel:${selectedLead.phone}`} className="text-foreground hover:text-primary transition-colors">
+                    <a href={`tel:${selectedLead.phone}`} className="text-foreground hover:text-primary transition-colors min-w-0 break-all">
                       {selectedLead.phone}
                     </a>
                   </div>
@@ -484,7 +484,7 @@ export default function GoogleMapsLeads() {
                       target="_blank"
                       rel="noopener noreferrer"
                       title={selectedLead.website}
-                      className="text-primary hover:underline truncate min-w-0 flex-1 block"
+                      className="text-primary hover:underline min-w-0 flex-1 block break-all whitespace-normal leading-relaxed"
                     >
                       {selectedLead.website}
                     </a>
@@ -492,14 +492,14 @@ export default function GoogleMapsLeads() {
                 )}
 
                 {selectedLead.address && (
-                  <div className="flex items-start gap-3 text-sm">
+                  <div className="flex items-start gap-3 text-sm min-w-0">
                     <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-foreground">{selectedLead.address}</span>
+                    <span className="text-foreground min-w-0 break-words leading-relaxed">{selectedLead.address}</span>
                   </div>
                 )}
               </div>
 
-              <div className="border-t pt-4 space-y-3">
+              <div className="border-t pt-4 space-y-3 min-w-0">
                 <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   <Sparkles className="w-3.5 h-3.5 text-primary" />
                   Enriquecimento automático
@@ -514,7 +514,7 @@ export default function GoogleMapsLeads() {
                   <p className="text-sm text-muted-foreground">{enrichment.error}</p>
                 ) : (
                   <>
-                    <div className="flex items-start gap-3 text-sm">
+                    <div className="flex items-start gap-3 text-sm min-w-0">
                       <Mail className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">
                         {enrichment.emails.length === 0 ? (
@@ -522,7 +522,12 @@ export default function GoogleMapsLeads() {
                         ) : (
                           <div className="flex flex-col gap-1">
                             {enrichment.emails.map((e) => (
-                              <a key={e} href={`mailto:${e}`} className="text-foreground hover:text-primary transition-colors truncate">
+                              <a
+                                key={e}
+                                href={`mailto:${e}`}
+                                title={e}
+                                className="text-foreground hover:text-primary transition-colors break-all whitespace-normal leading-relaxed"
+                              >
                                 {e}
                               </a>
                             ))}
@@ -531,9 +536,9 @@ export default function GoogleMapsLeads() {
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3 text-sm">
+                    <div className="flex items-start gap-3 text-sm min-w-0">
                       <Share2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <div className="flex-1 flex flex-wrap gap-2">
+                      <div className="flex-1 min-w-0 flex flex-wrap gap-2">
                         {Object.keys(enrichment.socials).length === 0 ? (
                           <span className="text-muted-foreground">Nenhuma rede social encontrada</span>
                         ) : (
@@ -560,7 +565,7 @@ export default function GoogleMapsLeads() {
                 )}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 min-w-0">
                 <Button
                   className="flex-1 font-bold tracking-wide"
                   disabled={enrichment.loading}
