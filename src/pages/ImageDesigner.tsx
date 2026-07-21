@@ -23,6 +23,9 @@ import {
   Upload,
   Loader2,
   Palette,
+  Images,
+  RefreshCw,
+  X,
 } from "lucide-react";
 
 type Mode = "generate" | "edit" | "remove_bg" | "upscale" | "ad_creative";
@@ -71,6 +74,17 @@ const AD_TEMPLATES = [
   },
 ];
 
+const STYLE_OPTIONS = [
+  { id: "none", label: "Sem estilo (livre)" },
+  { id: "photorealistic", label: "Fotorrealista" },
+  { id: "premium_product", label: "Produto Premium" },
+  { id: "cinematic", label: "Cinematográfico" },
+  { id: "minimalist", label: "Minimalista" },
+  { id: "editorial_magazine", label: "Editorial / Revista" },
+  { id: "vibrant_pop", label: "Pop Vibrante" },
+  { id: "luxury_dark", label: "Luxo Dark" },
+];
+
 interface GeneratedImage {
   id: string;
   prompt: string;
@@ -100,9 +114,13 @@ export default function ImageDesigner() {
   const [enhance, setEnhance] = useState(true);
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
+  const [referenceFiles, setReferenceFiles] = useState<File[]>([]);
+  const [referencePreviews, setReferencePreviews] = useState<string[]>([]);
+  const [style, setStyle] = useState<string>("none");
   const [loading, setLoading] = useState(false);
   const [latest, setLatest] = useState<GeneratedImage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const refFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!sourceFile) {
@@ -113,6 +131,19 @@ export default function ImageDesigner() {
     setSourcePreview(url);
     return () => URL.revokeObjectURL(url);
   }, [sourceFile]);
+
+  useEffect(() => {
+    if (referenceFiles.length === 0) {
+      setReferencePreviews([]);
+      return;
+    }
+    const urls = referenceFiles.map((f) => URL.createObjectURL(f));
+    setReferencePreviews(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [referenceFiles]);
+
+
+
 
   const { data: gallery = [], isLoading: galleryLoading } = useQuery({
     queryKey: ["generated-images", companyId, user?.id],
@@ -129,12 +160,21 @@ export default function ImageDesigner() {
     enabled: !!user,
   });
 
-  const handleGenerate = async () => {
-    if (!prompt.trim() && mode !== "remove_bg" && mode !== "upscale") {
+  const runGeneration = async (opts?: {
+    keepComposition?: boolean;
+    sourceImageUrl?: string;
+    overrideMode?: Mode;
+  }) => {
+    const effMode = opts?.overrideMode ?? mode;
+    if (!prompt.trim() && effMode !== "remove_bg" && effMode !== "upscale") {
       toast.error("Descreva o que você quer gerar");
       return;
     }
-    if ((mode === "edit" || mode === "remove_bg" || mode === "upscale") && !sourceFile) {
+    if (
+      (effMode === "edit" || effMode === "remove_bg" || effMode === "upscale") &&
+      !sourceFile &&
+      !opts?.sourceImageUrl
+    ) {
       toast.error("Envie uma imagem de origem");
       return;
     }
@@ -142,14 +182,23 @@ export default function ImageDesigner() {
     setLoading(true);
     try {
       const sourceImageBase64 = sourceFile ? await fileToBase64(sourceFile) : undefined;
+      const referenceImagesBase64 =
+        referenceFiles.length > 0
+          ? await Promise.all(referenceFiles.map(fileToBase64))
+          : undefined;
+
       const { data, error } = await supabase.functions.invoke("image-designer", {
         body: {
           prompt: prompt.trim() || "image",
-          mode,
+          mode: effMode,
           model,
           aspectRatio,
           enhance,
           sourceImageBase64,
+          sourceImageUrl: opts?.sourceImageUrl,
+          referenceImagesBase64,
+          style: style !== "none" ? style : undefined,
+          keepComposition: opts?.keepComposition ?? false,
         },
       });
       if (error) throw error;
@@ -166,6 +215,17 @@ export default function ImageDesigner() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGenerate = () => runGeneration();
+
+  const handleRegenerateVariation = () => {
+    if (!latest) return;
+    runGeneration({
+      keepComposition: true,
+      sourceImageUrl: latest.image_url,
+      overrideMode: "edit",
+    });
   };
 
   const handleDelete = async (img: GeneratedImage) => {
@@ -333,6 +393,85 @@ export default function ImageDesigner() {
             )}
 
             {mode !== "remove_bg" && mode !== "upscale" && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5">
+                  <Palette className="h-3.5 w-3.5 text-primary" />
+                  Estilo visual
+                </Label>
+                <Select value={style} onValueChange={setStyle}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STYLE_OPTIONS.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground">
+                  O estilo é injetado automaticamente no prompt final.
+                </p>
+              </div>
+            )}
+
+            {mode !== "remove_bg" && mode !== "upscale" && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5">
+                  <Images className="h-3.5 w-3.5 text-primary" />
+                  Referências visuais (opcional, até 4)
+                </Label>
+                <div
+                  onClick={() => refFileRef.current?.click()}
+                  className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border bg-muted/30 p-3 transition hover:bg-muted/50"
+                >
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    A IA extrai paleta, iluminação e elementos das referências
+                  </p>
+                </div>
+                <input
+                  ref={refFileRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files ?? []).slice(0, 4);
+                    setReferenceFiles(files);
+                    if (refFileRef.current) refFileRef.current.value = "";
+                  }}
+                />
+                {referencePreviews.length > 0 && (
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {referencePreviews.map((src, i) => (
+                      <div key={i} className="relative group">
+                        <img
+                          src={src}
+                          alt={`Ref ${i + 1}`}
+                          className="aspect-square w-full rounded border border-border object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setReferenceFiles((prev) => prev.filter((_, idx) => idx !== i))
+                          }
+                          className="absolute -right-1 -top-1 rounded-full bg-destructive p-0.5 text-destructive-foreground opacity-0 transition group-hover:opacity-100"
+                          aria-label="Remover referência"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+
+
+            {mode !== "remove_bg" && mode !== "upscale" && (
               <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-muted/30 p-3 transition hover:bg-muted/50">
                 <input
                   type="checkbox"
@@ -410,6 +549,16 @@ export default function ImageDesigner() {
                       onClick={() => download(latest.image_url, `next-pro-${latest.id}.png`)}
                     >
                       <Download className="mr-1 h-4 w-4" /> Baixar
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      disabled={loading}
+                      onClick={handleRegenerateVariation}
+                      className="gap-1"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                      Regenerar variação (mantendo composição)
                     </Button>
                     <p className="text-xs text-muted-foreground line-clamp-2 flex-1">
                       {latest.prompt}

@@ -52,10 +52,30 @@ Rules for the output:
 
 Never output anything except the final prompt string.`;
 
+const STYLE_PRESETS: Record<string, string> = {
+  photorealistic:
+    "Photorealistic style: DSLR camera, 85mm lens, shallow depth of field, natural realistic lighting, true-to-life textures and skin tones, no illustration.",
+  premium_product:
+    "Premium product photography: seamless studio backdrop, controlled softbox lighting with rim light, glossy reflections, luxurious materials, macro detail, editorial e-commerce quality.",
+  cinematic:
+    "Cinematic style: anamorphic 2.39:1 feel, dramatic teal and orange color grading, volumetric light rays, atmospheric haze, movie-poster composition, filmic grain.",
+  minimalist:
+    "Minimalist style: negative space, pastel or monochrome palette, single subject, geometric layout, ultra clean typography, Scandinavian design sensibility.",
+  editorial_magazine:
+    "Editorial magazine style: high fashion Vogue/GQ layout, bold serif headline, dynamic asymmetric composition, high-contrast lighting, print-quality art direction.",
+  vibrant_pop:
+    "Vibrant pop style: saturated primary colors, gradient background, bold sans-serif typography, playful shapes, Gen-Z social media energy.",
+  luxury_dark:
+    "Luxury dark style: black or deep navy background, gold accents, low-key lighting, marble/velvet textures, elegant serif typography, high-end brand feel.",
+};
+
 async function enhancePrompt(
   userIdea: string,
   mode: Mode,
   aspect: AspectRatio,
+  style?: string,
+  references?: { b64: string; mime: string }[],
+  keepComposition?: boolean,
 ): Promise<string> {
   const modeHint =
     mode === "ad_creative"
@@ -64,7 +84,31 @@ async function enhancePrompt(
         ? "This is an EDIT instruction for an existing image."
         : "This is a standalone generated image.";
 
-  const userMsg = `User idea: ${userIdea}\n\nContext: ${modeHint}\nAspect ratio: ${aspect} (${ASPECT_DESCRIPTION[aspect]}).\n\nWrite the final professional designer prompt now.`;
+  const styleDirective =
+    style && STYLE_PRESETS[style]
+      ? `\nStyle directive (MUST follow): ${STYLE_PRESETS[style]}`
+      : "";
+
+  const refDirective =
+    references && references.length > 0
+      ? `\nReference images provided (${references.length}). ANALYZE them and EXTRACT: (a) dominant color palette with hex-like description, (b) lighting setup (direction, softness, temperature), (c) typography style if any, (d) composition rules, (e) recurring visual elements/props. Fuse these attributes into the final prompt so the generated image visually matches the references without copying them.`
+      : "";
+
+  const compositionDirective = keepComposition
+    ? `\nCOMPOSITION LOCK: keep the exact same composition, framing, subject placement and layout as the reference/source image. Only vary lighting nuances, color micro-variations and small details. This is a VARIATION, not a redesign.`
+    : "";
+
+  const userText = `User idea: ${userIdea}\n\nContext: ${modeHint}\nAspect ratio: ${aspect} (${ASPECT_DESCRIPTION[aspect]}).${styleDirective}${refDirective}${compositionDirective}\n\nWrite the final professional designer prompt now.`;
+
+  const userContent: unknown[] = [{ type: "text", text: userText }];
+  if (references) {
+    for (const ref of references) {
+      userContent.push({
+        type: "image_url",
+        image_url: { url: `data:${ref.mime};base64,${ref.b64}` },
+      });
+    }
+  }
 
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -76,7 +120,7 @@ async function enhancePrompt(
       model: "google/gemini-2.5-flash",
       messages: [
         { role: "system", content: DESIGNER_SYSTEM_PROMPT },
-        { role: "user", content: userMsg },
+        { role: "user", content: userContent },
       ],
       temperature: 0.8,
     }),
@@ -215,6 +259,9 @@ Deno.serve(async (req) => {
       sourceImageBase64,
       aspectRatio = "1:1",
       enhance = true,
+      style,
+      referenceImagesBase64,
+      keepComposition = false,
     } = (await req.json()) as {
       prompt?: string;
       mode?: Mode;
@@ -223,6 +270,9 @@ Deno.serve(async (req) => {
       sourceImageBase64?: string;
       aspectRatio?: AspectRatio;
       enhance?: boolean;
+      style?: string;
+      referenceImagesBase64?: string[];
+      keepComposition?: boolean;
     };
 
     const rawUserPrompt = (prompt || "").trim();
@@ -231,18 +281,44 @@ Deno.serve(async (req) => {
     // and we shouldn't run the enhancer — the mode prefix already encodes the intent.
     const isTechnicalMode = mode === "remove_bg" || mode === "upscale";
 
+    // Parse reference images (limit 4 to keep the enhancer request lean)
+    const references: { b64: string; mime: string }[] = [];
+    if (referenceImagesBase64 && referenceImagesBase64.length > 0) {
+      for (const raw of referenceImagesBase64.slice(0, 4)) {
+        const b64 = raw.replace(/^data:[^;]+;base64,/, "");
+        const m = /^data:([^;]+);base64,/.exec(raw);
+        references.push({ b64, mime: m?.[1] || "image/png" });
+      }
+    }
+
     let workingIdea = rawUserPrompt;
     if (!isTechnicalMode && enhance && rawUserPrompt) {
       try {
-        workingIdea = await enhancePrompt(rawUserPrompt, mode as Mode, aspectRatio);
+        workingIdea = await enhancePrompt(
+          rawUserPrompt,
+          mode as Mode,
+          aspectRatio,
+          style,
+          references.length > 0 ? references : undefined,
+          keepComposition,
+        );
       } catch (err) {
         console.warn("[image-designer] enhance error, falling back", err);
       }
     }
 
+    const styleFallback =
+      !enhance && style && STYLE_PRESETS[style] ? ` ${STYLE_PRESETS[style]}` : "";
+    const compositionFallback =
+      !enhance && keepComposition
+        ? " Keep the exact same composition, framing and subject placement as the source image; only vary lighting and small details."
+        : "";
+
     const finalPrompt =
       (MODE_PROMPT_PREFIX[mode as Mode] || "") +
       workingIdea +
+      styleFallback +
+      compositionFallback +
       (isTechnicalMode
         ? ""
         : ` Aspect ratio ${aspectRatio}. Render in ultra high definition, 4K resolution, professional designer quality, sharp focus, ultra detailed.`);
