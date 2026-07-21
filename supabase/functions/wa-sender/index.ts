@@ -6,19 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
 
-// Preserva o número real vindo do WhatsApp/JID.
-// Importante: contatos sincronizados do WhatsApp podem vir sem o nono dígito no JID,
-// e adicionar "9" automaticamente pode enviar para outro destino que não recebe.
-function normalizeBrNumber(raw: string): string {
-  const digits = (raw || "").replace("@s.whatsapp.net", "").replace(/\D/g, "");
-  return digits;
-}
-
-function isValidSendNumber(raw: string): boolean {
-  const digits = normalizeBrNumber(raw);
-  return digits.length >= 10 && digits.length <= 15;
-}
-
 const sendCampaignStartTelegramNotification = async ({
   supabase,
   connection,
@@ -169,7 +156,7 @@ serve(async (req) => {
     switch (action) {
       case "direct":
         // Direct send for testing - uses /send/text, /send/media, /send/menu, /send/carousel
-        const directNumber = normalizeBrNumber(params.numbers?.[0] || "");
+        const directNumber = (params.numbers?.[0] || "").replace("@s.whatsapp.net", "").replace(/\D/g, "");
         const directType = params.type || "text";
         
         let directEndpoint: string;
@@ -287,28 +274,18 @@ serve(async (req) => {
         // For single message, we use scheduled_for to add delay
         endpoint = `${base_url}/sender/advanced`;
         
-        const simpleNumbers = (params.numbers || []).filter(isValidSendNumber);
+        const simpleNumbers = params.numbers || [];
         const simpleTypeRaw = params.type || "text";
         const simpleType = simpleTypeRaw === "buttons" ? "button" : simpleTypeRaw;
         const simpleMedia = params.media || params.file;
         const requestedDelayMin = params.delayMin || 10;
         const requestedDelayMax = params.delayMax || 30;
         
-        if (simpleNumbers.length === 0) {
-          return new Response(JSON.stringify({
-            success: false,
-            error: "Nenhum número válido para envio"
-          }), {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" }
-          });
-        }
-
         console.log(`[wa-sender] ViewOnce param received: ${params.viewOnce}`);
         
         // Build messages array for /sender/advanced
         const advancedMessages: any[] = simpleNumbers.map((num: string) => {
-          const cleanNumber = normalizeBrNumber(num);
+          const cleanNumber = num.replace("@s.whatsapp.net", "").replace(/\D/g, "");
           const msg: any = {
             number: cleanNumber,
             type: simpleType
@@ -427,7 +404,7 @@ serve(async (req) => {
         const MAX_CONSECUTIVE_ERRORS = 5; // Stop after 5 consecutive errors
         
         for (let i = 0; i < menuNumbers.length; i++) {
-          const number = normalizeBrNumber(menuNumbers[i]);
+          const number = menuNumbers[i].replace("@s.whatsapp.net", "").replace(/\D/g, "");
           
           try {
             let menuEndpoint: string;
@@ -814,7 +791,7 @@ serve(async (req) => {
         
         // Prepare messages
         const progressMessages = progressNumbers.map((num: string) => {
-          const cleanNumber = normalizeBrNumber(num);
+          const cleanNumber = num.replace("@s.whatsapp.net", "").replace(/\D/g, "");
           return {
             number: cleanNumber,
             type: progressType,
