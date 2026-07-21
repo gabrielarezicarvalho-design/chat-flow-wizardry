@@ -966,6 +966,56 @@ export type Database = {
           },
         ]
       }
+      generated_images: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          image_url: string
+          metadata: Json | null
+          mode: string
+          model: string
+          prompt: string
+          source_image_url: string | null
+          storage_path: string | null
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          metadata?: Json | null
+          mode?: string
+          model?: string
+          prompt: string
+          source_image_url?: string | null
+          storage_path?: string | null
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          metadata?: Json | null
+          mode?: string
+          model?: string
+          prompt?: string
+          source_image_url?: string | null
+          storage_path?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_images_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           company_id: string | null
