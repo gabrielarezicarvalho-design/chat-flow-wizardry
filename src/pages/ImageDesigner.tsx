@@ -95,6 +95,8 @@ export default function ImageDesigner() {
   const [mode, setMode] = useState<Mode>("generate");
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState(MODELS[0].id);
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>("1:1");
+  const [enhance, setEnhance] = useState(true);
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
