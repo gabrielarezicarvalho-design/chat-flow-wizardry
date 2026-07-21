@@ -164,8 +164,9 @@ export default function FacebookAdsSpy() {
         {/* Search Card */}
         <Card className="p-6 shadow-lg">
           <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
-            <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+            <TabsList className="grid w-full max-w-xl grid-cols-3 mb-6">
               <TabsTrigger value="keyword" className="gap-2"><Search className="h-4 w-4" /> Palavra-chave</TabsTrigger>
+              <TabsTrigger value="username" className="gap-2"><AtSign className="h-4 w-4" /> @usuário</TabsTrigger>
               <TabsTrigger value="page" className="gap-2"><Building2 className="h-4 w-4" /> Página</TabsTrigger>
             </TabsList>
 
