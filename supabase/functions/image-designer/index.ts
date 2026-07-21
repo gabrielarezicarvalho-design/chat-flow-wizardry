@@ -210,7 +210,7 @@ Deno.serve(async (req) => {
     const {
       prompt,
       mode = "generate",
-      model = "google/gemini-3-pro-image",
+      model = "openai/gpt-image-2",
       sourceImageUrl,
       sourceImageBase64,
       aspectRatio = "1:1",
