@@ -150,6 +150,13 @@ Deno.serve(async (req) => {
       activeStatus,
     });
 
+    // Debug: log raw sample keys of first item to understand actor output
+    if (items?.[0]) {
+      console.log("Sample keys:", Object.keys(items[0]));
+      console.log("Sample snapshot keys:", Object.keys(items[0].snapshot || items[0].ad_snapshot || {}));
+      console.log("Sample first item:", JSON.stringify(items[0]).slice(0, 2000));
+    }
+
     const ads = (Array.isArray(items) ? items : []).slice(0, limit).map(normalize);
 
     return new Response(
