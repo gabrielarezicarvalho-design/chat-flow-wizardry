@@ -593,7 +593,13 @@ export default function GoogleMapsLeads() {
   );
 }
 
-function StatCard({ color, icon, value, label }: { color: string; icon: React.ReactNode; value: string; label: string }) {
+function StatCard({ color, icon, start, label }: { color: string; icon: React.ReactNode; start: number; label: string }) {
+  const [value, setValue] = useState(start);
+  useEffect(() => {
+    const id = setInterval(() => setValue((v) => v + 10), 30000);
+    return () => clearInterval(id);
+  }, []);
+  const formatted = value.toLocaleString("pt-BR") + "+";
   return (
     <div
       className={`group relative rounded-xl p-4 bg-gradient-to-br ${color} border border-border/50 overflow-hidden cursor-default transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/40`}
@@ -601,10 +607,39 @@ function StatCard({ color, icon, value, label }: { color: string; icon: React.Re
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.15),transparent_60%)]" />
       <div className="relative">
         <div className="mb-2 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">{icon}</div>
-        <p className="text-lg font-bold">{value}</p>
+        <RollingNumber text={formatted} />
         <p className="text-xs text-muted-foreground leading-tight">{label}</p>
       </div>
     </div>
+  );
+}
+
+function RollingNumber({ text }: { text: string }) {
+  return (
+    <p className="text-lg font-bold flex items-center leading-none h-[1.4em]">
+      {text.split("").map((ch, i) =>
+        /\d/.test(ch) ? (
+          <RollingDigit key={i} digit={parseInt(ch, 10)} />
+        ) : (
+          <span key={i} className="inline-block">{ch}</span>
+        )
+      )}
+    </p>
+  );
+}
+
+function RollingDigit({ digit }: { digit: number }) {
+  return (
+    <span className="inline-block overflow-hidden h-[1.2em] leading-[1.2em] align-middle" style={{ width: "0.62em" }}>
+      <span
+        className="flex flex-col transition-transform duration-700 ease-out"
+        style={{ transform: `translateY(-${digit * 1.2}em)` }}
+      >
+        {Array.from({ length: 10 }).map((_, n) => (
+          <span key={n} className="h-[1.2em] leading-[1.2em] text-center">{n}</span>
+        ))}
+      </span>
+    </span>
   );
 }
 
