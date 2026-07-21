@@ -599,7 +599,7 @@ function StatCard({ color, icon, start, label }: { color: string; icon: React.Re
     const id = setInterval(() => setValue((v) => v + 10), 30000);
     return () => clearInterval(id);
   }, []);
-  const formatted = value.toLocaleString("pt-BR");
+  const formatted = value.toLocaleString("pt-BR") + "+";
   return (
     <div
       className={`group relative rounded-xl p-4 bg-gradient-to-br ${color} border border-border/50 overflow-hidden cursor-default transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/40`}
@@ -607,10 +607,7 @@ function StatCard({ color, icon, start, label }: { color: string; icon: React.Re
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.15),transparent_60%)]" />
       <div className="relative">
         <div className="mb-2 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">{icon}</div>
-        <div className="flex items-center gap-1">
-          <span className="text-lg font-bold leading-none flex items-center h-[1.4em]">+</span>
-          <RollingNumber text={formatted} />
-        </div>
+        <RollingNumber text={formatted} />
         <p className="text-xs text-muted-foreground leading-tight">{label}</p>
       </div>
     </div>
