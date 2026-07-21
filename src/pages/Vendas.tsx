@@ -245,8 +245,8 @@ export default function Vendas() {
     } finally {
       setDistributing(false);
     }
-    };
   };
+
 
   const stats = useMemo(() => {
     const total = leads.length;
