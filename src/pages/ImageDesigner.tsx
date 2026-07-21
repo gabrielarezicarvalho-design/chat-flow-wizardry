@@ -23,6 +23,9 @@ import {
   Upload,
   Loader2,
   Palette,
+  Images,
+  RefreshCw,
+  X,
 } from "lucide-react";
 
 type Mode = "generate" | "edit" | "remove_bg" | "upscale" | "ad_creative";
