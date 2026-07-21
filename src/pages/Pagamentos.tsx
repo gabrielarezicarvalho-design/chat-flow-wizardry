@@ -559,14 +559,19 @@ function CobrancaRow({
   onDelete,
   onPaid,
   onGenPix,
+  onSendWhats,
   generating,
+  sending,
 }: {
   c: any;
   onDelete: () => void;
   onPaid: () => void;
   onGenPix: () => void;
+  onSendWhats: () => void;
   generating: boolean;
+  sending: boolean;
 }) {
+
   const [showPix, setShowPix] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
   const isOverdue = c.status === "pending" && c.vencimento < today;
@@ -616,20 +621,34 @@ function CobrancaRow({
             <QrCode className="w-4 h-4" />
           </Button>
           {c.pix_copia_cola && (
-            <Button
-              size="icon"
-              variant="ghost"
-              title="Ver Pix"
-              onClick={() => setShowPix((s) => !s)}
-            >
-              <ExternalLink className="w-4 h-4" />
-            </Button>
+            <>
+              <Button
+                size="icon"
+                variant="ghost"
+                title="Ver Pix"
+                onClick={() => setShowPix((s) => !s)}
+              >
+                <ExternalLink className="w-4 h-4" />
+              </Button>
+              {c.telefone && c.status !== "paid" && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  title="Enviar Pix por WhatsApp"
+                  onClick={onSendWhats}
+                  disabled={sending}
+                >
+                  <MessageSquare className="w-4 h-4 text-emerald-500" />
+                </Button>
+              )}
+            </>
           )}
           {c.status !== "paid" && (
             <Button size="sm" variant="outline" onClick={onPaid}>
               <CheckCircle2 className="w-4 h-4 mr-1" /> Pago
             </Button>
           )}
+
           <Button size="icon" variant="ghost" onClick={onDelete}>
             <Trash2 className="w-4 h-4" />
           </Button>
