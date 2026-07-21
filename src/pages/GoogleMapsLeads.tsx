@@ -546,17 +546,32 @@ export default function GoogleMapsLeads() {
                 )}
               </div>
 
-              <Button
-                variant="outline"
-                className="w-full font-bold tracking-wide"
-                onClick={() => {
-                  const q = encodeURIComponent(`${selectedLead.name} ${selectedLead.address ?? ""}`);
-                  window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
-                }}
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                GOOGLE MAPS
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  className="flex-1 font-bold tracking-wide"
+                  disabled={enrichment.loading}
+                  onClick={async () => {
+                    await saveAsLead(selectedLead, {
+                      emails: enrichment.emails,
+                      socials: enrichment.socials,
+                    });
+                  }}
+                >
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  SALVAR COMO LEAD
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 font-bold tracking-wide"
+                  onClick={() => {
+                    const q = encodeURIComponent(`${selectedLead.name} ${selectedLead.address ?? ""}`);
+                    window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  GOOGLE MAPS
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
