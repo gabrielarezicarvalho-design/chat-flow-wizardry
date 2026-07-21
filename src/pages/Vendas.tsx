@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { useLeads } from "@/hooks/useLeads";
+import { useCompanyId } from "@/hooks/useCompanyId";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   BarChart3,
   Users,
@@ -21,8 +23,10 @@ import {
   TrendingUp,
   Clock,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+
 
 const StatCard = ({
   label,
@@ -51,11 +55,69 @@ const StatCard = ({
 
 export default function Vendas() {
   const { leads } = useLeads();
+  const { companyId } = useCompanyId();
   const [signMessages, setSignMessages] = useState(true);
   const [format, setFormat] = useState("*{nome}*:\n{msg}");
   const [autoDistribute, setAutoDistribute] = useState(false);
   const [lockConversation, setLockConversation] = useState(true);
   const [sla, setSla] = useState(30);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  useEffect(() => {
+    if (!companyId) return;
+    let active = true;
+    (async () => {
+      setLoadingSettings(true);
+      const { data, error } = await supabase
+        .from("sales_settings")
+        .select("*")
+        .eq("company_id", companyId)
+        .maybeSingle();
+      if (!active) return;
+      if (error) {
+        toast.error("Erro ao carregar configurações");
+      } else if (data) {
+        setSignMessages(data.sign_messages);
+        setFormat(data.message_format);
+        setAutoDistribute(data.auto_distribute);
+        setLockConversation(data.lock_conversation);
+        setSla(data.sla_minutes);
+      }
+      setLoadingSettings(false);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [companyId]);
+
+  const handleSaveSettings = async () => {
+    if (!companyId) {
+      toast.error("Nenhuma empresa vinculada ao usuário");
+      return;
+    }
+    setSavingSettings(true);
+    const { error } = await supabase
+      .from("sales_settings")
+      .upsert(
+        {
+          company_id: companyId,
+          sign_messages: signMessages,
+          message_format: format,
+          auto_distribute: autoDistribute,
+          lock_conversation: lockConversation,
+          sla_minutes: sla,
+        },
+        { onConflict: "company_id" }
+      );
+    setSavingSettings(false);
+    if (error) {
+      toast.error(error.message || "Erro ao salvar configurações");
+    } else {
+      toast.success("Configurações salvas!");
+    }
+  };
+
 
   const stats = useMemo(() => {
     const total = leads.length;
@@ -226,12 +288,18 @@ export default function Vendas() {
         <TabsContent value="configuracoes">
           <Card className="bg-card/60 border-border/60">
             <CardContent className="p-6 space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold">Configurações do time</h2>
-                <p className="text-sm text-muted-foreground">
-                  Como o sistema se comporta quando há vários vendedores.
-                </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Configurações do time</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Como o sistema se comporta quando há vários vendedores.
+                  </p>
+                </div>
+                {loadingSettings && (
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                )}
               </div>
+
 
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -313,9 +381,17 @@ export default function Vendas() {
                 </p>
               </div>
 
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button
+                className="bg-primary hover:bg-primary/90"
+                onClick={handleSaveSettings}
+                disabled={savingSettings || loadingSettings}
+              >
+                {savingSettings && (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                )}
                 Salvar configurações
               </Button>
+
             </CardContent>
           </Card>
         </TabsContent>
