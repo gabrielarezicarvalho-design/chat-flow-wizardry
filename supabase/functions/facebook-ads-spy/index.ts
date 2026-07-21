@@ -244,7 +244,6 @@ Deno.serve(async (req) => {
     const {
       query,
       pageId,
-      username,
       country = "BR",
       activeStatus = "active",
       adType = "all",
@@ -252,36 +251,15 @@ Deno.serve(async (req) => {
       quantity = 30,
     } = await req.json();
 
-    // Normalize @handle: aceitar "@nome", "nome", "https://instagram.com/nome", "https://facebook.com/nome"
-    let handle: string | undefined;
-    if (typeof username === "string" && username.trim()) {
-      let u = username.trim();
-      const urlMatch = u.match(/(?:facebook\.com|instagram\.com|fb\.com)\/([^/?#]+)/i);
-      if (urlMatch) u = urlMatch[1];
-      handle = u.replace(/^@+/, "").replace(/\/+$/, "").trim();
-    }
-
-    if (!query && !pageId && !handle) {
-      throw new Error("Informe uma palavra-chave (query), o ID da página (pageId) ou um @usuário (username).");
+    if (!query && !pageId) {
+      throw new Error("Informe uma palavra-chave (query) ou o ID da página (pageId).");
     }
 
     const limit = Math.min(Math.max(Number(quantity) || 30, 1), 200);
-
-    // Para @handle: o ator aceita URL de página do FB. Se o handle for só do Instagram,
-    // caímos na busca da Ad Library por palavra-chave como fallback.
-    const startUrls: { url: string }[] = [];
-    if (handle && !query && !pageId) {
-      startUrls.push({ url: `https://www.facebook.com/${handle}` });
-      startUrls.push({
-        url: buildSearchUrl({ query: handle, country, activeStatus, adType, platform }),
-      });
-    } else {
-      const searchUrl = buildSearchUrl({ query, pageId, country, activeStatus, adType, platform });
-      startUrls.push({ url: searchUrl });
-    }
+    const searchUrl = buildSearchUrl({ query, pageId, country, activeStatus, adType, platform });
 
     const { items, status } = await runActorAsync({
-      startUrls,
+      startUrls: [{ url: searchUrl }],
       resultsLimit: limit,
       activeStatus,
     });
@@ -293,13 +271,10 @@ Deno.serve(async (req) => {
       console.log("Sample first item:", JSON.stringify(items[0]).slice(0, 2000));
     }
 
-    const ads = (Array.isArray(items) ? items : [])
-      .slice(0, limit)
-      .map(normalize)
-      .filter((a) => a.page_name || a.body || (a.images && a.images.length) || (a.videos && a.videos.length));
+    const ads = (Array.isArray(items) ? items : []).slice(0, limit).map(normalize);
 
     return new Response(
-      JSON.stringify({ ads, count: ads.length, status }),
+      JSON.stringify({ ads, count: ads.length, searchUrl, status }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err: unknown) {

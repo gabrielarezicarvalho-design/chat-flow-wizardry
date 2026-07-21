@@ -13,7 +13,7 @@ import { AdDetailDialog } from "@/components/facebook-ads/AdDetailDialog";
 import {
   Eye, Search, Loader2, ExternalLink, Facebook, Instagram,
   Sparkles, Target, Zap, PlayCircle, Image as ImageIcon,
-  CalendarDays, TrendingUp, Download, Building2, AtSign,
+  CalendarDays, TrendingUp, Download, Building2,
 } from "lucide-react";
 
 interface FacebookAd {
@@ -38,7 +38,7 @@ interface FacebookAd {
   ad_library_url?: string;
 }
 
-type Mode = "keyword" | "page" | "username";
+type Mode = "keyword" | "page";
 
 const POPULAR = [
   "Emagrecimento", "Curso Online", "E-commerce", "Infoproduto",
@@ -71,7 +71,6 @@ export default function FacebookAdsSpy() {
   const [mode, setMode] = useState<Mode>("keyword");
   const [query, setQuery] = useState("");
   const [pageId, setPageId] = useState("");
-  const [username, setUsername] = useState("");
   const [country, setCountry] = useState("BR");
   const [activeStatus, setActiveStatus] = useState("active");
   const [platform, setPlatform] = useState("");
@@ -81,13 +80,9 @@ export default function FacebookAdsSpy() {
   const [selectedAd, setSelectedAd] = useState<FacebookAd | null>(null);
 
   const handleSearch = async () => {
-    const input = mode === "keyword" ? query : mode === "page" ? pageId : username;
+    const input = mode === "keyword" ? query : pageId;
     if (!input.trim()) {
-      toast.error(
-        mode === "keyword" ? "Digite uma palavra-chave"
-        : mode === "page" ? "Digite o ID da página"
-        : "Digite um @usuário"
-      );
+      toast.error(mode === "keyword" ? "Digite uma palavra-chave" : "Digite o ID da página");
       return;
     }
     setLoading(true);
@@ -97,7 +92,6 @@ export default function FacebookAdsSpy() {
         body: {
           query: mode === "keyword" ? query.trim() : undefined,
           pageId: mode === "page" ? pageId.trim() : undefined,
-          username: mode === "username" ? username.trim() : undefined,
           country: country === "ALL" ? "" : country,
           activeStatus,
           platform,
@@ -164,9 +158,8 @@ export default function FacebookAdsSpy() {
         {/* Search Card */}
         <Card className="p-6 shadow-lg">
           <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
-            <TabsList className="grid w-full max-w-xl grid-cols-3 mb-6">
+            <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
               <TabsTrigger value="keyword" className="gap-2"><Search className="h-4 w-4" /> Palavra-chave</TabsTrigger>
-              <TabsTrigger value="username" className="gap-2"><AtSign className="h-4 w-4" /> @usuário</TabsTrigger>
               <TabsTrigger value="page" className="gap-2"><Building2 className="h-4 w-4" /> Página</TabsTrigger>
             </TabsList>
 
@@ -187,22 +180,6 @@ export default function FacebookAdsSpy() {
                     {t}
                   </Badge>
                 ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="username" className="space-y-4 mt-0">
-              <div>
-                <Label>@usuário do Facebook ou Instagram</Label>
-                <Input
-                  placeholder="Ex: @nike, nike, ou https://instagram.com/nike"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="mt-2 h-12"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Cole o @ ou a URL do perfil. Buscamos os anúncios daquela página na Ad Library.
-                </p>
               </div>
             </TabsContent>
 
