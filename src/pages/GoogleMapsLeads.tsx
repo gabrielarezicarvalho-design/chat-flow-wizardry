@@ -443,9 +443,10 @@ export default function GoogleMapsLeads() {
               </div>
               <p className="font-semibold text-sm pt-1 transition-transform duration-300 group-hover:translate-x-1">Plano Profissional</p>
               <p className="text-xs text-white/80 transition-transform duration-300 group-hover:translate-x-1">Acesso completo a tudo</p>
-              <button className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-white/90 hover:text-white transition-colors">
-                Ver planos <ArrowRight className="w-3 h-3" />
-              </button>
+              <Button size="sm" className="mt-2 bg-white text-primary hover:bg-white/90 font-semibold rounded-lg shadow-md">
+                Ver planos <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </Button>
+
             </CardContent>
           </Card>
 
