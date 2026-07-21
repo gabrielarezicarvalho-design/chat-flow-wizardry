@@ -71,6 +71,7 @@ export default function FacebookAdsSpy() {
   const [mode, setMode] = useState<Mode>("keyword");
   const [query, setQuery] = useState("");
   const [pageId, setPageId] = useState("");
+  const [username, setUsername] = useState("");
   const [country, setCountry] = useState("BR");
   const [activeStatus, setActiveStatus] = useState("active");
   const [platform, setPlatform] = useState("");
