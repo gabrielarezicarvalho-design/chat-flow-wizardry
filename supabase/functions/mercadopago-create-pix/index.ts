@@ -84,6 +84,30 @@ Deno.serve(async (req) => {
       })
       .eq("id", cobrancaId);
 
+    // Envio automático via WhatsApp (se habilitado nas configurações da empresa)
+    let autoSent = false;
+    try {
+      const { data: mpCfg } = await supabase
+        .from("mercado_pago_configs")
+        .select("auto_send")
+        .eq("company_id", cobranca.company_id)
+        .maybeSingle();
+
+      if (mpCfg?.auto_send !== false && cobranca.telefone) {
+        const admin = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+        );
+        const { error: sendErr } = await admin.functions.invoke("send-pix-whatsapp", {
+          body: { cobrancaId },
+        });
+        if (sendErr) console.error("Auto-send falhou:", sendErr);
+        else autoSent = true;
+      }
+    } catch (e) {
+      console.error("Erro ao disparar auto-envio:", e);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -91,9 +115,11 @@ Deno.serve(async (req) => {
         qr_code_base64: qrCode,
         copia_cola: copiaCola,
         ticket_url: ticketUrl,
+        whatsapp_sent: autoSent,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
+
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erro desconhecido";
     return new Response(JSON.stringify({ error: message }), {
