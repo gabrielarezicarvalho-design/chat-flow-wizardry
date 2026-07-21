@@ -266,12 +266,21 @@ Deno.serve(async (req) => {
     }
 
     const limit = Math.min(Math.max(Number(quantity) || 30, 1), 200);
-    // Ad Library aceita busca por nome/handle da página via keyword
-    const effectiveQuery = query || handle;
-    const searchUrl = buildSearchUrl({ query: effectiveQuery, pageId, country, activeStatus, adType, platform });
+
+    // Para @handle: passamos a URL da página do FB direto como startUrl.
+    // O ator apify/facebook-ads-scraper resolve o page_id e traz os anúncios da página.
+    // Para query/pageId: usamos a URL da Ad Library.
+    const startUrls: { url: string }[] = [];
+    if (handle && !query && !pageId) {
+      startUrls.push({ url: `https://www.facebook.com/${handle}/` });
+      startUrls.push({ url: `https://www.facebook.com/${handle}` });
+    } else {
+      const searchUrl = buildSearchUrl({ query, pageId, country, activeStatus, adType, platform });
+      startUrls.push({ url: searchUrl });
+    }
 
     const { items, status } = await runActorAsync({
-      startUrls: [{ url: searchUrl }],
+      startUrls,
       resultsLimit: limit,
       activeStatus,
     });
@@ -286,7 +295,7 @@ Deno.serve(async (req) => {
     const ads = (Array.isArray(items) ? items : []).slice(0, limit).map(normalize);
 
     return new Response(
-      JSON.stringify({ ads, count: ads.length, searchUrl, status }),
+      JSON.stringify({ ads, count: ads.length, status }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err: unknown) {
