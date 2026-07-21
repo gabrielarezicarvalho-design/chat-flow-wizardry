@@ -362,20 +362,100 @@ export default function Vendas() {
                   <span className="font-medium text-foreground">Equipe</span> e
                   marque a permissão "sales" para começar a distribuir leads.
                 </p>
-                <Button asChild variant="secondary" size="sm">
-                  <Link to="/users">Ir para Equipe</Link>
-                </Button>
-              </div>
+              {salespeople.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-border/60 p-8 text-center space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Você ainda não tem vendedores com permissão de{" "}
+                    <span className="font-medium text-foreground">Vendas</span>.
+                    Convide alguém em{" "}
+                    <span className="font-medium text-foreground">Equipe</span>{" "}
+                    e marque a permissão "sales" para começar.
+                  </p>
+                  <Button asChild variant="secondary" size="sm">
+                    <Link to="/users">Ir para Equipe</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold">
+                      Fila de rodízio ({salespeople.length} vendedor
+                      {salespeople.length > 1 ? "es" : ""})
+                    </p>
+                    <Button
+                      size="sm"
+                      onClick={handleDistribute}
+                      disabled={distributing || stats.unassigned === 0}
+                    >
+                      {distributing && (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      )}
+                      Distribuir {stats.unassigned} lead(s) sem dono
+                    </Button>
+                  </div>
+                  <div className="rounded-lg border border-border/60 divide-y divide-border/60">
+                    {[...salespeople]
+                      .sort((a, b) => {
+                        const ta = a.last_assigned_at
+                          ? new Date(a.last_assigned_at).getTime()
+                          : 0;
+                        const tb = b.last_assigned_at
+                          ? new Date(b.last_assigned_at).getTime()
+                          : 0;
+                        return ta - tb;
+                      })
+                      .map((s, i) => (
+                        <div
+                          key={s.user_id}
+                          className="flex items-center justify-between p-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
+                              {i + 1}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">
+                                {s.full_name || s.username || s.user_id.slice(0, 8)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Último lead:{" "}
+                                {s.last_assigned_at
+                                  ? new Date(
+                                      s.last_assigned_at
+                                    ).toLocaleString("pt-BR")
+                                  : "nunca"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold">
+                              {s.assigned_count}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              leads atribuídos
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                  {loadingTeam && (
+                    <p className="text-xs text-muted-foreground">
+                      Atualizando fila...
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-3">
                 <p className="text-sm font-semibold">
-                  Outros Modos de Distribuição
+                  Modo ativo
                 </p>
                 <div className="grid md:grid-cols-2 gap-3">
-                  <div className="rounded-lg border border-border/60 p-4 flex items-start gap-3 hover:bg-muted/30 transition-colors cursor-pointer">
+                  <div className="rounded-lg border-2 border-primary bg-primary/5 p-4 flex items-start gap-3">
                     <Sparkles className="w-5 h-5 text-primary mt-0.5" />
                     <div>
                       <p className="font-medium text-sm">
+
                         Rodízio Automático (Round-Robin)
                       </p>
                       <p className="text-xs text-muted-foreground">
