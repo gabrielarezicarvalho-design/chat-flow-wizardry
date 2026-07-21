@@ -287,13 +287,23 @@ serve(async (req) => {
         // For single message, we use scheduled_for to add delay
         endpoint = `${base_url}/sender/advanced`;
         
-        const simpleNumbers = params.numbers || [];
+        const simpleNumbers = (params.numbers || []).filter(isValidSendNumber);
         const simpleTypeRaw = params.type || "text";
         const simpleType = simpleTypeRaw === "buttons" ? "button" : simpleTypeRaw;
         const simpleMedia = params.media || params.file;
         const requestedDelayMin = params.delayMin || 10;
         const requestedDelayMax = params.delayMax || 30;
         
+        if (simpleNumbers.length === 0) {
+          return new Response(JSON.stringify({
+            success: false,
+            error: "Nenhum número válido para envio"
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+
         console.log(`[wa-sender] ViewOnce param received: ${params.viewOnce}`);
         
         // Build messages array for /sender/advanced
