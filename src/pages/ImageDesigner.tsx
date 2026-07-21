@@ -550,6 +550,16 @@ export default function ImageDesigner() {
                     >
                       <Download className="mr-1 h-4 w-4" /> Baixar
                     </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      disabled={loading}
+                      onClick={handleRegenerateVariation}
+                      className="gap-1"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                      Regenerar variação (mantendo composição)
+                    </Button>
                     <p className="text-xs text-muted-foreground line-clamp-2 flex-1">
                       {latest.prompt}
                     </p>
