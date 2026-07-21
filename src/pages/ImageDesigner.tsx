@@ -467,6 +467,9 @@ export default function ImageDesigner() {
                   </div>
                 )}
               </div>
+            )}
+
+
 
             {mode !== "remove_bg" && mode !== "upscale" && (
               <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-muted/30 p-3 transition hover:bg-muted/50">
