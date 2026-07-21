@@ -53,8 +53,16 @@ const StatCard = ({
   </Card>
 );
 
+type Salesperson = {
+  user_id: string;
+  full_name: string | null;
+  username: string | null;
+  last_assigned_at: string | null;
+  assigned_count: number;
+};
+
 export default function Vendas() {
-  const { leads } = useLeads();
+  const { leads, refetch: refetchLeads } = useLeads() as any;
   const { companyId } = useCompanyId();
   const [signMessages, setSignMessages] = useState(true);
   const [format, setFormat] = useState("*{nome}*:\n{msg}");
@@ -63,6 +71,57 @@ export default function Vendas() {
   const [sla, setSla] = useState(30);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [salespeople, setSalespeople] = useState<Salesperson[]>([]);
+  const [loadingTeam, setLoadingTeam] = useState(false);
+  const [distributing, setDistributing] = useState(false);
+
+  const loadSalespeople = async (cid: string) => {
+    setLoadingTeam(true);
+    // 1) fetch sales-permitted users
+    const { data: perms, error: permsErr } = await supabase
+      .from("user_permissions")
+      .select("user_id, last_assigned_at")
+      .eq("company_id", cid)
+      .eq("sales", true);
+    if (permsErr) {
+      toast.error("Erro ao carregar vendedores");
+      setLoadingTeam(false);
+      return;
+    }
+    const ids = (perms ?? []).map((p: any) => p.user_id);
+    if (ids.length === 0) {
+      setSalespeople([]);
+      setLoadingTeam(false);
+      return;
+    }
+    // 2) profile names
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, full_name, username")
+      .in("id", ids);
+    // 3) counts of assigned leads
+    const { data: assignedLeads } = await supabase
+      .from("leads")
+      .select("user_id")
+      .eq("company_id", cid)
+      .in("user_id", ids);
+    const counts = new Map<string, number>();
+    (assignedLeads ?? []).forEach((l: any) => {
+      counts.set(l.user_id, (counts.get(l.user_id) ?? 0) + 1);
+    });
+    const rows: Salesperson[] = (perms ?? []).map((p: any) => {
+      const prof = (profs ?? []).find((x: any) => x.id === p.user_id);
+      return {
+        user_id: p.user_id,
+        full_name: prof?.full_name ?? null,
+        username: prof?.username ?? null,
+        last_assigned_at: p.last_assigned_at,
+        assigned_count: counts.get(p.user_id) ?? 0,
+      };
+    });
+    setSalespeople(rows);
+    setLoadingTeam(false);
+  };
 
   useEffect(() => {
     if (!companyId) return;
@@ -85,6 +144,7 @@ export default function Vendas() {
         setSla(data.sla_minutes);
       }
       setLoadingSettings(false);
+      loadSalespeople(companyId);
     })();
     return () => {
       active = false;
@@ -118,14 +178,85 @@ export default function Vendas() {
     }
   };
 
+  const handleDistribute = async () => {
+    if (!companyId) {
+      toast.error("Nenhuma empresa vinculada ao usuário");
+      return;
+    }
+    if (salespeople.length === 0) {
+      toast.error("Nenhum vendedor com permissão de Vendas");
+      return;
+    }
+    setDistributing(true);
+    try {
+      // fetch unassigned leads for this company
+      const { data: unassigned, error: leadsErr } = await supabase
+        .from("leads")
+        .select("id")
+        .eq("company_id", companyId)
+        .is("user_id", null)
+        .order("created_at", { ascending: true });
+      if (leadsErr) throw leadsErr;
+      if (!unassigned || unassigned.length === 0) {
+        toast.info("Nenhum lead sem atribuição");
+        setDistributing(false);
+        return;
+      }
+
+      // round-robin ordered by last_assigned_at (NULL first = never received)
+      const queue = [...salespeople].sort((a, b) => {
+        const ta = a.last_assigned_at ? new Date(a.last_assigned_at).getTime() : 0;
+        const tb = b.last_assigned_at ? new Date(b.last_assigned_at).getTime() : 0;
+        return ta - tb;
+      });
+
+      const nowIso = new Date().toISOString();
+      let idx = 0;
+      const perUserLast = new Map<string, string>();
+      for (const lead of unassigned) {
+        const target = queue[idx % queue.length];
+        const ts = new Date(Date.now() + idx).toISOString();
+        const { error: upErr } = await supabase
+          .from("leads")
+          .update({ user_id: target.user_id, status: "contacted" })
+          .eq("id", lead.id);
+        if (upErr) throw upErr;
+        perUserLast.set(target.user_id, ts);
+        idx++;
+      }
+
+      // update last_assigned_at for each rotated salesperson
+      await Promise.all(
+        Array.from(perUserLast.entries()).map(([uid, ts]) =>
+          supabase
+            .from("user_permissions")
+            .update({ last_assigned_at: ts })
+            .eq("user_id", uid)
+        )
+      );
+
+      toast.success(
+        `${unassigned.length} lead(s) distribuído(s) entre ${queue.length} vendedor(es)`
+      );
+      await loadSalespeople(companyId);
+      refetchLeads?.();
+    } catch (e: any) {
+      toast.error(e.message || "Falha na distribuição");
+    } finally {
+      setDistributing(false);
+    }
+  };
+
 
   const stats = useMemo(() => {
     const total = leads.length;
     const converted = leads.filter((l: any) => l.status === "converted").length;
     const contacted = leads.filter((l: any) => l.status === "contacted").length;
     const newLeads = leads.filter((l: any) => l.status === "new").length;
-    return { total, converted, contacted, newLeads };
+    const unassigned = leads.filter((l: any) => !l.user_id).length;
+    return { total, converted, contacted, newLeads, unassigned };
   }, [leads]);
+
 
   return (
     <div className="p-6 space-y-6">
@@ -144,10 +275,20 @@ export default function Vendas() {
             <Filter className="w-4 h-4 mr-2" />
             Filtros
           </Button>
-          <Button size="sm" className="bg-primary hover:bg-primary/90">
-            <UserPlus className="w-4 h-4 mr-2" />
-            Distribuir Leads
+          <Button
+            size="sm"
+            className="bg-primary hover:bg-primary/90"
+            onClick={handleDistribute}
+            disabled={distributing || salespeople.length === 0}
+          >
+            {distributing ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <UserPlus className="w-4 h-4 mr-2" />
+            )}
+            Distribuir Leads {stats.unassigned > 0 ? `(${stats.unassigned})` : ""}
           </Button>
+
         </div>
       </div>
 
@@ -213,28 +354,100 @@ export default function Vendas() {
                 </p>
               </div>
 
-              <div className="rounded-lg border border-dashed border-border/60 p-8 text-center space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Você ainda não tem vendedores com permissão de{" "}
-                  <span className="font-medium text-foreground">Vendas</span>.
-                  Convide alguém em{" "}
-                  <span className="font-medium text-foreground">Equipe</span> e
-                  marque a permissão "sales" para começar a distribuir leads.
-                </p>
-                <Button asChild variant="secondary" size="sm">
-                  <Link to="/users">Ir para Equipe</Link>
-                </Button>
-              </div>
+              {salespeople.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-border/60 p-8 text-center space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Você ainda não tem vendedores com permissão de{" "}
+                    <span className="font-medium text-foreground">Vendas</span>.
+                    Convide alguém em{" "}
+                    <span className="font-medium text-foreground">Equipe</span>{" "}
+                    e marque a permissão "sales" para começar.
+                  </p>
+                  <Button asChild variant="secondary" size="sm">
+                    <Link to="/users">Ir para Equipe</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold">
+                      Fila de rodízio ({salespeople.length} vendedor
+                      {salespeople.length > 1 ? "es" : ""})
+                    </p>
+                    <Button
+                      size="sm"
+                      onClick={handleDistribute}
+                      disabled={distributing || stats.unassigned === 0}
+                    >
+                      {distributing && (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      )}
+                      Distribuir {stats.unassigned} lead(s) sem dono
+                    </Button>
+                  </div>
+                  <div className="rounded-lg border border-border/60 divide-y divide-border/60">
+                    {[...salespeople]
+                      .sort((a, b) => {
+                        const ta = a.last_assigned_at
+                          ? new Date(a.last_assigned_at).getTime()
+                          : 0;
+                        const tb = b.last_assigned_at
+                          ? new Date(b.last_assigned_at).getTime()
+                          : 0;
+                        return ta - tb;
+                      })
+                      .map((s, i) => (
+                        <div
+                          key={s.user_id}
+                          className="flex items-center justify-between p-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
+                              {i + 1}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">
+                                {s.full_name || s.username || s.user_id.slice(0, 8)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Último lead:{" "}
+                                {s.last_assigned_at
+                                  ? new Date(
+                                      s.last_assigned_at
+                                    ).toLocaleString("pt-BR")
+                                  : "nunca"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold">
+                              {s.assigned_count}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              leads atribuídos
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                  {loadingTeam && (
+                    <p className="text-xs text-muted-foreground">
+                      Atualizando fila...
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-3">
                 <p className="text-sm font-semibold">
-                  Outros Modos de Distribuição
+                  Modo ativo
                 </p>
                 <div className="grid md:grid-cols-2 gap-3">
-                  <div className="rounded-lg border border-border/60 p-4 flex items-start gap-3 hover:bg-muted/30 transition-colors cursor-pointer">
+                  <div className="rounded-lg border-2 border-primary bg-primary/5 p-4 flex items-start gap-3">
                     <Sparkles className="w-5 h-5 text-primary mt-0.5" />
                     <div>
                       <p className="font-medium text-sm">
+
                         Rodízio Automático (Round-Robin)
                       </p>
                       <p className="text-xs text-muted-foreground">
