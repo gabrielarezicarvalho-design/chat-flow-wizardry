@@ -147,16 +147,32 @@ export default function GoogleMapsLeads() {
     }
   };
 
-  const saveAsLead = async (lead: MapLead) => {
+  const saveAsLead = async (
+    lead: MapLead,
+    extra?: { emails?: string[]; socials?: Record<string, string> }
+  ) => {
     try {
       const { data: authData } = await supabase.auth.getUser();
+      const cached = lead.website ? enrichCache[lead.website] : undefined;
+      const emails = extra?.emails ?? cached?.emails ?? [];
+      const socials = extra?.socials ?? cached?.socials ?? {};
+
       const payload: any = {
         name: lead.name,
         phone: lead.phone || "",
+        email: emails[0] || null,
         source: "google_maps",
         status: "new",
         notes: [lead.address, lead.website, lead.category].filter(Boolean).join(" • "),
         user_id: authData?.user?.id,
+        custom_fields: {
+          website: lead.website || null,
+          category: lead.category || null,
+          address: lead.address || null,
+          rating: lead.rating ?? null,
+          emails,
+          socials,
+        },
       };
       if (companyId) payload.company_id = companyId;
 
@@ -530,17 +546,32 @@ export default function GoogleMapsLeads() {
                 )}
               </div>
 
-              <Button
-                variant="outline"
-                className="w-full font-bold tracking-wide"
-                onClick={() => {
-                  const q = encodeURIComponent(`${selectedLead.name} ${selectedLead.address ?? ""}`);
-                  window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
-                }}
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                GOOGLE MAPS
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  className="flex-1 font-bold tracking-wide"
+                  disabled={enrichment.loading}
+                  onClick={async () => {
+                    await saveAsLead(selectedLead, {
+                      emails: enrichment.emails,
+                      socials: enrichment.socials,
+                    });
+                  }}
+                >
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  SALVAR COMO LEAD
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 font-bold tracking-wide"
+                  onClick={() => {
+                    const q = encodeURIComponent(`${selectedLead.name} ${selectedLead.address ?? ""}`);
+                    window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  GOOGLE MAPS
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
