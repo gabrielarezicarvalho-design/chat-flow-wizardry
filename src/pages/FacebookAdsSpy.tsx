@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,6 +66,126 @@ function daysRunning(start?: string | number, end?: string | number) {
   const s = typeof start === "number" ? new Date(start * 1000) : new Date(start);
   const e = end ? (typeof end === "number" ? new Date(end * 1000) : new Date(end)) : new Date();
   return Math.max(1, Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)));
+}
+
+function AdMediaPreview({ ad }: { ad: FacebookAd }) {
+  const images = ad.images || [];
+  const videos = ad.videos || [];
+  const hasVideo = videos.length > 0;
+  const hasImage = images.length > 0;
+  const [idx, setIdx] = useState(0);
+  const [imgError, setImgError] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // No media at all → friendly fallback
+  if (!hasVideo && !hasImage) {
+    return (
+      <div className="relative aspect-square bg-gradient-to-br from-muted/60 via-muted/30 to-primary/5 overflow-hidden flex flex-col items-center justify-center text-center px-6 border-y border-border/40">
+        <div className="h-14 w-14 rounded-2xl bg-background/70 backdrop-blur flex items-center justify-center mb-3 ring-1 ring-border/60">
+          <ImageIcon className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <p className="text-sm font-medium text-foreground/80">Somente texto</p>
+        <p className="text-xs text-muted-foreground mt-1 max-w-[220px]">
+          Este anúncio não possui imagens nem vídeos — o criativo é apenas copy.
+        </p>
+      </div>
+    );
+  }
+
+  // Video preview (hover to play)
+  if (hasVideo && !videoError) {
+    const poster = images[0];
+    return (
+      <div
+        className="relative aspect-square bg-black overflow-hidden group/media"
+        onMouseEnter={() => videoRef.current?.play().catch(() => {})}
+        onMouseLeave={() => { const v = videoRef.current; if (v) { v.pause(); v.currentTime = 0; } }}
+      >
+        <video
+          ref={videoRef}
+          src={videos[0]}
+          poster={poster}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          controls
+          className="w-full h-full object-cover"
+          onError={() => setVideoError(true)}
+        />
+        <div className="absolute top-2 left-2 bg-background/80 backdrop-blur text-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium pointer-events-none">
+          <PlayCircle className="h-3.5 w-3.5" /> Vídeo
+        </div>
+        {videos.length > 1 && (
+          <Badge className="absolute top-2 right-2 gap-1 bg-background/80 backdrop-blur text-foreground border-border">
+            <PlayCircle className="h-3 w-3" /> {videos.length}
+          </Badge>
+        )}
+      </div>
+    );
+  }
+
+  // Image carousel
+  if (hasImage && !imgError) {
+    const src = images[idx] || images[0];
+    return (
+      <div className="relative aspect-square bg-muted overflow-hidden group/media">
+        <img
+          src={src}
+          alt={ad.title || ad.page_name || "Criativo"}
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={() => setImgError(true)}
+        />
+        {images.length > 1 && (
+          <>
+            <div className="absolute inset-x-0 bottom-2 flex justify-center gap-1.5 pointer-events-none">
+              {images.slice(0, 8).map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all ${i === idx ? "w-4 bg-white" : "w-1.5 bg-white/60"}`}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setIdx((idx - 1 + images.length) % images.length); }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 backdrop-blur flex items-center justify-center opacity-0 group-hover/media:opacity-100 transition-opacity hover:bg-background"
+              aria-label="Imagem anterior"
+            >‹</button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setIdx((idx + 1) % images.length); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/70 backdrop-blur flex items-center justify-center opacity-0 group-hover/media:opacity-100 transition-opacity hover:bg-background"
+              aria-label="Próxima imagem"
+            >›</button>
+            <Badge className="absolute top-2 right-2 gap-1 bg-background/80 backdrop-blur text-foreground border-border">
+              <ImageIcon className="h-3 w-3" /> {images.length}
+            </Badge>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // Broken media fallback
+  return (
+    <div className="relative aspect-square bg-gradient-to-br from-muted/60 to-muted/20 overflow-hidden flex flex-col items-center justify-center text-center px-6 border-y border-border/40">
+      <div className="h-14 w-14 rounded-2xl bg-background/70 backdrop-blur flex items-center justify-center mb-3 ring-1 ring-border/60">
+        <ImageIcon className="h-7 w-7 text-muted-foreground" />
+      </div>
+      <p className="text-sm font-medium text-foreground/80">Mídia indisponível</p>
+      <p className="text-xs text-muted-foreground mt-1">
+        A Meta expirou os arquivos deste criativo.
+      </p>
+      {ad.ad_library_url && (
+        <a href={ad.ad_library_url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline mt-2 inline-flex items-center gap-1">
+          Ver na Biblioteca <ExternalLink className="h-3 w-3" />
+        </a>
+      )}
+    </div>
+  );
 }
 
 export default function FacebookAdsSpy() {
@@ -366,8 +486,6 @@ export default function FacebookAdsSpy() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {ads.map((ad, i) => {
-                const media = ad.videos?.[0] || ad.images?.[0];
-                const isVideo = !!ad.videos?.[0];
                 const days = daysRunning(ad.start_date, ad.end_date);
                 return (
                   <Card
@@ -406,25 +524,8 @@ export default function FacebookAdsSpy() {
                     )}
 
                     {/* Media */}
-                    {media && (
-                      <div className="relative aspect-square bg-muted overflow-hidden">
-                        {isVideo ? (
-                          <>
-                            <video src={media} className="w-full h-full object-cover" controls preload="metadata" />
-                            <div className="absolute top-2 left-2 bg-background/80 backdrop-blur text-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium">
-                              <PlayCircle className="h-3.5 w-3.5" /> Vídeo
-                            </div>
-                          </>
-                        ) : (
-                          <img src={media} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                        )}
-                        {(ad.images?.length || 0) > 1 && (
-                          <Badge className="absolute top-2 right-2 gap-1 bg-background/80 backdrop-blur text-foreground border-border">
-                            <ImageIcon className="h-3 w-3" /> {ad.images?.length}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
+                    <AdMediaPreview ad={ad} />
+
 
                     {/* CTA */}
                     {(ad.cta_text || ad.link_url) && (
