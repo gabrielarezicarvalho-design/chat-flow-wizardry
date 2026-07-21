@@ -267,13 +267,14 @@ Deno.serve(async (req) => {
 
     const limit = Math.min(Math.max(Number(quantity) || 30, 1), 200);
 
-    // Para @handle: passamos a URL da página do FB direto como startUrl.
-    // O ator apify/facebook-ads-scraper resolve o page_id e traz os anúncios da página.
-    // Para query/pageId: usamos a URL da Ad Library.
+    // Para @handle: o ator aceita URL de página do FB. Se o handle for só do Instagram,
+    // caímos na busca da Ad Library por palavra-chave como fallback.
     const startUrls: { url: string }[] = [];
     if (handle && !query && !pageId) {
-      startUrls.push({ url: `https://www.facebook.com/${handle}/` });
       startUrls.push({ url: `https://www.facebook.com/${handle}` });
+      startUrls.push({
+        url: buildSearchUrl({ query: handle, country, activeStatus, adType, platform }),
+      });
     } else {
       const searchUrl = buildSearchUrl({ query, pageId, country, activeStatus, adType, platform });
       startUrls.push({ url: searchUrl });
@@ -292,7 +293,10 @@ Deno.serve(async (req) => {
       console.log("Sample first item:", JSON.stringify(items[0]).slice(0, 2000));
     }
 
-    const ads = (Array.isArray(items) ? items : []).slice(0, limit).map(normalize);
+    const ads = (Array.isArray(items) ? items : [])
+      .slice(0, limit)
+      .map(normalize)
+      .filter((a) => a.page_name || a.body || (a.images && a.images.length) || (a.videos && a.videos.length));
 
     return new Response(
       JSON.stringify({ ads, count: ads.length, status }),
