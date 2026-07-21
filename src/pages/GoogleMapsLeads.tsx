@@ -222,10 +222,10 @@ export default function GoogleMapsLeads() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4">
-              <StatCard color="from-blue-500/10 to-blue-500/5" icon={<Building2 className="w-5 h-5 text-blue-500" />} value="1.250.000+" label="Empresas encontradas" />
-              <StatCard color="from-cyan-500/10 to-cyan-500/5" icon={<Phone className="w-5 h-5 text-cyan-500" />} value="980.000+" label="Telefones capturados" />
-              <StatCard color="from-purple-500/10 to-purple-500/5" icon={<Globe className="w-5 h-5 text-purple-500" />} value="750.000+" label="Sites encontrados" />
-              <StatCard color="from-pink-500/10 to-pink-500/5" icon={<Star className="w-5 h-5 text-pink-500" />} value="450.000+" label="Avaliações coletadas" />
+              <StatCard color="from-blue-500/10 to-blue-500/5" icon={<Building2 className="w-5 h-5 text-blue-500" />} start={1250000} label="Empresas encontradas" />
+              <StatCard color="from-cyan-500/10 to-cyan-500/5" icon={<Phone className="w-5 h-5 text-cyan-500" />} start={980000} label="Telefones capturados" />
+              <StatCard color="from-purple-500/10 to-purple-500/5" icon={<Globe className="w-5 h-5 text-purple-500" />} start={750000} label="Sites encontrados" />
+              <StatCard color="from-pink-500/10 to-pink-500/5" icon={<Star className="w-5 h-5 text-pink-500" />} start={450000} label="Avaliações coletadas" />
             </div>
           </div>
 
