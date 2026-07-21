@@ -1208,6 +1208,50 @@ export type Database = {
           },
         ]
       }
+      sales_settings: {
+        Row: {
+          auto_distribute: boolean
+          company_id: string
+          created_at: string
+          id: string
+          lock_conversation: boolean
+          message_format: string
+          sign_messages: boolean
+          sla_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          auto_distribute?: boolean
+          company_id: string
+          created_at?: string
+          id?: string
+          lock_conversation?: boolean
+          message_format?: string
+          sign_messages?: boolean
+          sla_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_distribute?: boolean
+          company_id?: string
+          created_at?: string
+          id?: string
+          lock_conversation?: boolean
+          message_format?: string
+          sign_messages?: boolean
+          sla_minutes?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       settings: {
         Row: {
           company_id: string | null
