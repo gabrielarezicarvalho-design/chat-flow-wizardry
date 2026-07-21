@@ -53,6 +53,7 @@ const ChatHistory = lazy(() => import("./pages/ChatHistory"));
 const Segmentation = lazy(() => import("./pages/Segmentation"));
 const GoogleMapsLeads = lazy(() => import("./pages/GoogleMapsLeads"));
 const InstagramLeads = lazy(() => import("./pages/InstagramLeads"));
+const FacebookAdsSpy = lazy(() => import("./pages/FacebookAdsSpy"));
 const TikTokLeads = lazy(() => import("./pages/TikTokLeads"));
 
 const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
