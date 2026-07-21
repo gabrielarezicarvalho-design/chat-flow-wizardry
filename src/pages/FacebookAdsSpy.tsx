@@ -13,7 +13,7 @@ import { AdDetailDialog } from "@/components/facebook-ads/AdDetailDialog";
 import {
   Eye, Search, Loader2, ExternalLink, Facebook, Instagram,
   Sparkles, Target, Zap, PlayCircle, Image as ImageIcon,
-  CalendarDays, TrendingUp, Download, Building2,
+  CalendarDays, TrendingUp, Download, Building2, AtSign,
 } from "lucide-react";
 
 interface FacebookAd {
