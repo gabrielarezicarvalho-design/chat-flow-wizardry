@@ -477,13 +477,14 @@ export default function GoogleMapsLeads() {
                 )}
 
                 {selectedLead.website && (
-                  <div className="flex items-center gap-3 text-sm">
+                  <div className="flex items-center gap-3 text-sm min-w-0">
                     <Globe className="w-4 h-4 text-primary flex-shrink-0" />
                     <a
                       href={selectedLead.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary hover:underline truncate"
+                      title={selectedLead.website}
+                      className="text-primary hover:underline truncate min-w-0 flex-1 block"
                     >
                       {selectedLead.website}
                     </a>
