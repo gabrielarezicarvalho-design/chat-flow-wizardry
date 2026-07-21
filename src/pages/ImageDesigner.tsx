@@ -29,10 +29,11 @@ type Mode = "generate" | "edit" | "remove_bg" | "upscale" | "ad_creative";
 type AspectRatio = "1:1" | "9:16" | "16:9" | "4:5" | "3:4";
 
 const MODELS = [
-  { id: "google/gemini-3-pro-image", label: "Gemini 3 Pro Image (padrão, mais qualidade)" },
+  { id: "openai/gpt-image-2", label: "GPT Image 2 (padrão, agência/marketing)" },
+  { id: "google/gemini-3-pro-image", label: "Gemini 3 Pro Image (fotorrealismo)" },
   { id: "google/gemini-3.1-flash-image", label: "Gemini 3.1 Flash Image (rápido)" },
   { id: "google/gemini-2.5-flash-image", label: "Gemini 2.5 Flash (Nano Banana)" },
-  { id: "openai/gpt-image-2", label: "GPT Image 2 (OpenAI, alta fidelidade)" },
+  { id: "openai/gpt-image-1-mini", label: "GPT Image 1 Mini (rápido/barato)" },
 ];
 
 const ASPECT_RATIOS: { id: AspectRatio; label: string }[] = [
