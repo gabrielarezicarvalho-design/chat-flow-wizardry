@@ -142,15 +142,8 @@ export default function ImageDesigner() {
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, [referenceFiles]);
 
-  useEffect(() => {
-    if (!sourceFile) {
-      setSourcePreview(null);
-      return;
-    }
-    const url = URL.createObjectURL(sourceFile);
-    setSourcePreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [sourceFile]);
+
+
 
   const { data: gallery = [], isLoading: galleryLoading } = useQuery({
     queryKey: ["generated-images", companyId, user?.id],
