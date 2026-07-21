@@ -1608,6 +1608,8 @@ export type Database = {
           company_id: string | null
           created_at: string
           id: string
+          last_assigned_at: string | null
+          sales: boolean
           updated_at: string
           user_id: string
         }
@@ -1626,6 +1628,8 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           id?: string
+          last_assigned_at?: string | null
+          sales?: boolean
           updated_at?: string
           user_id: string
         }
@@ -1644,6 +1648,8 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           id?: string
+          last_assigned_at?: string | null
+          sales?: boolean
           updated_at?: string
           user_id?: string
         }
