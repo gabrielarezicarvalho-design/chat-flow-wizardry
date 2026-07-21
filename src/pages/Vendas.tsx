@@ -53,8 +53,16 @@ const StatCard = ({
   </Card>
 );
 
+type Salesperson = {
+  user_id: string;
+  full_name: string | null;
+  username: string | null;
+  last_assigned_at: string | null;
+  assigned_count: number;
+};
+
 export default function Vendas() {
-  const { leads } = useLeads();
+  const { leads, refetch: refetchLeads } = useLeads() as any;
   const { companyId } = useCompanyId();
   const [signMessages, setSignMessages] = useState(true);
   const [format, setFormat] = useState("*{nome}*:\n{msg}");
@@ -63,6 +71,57 @@ export default function Vendas() {
   const [sla, setSla] = useState(30);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [salespeople, setSalespeople] = useState<Salesperson[]>([]);
+  const [loadingTeam, setLoadingTeam] = useState(false);
+  const [distributing, setDistributing] = useState(false);
+
+  const loadSalespeople = async (cid: string) => {
+    setLoadingTeam(true);
+    // 1) fetch sales-permitted users
+    const { data: perms, error: permsErr } = await supabase
+      .from("user_permissions")
+      .select("user_id, last_assigned_at")
+      .eq("company_id", cid)
+      .eq("sales", true);
+    if (permsErr) {
+      toast.error("Erro ao carregar vendedores");
+      setLoadingTeam(false);
+      return;
+    }
+    const ids = (perms ?? []).map((p: any) => p.user_id);
+    if (ids.length === 0) {
+      setSalespeople([]);
+      setLoadingTeam(false);
+      return;
+    }
+    // 2) profile names
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, full_name, username")
+      .in("id", ids);
+    // 3) counts of assigned leads
+    const { data: assignedLeads } = await supabase
+      .from("leads")
+      .select("user_id")
+      .eq("company_id", cid)
+      .in("user_id", ids);
+    const counts = new Map<string, number>();
+    (assignedLeads ?? []).forEach((l: any) => {
+      counts.set(l.user_id, (counts.get(l.user_id) ?? 0) + 1);
+    });
+    const rows: Salesperson[] = (perms ?? []).map((p: any) => {
+      const prof = (profs ?? []).find((x: any) => x.id === p.user_id);
+      return {
+        user_id: p.user_id,
+        full_name: prof?.full_name ?? null,
+        username: prof?.username ?? null,
+        last_assigned_at: p.last_assigned_at,
+        assigned_count: counts.get(p.user_id) ?? 0,
+      };
+    });
+    setSalespeople(rows);
+    setLoadingTeam(false);
+  };
 
   useEffect(() => {
     if (!companyId) return;
@@ -85,6 +144,7 @@ export default function Vendas() {
         setSla(data.sla_minutes);
       }
       setLoadingSettings(false);
+      loadSalespeople(companyId);
     })();
     return () => {
       active = false;
@@ -118,14 +178,85 @@ export default function Vendas() {
     }
   };
 
+  const handleDistribute = async () => {
+    if (!companyId) {
+      toast.error("Nenhuma empresa vinculada ao usuário");
+      return;
+    }
+    if (salespeople.length === 0) {
+      toast.error("Nenhum vendedor com permissão de Vendas");
+      return;
+    }
+    setDistributing(true);
+    try {
+      // fetch unassigned leads for this company
+      const { data: unassigned, error: leadsErr } = await supabase
+        .from("leads")
+        .select("id")
+        .eq("company_id", companyId)
+        .is("user_id", null)
+        .order("created_at", { ascending: true });
+      if (leadsErr) throw leadsErr;
+      if (!unassigned || unassigned.length === 0) {
+        toast.info("Nenhum lead sem atribuição");
+        setDistributing(false);
+        return;
+      }
+
+      // round-robin ordered by last_assigned_at (NULL first = never received)
+      const queue = [...salespeople].sort((a, b) => {
+        const ta = a.last_assigned_at ? new Date(a.last_assigned_at).getTime() : 0;
+        const tb = b.last_assigned_at ? new Date(b.last_assigned_at).getTime() : 0;
+        return ta - tb;
+      });
+
+      const nowIso = new Date().toISOString();
+      let idx = 0;
+      const perUserLast = new Map<string, string>();
+      for (const lead of unassigned) {
+        const target = queue[idx % queue.length];
+        const ts = new Date(Date.now() + idx).toISOString();
+        const { error: upErr } = await supabase
+          .from("leads")
+          .update({ user_id: target.user_id, status: "contacted" })
+          .eq("id", lead.id);
+        if (upErr) throw upErr;
+        perUserLast.set(target.user_id, ts);
+        idx++;
+      }
+
+      // update last_assigned_at for each rotated salesperson
+      await Promise.all(
+        Array.from(perUserLast.entries()).map(([uid, ts]) =>
+          supabase
+            .from("user_permissions")
+            .update({ last_assigned_at: ts })
+            .eq("user_id", uid)
+        )
+      );
+
+      toast.success(
+        `${unassigned.length} lead(s) distribuído(s) entre ${queue.length} vendedor(es)`
+      );
+      await loadSalespeople(companyId);
+      refetchLeads?.();
+    } catch (e: any) {
+      toast.error(e.message || "Falha na distribuição");
+    } finally {
+      setDistributing(false);
+    }
+    void nowIso;
+  };
 
   const stats = useMemo(() => {
     const total = leads.length;
     const converted = leads.filter((l: any) => l.status === "converted").length;
     const contacted = leads.filter((l: any) => l.status === "contacted").length;
     const newLeads = leads.filter((l: any) => l.status === "new").length;
-    return { total, converted, contacted, newLeads };
+    const unassigned = leads.filter((l: any) => !l.user_id).length;
+    return { total, converted, contacted, newLeads, unassigned };
   }, [leads]);
+
 
   return (
     <div className="p-6 space-y-6">
