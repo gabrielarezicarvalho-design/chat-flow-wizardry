@@ -117,10 +117,9 @@ Deno.serve(async (req) => {
     const searchUrl = buildSearchUrl({ query, pageId, country, activeStatus, adType, platform });
 
     const items = await runActorSync({
-      urls: [{ url: searchUrl }],
-      count: limit,
-      "scrapePageAds.activeStatus": activeStatus,
-      period: "",
+      startUrls: [{ url: searchUrl }],
+      resultsLimit: limit,
+      activeStatus,
     });
 
     const ads = (Array.isArray(items) ? items : []).slice(0, limit).map(normalize);
