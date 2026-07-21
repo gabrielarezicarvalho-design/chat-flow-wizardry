@@ -1,0 +1,2 @@
+ALTER TABLE public.campaigns DROP CONSTRAINT IF EXISTS campaigns_connection_id_fkey;
+ALTER TABLE public.campaigns ADD CONSTRAINT campaigns_connection_id_fkey FOREIGN KEY (connection_id) REFERENCES public.connections(id) ON DELETE SET NULL;
