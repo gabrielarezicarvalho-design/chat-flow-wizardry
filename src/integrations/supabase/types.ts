@@ -484,6 +484,77 @@ export type Database = {
           },
         ]
       }
+      cobrancas: {
+        Row: {
+          checkout_url: string | null
+          cliente_nome: string
+          company_id: string | null
+          created_at: string
+          descricao: string | null
+          id: string
+          mercado_pago_payment_id: string | null
+          paid_at: string | null
+          pix_copia_cola: string | null
+          pix_qr_code: string | null
+          recorrencia: string
+          status: string
+          telefone: string | null
+          updated_at: string
+          user_id: string | null
+          valor: number
+          vencimento: string
+          whatsapp_connection_id: string | null
+        }
+        Insert: {
+          checkout_url?: string | null
+          cliente_nome: string
+          company_id?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          mercado_pago_payment_id?: string | null
+          paid_at?: string | null
+          pix_copia_cola?: string | null
+          pix_qr_code?: string | null
+          recorrencia?: string
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+          user_id?: string | null
+          valor?: number
+          vencimento?: string
+          whatsapp_connection_id?: string | null
+        }
+        Update: {
+          checkout_url?: string | null
+          cliente_nome?: string
+          company_id?: string | null
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          mercado_pago_payment_id?: string | null
+          paid_at?: string | null
+          pix_copia_cola?: string | null
+          pix_qr_code?: string | null
+          recorrencia?: string
+          status?: string
+          telefone?: string | null
+          updated_at?: string
+          user_id?: string | null
+          valor?: number
+          vencimento?: string
+          whatsapp_connection_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobrancas_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
@@ -702,6 +773,56 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custos: {
+        Row: {
+          categoria: string | null
+          company_id: string | null
+          created_at: string
+          data: string
+          descricao: string
+          id: string
+          observacoes: string | null
+          recorrente: boolean
+          updated_at: string
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          categoria?: string | null
+          company_id?: string | null
+          created_at?: string
+          data?: string
+          descricao: string
+          id?: string
+          observacoes?: string | null
+          recorrente?: boolean
+          updated_at?: string
+          user_id?: string | null
+          valor?: number
+        }
+        Update: {
+          categoria?: string | null
+          company_id?: string | null
+          created_at?: string
+          data?: string
+          descricao?: string
+          id?: string
+          observacoes?: string | null
+          recorrente?: boolean
+          updated_at?: string
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custos_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -1073,6 +1194,41 @@ export type Database = {
             foreignKeyName: "leads_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mercado_pago_configs: {
+        Row: {
+          access_token: string
+          apelido: string | null
+          company_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          apelido?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          apelido?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mercado_pago_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -1692,6 +1848,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vendas: {
+        Row: {
+          cliente: string
+          company_id: string | null
+          created_at: string
+          data: string
+          id: string
+          observacoes: string | null
+          produto: string | null
+          updated_at: string
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          cliente: string
+          company_id?: string | null
+          created_at?: string
+          data?: string
+          id?: string
+          observacoes?: string | null
+          produto?: string | null
+          updated_at?: string
+          user_id?: string | null
+          valor?: number
+        }
+        Update: {
+          cliente?: string
+          company_id?: string | null
+          created_at?: string
+          data?: string
+          id?: string
+          observacoes?: string | null
+          produto?: string | null
+          updated_at?: string
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendas_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       whatsapp_connections: {
         Row: {
