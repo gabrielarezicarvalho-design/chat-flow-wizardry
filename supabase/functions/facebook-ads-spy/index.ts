@@ -7,19 +7,38 @@ const corsHeaders = {
 const APIFY_TOKEN = Deno.env.get("APIFY_TOKEN");
 const ACTOR = "apify~facebook-ads-scraper";
 
-async function runActorSync(input: Record<string, unknown>, timeoutSec = 180) {
-  const url = `https://api.apify.com/v2/acts/${ACTOR}/run-sync-get-dataset-items?token=${APIFY_TOKEN}&timeout=${timeoutSec}&memory=1024`;
-  const res = await fetch(url, {
+async function runActorAsync(input: Record<string, unknown>, maxWaitMs = 130_000) {
+  // Start run asynchronously
+  const startUrl = `https://api.apify.com/v2/acts/${ACTOR}/runs?token=${APIFY_TOKEN}&memory=1024`;
+  const startRes = await fetch(startUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
-  const text = await res.text();
-  if (!res.ok) {
-    console.error(`Apify ${ACTOR} failed [${res.status}]:`, text.slice(0, 500));
-    throw new Error(`Apify ${ACTOR} ${res.status}: ${text.slice(0, 300)}`);
+  const startText = await startRes.text();
+  if (!startRes.ok) {
+    console.error(`Apify start failed [${startRes.status}]:`, startText.slice(0, 500));
+    throw new Error(`Apify ${ACTOR} ${startRes.status}: ${startText.slice(0, 300)}`);
   }
-  try { return JSON.parse(text); } catch { return []; }
+  const startJson = JSON.parse(startText);
+  const runId = startJson?.data?.id;
+  const datasetId = startJson?.data?.defaultDatasetId;
+  if (!runId || !datasetId) throw new Error("Apify: resposta inválida ao iniciar run");
+
+  // Poll status until finished or timeout
+  const deadline = Date.now() + maxWaitMs;
+  let status = startJson?.data?.status;
+  while (Date.now() < deadline && !["SUCCEEDED", "FAILED", "ABORTED", "TIMED-OUT"].includes(status)) {
+    await new Promise((r) => setTimeout(r, 3000));
+    const sRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${APIFY_TOKEN}`);
+    const sJson = await sRes.json();
+    status = sJson?.data?.status;
+  }
+
+  // Fetch whatever items exist (partial results OK if timed out)
+  const dsRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${APIFY_TOKEN}&clean=true&format=json`);
+  const dsText = await dsRes.text();
+  try { return { items: JSON.parse(dsText), status }; } catch { return { items: [], status }; }
 }
 
 function buildSearchUrl(params: {
