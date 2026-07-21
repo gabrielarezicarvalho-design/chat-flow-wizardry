@@ -275,10 +275,20 @@ export default function Vendas() {
             <Filter className="w-4 h-4 mr-2" />
             Filtros
           </Button>
-          <Button size="sm" className="bg-primary hover:bg-primary/90">
-            <UserPlus className="w-4 h-4 mr-2" />
-            Distribuir Leads
+          <Button
+            size="sm"
+            className="bg-primary hover:bg-primary/90"
+            onClick={handleDistribute}
+            disabled={distributing || salespeople.length === 0}
+          >
+            {distributing ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <UserPlus className="w-4 h-4 mr-2" />
+            )}
+            Distribuir Leads {stats.unassigned > 0 ? `(${stats.unassigned})` : ""}
           </Button>
+
         </div>
       </div>
 
