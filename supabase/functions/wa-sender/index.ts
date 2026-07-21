@@ -179,7 +179,7 @@ serve(async (req) => {
     switch (action) {
       case "direct":
         // Direct send for testing - uses /send/text, /send/media, /send/menu, /send/carousel
-        const directNumber = (params.numbers?.[0] || "").replace("@s.whatsapp.net", "").replace(/\D/g, "");
+        const directNumber = normalizeBrNumber(params.numbers?.[0] || "");
         const directType = params.type || "text";
         
         let directEndpoint: string;
@@ -308,7 +308,7 @@ serve(async (req) => {
         
         // Build messages array for /sender/advanced
         const advancedMessages: any[] = simpleNumbers.map((num: string) => {
-          const cleanNumber = num.replace("@s.whatsapp.net", "").replace(/\D/g, "");
+          const cleanNumber = normalizeBrNumber(num);
           const msg: any = {
             number: cleanNumber,
             type: simpleType
@@ -427,7 +427,7 @@ serve(async (req) => {
         const MAX_CONSECUTIVE_ERRORS = 5; // Stop after 5 consecutive errors
         
         for (let i = 0; i < menuNumbers.length; i++) {
-          const number = menuNumbers[i].replace("@s.whatsapp.net", "").replace(/\D/g, "");
+          const number = normalizeBrNumber(menuNumbers[i]);
           
           try {
             let menuEndpoint: string;
@@ -814,7 +814,7 @@ serve(async (req) => {
         
         // Prepare messages
         const progressMessages = progressNumbers.map((num: string) => {
-          const cleanNumber = num.replace("@s.whatsapp.net", "").replace(/\D/g, "");
+          const cleanNumber = normalizeBrNumber(num);
           return {
             number: cleanNumber,
             type: progressType,
