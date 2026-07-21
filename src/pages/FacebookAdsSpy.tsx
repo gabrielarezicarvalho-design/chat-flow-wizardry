@@ -81,9 +81,13 @@ export default function FacebookAdsSpy() {
   const [selectedAd, setSelectedAd] = useState<FacebookAd | null>(null);
 
   const handleSearch = async () => {
-    const input = mode === "keyword" ? query : pageId;
+    const input = mode === "keyword" ? query : mode === "page" ? pageId : username;
     if (!input.trim()) {
-      toast.error(mode === "keyword" ? "Digite uma palavra-chave" : "Digite o ID da página");
+      toast.error(
+        mode === "keyword" ? "Digite uma palavra-chave"
+        : mode === "page" ? "Digite o ID da página"
+        : "Digite um @usuário"
+      );
       return;
     }
     setLoading(true);
@@ -93,6 +97,7 @@ export default function FacebookAdsSpy() {
         body: {
           query: mode === "keyword" ? query.trim() : undefined,
           pageId: mode === "page" ? pageId.trim() : undefined,
+          username: mode === "username" ? username.trim() : undefined,
           country: country === "ALL" ? "" : country,
           activeStatus,
           platform,
