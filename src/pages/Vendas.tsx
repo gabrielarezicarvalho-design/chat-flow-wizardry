@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { useLeads } from "@/hooks/useLeads";
+import { useCompanyId } from "@/hooks/useCompanyId";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   BarChart3,
   Users,
@@ -21,8 +23,10 @@ import {
   TrendingUp,
   Clock,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+
 
 const StatCard = ({
   label,
