@@ -26,12 +26,21 @@ import {
 } from "lucide-react";
 
 type Mode = "generate" | "edit" | "remove_bg" | "upscale" | "ad_creative";
+type AspectRatio = "1:1" | "9:16" | "16:9" | "4:5" | "3:4";
 
 const MODELS = [
-  { id: "google/gemini-3-pro-image", label: "Gemini 3 Pro Image (padrão)" },
+  { id: "google/gemini-3-pro-image", label: "Gemini 3 Pro Image (padrão, mais qualidade)" },
   { id: "google/gemini-3.1-flash-image", label: "Gemini 3.1 Flash Image (rápido)" },
   { id: "google/gemini-2.5-flash-image", label: "Gemini 2.5 Flash (Nano Banana)" },
-  { id: "openai/gpt-image-2", label: "GPT Image 2 (OpenAI)" },
+  { id: "openai/gpt-image-2", label: "GPT Image 2 (OpenAI, alta fidelidade)" },
+];
+
+const ASPECT_RATIOS: { id: AspectRatio; label: string }[] = [
+  { id: "1:1", label: "1:1 Feed" },
+  { id: "4:5", label: "4:5 Instagram" },
+  { id: "9:16", label: "9:16 Story/Reels" },
+  { id: "16:9", label: "16:9 Banner" },
+  { id: "3:4", label: "3:4 Retrato" },
 ];
 
 const AD_TEMPLATES = [
