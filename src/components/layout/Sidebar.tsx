@@ -35,7 +35,8 @@ import {
   Instagram,
   Music2,
   Eye,
-  Palette
+  Palette,
+  DollarSign
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -82,6 +83,7 @@ const adminNavItems: NavItem[] = [
   { to: "/tiktok-leads", icon: Music2, label: "Leads TikTok" },
   { to: "/facebook-ads-spy", icon: Eye, label: "Espionar Anúncios" },
   { to: "/image-designer", icon: Palette, label: "Criador de Imagem" },
+  { to: "/vendas", icon: DollarSign, label: "Vendas" },
   
   { to: "/flows", icon: Workflow, label: "Fluxos", feature: "flows_basic" },
   { to: "/agents", icon: Bot, label: "Agentes IA", feature: "ai_agents" },
