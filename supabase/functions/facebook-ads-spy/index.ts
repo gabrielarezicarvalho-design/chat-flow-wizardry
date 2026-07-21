@@ -295,7 +295,7 @@ Deno.serve(async (req) => {
     const ads = (Array.isArray(items) ? items : []).slice(0, limit).map(normalize);
 
     return new Response(
-      JSON.stringify({ ads, count: ads.length, searchUrl, status }),
+      JSON.stringify({ ads, count: ads.length, status }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err: unknown) {
