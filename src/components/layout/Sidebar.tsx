@@ -32,7 +32,8 @@ import {
   HardDrive,
   History,
   MapPin,
-  Instagram
+  Instagram,
+  Music2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +77,7 @@ const adminNavItems: NavItem[] = [
   { to: "/contacts", icon: Contact, label: "Contatos", feature: "leads_management" },
   { to: "/google-maps-leads", icon: MapPin, label: "Leads Google Maps" },
   { to: "/instagram-leads", icon: Instagram, label: "Leads Instagram" },
+  { to: "/tiktok-leads", icon: Music2, label: "Leads TikTok" },
   
   { to: "/flows", icon: Workflow, label: "Fluxos", feature: "flows_basic" },
   { to: "/agents", icon: Bot, label: "Agentes IA", feature: "ai_agents" },
