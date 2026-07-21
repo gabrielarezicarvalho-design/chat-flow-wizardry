@@ -146,6 +146,8 @@ export default function ImageDesigner() {
           prompt: prompt.trim() || "image",
           mode,
           model,
+          aspectRatio,
+          enhance,
           sourceImageBase64,
         },
       });
