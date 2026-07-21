@@ -159,6 +159,7 @@ function App() {
                                 <Route path="/facebook-ads-spy" element={<FacebookAdsSpy />} />
                                 <Route path="/tiktok-leads" element={<TikTokLeads />} />
                                 <Route path="/image-designer" element={<ImageDesigner />} />
+                                <Route path="/vendas" element={<Vendas />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
                                 <Route path="*" element={<NotFound />} />
