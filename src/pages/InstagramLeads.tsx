@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useLeads } from "@/hooks/useLeads";
@@ -14,7 +15,7 @@ import {
   Sparkles,
   Zap,
   Target,
-  Shield,
+  ShieldCheck,
   Users,
   MessageSquare,
   Hash,
@@ -25,11 +26,14 @@ import {
   Phone,
   Globe,
   MapPin,
-  Trophy,
   Flame,
   Crown,
   ArrowRight,
   AlertCircle,
+  CheckCircle2,
+  TrendingUp,
+  Database,
+  Clock,
 } from "lucide-react";
 
 interface InstagramLead {
@@ -77,11 +81,8 @@ export default function InstagramLeads() {
       if (data?.error) throw new Error(data.error);
       const list: InstagramLead[] = data?.leads || [];
       setLeads(list);
-      if (list.length === 0) {
-        toast.info("Nenhum perfil encontrado.");
-      } else {
-        toast.success(`${list.length} perfis encontrados!`);
-      }
+      if (list.length === 0) toast.info("Nenhum perfil encontrado.");
+      else toast.success(`${list.length} perfis encontrados!`);
     } catch (err: any) {
       toast.error(err.message || "Erro ao extrair perfis");
     } finally {
@@ -137,161 +138,191 @@ export default function InstagramLeads() {
   };
 
   const current = modeConfig[mode];
-  const Icon = current.icon;
   const estimatedPhones = Math.round(quantity * 0.3);
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      {/* Hero */}
-      <Card className="relative overflow-hidden border-border bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-blue-950/30 dark:via-background dark:to-blue-950/30 p-8 md:p-12 mb-6">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -z-0" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl -z-0" />
-
-        <div className="relative z-10 grid lg:grid-cols-3 gap-8">
-          {/* Left title */}
-          <div className="lg:col-span-2">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-primary to-blue-700 flex items-center justify-center mb-6 shadow-lg shadow-primary/30">
-              <Instagram className="w-7 h-7 text-primary-foreground" />
+    <div className="min-h-screen bg-background">
+      {/* Page header — enterprise, restrained */}
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-8">
+          <div className="flex items-start justify-between gap-6 flex-wrap">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <Instagram className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-semibold border-primary/30 text-primary bg-primary/5">
+                    Prospecção B2B
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-semibold border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+                    Operacional
+                  </Badge>
+                </div>
+                <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">
+                  Instagram Lead Intelligence
+                </h1>
+                <p className="text-muted-foreground text-sm mt-2 max-w-2xl">
+                  Plataforma corporativa de extração e enriquecimento de leads qualificados a partir do Instagram — dados de contato reais, integração direta com seu CRM.
+                </p>
+              </div>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground leading-tight">
-              Gerador de<br />Leads{" "}
-              <span className="bg-gradient-to-r from-blue-500 via-primary to-blue-700 bg-clip-text text-transparent">
-                Instagram
-              </span>
-            </h1>
-            <p className="text-muted-foreground mt-4 max-w-lg">
-              Encontre perfis qualificados no Instagram e gere leads prontos para vender mais!
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 max-w-2xl">
-              <FeaturePill icon={Target} title="Mais Precisão" desc="Encontre o público certo para seu negócio" color="blue" />
-              <FeaturePill icon={Zap} title="Mais Agilidade" desc="Extraia leads em segundos" color="amber" />
-              <FeaturePill icon={Shield} title="Mais Resultados" desc="Conecte, encante e venda mais!" color="emerald" />
+            <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <span>LGPD compliant</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Database className="w-4 h-4 text-primary" />
+                <span>API Enterprise</span>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Right: how it works */}
-          <div>
-            <Card className="bg-card border-border p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-foreground font-semibold text-sm">Como funciona?</span>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-8 space-y-6">
+        {/* KPI strip */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <KpiCard icon={Users} label="Perfis indexados" value="2.5M+" delta="+12% mês" />
+          <KpiCard icon={Target} label="Precisão de filtros" value="98.7%" delta="SLA garantido" />
+          <KpiCard icon={Clock} label="Tempo médio" value="6.2s" delta="por busca" />
+          <KpiCard icon={TrendingUp} label="Taxa de conversão" value="~30%" delta="c/ telefone visível" />
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left: extraction panel (2 cols) */}
+          <Card className="lg:col-span-2 border-border bg-card p-0 overflow-hidden">
+            <div className="px-6 py-5 border-b border-border flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-foreground">Nova extração</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">Selecione o método de captura e defina os parâmetros</p>
               </div>
-              <div className="space-y-4">
-                <Step n={1} title="Defina os filtros" desc="Segmento, cidade e quantidade" />
-                <Step n={2} title="Buscamos no Instagram" desc="Nosso sistema encontra os melhores perfis" />
-                <Step n={3} title="Leads prontos para uso" desc="Baixe ou conecte seu CRM e comece a vender!" />
+              <Badge variant="outline" className="text-xs border-border">
+                <Sparkles className="w-3 h-3 mr-1.5 text-primary" />
+                Motor Apify
+              </Badge>
+            </div>
+
+            <div className="p-6">
+              <Tabs value={mode} onValueChange={(v) => setMode(v as ExtractionMode)} className="w-full">
+                <TabsList className="grid grid-cols-4 bg-muted/50 border border-border p-1 h-auto rounded-lg">
+                  {(Object.keys(modeConfig) as ExtractionMode[]).map((k) => {
+                    const Ic = modeConfig[k].icon;
+                    return (
+                      <TabsTrigger
+                        key={k}
+                        value={k}
+                        className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground py-2.5 gap-2 text-xs font-medium rounded-md"
+                      >
+                        <Ic className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{modeConfig[k].label}</span>
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+
+                <TabsContent value={mode} className="mt-6 space-y-6">
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground uppercase tracking-wide mb-2 block">
+                      {current.label}
+                    </Label>
+                    <Input
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder={current.placeholder}
+                      className="bg-background border-input text-foreground placeholder:text-muted-foreground h-11"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-primary" />
+                      {current.hint}
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg border border-border bg-muted/30 p-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <Label className="text-xs font-semibold text-foreground uppercase tracking-wide">Volume de extração</Label>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-foreground font-bold text-2xl tabular-nums">{quantity}</span>
+                        <span className="text-muted-foreground text-xs">perfis</span>
+                      </div>
+                    </div>
+                    <Slider
+                      value={[quantity]}
+                      onValueChange={(v) => setQuantity(v[0])}
+                      min={10}
+                      max={500}
+                      step={10}
+                      className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+                      <span className="flex items-center gap-1.5"><Database className="w-3 h-3" />Custo: <strong className="text-foreground">{quantity} créditos</strong></span>
+                      <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-emerald-500" />~<strong className="text-foreground">{estimatedPhones}</strong> c/ telefone</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleSearch}
+                    disabled={loading}
+                    className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-sm"
+                  >
+                    {loading ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processando extração...</>
+                    ) : (
+                      <><Search className="w-4 h-4 mr-2" /> Iniciar extração</>
+                    )}
+                  </Button>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </Card>
+
+          {/* Right: how it works + compliance */}
+          <div className="space-y-6">
+            <Card className="border-border bg-card p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <span className="text-sm font-semibold text-foreground">Fluxo operacional</span>
+              </div>
+              <div className="space-y-5">
+                <Step n={1} title="Configure parâmetros" desc="Método, target e volume de captura" />
+                <Separator />
+                <Step n={2} title="Extração em tempo real" desc="Motor Apify processa e enriquece dados" />
+                <Separator />
+                <Step n={3} title="Entrega qualificada" desc="Exportação CSV ou push direto ao CRM" />
+              </div>
+            </Card>
+
+            <Card className="border-amber-200 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/20 p-5">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-amber-900 dark:text-amber-100 leading-relaxed">
+                  <strong className="block mb-1">Política de dados</strong>
+                  Aproximadamente <strong>30%</strong> dos perfis públicos exibem telefone. A cobrança é baseada em perfis <strong>processados</strong>, não em perfis com contato.
+                </div>
               </div>
             </Card>
           </div>
         </div>
-      </Card>
 
-      {/* Warning */}
-      <Card className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-500/30 p-4 mb-6 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-amber-800 dark:text-amber-100">
-          <strong>Aviso importante:</strong> nem todos os perfis públicos do Instagram exibem telefone. Em média,{" "}
-          <strong>~30%</strong> dos perfis processados têm telefone visível na bio. Você paga pelos{" "}
-          <strong>perfis processados</strong>, não pelos com telefone.
-        </div>
-      </Card>
-
-      {/* Extraction panel */}
-      <Card className="relative overflow-hidden border-border bg-card p-6 md:p-8 mb-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 via-primary to-blue-700 flex items-center justify-center">
-            <Instagram className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <h2 className="text-xl font-bold bg-gradient-to-r from-blue-500 to-primary bg-clip-text text-transparent">
-            Gerador de Leads Instagram
-          </h2>
-        </div>
-
-        <Tabs value={mode} onValueChange={(v) => setMode(v as ExtractionMode)} className="w-full">
-          <TabsList className="grid grid-cols-4 bg-muted border border-border p-1 h-auto">
-            {(Object.keys(modeConfig) as ExtractionMode[]).map((k) => {
-              const Ic = modeConfig[k].icon;
-              return (
-                <TabsTrigger
-                  key={k}
-                  value={k}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground py-2.5 gap-2"
-                >
-                  <Ic className="w-4 h-4" />
-                  <span className="hidden sm:inline">{modeConfig[k].label}</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-
-          <TabsContent value={mode} className="mt-6 space-y-5">
-            <div>
-              <Label className="text-foreground mb-2 block">{current.label}</Label>
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder={current.placeholder}
-                className="bg-background border-input text-foreground placeholder:text-muted-foreground h-12"
-              />
-              <p className="text-xs text-muted-foreground mt-2">{current.hint}</p>
+        {/* Popular searches */}
+        <Card className="border-border bg-card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Flame className="w-4 h-4 text-orange-500" />
+              <h3 className="text-sm font-semibold text-foreground">Segmentos populares</h3>
             </div>
-
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <Label className="text-foreground">Quantos perfis extrair?</Label>
-                <span className="text-foreground font-bold text-lg">{quantity}</span>
-              </div>
-              <Slider
-                value={[quantity]}
-                onValueChange={(v) => setQuantity(v[0])}
-                min={10}
-                max={500}
-                step={10}
-                className="[&_[role=slider]]:bg-primary [&_[role=slider]]:border-primary"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>Custo: {quantity} créditos</span>
-                <span className="text-primary">Estimativa: ~{estimatedPhones} perfis com telefone</span>
-              </div>
-            </div>
-
-            <Button
-              onClick={handleSearch}
-              disabled={loading}
-              className="w-full h-12 bg-gradient-to-r from-blue-600 via-primary to-blue-700 hover:from-blue-500 hover:via-primary hover:to-blue-600 text-primary-foreground font-semibold shadow-lg shadow-primary/30 border-0"
-            >
-              {loading ? (
-                <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Extraindo...</>
-              ) : (
-                <><Search className="w-5 h-5 mr-2" /> BUSCAR</>
-              )}
-            </Button>
-          </TabsContent>
-        </Tabs>
-      </Card>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard icon={Users} value="+2.5M" label="Perfis encontrados" sub="Busca inteligente e precisa" gradient="from-blue-500 to-primary" />
-        <StatCard icon={Target} value="98.7%" label="Precisão dos filtros" sub="Leads altamente qualificados" gradient="from-primary to-blue-700" />
-        <StatCard icon={Zap} value="6.2s" label="Tempo médio" sub="Resultados em segundos" gradient="from-amber-500 to-orange-500" />
-        <StatCard icon={Download} value="100%" label="Exportável" sub="Baixe ou integre ao CRM" gradient="from-emerald-500 to-blue-500" />
-      </div>
-
-      {/* Popular + Tip */}
-      <div className="grid lg:grid-cols-3 gap-4 mb-6">
-        <Card className="lg:col-span-2 bg-card border-border p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Flame className="w-5 h-5 text-orange-500" />
-            <h3 className="text-foreground font-semibold">Buscas populares</h3>
+            <span className="text-xs text-muted-foreground">Clique para preencher</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {POPULAR_SEARCHES.map((s) => (
               <button
                 key={s}
                 onClick={() => setInputValue(s)}
-                className="px-4 py-1.5 rounded-full border border-border text-foreground/80 text-sm hover:bg-muted hover:border-primary/50 transition-all"
+                className="px-3.5 py-1.5 rounded-md border border-border bg-background text-foreground/80 text-xs font-medium hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
               >
                 {s}
               </button>
@@ -299,132 +330,141 @@ export default function InstagramLeads() {
           </div>
         </Card>
 
-        <Card className="bg-card border-border p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Trophy className="w-5 h-5 text-amber-500" />
-            <h3 className="text-foreground font-semibold">Dica de ouro</h3>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            Seja específico no segmento para encontrar os melhores leads!
-          </p>
-        </Card>
-      </div>
-
-      {/* Results */}
-      {leads.length > 0 && (
-        <Card className="bg-card border-border p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-foreground font-semibold text-lg">
-              {leads.length} perfis encontrados
-            </h3>
-            <div className="flex gap-2">
-              <Button onClick={exportCSV} variant="outline" className="border-border text-foreground hover:bg-muted">
-                <Download className="w-4 h-4 mr-2" /> CSV
-              </Button>
-              <Button onClick={saveAll} className="bg-gradient-to-r from-blue-600 to-primary text-primary-foreground">
-                Salvar todos
-              </Button>
+        {/* Results */}
+        {leads.length > 0 && (
+          <Card className="border-border bg-card overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-md bg-emerald-500/10 flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">
+                    {leads.length} perfis extraídos
+                  </h3>
+                  <p className="text-xs text-muted-foreground">Prontos para importação e ativação</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={exportCSV} variant="outline" size="sm" className="border-border">
+                  <Download className="w-3.5 h-3.5 mr-2" /> Exportar CSV
+                </Button>
+                <Button onClick={saveAll} size="sm" className="bg-primary text-primary-foreground">
+                  Salvar todos no CRM
+                </Button>
+              </div>
             </div>
-          </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            {leads.map((l, i) => (
-              <Card key={i} className="bg-card border-border p-4 hover:border-primary/50 hover:-translate-y-1 transition-all group">
-                <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 via-primary to-blue-700 flex items-center justify-center text-primary-foreground font-bold flex-shrink-0">
-                    {l.username?.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-foreground font-semibold truncate">@{l.username}</p>
-                      {l.is_business && <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">Business</Badge>}
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-px bg-border">
+              {leads.map((l, i) => (
+                <div key={i} className="bg-card p-5 hover:bg-muted/30 transition-colors group">
+                  <div className="flex items-start gap-3">
+                    <div className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">
+                      {l.username?.charAt(0).toUpperCase()}
                     </div>
-                    {l.full_name && <p className="text-muted-foreground text-sm truncate">{l.full_name}</p>}
-                    {l.followers !== undefined && (
-                      <p className="text-muted-foreground/70 text-xs mt-1">{l.followers.toLocaleString("pt-BR")} seguidores</p>
-                    )}
-                    {l.bio && <p className="text-muted-foreground text-xs mt-2 line-clamp-2">{l.bio}</p>}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-foreground font-semibold text-sm truncate">@{l.username}</p>
+                        {l.is_business && (
+                          <Badge variant="outline" className="border-primary/30 text-primary text-[10px] h-4 px-1.5">BUSINESS</Badge>
+                        )}
+                      </div>
+                      {l.full_name && <p className="text-muted-foreground text-xs truncate mt-0.5">{l.full_name}</p>}
+                      {l.followers !== undefined && (
+                        <p className="text-muted-foreground/70 text-[11px] mt-1 tabular-nums">
+                          {l.followers.toLocaleString("pt-BR")} seguidores
+                        </p>
+                      )}
+                      {l.bio && <p className="text-muted-foreground text-xs mt-2 line-clamp-2 leading-relaxed">{l.bio}</p>}
 
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {l.phone && <Badge variant="outline" className="border-green-500/30 text-green-600 dark:text-green-300 text-xs"><Phone className="w-3 h-3 mr-1" />{l.phone}</Badge>}
-                      {l.website && <Badge variant="outline" className="border-blue-500/30 text-blue-600 dark:text-blue-300 text-xs"><Globe className="w-3 h-3 mr-1" />site</Badge>}
-                      {l.city && <Badge variant="outline" className="border-primary/30 text-primary text-xs"><MapPin className="w-3 h-3 mr-1" />{l.city}</Badge>}
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {l.phone && (
+                          <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300 text-[10px] h-5">
+                            <Phone className="w-2.5 h-2.5 mr-1" />{l.phone}
+                          </Badge>
+                        )}
+                        {l.website && (
+                          <Badge variant="outline" className="border-blue-500/30 bg-blue-500/5 text-blue-700 dark:text-blue-300 text-[10px] h-5">
+                            <Globe className="w-2.5 h-2.5 mr-1" />site
+                          </Badge>
+                        )}
+                        {l.city && (
+                          <Badge variant="outline" className="border-border text-[10px] h-5">
+                            <MapPin className="w-2.5 h-2.5 mr-1" />{l.city}
+                          </Badge>
+                        )}
+                      </div>
+
+                      <Button
+                        onClick={() => saveLead(l)}
+                        size="sm"
+                        variant="outline"
+                        className="mt-3 w-full h-8 text-xs border-border hover:bg-primary hover:text-primary-foreground hover:border-primary"
+                      >
+                        + Adicionar ao CRM
+                      </Button>
                     </div>
-
-                    <Button
-                      onClick={() => saveLead(l)}
-                      size="sm"
-                      className="mt-3 w-full bg-primary/90 hover:bg-primary text-primary-foreground text-xs"
-                    >
-                      Salvar como lead
-                    </Button>
                   </div>
                 </div>
-              </Card>
-            ))}
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Upgrade CTA — refined */}
+        <Card className="border-border bg-card p-6 md:p-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5" />
+          <div className="relative flex items-center justify-between gap-6 flex-wrap">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
+                <Crown className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-foreground font-bold text-lg">Plano Enterprise</h3>
+                  <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">RECOMENDADO</Badge>
+                </div>
+                <p className="text-muted-foreground text-sm mt-0.5">Volume ilimitado, API dedicada, SLA 99.9% e gerente de conta.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" className="border-border">Falar com vendas</Button>
+              <Button className="bg-primary text-primary-foreground">
+                Ver planos <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
           </div>
         </Card>
-      )}
-
-      {/* Upgrade card */}
-      <Card className="mt-6 relative overflow-hidden border-0 bg-gradient-to-br from-blue-600 via-primary to-blue-700 p-6">
-        <div className="flex items-center gap-4 justify-between flex-wrap">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
-              <Crown className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h3 className="text-white font-bold text-lg whitespace-nowrap">Plano Profissional</h3>
-              <p className="text-white/80 text-sm">Acesso completo a tudo</p>
-            </div>
-          </div>
-          <Button className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg rounded-full px-6">
-            Ver planos <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
-      </Card>
+      </div>
     </div>
   );
 }
 
-function FeaturePill({ icon: Icon, title, desc, color }: any) {
-  const colorMap: Record<string, string> = {
-    blue: "text-blue-600 bg-blue-500/10 border-blue-500/30 dark:text-blue-400",
-    amber: "text-amber-600 bg-amber-500/10 border-amber-500/30 dark:text-amber-400",
-    emerald: "text-emerald-600 bg-emerald-500/10 border-emerald-500/30 dark:text-emerald-400",
-  };
+function KpiCard({ icon: Icon, label, value, delta }: { icon: any; label: string; value: string; delta: string }) {
   return (
-    <div className={`rounded-xl border p-3 ${colorMap[color]}`}>
-      <Icon className="w-5 h-5 mb-2" />
-      <p className="text-foreground font-semibold text-sm">{title}</p>
-      <p className="text-muted-foreground text-xs mt-0.5">{desc}</p>
-    </div>
+    <Card className="border-border bg-card p-5 hover:border-primary/40 transition-colors">
+      <div className="flex items-start justify-between mb-3">
+        <div className="w-9 h-9 rounded-md bg-primary/10 flex items-center justify-center">
+          <Icon className="w-4 h-4 text-primary" />
+        </div>
+        <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{delta}</span>
+      </div>
+      <p className="text-2xl font-bold text-foreground tabular-nums tracking-tight">{value}</p>
+      <p className="text-xs text-muted-foreground mt-1">{label}</p>
+    </Card>
   );
 }
 
 function Step({ n, title, desc }: { n: number; title: string; desc: string }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
+      <div className="w-6 h-6 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0 tabular-nums">
         {n}
       </div>
       <div>
         <p className="text-foreground font-semibold text-sm">{title}</p>
-        <p className="text-muted-foreground text-xs">{desc}</p>
+        <p className="text-muted-foreground text-xs mt-0.5">{desc}</p>
       </div>
     </div>
-  );
-}
-
-function StatCard({ icon: Icon, value, label, sub, gradient }: any) {
-  return (
-    <Card className="bg-card border-border p-5 hover:border-primary/50 hover:-translate-y-1 transition-all">
-      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-3`}>
-        <Icon className="w-5 h-5 text-white" />
-      </div>
-      <p className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-primary bg-clip-text text-transparent">{value}</p>
-      <p className="text-foreground font-medium text-sm mt-1">{label}</p>
-      <p className="text-muted-foreground text-xs">{sub}</p>
-    </Card>
   );
 }
