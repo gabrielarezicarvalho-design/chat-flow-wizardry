@@ -665,7 +665,7 @@ function RollingDigit({ digit, delay }: { digit: number; delay: number }) {
     const t = setTimeout(() => {
       setAnimating(false);
       setOffset((o) => o % 10);
-    }, 900);
+    }, 1400);
     return () => clearTimeout(t);
   }, [offset, animating]);
 
