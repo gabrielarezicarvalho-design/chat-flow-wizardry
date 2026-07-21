@@ -435,20 +435,21 @@ export default function GoogleMapsLeads() {
           <FeatureCard icon={<SlidersHorizontal className="w-5 h-5" />} title="Filtros avançados" desc="Encontre exatamente o que precisa" />
           <FeatureCard icon={<Download className="w-5 h-5" />} title="Exportação fácil" desc="Exporte e use onde quiser" />
           <FeatureCard icon={<Headphones className="w-5 h-5" />} title="Suporte humanizado" desc="Estamos aqui pra ajudar" />
-          <Card className="bg-primary text-primary-foreground border-0 shadow-lg shadow-primary/30">
-            <CardContent className="p-5 flex items-center justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Crown className="w-4 h-4" />
-                  <p className="font-bold">Plano Profissional</p>
+          <Card className="border-0 shadow-lg shadow-primary/30 overflow-hidden relative bg-gradient-to-br from-[hsl(217_91%_55%)] via-[hsl(221_83%_45%)] to-[hsl(224_76%_35%)] text-white">
+            <CardContent className="p-5 flex items-center justify-between gap-3 relative">
+              <div className="flex items-center gap-3">
+                <Crown className="w-7 h-7 flex-shrink-0" strokeWidth={2} />
+                <div>
+                  <p className="font-bold text-base leading-tight">Plano Profissional</p>
+                  <p className="text-xs text-white/80 mt-0.5">Acesso completo a tudo</p>
                 </div>
-                <p className="text-xs opacity-90">Acesso completo a tudo</p>
               </div>
-              <Button size="sm" variant="secondary">
-                Ver planos <ArrowRight className="w-3 h-3 ml-1" />
+              <Button size="sm" className="bg-white text-primary hover:bg-white/90 font-semibold rounded-lg shadow-md flex-shrink-0">
+                Ver planos <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </CardContent>
           </Card>
+
         </div>
       </div>
 
