@@ -114,9 +114,33 @@ export default function ImageDesigner() {
   const [enhance, setEnhance] = useState(true);
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
+  const [referenceFiles, setReferenceFiles] = useState<File[]>([]);
+  const [referencePreviews, setReferencePreviews] = useState<string[]>([]);
+  const [style, setStyle] = useState<string>("none");
   const [loading, setLoading] = useState(false);
   const [latest, setLatest] = useState<GeneratedImage | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const refFileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!sourceFile) {
+      setSourcePreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(sourceFile);
+    setSourcePreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [sourceFile]);
+
+  useEffect(() => {
+    if (referenceFiles.length === 0) {
+      setReferencePreviews([]);
+      return;
+    }
+    const urls = referenceFiles.map((f) => URL.createObjectURL(f));
+    setReferencePreviews(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [referenceFiles]);
 
   useEffect(() => {
     if (!sourceFile) {
