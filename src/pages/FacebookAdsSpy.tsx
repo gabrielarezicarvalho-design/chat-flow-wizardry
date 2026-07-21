@@ -190,6 +190,22 @@ export default function FacebookAdsSpy() {
               </div>
             </TabsContent>
 
+            <TabsContent value="username" className="space-y-4 mt-0">
+              <div>
+                <Label>@usuário do Facebook ou Instagram</Label>
+                <Input
+                  placeholder="Ex: @nike, nike, ou https://instagram.com/nike"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="mt-2 h-12"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Cole o @ ou a URL do perfil. Buscamos os anúncios daquela página na Ad Library.
+                </p>
+              </div>
+            </TabsContent>
+
             <TabsContent value="page" className="space-y-4 mt-0">
               <div>
                 <Label>ID da página do Facebook</Label>
