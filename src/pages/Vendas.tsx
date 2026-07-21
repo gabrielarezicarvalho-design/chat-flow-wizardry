@@ -381,9 +381,17 @@ export default function Vendas() {
                 </p>
               </div>
 
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button
+                className="bg-primary hover:bg-primary/90"
+                onClick={handleSaveSettings}
+                disabled={savingSettings || loadingSettings}
+              >
+                {savingSettings && (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                )}
                 Salvar configurações
               </Button>
+
             </CardContent>
           </Card>
         </TabsContent>
