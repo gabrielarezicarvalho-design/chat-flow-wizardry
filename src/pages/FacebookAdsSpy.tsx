@@ -486,8 +486,6 @@ export default function FacebookAdsSpy() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {ads.map((ad, i) => {
-                const media = ad.videos?.[0] || ad.images?.[0];
-                const isVideo = !!ad.videos?.[0];
                 const days = daysRunning(ad.start_date, ad.end_date);
                 return (
                   <Card
@@ -526,25 +524,8 @@ export default function FacebookAdsSpy() {
                     )}
 
                     {/* Media */}
-                    {media && (
-                      <div className="relative aspect-square bg-muted overflow-hidden">
-                        {isVideo ? (
-                          <>
-                            <video src={media} className="w-full h-full object-cover" controls preload="metadata" />
-                            <div className="absolute top-2 left-2 bg-background/80 backdrop-blur text-foreground rounded-full px-2 py-1 flex items-center gap-1 text-xs font-medium">
-                              <PlayCircle className="h-3.5 w-3.5" /> Vídeo
-                            </div>
-                          </>
-                        ) : (
-                          <img src={media} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                        )}
-                        {(ad.images?.length || 0) > 1 && (
-                          <Badge className="absolute top-2 right-2 gap-1 bg-background/80 backdrop-blur text-foreground border-border">
-                            <ImageIcon className="h-3 w-3" /> {ad.images?.length}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
+                    <AdMediaPreview ad={ad} />
+
 
                     {/* CTA */}
                     {(ad.cta_text || ad.link_url) && (
