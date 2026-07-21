@@ -352,7 +352,3 @@ export default function FacebookAdsSpy() {
     </div>
   );
 }
-      </div>
-    </div>
-  );
-}
