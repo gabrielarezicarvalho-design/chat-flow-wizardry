@@ -1,15 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useInternalChat, ChatRoom, ChatMessage, useCompanyUsers } from '@/hooks/useInternalChat';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MessageSquare, 
-  Plus, 
-  Send, 
-  Users, 
+import {
+  MessageSquare,
+  Plus,
+  Send,
+  Users,
   Search,
   Pin,
   Reply,
@@ -18,8 +18,12 @@ import {
   FileText,
   MoreVertical,
   UserPlus,
-  Settings
+  Settings,
+  Paperclip,
+  X,
+  Download,
 } from 'lucide-react';
+
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CreateGroupDialog } from '@/components/internal-chat/CreateGroupDialog';
@@ -36,6 +40,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+const slugify = (u: { full_name: string | null; username: string | null }) =>
+  (u.username || u.full_name || '').toLowerCase().replace(/\s+/g, '');
+
+const MENTION_TOKEN_RE = /@([\w.-]+)/g;
+
 const InternalChatContent = () => {
   const { isAdmin } = useUserRole();
   const {
@@ -50,6 +59,7 @@ const InternalChatContent = () => {
     removeReaction,
     deleteMessage,
     markAsRead,
+    uploadFile,
   } = useInternalChat();
   const { data: companyUsers = [] } = useCompanyUsers();
   const allUsers = companyUsers.map(u => ({
@@ -59,6 +69,11 @@ const InternalChatContent = () => {
     is_online: u.is_online ?? null,
   }));
 
+  const userSlugMap = useMemo(() => {
+    const m = new Map<string, typeof allUsers[number]>();
+    allUsers.forEach((u) => m.set(slugify(u), u));
+    return m;
+  }, [allUsers]);
 
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -68,8 +83,12 @@ const InternalChatContent = () => {
   const [taskForUser, setTaskForUser] = useState<string | null>(null);
   const [reactionFor, setReactionFor] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('chats');
-  
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -83,6 +102,72 @@ const InternalChatContent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRoom?.id, messages?.length]);
 
+  const parseMentions = (text: string): string[] => {
+    const ids: string[] = [];
+    for (const match of text.matchAll(MENTION_TOKEN_RE)) {
+      const u = userSlugMap.get(match[1].toLowerCase());
+      if (u) ids.push(u.id);
+    }
+    return ids;
+  };
+
+  const renderContent = (text: string | null) => {
+    if (!text) return null;
+    const parts = text.split(/(@[\w.-]+)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('@')) {
+        const slug = part.slice(1).toLowerCase();
+        if (userSlugMap.has(slug)) {
+          return (
+            <span key={i} className="text-primary font-medium bg-primary/10 rounded px-1">
+              {part}
+            </span>
+          );
+        }
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
+  const mentionSuggestions = useMemo(() => {
+    if (mentionQuery === null) return [];
+    const q = mentionQuery.toLowerCase();
+    return allUsers
+      .filter((u) => {
+        if (!q) return true;
+        return (
+          slugify(u).includes(q) ||
+          (u.full_name || '').toLowerCase().includes(q)
+        );
+      })
+      .slice(0, 6);
+  }, [mentionQuery, allUsers]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setMessageInput(v);
+    const caret = e.target.selectionStart ?? v.length;
+    const before = v.slice(0, caret);
+    const m = before.match(/@([\w.-]*)$/);
+    setMentionQuery(m ? m[1] : null);
+  };
+
+  const insertMention = (u: { full_name: string | null; username: string | null }) => {
+    const slug = slugify(u);
+    const el = inputRef.current;
+    const caret = el?.selectionStart ?? messageInput.length;
+    const before = messageInput.slice(0, caret);
+    const after = messageInput.slice(caret);
+    const replaced = before.replace(/@([\w.-]*)$/, `@${slug} `);
+    const next = replaced + after;
+    setMessageInput(next);
+    setMentionQuery(null);
+    setTimeout(() => {
+      el?.focus();
+      const pos = replaced.length;
+      el?.setSelectionRange(pos, pos);
+    }, 0);
+  };
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedRoom) return;
@@ -91,11 +176,13 @@ const InternalChatContent = () => {
       roomId: selectedRoom.id,
       content: messageInput,
       type: 'text',
-      replyTo: replyTo?.id
+      replyTo: replyTo?.id,
+      mentions: parseMentions(messageInput),
     });
 
     setMessageInput('');
     setReplyTo(null);
+    setMentionQuery(null);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -104,6 +191,31 @@ const InternalChatContent = () => {
       handleSendMessage();
     }
   };
+
+  const handleFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !selectedRoom) return;
+    try {
+      setUploading(true);
+      const { url, name } = await uploadFile(file, selectedRoom.id);
+      const isImage = file.type.startsWith('image/');
+      await sendMessage.mutateAsync({
+        roomId: selectedRoom.id,
+        content: messageInput.trim() || (isImage ? '' : name),
+        type: isImage ? 'image' : 'file',
+        replyTo: replyTo?.id,
+        fileUrl: url,
+        fileName: name,
+        mentions: parseMentions(messageInput),
+      });
+      setMessageInput('');
+      setReplyTo(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
 
   const getRoomDisplayName = (room: ChatRoom) => {
     if (room.type === 'group') return room.name || 'Grupo';
@@ -301,12 +413,55 @@ const InternalChatContent = () => {
                             msg.is_pinned && "ring-2 ring-yellow-400"
                           )}>
                             <p className="text-xs font-medium mb-1 opacity-70">{senderName}</p>
-                            <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+
+                            {msg.reply_message && (
+                              <div className="mb-2 border-l-2 border-primary/60 bg-background/60 rounded px-2 py-1">
+                                <p className="text-[10px] font-medium text-primary">
+                                  {msg.reply_message.sender?.full_name || msg.reply_message.sender?.username || 'Usuário'}
+                                </p>
+                                <p className="text-xs text-muted-foreground truncate max-w-[240px]">
+                                  {msg.reply_message.type === 'image'
+                                    ? '📷 Imagem'
+                                    : msg.reply_message.type === 'file'
+                                      ? `📎 ${msg.reply_message.file_name ?? 'Arquivo'}`
+                                      : msg.reply_message.content}
+                                </p>
+                              </div>
+                            )}
+
+                            {msg.type === 'image' && msg.file_url && (
+                              <a href={msg.file_url} target="_blank" rel="noreferrer">
+                                <img
+                                  src={msg.file_url}
+                                  alt={msg.file_name ?? 'imagem'}
+                                  className="max-w-full max-h-64 rounded mb-1 object-cover"
+                                />
+                              </a>
+                            )}
+                            {msg.type === 'file' && msg.file_url && (
+                              <a
+                                href={msg.file_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-2 bg-background/60 rounded px-2 py-1.5 mb-1 text-sm hover:bg-background"
+                              >
+                                <FileText className="h-4 w-4 shrink-0" />
+                                <span className="truncate flex-1">{msg.file_name ?? 'Arquivo'}</span>
+                                <Download className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                              </a>
+                            )}
+
+                            {msg.content && (
+                              <p className="whitespace-pre-wrap break-words">
+                                {renderContent(msg.content)}
+                              </p>
+                            )}
                             <span className="text-[10px] mt-1 block text-muted-foreground">
                               {format(new Date(msg.created_at), 'HH:mm')}
                               {msg.is_pinned && <Pin className="h-3 w-3 inline ml-1 text-yellow-600" />}
                             </span>
                           </div>
+
 
                           {/* Reactions display */}
                           {Object.keys(reactionGroups).length > 0 && (
@@ -393,7 +548,29 @@ const InternalChatContent = () => {
             )}
 
             {/* Message Input */}
-            <div className="p-4 border-t bg-card shrink-0">
+            <div className="p-4 border-t bg-card shrink-0 relative">
+              {mentionQuery !== null && mentionSuggestions.length > 0 && (
+                <div className="absolute bottom-full left-4 right-4 mb-1 max-h-56 overflow-y-auto bg-popover border rounded-md shadow-md z-10">
+                  {mentionSuggestions.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => insertMention(u)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent text-sm"
+                    >
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback className="text-[10px] bg-primary/10">
+                          {getInitials(u.full_name || u.username || '?')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-medium">{u.full_name || u.username}</div>
+                        <div className="truncate text-xs text-muted-foreground">@{slugify(u)}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
@@ -402,29 +579,51 @@ const InternalChatContent = () => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-2">
-                    <EmojiPicker 
-                      onSelect={(emoji) => setMessageInput(prev => prev + emoji)} 
+                    <EmojiPicker
+                      onSelect={(emoji) => setMessageInput(prev => prev + emoji)}
                     />
                   </PopoverContent>
                 </Popover>
 
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={handleFilePick}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || sendMessage.isPending}
+                  title="Anexar arquivo"
+                >
+                  <Paperclip className="h-5 w-5" />
+                </Button>
+
                 <Input
-                  placeholder="Digite sua mensagem..."
+                  ref={inputRef}
+                  placeholder="Digite sua mensagem... (use @ para mencionar)"
                   value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={handleKeyPress}
                   className="flex-1"
                 />
 
-                <Button 
-                  size="icon" 
+                <Button
+                  size="icon"
                   onClick={handleSendMessage}
-                  disabled={!messageInput.trim() || sendMessage.isPending}
+                  disabled={!messageInput.trim() || sendMessage.isPending || uploading}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
+              {uploading && (
+                <p className="text-xs text-muted-foreground mt-1">Enviando arquivo...</p>
+              )}
             </div>
+
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">

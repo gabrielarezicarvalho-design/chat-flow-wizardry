@@ -207,7 +207,18 @@ export const useInternalChat = () => {
         .order('created_at', { ascending: true });
       if (error) throw error;
       const msgs = (data ?? []) as ChatMessage[];
-      const senderIds = Array.from(new Set(msgs.map((m) => m.sender_id)));
+
+      // Fetch parents for replies (may reference messages outside current window)
+      const replyIds = Array.from(
+        new Set(msgs.map((m) => m.reply_to).filter(Boolean) as string[])
+      );
+      const missingReplyIds = replyIds.filter((id) => !msgs.some((m) => m.id === id));
+      const { data: extraReplies } = missingReplyIds.length
+        ? await db.from('chat_messages').select('*').in('id', missingReplyIds)
+        : { data: [] as ChatMessage[] };
+      const allForProfiles = [...msgs, ...((extraReplies ?? []) as ChatMessage[])];
+
+      const senderIds = Array.from(new Set(allForProfiles.map((m) => m.sender_id)));
       const { data: profs } = senderIds.length
         ? await db
             .from('profiles')
@@ -217,6 +228,11 @@ export const useInternalChat = () => {
       const profMap = new Map<string, ChatProfile>(
         (profs ?? []).map((p: any) => [p.id as string, p as ChatProfile])
       );
+
+      const parentMap = new Map<string, ChatMessage>();
+      for (const m of allForProfiles) {
+        parentMap.set(m.id, { ...m, sender: profMap.get(m.sender_id) });
+      }
 
       const msgIds = msgs.map((m) => m.id);
       const { data: reactions } = msgIds.length
@@ -233,9 +249,11 @@ export const useInternalChat = () => {
         ...m,
         sender: profMap.get(m.sender_id),
         reactions: rxMap.get(m.id) ?? [],
+        reply_message: m.reply_to ? parentMap.get(m.reply_to) : undefined,
       }));
     },
   });
+
 
   // ---- Tasks visible to me ----
   const tasksQuery = useQuery({
@@ -377,6 +395,7 @@ export const useInternalChat = () => {
       replyTo?: string;
       fileUrl?: string;
       fileName?: string;
+      mentions?: string[];
     }) => {
       if (!userId) throw new Error('Não autenticado');
       const { data: msg, error } = await db
@@ -393,6 +412,12 @@ export const useInternalChat = () => {
         .select()
         .single();
       if (error) throw error;
+      const mentionIds = Array.from(new Set((data.mentions ?? []).filter(Boolean)));
+      if (mentionIds.length && msg?.id) {
+        await db.from('chat_mentions').insert(
+          mentionIds.map((uid) => ({ message_id: msg.id, user_id: uid }))
+        );
+      }
       return msg as ChatMessage;
     },
     onSuccess: (_msg, vars) => {
@@ -400,6 +425,7 @@ export const useInternalChat = () => {
       queryClient.invalidateQueries({ queryKey: ['chat-rooms', userId] });
     },
   });
+
 
   const deleteMessage = useMutation({
     mutationFn: async (messageId: string) => {
