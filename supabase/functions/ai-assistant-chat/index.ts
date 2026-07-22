@@ -388,8 +388,8 @@ async function executeToolCall(
 
         return {
           result: sent
-            ? `Cobrança PIX de R$ ${valor.toFixed(2)} criada e enviada ao cliente pelo WhatsApp com sucesso. Descrição: ${descricao}. Confirme o envio ao cliente de forma cordial.`
-            : `Cobrança PIX de R$ ${valor.toFixed(2)} criada (código PIX: ${copiaCola?.slice(0, 40)}...). O envio automático falhou — informe o cliente que um atendente vai encaminhar o PIX.`,
+            ? `Cobrança PIX de R$ ${valor.toFixed(2)} criada e enviada ao cliente pelo WhatsApp com sucesso. Referência: ${referencia}. Descrição: ${descricao}. Confirme o envio ao cliente citando a referência.`
+            : `Cobrança PIX de R$ ${valor.toFixed(2)} criada para a referência ${referencia} (código PIX: ${copiaCola?.slice(0, 40)}...). O envio automático falhou — informe o cliente que um atendente vai encaminhar o PIX.`,
         };
       } catch (e) {
         console.error("Erro gerando PIX:", e);
