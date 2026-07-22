@@ -106,6 +106,24 @@ Deno.serve(async (req) => {
           body: { connectionId, phone: c.telefone, text },
         });
 
+        // Registra histórico do lembrete (sucesso ou falha)
+        await supabase.from("pix_reminder_history").insert({
+          company_id: cfg.company_id,
+          cobranca_id: c.id,
+          connection_id: connectionId,
+          telefone: c.telefone,
+          cliente_nome: c.cliente_nome,
+          valor: c.valor,
+          vencimento: c.vencimento,
+          template: tpl,
+          message_text: text,
+          pix_copia_cola: c.pix_copia_cola,
+          link_pagamento: c.checkout_url,
+          source: "cron",
+          success: !sErr,
+          error_message: sErr ? sErr.message : null,
+        });
+
         if (sErr) {
           results.push({ cobranca_id: c.id, error: sErr.message });
           continue;
