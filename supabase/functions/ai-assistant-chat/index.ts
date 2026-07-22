@@ -1031,8 +1031,8 @@ ${asaasContext}`;
         toolResults.push(`Resultado de ${call.name}: ${result}`);
         if (sideEffect?.transferToHuman) transferToHuman = true;
         if (sideEffect?.ticketId) { ticketCreated = true; ticketId = sideEffect.ticketId; }
-        // buscar_pedido devolve dados que a IA precisa usar → nova rodada
-        if (call.name === "buscar_pedido") needsFollowUp = true;
+        // Tools que retornam dados → nova rodada para a IA usar o resultado
+        if (call.name === "buscar_pedido" || call.name === "criar_cobranca_pix") needsFollowUp = true;
       }
 
       // Remove tags do texto para não vazar ao cliente
