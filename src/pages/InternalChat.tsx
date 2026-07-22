@@ -46,6 +46,14 @@ const InternalChatContent = () => {
     selectedRoom,
     setSelectedRoom
   } = useInternalChat();
+  const { data: companyUsers = [] } = useCompanyUsers();
+  const allUsers = companyUsers.map(u => ({
+    id: u.id,
+    full_name: u.full_name,
+    username: u.username,
+    is_online: u.is_online ?? null,
+  }));
+
 
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
