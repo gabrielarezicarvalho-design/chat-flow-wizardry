@@ -223,11 +223,9 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
   const { isAdmin, isAgent, role, isLoading: roleLoading } = useUserRole();
   const { user, signOut } = useAuth();
   const { hasAccess } = useFeatureAccess();
-  
-
-  const { hasAccess } = useFeatureAccess();
   const navigate = useNavigate();
   const [upgradeItem, setUpgradeItem] = useState<NavItem | null>(null);
+
 
 
   const getFilteredNavItems = () => {
