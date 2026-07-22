@@ -1801,12 +1801,24 @@ function TemplatesDialog({
     if (!companyId) return toast.error("Empresa não encontrada");
     setSaving(true);
     try {
+      const parseNum = (v: string) => {
+        const n = parseFloat(String(v).replace(",", "."));
+        return Number.isFinite(n) && n > 0 ? n : null;
+      };
+      const minN = parseNum(odMinValor);
+      const maxN = parseNum(odMaxValor);
+      if (minN != null && maxN != null && minN > maxN) {
+        setSaving(false);
+        return toast.error("Valor mínimo não pode ser maior que o máximo");
+      }
       const payload: any = {
         reminder_templates: tpls,
         ondemand_reminders_enabled: odEnabled,
         ondemand_deadline_hours: Number(odDeadline) || 24,
         ondemand_interval_hours: Number(odInterval) || 12,
         ondemand_max_reminders: Number(odMax) || 3,
+        ondemand_min_valor: minN,
+        ondemand_max_valor: maxN,
         ondemand_template: odTemplate,
       };
       if (config) {
