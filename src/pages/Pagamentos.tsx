@@ -1876,6 +1876,70 @@ function TemplatesDialog({
               </CardContent>
             </Card>
           ))}
+
+          {/* On-demand (avulsa) reminders */}
+          <Card className="border-primary/40">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <h4 className="font-semibold text-sm">PIX sob demanda (avulso)</h4>
+                  <p className="text-[11px] text-muted-foreground">
+                    Lembretes automáticos para PIX gerado pela IA/atendente que não foi pago no prazo.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs">Ativo</Label>
+                  <Switch checked={odEnabled} onCheckedChange={setOdEnabled} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label className="text-[11px]">Prazo (horas)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={odDeadline}
+                    onChange={(e) => setOdDeadline(Number(e.target.value))}
+                    className="h-8"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[11px]">Intervalo (h)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={odInterval}
+                    onChange={(e) => setOdInterval(Number(e.target.value))}
+                    className="h-8"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[11px]">Máx. lembretes</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={odMax}
+                    onChange={(e) => setOdMax(Number(e.target.value))}
+                    className="h-8"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-[11px]">Mensagem</Label>
+                <Textarea
+                  value={odTemplate}
+                  onChange={(e) => setOdTemplate(e.target.value)}
+                  rows={3}
+                  className="text-sm"
+                />
+                <p className="text-[10px] text-muted-foreground font-mono mt-1">
+                  Variáveis: {"{cliente} {valor} {descricao} {referencia} {pix_copia_cola} {link_pagamento}"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <DialogFooter>
