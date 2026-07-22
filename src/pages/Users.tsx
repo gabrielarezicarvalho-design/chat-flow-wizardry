@@ -247,14 +247,20 @@ export default function Users() {
     setUserDepartments(departmentsMap);
   }, [departmentMembersData]);
 
-  // Real-time subscription for profile status changes
+  // Real-time subscription for profiles + user_roles changes
   useEffect(() => {
+    const invalidate = () => {
+      queryClient.invalidateQueries({ queryKey: ["users-with-roles"] });
+      refetch();
+    };
     const channel = supabase
-      .channel('profiles-status')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => refetch())
+      .channel('users-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, invalidate)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_roles' }, invalidate)
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [refetch]);
+  }, [refetch, queryClient]);
+
 
   const filteredUsers = users.filter((u) => {
     if (!searchQuery) return true;
