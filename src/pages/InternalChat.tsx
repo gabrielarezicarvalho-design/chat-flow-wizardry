@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useInternalChat, ChatRoom, ChatMessage, useCompanyUsers } from '@/hooks/useInternalChat';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+
 import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
