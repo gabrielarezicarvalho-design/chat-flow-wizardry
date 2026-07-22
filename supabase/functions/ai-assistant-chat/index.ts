@@ -204,6 +204,7 @@ async function executeToolCall(
     agentUserId: string;
     contactName: string;
     contactPhone: string;
+    companyId: string | null;
   }
 ): Promise<{ result: string; sideEffect?: { transferToHuman?: boolean; ticketId?: string } }> {
   console.log(`🛠️ Executando tool: ${call.name}`, call.args);
