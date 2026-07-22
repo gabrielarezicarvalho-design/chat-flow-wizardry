@@ -19,6 +19,7 @@ import {
   Trash2,
   ShieldCheck,
   MessageSquare,
+  History,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
