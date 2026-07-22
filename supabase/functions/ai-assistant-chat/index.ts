@@ -278,6 +278,16 @@ async function executeToolCall(
       if (!valor || valor <= 0) return { result: "Erro: valor inválido. Informe um valor em reais maior que zero." };
       const descricao = String(call.args.descricao || call.args.servico || "Cobrança").slice(0, 200);
       const clienteNome = String(call.args.cliente_nome || ctx.contactName || "Cliente").slice(0, 120);
+      const valorOrigem = String(call.args.valor_origem || "").toLowerCase(); // "cliente" | "tabela" | "atendente"
+      const confirmado = call.args.confirmado === true || call.args.confirmado === "true";
+
+      // Guarda de confirmação: se o valor veio do cliente, exige confirmação explícita antes de gerar o PIX
+      if (valorOrigem === "cliente" && !confirmado) {
+        return {
+          result: `AGUARDANDO CONFIRMAÇÃO: o valor R$ ${valor.toFixed(2)} foi informado pelo cliente. NÃO gere o PIX ainda. Responda ao cliente confirmando explicitamente: "Só para confirmar: você quer gerar um PIX de R$ ${valor.toFixed(2)} para ${descricao}? (sim/não)". Só chame criar_cobranca_pix novamente com "confirmado": true depois que o cliente responder "sim" ou equivalente.`,
+        };
+      }
+
 
       // Verifica Mercado Pago
       const { data: mpCfg } = await ctx.supabase
