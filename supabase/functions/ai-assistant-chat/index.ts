@@ -318,6 +318,7 @@ async function executeToolCall(
           telefone: ctx.contactPhone,
           valor,
           descricao,
+          referencia,
           vencimento: today,
           status: "pending",
           recorrencia: "avulsa",
