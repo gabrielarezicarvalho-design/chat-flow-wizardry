@@ -489,6 +489,7 @@ export type Database = {
           checkout_url: string | null
           cliente_nome: string
           company_id: string | null
+          confirmation_sent_at: string | null
           created_at: string
           descricao: string | null
           id: string
@@ -511,6 +512,7 @@ export type Database = {
           checkout_url?: string | null
           cliente_nome: string
           company_id?: string | null
+          confirmation_sent_at?: string | null
           created_at?: string
           descricao?: string | null
           id?: string
@@ -533,6 +535,7 @@ export type Database = {
           checkout_url?: string | null
           cliente_nome?: string
           company_id?: string | null
+          confirmation_sent_at?: string | null
           created_at?: string
           descricao?: string | null
           id?: string
@@ -1293,6 +1296,8 @@ export type Database = {
           apelido: string | null
           auto_send: boolean
           company_id: string
+          confirmation_enabled: boolean | null
+          confirmation_template: string | null
           created_at: string
           default_connection_id: string | null
           id: string
@@ -1310,6 +1315,8 @@ export type Database = {
           apelido?: string | null
           auto_send?: boolean
           company_id: string
+          confirmation_enabled?: boolean | null
+          confirmation_template?: string | null
           created_at?: string
           default_connection_id?: string | null
           id?: string
@@ -1327,6 +1334,8 @@ export type Database = {
           apelido?: string | null
           auto_send?: boolean
           company_id?: string
+          confirmation_enabled?: boolean | null
+          confirmation_template?: string | null
           created_at?: string
           default_connection_id?: string | null
           id?: string
