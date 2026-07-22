@@ -204,6 +204,7 @@ async function executeToolCall(
     agentUserId: string;
     contactName: string;
     contactPhone: string;
+    companyId: string | null;
   }
 ): Promise<{ result: string; sideEffect?: { transferToHuman?: boolean; ticketId?: string } }> {
   console.log(`🛠️ Executando tool: ${call.name}`, call.args);
@@ -268,6 +269,113 @@ async function executeToolCall(
       return {
         result: `Pedido/Lead encontrado:\n- Nome: ${lead.name}\n- Telefone: ${lead.phone || "-"}\n- Email: ${lead.email || "-"}\n- Status: ${lead.status || "-"}\n- Notas: ${lead.notes || "-"}\n- Criado em: ${lead.created_at}`,
       };
+    }
+
+    if (call.name === "criar_cobranca_pix") {
+      if (!ctx.companyId) return { result: "Erro: empresa não identificada para criar cobrança." };
+      const valorRaw = call.args.valor;
+      const valor = typeof valorRaw === "number" ? valorRaw : parseFloat(String(valorRaw || "").replace(",", "."));
+      if (!valor || valor <= 0) return { result: "Erro: valor inválido. Informe um valor em reais maior que zero." };
+      const descricao = String(call.args.descricao || call.args.servico || "Cobrança").slice(0, 200);
+      const clienteNome = String(call.args.cliente_nome || ctx.contactName || "Cliente").slice(0, 120);
+
+      // Verifica Mercado Pago
+      const { data: mpCfg } = await ctx.supabase
+        .from("mercado_pago_configs")
+        .select("access_token, auto_send")
+        .eq("company_id", ctx.companyId)
+        .maybeSingle();
+      if (!mpCfg?.access_token) {
+        return { result: "Erro: Mercado Pago não configurado para esta empresa. Peça para o cliente aguardar um atendente." };
+      }
+
+      // Cria cobrança
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: cobranca, error: cErr } = await ctx.supabase
+        .from("cobrancas")
+        .insert({
+          company_id: ctx.companyId,
+          user_id: ctx.agentUserId,
+          cliente_nome: clienteNome,
+          telefone: ctx.contactPhone,
+          valor,
+          descricao,
+          vencimento: today,
+          status: "pending",
+          recorrencia: "avulsa",
+          whatsapp_connection_id: ctx.connectionId,
+        })
+        .select()
+        .single();
+      if (cErr || !cobranca) {
+        console.error("Erro criando cobrança:", cErr);
+        return { result: `Erro ao registrar cobrança: ${cErr?.message || "desconhecido"}` };
+      }
+
+      // Gera PIX no Mercado Pago
+      try {
+        const idempotencyKey = crypto.randomUUID();
+        const mpRes = await fetch("https://api.mercadopago.com/v1/payments", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${mpCfg.access_token}`,
+            "Content-Type": "application/json",
+            "X-Idempotency-Key": idempotencyKey,
+          },
+          body: JSON.stringify({
+            transaction_amount: Number(valor),
+            description: descricao,
+            payment_method_id: "pix",
+            payer: {
+              email: `cliente${cobranca.id.slice(0, 8)}@nextpro.com.br`,
+              first_name: clienteNome.split(" ")[0] || "Cliente",
+            },
+          }),
+        });
+        const mpData = await mpRes.json();
+        if (!mpRes.ok) {
+          console.error("MP error", mpData);
+          return { result: `Erro Mercado Pago: ${mpData?.message || "falha ao gerar PIX"}` };
+        }
+        const qrCode = mpData?.point_of_interaction?.transaction_data?.qr_code_base64;
+        const copiaCola = mpData?.point_of_interaction?.transaction_data?.qr_code;
+        const ticketUrl = mpData?.point_of_interaction?.transaction_data?.ticket_url;
+
+        await ctx.supabase
+          .from("cobrancas")
+          .update({
+            pix_qr_code: qrCode || null,
+            pix_copia_cola: copiaCola || null,
+            checkout_url: ticketUrl || null,
+            mercado_pago_payment_id: String(mpData?.id || ""),
+          })
+          .eq("id", cobranca.id);
+
+        // Envia no WhatsApp automaticamente
+        let sent = false;
+        try {
+          const admin = createClient(
+            Deno.env.get("SUPABASE_URL")!,
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+          );
+          const { error: sendErr } = await admin.functions.invoke("send-pix-whatsapp", {
+            body: { cobrancaId: cobranca.id },
+          });
+          if (!sendErr) sent = true;
+          else console.error("send-pix-whatsapp err:", sendErr);
+        } catch (e) {
+          console.error("Erro auto-envio:", e);
+        }
+
+        return {
+          result: sent
+            ? `Cobrança PIX de R$ ${valor.toFixed(2)} criada e enviada ao cliente pelo WhatsApp com sucesso. Descrição: ${descricao}. Confirme o envio ao cliente de forma cordial.`
+            : `Cobrança PIX de R$ ${valor.toFixed(2)} criada (código PIX: ${copiaCola?.slice(0, 40)}...). O envio automático falhou — informe o cliente que um atendente vai encaminhar o PIX.`,
+        };
+      } catch (e) {
+        console.error("Erro gerando PIX:", e);
+        return { result: `Erro ao gerar PIX: ${e instanceof Error ? e.message : String(e)}` };
+      }
     }
 
     return { result: `Ferramenta desconhecida: ${call.name}` };
@@ -758,10 +866,17 @@ Ferramentas:
    Use quando: problema complexo, cliente insatisfeito, ou solicitação exige acompanhamento.
    Exemplo: [[TOOL:criar_ticket|{"motivo":"Cobrança indevida","resumo":"Cliente contesta fatura de R$ 200","prioridade":"alta"}]]
 
+4. criar_cobranca_pix — Gera uma cobrança PIX sob demanda e envia o QR Code + copia-e-cola no WhatsApp do próprio cliente automaticamente.
+   Args: {"valor": 150.00, "descricao": "Mensalidade novembro", "cliente_nome": "opcional — usa o nome do contato se vazio"}
+   Use quando: cliente pedir para pagar algo, solicitar cobrança, informar valor de serviço, ou aceitar orçamento.
+   IMPORTANTE: confirme o valor e o serviço com o cliente ANTES de chamar. Nunca invente valores.
+   Exemplo: [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Mensalidade novembro"}]]
+   Após executar, o PIX é enviado automaticamente ao cliente — apenas confirme na mensagem seguinte.
+
 REGRAS:
 - Chame ferramentas apenas quando fizer sentido; nunca invente dados.
 - NÃO escreva a tag [[TOOL:...]] entre aspas ou como exemplo — sempre que aparecer no texto será executada.
-- Após buscar_pedido, aguarde o resultado antes de responder ao cliente com os dados.`;
+- Após buscar_pedido ou criar_cobranca_pix, aguarde o resultado antes de responder ao cliente com os dados.`;
 
     // ============ RAG: busca semântica na base de conhecimento ============
     let knowledgeContent = "";
@@ -917,13 +1032,14 @@ ${asaasContext}`;
           agentUserId: agent.user_id,
           contactName,
           contactPhone,
+          companyId,
         });
         toolsExecuted.push(call.name);
         toolResults.push(`Resultado de ${call.name}: ${result}`);
         if (sideEffect?.transferToHuman) transferToHuman = true;
         if (sideEffect?.ticketId) { ticketCreated = true; ticketId = sideEffect.ticketId; }
-        // buscar_pedido devolve dados que a IA precisa usar → nova rodada
-        if (call.name === "buscar_pedido") needsFollowUp = true;
+        // Tools que retornam dados → nova rodada para a IA usar o resultado
+        if (call.name === "buscar_pedido" || call.name === "criar_cobranca_pix") needsFollowUp = true;
       }
 
       // Remove tags do texto para não vazar ao cliente
