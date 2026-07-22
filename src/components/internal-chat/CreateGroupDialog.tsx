@@ -13,9 +13,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useInternalChat } from '@/hooks/useInternalChat';
-import { Users, User } from 'lucide-react';
+import { Users, User, Lock } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
+
 
 interface CreateGroupDialogProps {
   open: boolean;
