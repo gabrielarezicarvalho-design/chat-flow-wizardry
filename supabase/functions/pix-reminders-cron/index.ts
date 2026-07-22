@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     // Load all MP configs with reminders enabled
     const { data: configs, error: cfgErr } = await supabase
       .from("mercado_pago_configs")
-      .select("company_id, reminders_enabled, reminder_days_before, reminder_interval_hours, remind_after_due, reminder_template, pix_template, default_connection_id")
+      .select("company_id, reminders_enabled, reminder_days_before, reminder_interval_hours, remind_after_due, reminder_template, reminder_templates, pix_template, default_connection_id")
       .eq("reminders_enabled", true);
     if (cfgErr) throw cfgErr;
 
@@ -83,14 +83,24 @@ Deno.serve(async (req) => {
           if (hoursSince < intervalHours) continue;
         }
 
-        const tpl = cfg.reminder_template || cfg.pix_template ||
+        // Escolhe template baseado nos dias até o vencimento
+        const daysDiff = Math.floor((dueDate.getTime() - new Date(now.toDateString()).getTime()) / 86400000);
+        const tplMap = (cfg as any).reminder_templates || {};
+        let tplEntry: any = null;
+        if (daysDiff < 0) tplEntry = tplMap.overdue;
+        else if (daysDiff === 0) tplEntry = tplMap.on_day;
+        else if (daysDiff === 1) tplEntry = tplMap.before_1;
+        else tplEntry = tplMap.before_3;
+        const tpl = (tplEntry && tplEntry.text) || cfg.reminder_template || cfg.pix_template ||
           "Lembrete de Pix R$ {valor} — {link_pagamento}";
 
+        const diasAtraso = daysDiff < 0 ? Math.abs(daysDiff) : 0;
         const text = render(tpl, {
           cliente: c.cliente_nome || "",
           valor: fmtBRL(c.valor as number),
           descricao: c.descricao || "",
           vencimento: fmtDate(c.vencimento as string),
+          dias_atraso: String(diasAtraso),
           pix_copia_cola: c.pix_copia_cola || "",
           link_pagamento: c.checkout_url || "",
           telefone: c.telefone || "",
