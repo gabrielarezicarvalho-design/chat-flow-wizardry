@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useInternalChat, ChatRoom, ChatMessage } from '@/hooks/useInternalChat';
+import { useInternalChat, ChatRoom, ChatMessage, useCompanyUsers } from '@/hooks/useInternalChat';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,6 +46,14 @@ const InternalChatContent = () => {
     selectedRoom,
     setSelectedRoom
   } = useInternalChat();
+  const { data: companyUsers = [] } = useCompanyUsers();
+  const allUsers = companyUsers.map(u => ({
+    id: u.id,
+    full_name: u.full_name,
+    username: u.username,
+    is_online: u.is_online ?? null,
+  }));
+
 
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -346,14 +354,14 @@ const InternalChatContent = () => {
       <CreateGroupDialog 
         open={showCreateGroup} 
         onOpenChange={setShowCreateGroup}
-        allUsers={[]}
+        allUsers={allUsers}
       />
 
       {/* Create Task Dialog */}
       <CreateTaskDialog 
         open={showCreateTask} 
         onOpenChange={setShowCreateTask}
-        allUsers={[]}
+        allUsers={allUsers}
       />
     </div>
   );
