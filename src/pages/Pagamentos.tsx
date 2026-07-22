@@ -1747,6 +1747,8 @@ function TemplatesDialog({
   const [odDeadline, setOdDeadline] = useState(24);
   const [odInterval, setOdInterval] = useState(12);
   const [odMax, setOdMax] = useState(3);
+  const [odMinValor, setOdMinValor] = useState<string>("");
+  const [odMaxValor, setOdMaxValor] = useState<string>("");
   const [odTemplate, setOdTemplate] = useState(
     "Oi {cliente}! 👋 Notei que o PIX de *R$ {valor}* ({descricao} — ref: {referencia}) ainda não foi pago. Envio novamente para facilitar: {pix_copia_cola} — Qualquer dúvida é só me chamar. 🙌"
   );
