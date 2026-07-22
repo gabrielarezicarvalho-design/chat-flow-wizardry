@@ -369,11 +369,19 @@ const InternalChatContent = () => {
                           <span className={cn("font-medium truncate", (room.unread_count ?? 0) > 0 && "font-semibold")}>
                             {getRoomDisplayName(room)}
                           </span>
-                          {(room.unread_count ?? 0) > 0 && (
-                            <Badge className="h-5 min-w-[20px] px-1.5 rounded-full text-[10px] shrink-0">
-                              {room.unread_count! > 99 ? '99+' : room.unread_count}
-                            </Badge>
-                          )}
+                          <div className="flex items-center gap-1 shrink-0">
+                            {(unreadMentions?.[room.id] ?? 0) > 0 && (
+                              <Badge variant="destructive" className="h-5 px-1.5 rounded-full text-[10px]">
+                                @{unreadMentions[room.id]}
+                              </Badge>
+                            )}
+                            {(room.unread_count ?? 0) > 0 && (
+                              <Badge className="h-5 min-w-[20px] px-1.5 rounded-full text-[10px]">
+                                {room.unread_count! > 99 ? '99+' : room.unread_count}
+                              </Badge>
+                            )}
+                          </div>
+
                         </div>
                         {room.last_message?.content && (
                           <p className="text-xs text-muted-foreground truncate mt-0.5">
