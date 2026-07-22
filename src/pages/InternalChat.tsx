@@ -203,11 +203,13 @@ const InternalChatContent = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
     setMessageInput(v);
+    broadcastTyping();
     const caret = e.target.selectionStart ?? v.length;
     const before = v.slice(0, caret);
     const m = before.match(/@([\w.-]*)$/);
     setMentionQuery(m ? m[1] : null);
   };
+
 
   const insertMention = (u: { full_name: string | null; username: string | null }) => {
     const slug = slugify(u);
