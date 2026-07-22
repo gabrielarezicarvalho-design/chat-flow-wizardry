@@ -756,6 +756,11 @@ function MercadoPagoPanel({
         pix_template: pixTemplate || null,
         auto_send: autoSend,
         default_connection_id: defaultConnId || null,
+        reminders_enabled: remindersEnabled,
+        reminder_days_before: Math.max(0, Math.min(30, reminderDaysBefore)),
+        reminder_interval_hours: Math.max(1, Math.min(720, reminderIntervalHours)),
+        remind_after_due: remindAfterDue,
+        reminder_template: reminderTemplate || null,
       };
       if (token) payload.access_token = token;
       const { error } = await supabase
