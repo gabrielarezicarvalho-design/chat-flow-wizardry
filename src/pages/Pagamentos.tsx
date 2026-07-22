@@ -361,6 +361,9 @@ export default function Pagamentos() {
           </TabsTrigger>
           <TabsTrigger value="vendas">Vendas ({vendas.length})</TabsTrigger>
           <TabsTrigger value="custos">Custos ({custos.length})</TabsTrigger>
+          <TabsTrigger value="recorrentes" className="gap-2">
+            <Repeat className="w-4 h-4" /> Recorrências
+          </TabsTrigger>
           <TabsTrigger value="historico" className="gap-2">
             <History className="w-4 h-4" /> Histórico de lembretes
           </TabsTrigger>
