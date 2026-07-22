@@ -280,7 +280,42 @@ export const useInternalChat = () => {
       );
       return tasks.map((t) => ({ ...t, assignee: profMap.get(t.assigned_to) }));
     },
+
+  // ---- Unread mentions per room ----
+  const mentionsQuery = useQuery({
+    queryKey: ['chat-unread-mentions', userId],
+    enabled: !!userId,
+    queryFn: async (): Promise<Record<string, number>> => {
+      const { data: mentions } = await db
+        .from('chat_mentions')
+        .select('message_id')
+        .eq('user_id', userId);
+      const msgIds = Array.from(new Set((mentions ?? []).map((m: any) => m.message_id)));
+      if (!msgIds.length) return {};
+      const { data: msgs } = await db
+        .from('chat_messages')
+        .select('id, room_id, created_at, sender_id')
+        .in('id', msgIds);
+      const { data: parts } = await db
+        .from('chat_participants')
+        .select('room_id, last_read_at')
+        .eq('user_id', userId);
+      const lastReadMap = new Map<string, string | null>(
+        (parts ?? []).map((p: any) => [p.room_id, p.last_read_at])
+      );
+      const counts: Record<string, number> = {};
+      for (const m of (msgs ?? []) as any[]) {
+        if (m.sender_id === userId) continue;
+        const lr = lastReadMap.get(m.room_id);
+        if (!lr || new Date(m.created_at) > new Date(lr)) {
+          counts[m.room_id] = (counts[m.room_id] ?? 0) + 1;
+        }
+      }
+      return counts;
+    },
   });
+
+
 
   // ---- Realtime ----
   useEffect(() => {
