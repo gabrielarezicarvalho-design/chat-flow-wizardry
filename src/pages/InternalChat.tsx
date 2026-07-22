@@ -548,7 +548,29 @@ const InternalChatContent = () => {
             )}
 
             {/* Message Input */}
-            <div className="p-4 border-t bg-card shrink-0">
+            <div className="p-4 border-t bg-card shrink-0 relative">
+              {mentionQuery !== null && mentionSuggestions.length > 0 && (
+                <div className="absolute bottom-full left-4 right-4 mb-1 max-h-56 overflow-y-auto bg-popover border rounded-md shadow-md z-10">
+                  {mentionSuggestions.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => insertMention(u)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent text-sm"
+                    >
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback className="text-[10px] bg-primary/10">
+                          {getInitials(u.full_name || u.username || '?')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate font-medium">{u.full_name || u.username}</div>
+                        <div className="truncate text-xs text-muted-foreground">@{slugify(u)}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
@@ -557,29 +579,51 @@ const InternalChatContent = () => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-2">
-                    <EmojiPicker 
-                      onSelect={(emoji) => setMessageInput(prev => prev + emoji)} 
+                    <EmojiPicker
+                      onSelect={(emoji) => setMessageInput(prev => prev + emoji)}
                     />
                   </PopoverContent>
                 </Popover>
 
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={handleFilePick}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || sendMessage.isPending}
+                  title="Anexar arquivo"
+                >
+                  <Paperclip className="h-5 w-5" />
+                </Button>
+
                 <Input
-                  placeholder="Digite sua mensagem..."
+                  ref={inputRef}
+                  placeholder="Digite sua mensagem... (use @ para mencionar)"
                   value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={handleKeyPress}
                   className="flex-1"
                 />
 
-                <Button 
-                  size="icon" 
+                <Button
+                  size="icon"
                   onClick={handleSendMessage}
-                  disabled={!messageInput.trim() || sendMessage.isPending}
+                  disabled={!messageInput.trim() || sendMessage.isPending || uploading}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
+              {uploading && (
+                <p className="text-xs text-muted-foreground mt-1">Enviando arquivo...</p>
+              )}
             </div>
+
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
