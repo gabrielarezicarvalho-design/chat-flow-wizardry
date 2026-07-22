@@ -225,6 +225,11 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
   const { hasAccess } = useFeatureAccess();
   
 
+  const { hasAccess } = useFeatureAccess();
+  const navigate = useNavigate();
+  const [upgradeItem, setUpgradeItem] = useState<NavItem | null>(null);
+
+
   const getFilteredNavItems = () => {
     const baseItems = isAdmin ? adminNavItems : agentNavItems;
     // Manter "Agentes IA" visível mesmo bloqueado; demais features seguem regra padrão
