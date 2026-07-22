@@ -1752,6 +1752,13 @@ function TemplatesDialog({
   const [odTemplate, setOdTemplate] = useState(
     "Oi {cliente}! 👋 Notei que o PIX de *R$ {valor}* ({descricao} — ref: {referencia}) ainda não foi pago. Envio novamente para facilitar: {pix_copia_cola} — Qualquer dúvida é só me chamar. 🙌"
   );
+  const [confEnabled, setConfEnabled] = useState(true);
+  const DEFAULT_CONF_TPL = `✅ *Pagamento confirmado!*\n\nOlá {nome}, recebemos seu pagamento de *R$ {valor}* referente a *{descricao}*.\n\nMuito obrigado! 🙌`;
+  const [confTemplate, setConfTemplate] = useState(DEFAULT_CONF_TPL);
+  const confPreview = confTemplate
+    .replace(/\{nome\}/g, "Maria Silva")
+    .replace(/\{valor\}/g, "149,90")
+    .replace(/\{descricao\}/g, "Mensalidade Novembro");
 
   useEffect(() => {
     if (open) {
