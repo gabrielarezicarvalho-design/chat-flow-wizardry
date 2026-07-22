@@ -709,6 +709,11 @@ function MercadoPagoPanel({
   const [pixTemplate, setPixTemplate] = useState("");
   const [autoSend, setAutoSend] = useState(true);
   const [defaultConnId, setDefaultConnId] = useState<string>("");
+  const [remindersEnabled, setRemindersEnabled] = useState(true);
+  const [reminderDaysBefore, setReminderDaysBefore] = useState(3);
+  const [reminderIntervalHours, setReminderIntervalHours] = useState(24);
+  const [remindAfterDue, setRemindAfterDue] = useState(true);
+  const [reminderTemplate, setReminderTemplate] = useState("");
   const [saving, setSaving] = useState(false);
 
   const { data: connections = [] } = useQuery({
@@ -732,6 +737,11 @@ function MercadoPagoPanel({
       setPixTemplate(config.pix_template || "");
       setAutoSend(config.auto_send !== false);
       setDefaultConnId(config.default_connection_id || "");
+      setRemindersEnabled(config.reminders_enabled !== false);
+      setReminderDaysBefore(config.reminder_days_before ?? 3);
+      setReminderIntervalHours(config.reminder_interval_hours ?? 24);
+      setRemindAfterDue(config.remind_after_due !== false);
+      setReminderTemplate(config.reminder_template || "");
     }
   }, [config]);
 
@@ -746,6 +756,11 @@ function MercadoPagoPanel({
         pix_template: pixTemplate || null,
         auto_send: autoSend,
         default_connection_id: defaultConnId || null,
+        reminders_enabled: remindersEnabled,
+        reminder_days_before: Math.max(0, Math.min(30, reminderDaysBefore)),
+        reminder_interval_hours: Math.max(1, Math.min(720, reminderIntervalHours)),
+        remind_after_due: remindAfterDue,
+        reminder_template: reminderTemplate || null,
       };
       if (token) payload.access_token = token;
       const { error } = await supabase
@@ -920,6 +935,88 @@ function MercadoPagoPanel({
           </Button>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-amber-500" />
+            <h3 className="font-semibold text-lg">Lembretes automáticos de Pix</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            O sistema envia lembretes pelo WhatsApp começando <strong>N dias antes do vencimento</strong> e repete no intervalo definido até a cobrança ser paga (o webhook do Mercado Pago para os envios automaticamente). Roda a cada hora.
+          </p>
+
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <p className="font-medium text-sm">Ativar lembretes automáticos</p>
+              <p className="text-xs text-muted-foreground">Somente cobranças pendentes com Pix gerado e telefone.</p>
+            </div>
+            <Switch checked={remindersEnabled} onCheckedChange={setRemindersEnabled} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label>Começar quantos dias antes do vencimento</Label>
+              <Input
+                type="number"
+                min={0}
+                max={30}
+                value={reminderDaysBefore}
+                onChange={(e) => setReminderDaysBefore(Number(e.target.value) || 0)}
+              />
+            </div>
+            <div>
+              <Label>Intervalo entre lembretes (horas)</Label>
+              <Input
+                type="number"
+                min={1}
+                max={720}
+                value={reminderIntervalHours}
+                onChange={(e) => setReminderIntervalHours(Number(e.target.value) || 24)}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <p className="font-medium text-sm">Continuar enviando após o vencimento</p>
+              <p className="text-xs text-muted-foreground">Repete até a cobrança ser paga ou cancelada.</p>
+            </div>
+            <Switch checked={remindAfterDue} onCheckedChange={setRemindAfterDue} />
+          </div>
+
+          <div>
+            <Label>Modelo da mensagem de lembrete</Label>
+            <Textarea
+              value={reminderTemplate}
+              onChange={(e) => setReminderTemplate(e.target.value)}
+              rows={8}
+              className="font-mono text-xs"
+              placeholder="Digite o texto do lembrete..."
+            />
+            <div className="mt-2 text-xs text-muted-foreground">
+              <p className="font-medium mb-1">Variáveis disponíveis:</p>
+              <div className="flex flex-wrap gap-1">
+                {["{cliente}", "{valor}", "{descricao}", "{vencimento}", "{pix_copia_cola}", "{link_pagamento}", "{telefone}"].map((v) => (
+                  <code
+                    key={v}
+                    className="px-1.5 py-0.5 rounded bg-muted cursor-pointer hover:bg-muted/70"
+                    onClick={() => setReminderTemplate((t) => (t || "") + v)}
+                  >
+                    {v}
+                  </code>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <Button onClick={save} disabled={saving}>
+            Salvar lembretes
+          </Button>
+        </CardContent>
+      </Card>
+
+
 
 
       <Card>

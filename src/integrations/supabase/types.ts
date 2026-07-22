@@ -492,11 +492,13 @@ export type Database = {
           created_at: string
           descricao: string | null
           id: string
+          last_reminder_at: string | null
           mercado_pago_payment_id: string | null
           paid_at: string | null
           pix_copia_cola: string | null
           pix_qr_code: string | null
           recorrencia: string
+          reminder_count: number
           status: string
           telefone: string | null
           updated_at: string
@@ -512,11 +514,13 @@ export type Database = {
           created_at?: string
           descricao?: string | null
           id?: string
+          last_reminder_at?: string | null
           mercado_pago_payment_id?: string | null
           paid_at?: string | null
           pix_copia_cola?: string | null
           pix_qr_code?: string | null
           recorrencia?: string
+          reminder_count?: number
           status?: string
           telefone?: string | null
           updated_at?: string
@@ -532,11 +536,13 @@ export type Database = {
           created_at?: string
           descricao?: string | null
           id?: string
+          last_reminder_at?: string | null
           mercado_pago_payment_id?: string | null
           paid_at?: string | null
           pix_copia_cola?: string | null
           pix_qr_code?: string | null
           recorrencia?: string
+          reminder_count?: number
           status?: string
           telefone?: string | null
           updated_at?: string
@@ -1209,6 +1215,11 @@ export type Database = {
           default_connection_id: string | null
           id: string
           pix_template: string
+          remind_after_due: boolean
+          reminder_days_before: number
+          reminder_interval_hours: number
+          reminder_template: string
+          reminders_enabled: boolean
           updated_at: string
         }
         Insert: {
@@ -1220,6 +1231,11 @@ export type Database = {
           default_connection_id?: string | null
           id?: string
           pix_template?: string
+          remind_after_due?: boolean
+          reminder_days_before?: number
+          reminder_interval_hours?: number
+          reminder_template?: string
+          reminders_enabled?: boolean
           updated_at?: string
         }
         Update: {
@@ -1231,6 +1247,11 @@ export type Database = {
           default_connection_id?: string | null
           id?: string
           pix_template?: string
+          remind_after_due?: boolean
+          reminder_days_before?: number
+          reminder_interval_hours?: number
+          reminder_template?: string
+          reminders_enabled?: boolean
           updated_at?: string
         }
         Relationships: [
