@@ -709,6 +709,11 @@ function MercadoPagoPanel({
   const [pixTemplate, setPixTemplate] = useState("");
   const [autoSend, setAutoSend] = useState(true);
   const [defaultConnId, setDefaultConnId] = useState<string>("");
+  const [remindersEnabled, setRemindersEnabled] = useState(true);
+  const [reminderDaysBefore, setReminderDaysBefore] = useState(3);
+  const [reminderIntervalHours, setReminderIntervalHours] = useState(24);
+  const [remindAfterDue, setRemindAfterDue] = useState(true);
+  const [reminderTemplate, setReminderTemplate] = useState("");
   const [saving, setSaving] = useState(false);
 
   const { data: connections = [] } = useQuery({
