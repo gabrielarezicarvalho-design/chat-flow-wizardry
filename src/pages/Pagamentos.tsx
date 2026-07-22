@@ -1942,6 +1942,37 @@ function TemplatesDialog({
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[11px]">Valor mínimo (R$)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    placeholder="Sem limite"
+                    value={odMinValor}
+                    onChange={(e) => setOdMinValor(e.target.value)}
+                    className="h-8"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[11px]">Valor máximo (R$)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    placeholder="Sem limite"
+                    value={odMaxValor}
+                    onChange={(e) => setOdMaxValor(e.target.value)}
+                    className="h-8"
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground -mt-1">
+                A IA bloqueia PIX fora desta faixa e pede um novo valor ao cliente. Deixe em branco para não limitar.
+              </p>
+
+
               <div>
                 <Label className="text-[11px]">Mensagem</Label>
                 <Textarea
