@@ -1,9 +1,18 @@
 import { useState, createContext, useContext } from "react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureAccess, FeatureId } from "@/hooks/useFeatureAccess";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Sparkles as SparklesIcon } from "lucide-react";
 
 import { 
   LayoutDashboard, 
