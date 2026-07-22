@@ -356,6 +356,9 @@ export default function Pagamentos() {
           <TabsTrigger value="pagamentos" className="gap-2">
             <CreditCard className="w-4 h-4" /> Pagamentos
           </TabsTrigger>
+          <TabsTrigger value="historico" className="gap-2">
+            <History className="w-4 h-4" /> Histórico de lembretes
+          </TabsTrigger>
         </TabsList>
 
         {/* COBRANCAS */}
