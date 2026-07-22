@@ -44,7 +44,12 @@ const InternalChatContent = () => {
     messages,
     sendMessage,
     selectedRoom,
-    setSelectedRoom
+    setSelectedRoom,
+    pinMessage,
+    addReaction,
+    removeReaction,
+    deleteMessage,
+    markAsRead,
   } = useInternalChat();
   const { data: companyUsers = [] } = useCompanyUsers();
   const allUsers = companyUsers.map(u => ({
@@ -61,7 +66,7 @@ const InternalChatContent = () => {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [taskForUser, setTaskForUser] = useState<string | null>(null);
-  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
+  const [reactionFor, setReactionFor] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('chats');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -69,6 +74,15 @@ const InternalChatContent = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Mark room as read when selected or when new messages arrive
+  useEffect(() => {
+    if (selectedRoom?.id) {
+      markAsRead.mutate(selectedRoom.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoom?.id, messages?.length]);
+
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedRoom) return;
