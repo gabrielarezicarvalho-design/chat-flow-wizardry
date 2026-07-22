@@ -73,6 +73,25 @@ Deno.serve(async (req) => {
     const { data: sent, error: sErr } = await supabase.functions.invoke("wa-send-text", {
       body: { connectionId, phone: cobranca.telefone, text },
     });
+
+    // Registra histórico do lembrete (sucesso ou falha)
+    await supabase.from("pix_reminder_history").insert({
+      company_id: cobranca.company_id,
+      cobranca_id: cobranca.id,
+      connection_id: connectionId,
+      telefone: cobranca.telefone,
+      cliente_nome: cobranca.cliente_nome,
+      valor: cobranca.valor,
+      vencimento: cobranca.vencimento,
+      template: tpl,
+      message_text: text,
+      pix_copia_cola: cobranca.pix_copia_cola,
+      link_pagamento: cobranca.checkout_url,
+      source: "manual",
+      success: !sErr,
+      error_message: sErr ? (sErr.message || "Falha ao enviar WhatsApp") : null,
+    });
+
     if (sErr) throw new Error(sErr.message || "Falha ao enviar WhatsApp");
 
     return new Response(JSON.stringify({ success: true, sent }), {
