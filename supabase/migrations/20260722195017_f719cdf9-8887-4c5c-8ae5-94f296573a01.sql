@@ -1,0 +1,3 @@
+ALTER TABLE public.mercado_pago_configs ALTER COLUMN reminder_template SET DEFAULT 'Olá {{nome}}, lembrete do seu Pix: {{pix_copia_cola}} no valor de {{valor}}.';
+UPDATE public.mercado_pago_configs SET reminder_template = 'Olá {{nome}}, lembrete do seu Pix: {{pix_copia_cola}} no valor de {{valor}}.' WHERE reminder_template IS NULL;
+ALTER TABLE public.mercado_pago_configs ALTER COLUMN reminder_template DROP NOT NULL;

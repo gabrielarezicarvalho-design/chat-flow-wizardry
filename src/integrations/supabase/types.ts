@@ -1218,7 +1218,7 @@ export type Database = {
           remind_after_due: boolean
           reminder_days_before: number
           reminder_interval_hours: number
-          reminder_template: string
+          reminder_template: string | null
           reminder_templates: Json
           reminders_enabled: boolean
           updated_at: string
@@ -1235,7 +1235,7 @@ export type Database = {
           remind_after_due?: boolean
           reminder_days_before?: number
           reminder_interval_hours?: number
-          reminder_template?: string
+          reminder_template?: string | null
           reminder_templates?: Json
           reminders_enabled?: boolean
           updated_at?: string
@@ -1252,7 +1252,7 @@ export type Database = {
           remind_after_due?: boolean
           reminder_days_before?: number
           reminder_interval_hours?: number
-          reminder_template?: string
+          reminder_template?: string | null
           reminder_templates?: Json
           reminders_enabled?: boolean
           updated_at?: string
