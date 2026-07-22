@@ -1743,6 +1743,13 @@ function TemplatesDialog({
   const [tpls, setTpls] = useState<Record<TplKey, { tone: string; text: string }>>(DEFAULT_TEMPLATES);
   const [saving, setSaving] = useState(false);
   const [genKey, setGenKey] = useState<TplKey | null>(null);
+  const [odEnabled, setOdEnabled] = useState(true);
+  const [odDeadline, setOdDeadline] = useState(24);
+  const [odInterval, setOdInterval] = useState(12);
+  const [odMax, setOdMax] = useState(3);
+  const [odTemplate, setOdTemplate] = useState(
+    "Oi {cliente}! 👋 Notei que o PIX de *R$ {valor}* ({descricao} — ref: {referencia}) ainda não foi pago. Envio novamente para facilitar: {pix_copia_cola} — Qualquer dúvida é só me chamar. 🙌"
+  );
 
   useEffect(() => {
     if (open) {
@@ -1753,6 +1760,13 @@ function TemplatesDialog({
         on_day: stored?.on_day || DEFAULT_TEMPLATES.on_day,
         overdue: stored?.overdue || DEFAULT_TEMPLATES.overdue,
       });
+      if (config) {
+        setOdEnabled(config.ondemand_reminders_enabled ?? true);
+        setOdDeadline(config.ondemand_deadline_hours ?? 24);
+        setOdInterval(config.ondemand_interval_hours ?? 12);
+        setOdMax(config.ondemand_max_reminders ?? 3);
+        if (config.ondemand_template) setOdTemplate(config.ondemand_template);
+      }
     }
   }, [open, config]);
 
@@ -1783,16 +1797,24 @@ function TemplatesDialog({
     if (!companyId) return toast.error("Empresa não encontrada");
     setSaving(true);
     try {
+      const payload: any = {
+        reminder_templates: tpls,
+        ondemand_reminders_enabled: odEnabled,
+        ondemand_deadline_hours: Number(odDeadline) || 24,
+        ondemand_interval_hours: Number(odInterval) || 12,
+        ondemand_max_reminders: Number(odMax) || 3,
+        ondemand_template: odTemplate,
+      };
       if (config) {
         const { error } = await supabase
           .from("mercado_pago_configs")
-          .update({ reminder_templates: tpls })
+          .update(payload)
           .eq("company_id", companyId);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("mercado_pago_configs")
-          .insert({ company_id: companyId, access_token: "", reminder_templates: tpls } as any);
+          .insert({ company_id: companyId, access_token: "", ...payload });
         if (error) throw error;
       }
       toast.success("Templates salvos!");
@@ -1854,6 +1876,70 @@ function TemplatesDialog({
               </CardContent>
             </Card>
           ))}
+
+          {/* On-demand (avulsa) reminders */}
+          <Card className="border-primary/40">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <h4 className="font-semibold text-sm">PIX sob demanda (avulso)</h4>
+                  <p className="text-[11px] text-muted-foreground">
+                    Lembretes automáticos para PIX gerado pela IA/atendente que não foi pago no prazo.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs">Ativo</Label>
+                  <Switch checked={odEnabled} onCheckedChange={setOdEnabled} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label className="text-[11px]">Prazo (horas)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={odDeadline}
+                    onChange={(e) => setOdDeadline(Number(e.target.value))}
+                    className="h-8"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[11px]">Intervalo (h)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={odInterval}
+                    onChange={(e) => setOdInterval(Number(e.target.value))}
+                    className="h-8"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[11px]">Máx. lembretes</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={odMax}
+                    onChange={(e) => setOdMax(Number(e.target.value))}
+                    className="h-8"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-[11px]">Mensagem</Label>
+                <Textarea
+                  value={odTemplate}
+                  onChange={(e) => setOdTemplate(e.target.value)}
+                  rows={3}
+                  className="text-sm"
+                />
+                <p className="text-[10px] text-muted-foreground font-mono mt-1">
+                  Variáveis: {"{cliente} {valor} {descricao} {referencia} {pix_copia_cola} {link_pagamento}"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <DialogFooter>

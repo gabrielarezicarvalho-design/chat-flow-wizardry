@@ -33,11 +33,12 @@ Deno.serve(async (req) => {
     // Load all MP configs with reminders enabled
     const { data: configs, error: cfgErr } = await supabase
       .from("mercado_pago_configs")
-      .select("company_id, reminders_enabled, reminder_days_before, reminder_interval_hours, remind_after_due, reminder_template, reminder_templates, pix_template, default_connection_id")
-      .eq("reminders_enabled", true);
+      .select("company_id, reminders_enabled, reminder_days_before, reminder_interval_hours, remind_after_due, reminder_template, reminder_templates, pix_template, default_connection_id, ondemand_reminders_enabled, ondemand_deadline_hours, ondemand_interval_hours, ondemand_max_reminders, ondemand_template")
+      .or("reminders_enabled.eq.true,ondemand_reminders_enabled.eq.true");
     if (cfgErr) throw cfgErr;
 
     for (const cfg of configs || []) {
+     if (cfg.reminders_enabled) {
       const daysBefore = cfg.reminder_days_before ?? 3;
       const intervalHours = cfg.reminder_interval_hours ?? 24;
       const remindAfter = cfg.remind_after_due ?? true;
@@ -149,6 +150,90 @@ Deno.serve(async (req) => {
 
         results.push({ cobranca_id: c.id, sent: true, overdue: isOverdue });
       }
+     } // end recurring reminders
+
+     // ============ ON-DEMAND (avulsa) REMINDERS ============
+     if (cfg.ondemand_reminders_enabled) {
+       const deadlineHrs = cfg.ondemand_deadline_hours ?? 24;
+       const intervalHrs = cfg.ondemand_interval_hours ?? 12;
+       const maxReminders = cfg.ondemand_max_reminders ?? 3;
+       const tplOnDemand = cfg.ondemand_template ||
+         "Oi {cliente}! O PIX de R$ {valor} ({descricao}) ainda não foi pago. Segue novamente: {pix_copia_cola}";
+
+       const cutoff = new Date(now.getTime() - deadlineHrs * 3600 * 1000).toISOString();
+       const { data: avulsas, error: aErr } = await supabase
+         .from("cobrancas")
+         .select("*")
+         .eq("company_id", cfg.company_id)
+         .eq("status", "pending")
+         .eq("recorrencia", "avulsa")
+         .not("telefone", "is", null)
+         .not("pix_copia_cola", "is", null)
+         .lte("created_at", cutoff);
+       if (aErr) {
+         results.push({ company_id: cfg.company_id, ondemand_error: aErr.message });
+       } else {
+         for (const c of avulsas || []) {
+           if ((c.reminder_count ?? 0) >= maxReminders) continue;
+           if (c.last_reminder_at) {
+             const hoursSince = (now.getTime() - new Date(c.last_reminder_at as string).getTime()) / 36e5;
+             if (hoursSince < intervalHrs) continue;
+           }
+
+           const text = render(tplOnDemand, {
+             cliente: c.cliente_nome || "",
+             valor: fmtBRL(c.valor as number),
+             descricao: c.descricao || "",
+             referencia: (c as any).referencia || "",
+             pix_copia_cola: c.pix_copia_cola || "",
+             link_pagamento: c.checkout_url || "",
+             telefone: c.telefone || "",
+           });
+
+           const connectionId = c.whatsapp_connection_id || cfg.default_connection_id;
+           if (!connectionId) {
+             results.push({ cobranca_id: c.id, skipped: "no_connection_ondemand" });
+             continue;
+           }
+
+           const { error: sErr } = await supabase.functions.invoke("wa-send-text", {
+             body: { connectionId, phone: c.telefone, text },
+           });
+
+           await supabase.from("pix_reminder_history").insert({
+             company_id: cfg.company_id,
+             cobranca_id: c.id,
+             connection_id: connectionId,
+             telefone: c.telefone,
+             cliente_nome: c.cliente_nome,
+             valor: c.valor,
+             vencimento: c.vencimento,
+             template: tplOnDemand,
+             message_text: text,
+             pix_copia_cola: c.pix_copia_cola,
+             link_pagamento: c.checkout_url,
+             source: "cron_ondemand",
+             success: !sErr,
+             error_message: sErr ? sErr.message : null,
+           });
+
+           if (sErr) {
+             results.push({ cobranca_id: c.id, ondemand_error: sErr.message });
+             continue;
+           }
+
+           await supabase
+             .from("cobrancas")
+             .update({
+               last_reminder_at: now.toISOString(),
+               reminder_count: (c.reminder_count ?? 0) + 1,
+             })
+             .eq("id", c.id);
+
+           results.push({ cobranca_id: c.id, sent: true, ondemand: true });
+         }
+       }
+     }
     }
 
     return new Response(
