@@ -1,9 +1,18 @@
 import { useState, createContext, useContext } from "react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureAccess, FeatureId } from "@/hooks/useFeatureAccess";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Sparkles as SparklesIcon } from "lucide-react";
 
 import { 
   LayoutDashboard, 
@@ -214,7 +223,10 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
   const { isAdmin, isAgent, role, isLoading: roleLoading } = useUserRole();
   const { user, signOut } = useAuth();
   const { hasAccess } = useFeatureAccess();
-  
+  const navigate = useNavigate();
+  const [upgradeItem, setUpgradeItem] = useState<NavItem | null>(null);
+
+
 
   const getFilteredNavItems = () => {
     const baseItems = isAdmin ? adminNavItems : agentNavItems;
@@ -321,12 +333,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
                 <button
                   key={item.to}
                   type="button"
-                  onClick={() =>
-                    toast({
-                      title: "Recurso bloqueado",
-                      description: `"${item.label}" não está disponível no seu plano. Faça upgrade para desbloquear.`,
-                    })
-                  }
+                  onClick={() => setUpgradeItem(item)}
                   className={cn(
                     "w-full flex items-center gap-3 rounded-lg text-white/50 hover:bg-white/10 transition-all group relative cursor-not-allowed",
                     collapsed ? "px-3 py-3 justify-center" : "px-4 py-3"
@@ -404,6 +411,38 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
           </Button>
         </div>
       </div>
+
+      <Dialog open={!!upgradeItem} onOpenChange={(open) => !open && setUpgradeItem(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+              <SparklesIcon className="w-6 h-6 text-primary" />
+            </div>
+            <DialogTitle className="text-center">
+              {upgradeItem?.label} está bloqueado
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Este recurso não está incluído no seu plano atual. Faça upgrade para desbloquear{" "}
+              <span className="font-medium text-foreground">{upgradeItem?.label}</span> e outras
+              funcionalidades avançadas.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center gap-2">
+            <Button variant="outline" onClick={() => setUpgradeItem(null)}>
+              Agora não
+            </Button>
+            <Button
+              onClick={() => {
+                setUpgradeItem(null);
+                navigate("/settings?tab=billing");
+              }}
+            >
+              <SparklesIcon className="w-4 h-4 mr-2" />
+              Gerenciar Plano
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </aside>
   );
 };
