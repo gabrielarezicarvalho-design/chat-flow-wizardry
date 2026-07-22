@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useInternalChat, ChatRoom, ChatMessage } from '@/hooks/useInternalChat';
+import { useInternalChat, ChatRoom, ChatMessage, useCompanyUsers } from '@/hooks/useInternalChat';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
