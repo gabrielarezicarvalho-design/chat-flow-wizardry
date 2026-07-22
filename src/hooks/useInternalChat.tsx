@@ -621,8 +621,10 @@ export const useInternalChat = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chat-rooms', userId] });
+      queryClient.invalidateQueries({ queryKey: ['chat-unread-mentions', userId] });
     },
   });
+
 
 
 
