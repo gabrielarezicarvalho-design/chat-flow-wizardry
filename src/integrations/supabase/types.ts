@@ -499,6 +499,7 @@ export type Database = {
           pix_copia_cola: string | null
           pix_qr_code: string | null
           recorrencia: string
+          referencia: string | null
           reminder_count: number
           status: string
           telefone: string | null
@@ -522,6 +523,7 @@ export type Database = {
           pix_copia_cola?: string | null
           pix_qr_code?: string | null
           recorrencia?: string
+          referencia?: string | null
           reminder_count?: number
           status?: string
           telefone?: string | null
@@ -545,6 +547,7 @@ export type Database = {
           pix_copia_cola?: string | null
           pix_qr_code?: string | null
           recorrencia?: string
+          referencia?: string | null
           reminder_count?: number
           status?: string
           telefone?: string | null

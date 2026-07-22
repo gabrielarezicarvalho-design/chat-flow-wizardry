@@ -280,11 +280,19 @@ async function executeToolCall(
       const clienteNome = String(call.args.cliente_nome || ctx.contactName || "Cliente").slice(0, 120);
       const valorOrigem = String(call.args.valor_origem || "").toLowerCase(); // "cliente" | "tabela" | "atendente"
       const confirmado = call.args.confirmado === true || call.args.confirmado === "true";
+      const referencia = String(call.args.referencia || call.args.pedido || call.args.servico_ref || "").trim().slice(0, 80);
+
+      // Exige referência (nº do pedido ou nome do serviço) antes de gerar o PIX
+      if (!referencia) {
+        return {
+          result: `AGUARDANDO REFERÊNCIA: peça ao cliente o número do pedido ou o nome do serviço vinculado a este PIX antes de gerar. Exemplo: "Para eu gerar o PIX, me confirma por favor: qual é o número do pedido ou o serviço referente a esta cobrança?". Só chame criar_cobranca_pix novamente incluindo o campo "referencia" com o valor informado pelo cliente.`,
+        };
+      }
 
       // Guarda de confirmação: se o valor veio do cliente, exige confirmação explícita antes de gerar o PIX
       if (valorOrigem === "cliente" && !confirmado) {
         return {
-          result: `AGUARDANDO CONFIRMAÇÃO: o valor R$ ${valor.toFixed(2)} foi informado pelo cliente. NÃO gere o PIX ainda. Responda ao cliente confirmando explicitamente: "Só para confirmar: você quer gerar um PIX de R$ ${valor.toFixed(2)} para ${descricao}? (sim/não)". Só chame criar_cobranca_pix novamente com "confirmado": true depois que o cliente responder "sim" ou equivalente.`,
+          result: `AGUARDANDO CONFIRMAÇÃO: o valor R$ ${valor.toFixed(2)} foi informado pelo cliente para a referência "${referencia}". NÃO gere o PIX ainda. Responda ao cliente confirmando explicitamente: "Só para confirmar: você quer gerar um PIX de R$ ${valor.toFixed(2)} para ${descricao} (ref: ${referencia})? (sim/não)". Só chame criar_cobranca_pix novamente com "confirmado": true depois que o cliente responder "sim" ou equivalente.`,
         };
       }
 
