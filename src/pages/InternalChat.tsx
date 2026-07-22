@@ -505,18 +505,54 @@ const InternalChatContent = () => {
                                 />
                               </a>
                             )}
-                            {msg.type === 'file' && msg.file_url && (
-                              <a
-                                href={msg.file_url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center gap-2 bg-background/60 rounded px-2 py-1.5 mb-1 text-sm hover:bg-background"
-                              >
-                                <FileText className="h-4 w-4 shrink-0" />
-                                <span className="truncate flex-1">{msg.file_name ?? 'Arquivo'}</span>
-                                <Download className="h-3.5 w-3.5 shrink-0 opacity-60" />
-                              </a>
-                            )}
+                            {msg.type === 'file' && msg.file_url && (() => {
+                              const name = (msg.file_name ?? msg.file_url ?? '').toLowerCase();
+                              const isPdf = name.endsWith('.pdf');
+                              const isAudio = /\.(mp3|wav|ogg|m4a|webm|aac)$/.test(name);
+                              if (isPdf) {
+                                return (
+                                  <div className="mb-1 space-y-1">
+                                    <iframe
+                                      src={msg.file_url}
+                                      title={msg.file_name ?? 'PDF'}
+                                      className="w-full h-72 rounded border bg-background"
+                                    />
+                                    <a
+                                      href={msg.file_url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="flex items-center gap-2 text-xs text-primary hover:underline"
+                                    >
+                                      <Download className="h-3 w-3" />
+                                      {msg.file_name ?? 'Baixar PDF'}
+                                    </a>
+                                  </div>
+                                );
+                              }
+                              if (isAudio) {
+                                return (
+                                  <div className="mb-1">
+                                    <audio controls src={msg.file_url} className="w-full max-w-xs" />
+                                    <p className="text-[10px] text-muted-foreground truncate">
+                                      {msg.file_name}
+                                    </p>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <a
+                                  href={msg.file_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="flex items-center gap-2 bg-background/60 rounded px-2 py-1.5 mb-1 text-sm hover:bg-background"
+                                >
+                                  <FileText className="h-4 w-4 shrink-0" />
+                                  <span className="truncate flex-1">{msg.file_name ?? 'Arquivo'}</span>
+                                  <Download className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                                </a>
+                              );
+                            })()}
+
 
                             {msg.content && (
                               <p className="whitespace-pre-wrap break-words">
