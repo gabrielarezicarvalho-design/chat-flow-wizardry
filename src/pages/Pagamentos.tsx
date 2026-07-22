@@ -280,7 +280,7 @@ export default function Pagamentos() {
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-5">
       {/* HEADER */}
       <div className="flex flex-wrap items-center gap-3 justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Select value={selMonth} onValueChange={setSelMonth}>
             <SelectTrigger className="w-[200px]">
               <SelectValue />
@@ -293,6 +293,9 @@ export default function Pagamentos() {
               ))}
             </SelectContent>
           </Select>
+          <Button variant="outline" onClick={() => setOpenTemplates(true)}>
+            <FileText className="w-4 h-4 mr-1" /> Templates
+          </Button>
         </div>
 
         <div className="flex gap-2">
