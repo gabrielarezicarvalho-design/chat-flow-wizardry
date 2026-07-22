@@ -194,12 +194,23 @@ const InternalChatContent = () => {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium truncate">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={cn("font-medium truncate", (room.unread_count ?? 0) > 0 && "font-semibold")}>
                             {getRoomDisplayName(room)}
                           </span>
+                          {(room.unread_count ?? 0) > 0 && (
+                            <Badge className="h-5 min-w-[20px] px-1.5 rounded-full text-[10px] shrink-0">
+                              {room.unread_count! > 99 ? '99+' : room.unread_count}
+                            </Badge>
+                          )}
                         </div>
+                        {room.last_message?.content && (
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            {room.last_message.content}
+                          </p>
+                        )}
                       </div>
+
                     </div>
                   </button>
                 ))
