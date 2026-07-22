@@ -1700,3 +1700,159 @@ function Info({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+// ============ TEMPLATES DIALOG ============
+
+type TplKey = "before_3" | "before_1" | "on_day" | "overdue";
+const TPL_META: { key: TplKey; label: string }[] = [
+  { key: "before_3", label: "3 dias antes" },
+  { key: "before_1", label: "1 dia antes" },
+  { key: "on_day", label: "No dia" },
+  { key: "overdue", label: "Em atraso" },
+];
+const DEFAULT_TEMPLATES: Record<TplKey, { tone: string; text: string }> = {
+  before_3: { tone: "Cordial", text: "Oi {cliente}! 👋 Passando só pra lembrar que sua cobrança de *R$ {valor}* ({descricao}) vence em *{vencimento}*. Qualquer dúvida é só me chamar. 🙌" },
+  before_1: { tone: "Cordial", text: "Oi {cliente}! Só um lembrete rápido: amanhã ({vencimento}) vence sua cobrança de *R$ {valor}*. Já está tudo certo por aí? 😊" },
+  on_day: { tone: "Cordial", text: "Olá {cliente}! Hoje é o dia do vencimento da sua cobrança de *R$ {valor}* ({descricao}). Quando puder, confirma o pagamento por aqui pra eu dar baixa, beleza? 🙏" },
+  overdue: { tone: "Firme", text: "Oi {cliente}, tudo bem? Sua cobrança de *R$ {valor}* venceu há {dias_atraso} dias. Conseguimos acertar essa pendência hoje? Qualquer coisa me chama. 😉" },
+};
+
+function TemplatesDialog({
+  open,
+  onClose,
+  companyId,
+  config,
+  onSaved,
+}: {
+  open: boolean;
+  onClose: () => void;
+  companyId: string | null;
+  config: any;
+  onSaved: () => void;
+}) {
+  const [tpls, setTpls] = useState<Record<TplKey, { tone: string; text: string }>>(DEFAULT_TEMPLATES);
+  const [saving, setSaving] = useState(false);
+  const [genKey, setGenKey] = useState<TplKey | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      const stored = config?.reminder_templates as Record<TplKey, { tone: string; text: string }> | undefined;
+      setTpls({
+        before_3: stored?.before_3 || DEFAULT_TEMPLATES.before_3,
+        before_1: stored?.before_1 || DEFAULT_TEMPLATES.before_1,
+        on_day: stored?.on_day || DEFAULT_TEMPLATES.on_day,
+        overdue: stored?.overdue || DEFAULT_TEMPLATES.overdue,
+      });
+    }
+  }, [open, config]);
+
+  const update = (k: TplKey, patch: Partial<{ tone: string; text: string }>) =>
+    setTpls((prev) => ({ ...prev, [k]: { ...prev[k], ...patch } }));
+
+  const generateAI = async (k: TplKey) => {
+    setGenKey(k);
+    try {
+      const { data, error } = await supabase.functions.invoke("pix-template-generate", {
+        body: { windowKey: k, tone: tpls[k].tone },
+      });
+      if (error) throw error;
+      if (data?.text) {
+        update(k, { text: data.text });
+        toast.success("Template gerado pela IA");
+      } else {
+        throw new Error(data?.error || "Sem resposta da IA");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao gerar com IA");
+    } finally {
+      setGenKey(null);
+    }
+  };
+
+  const save = async () => {
+    if (!companyId) return toast.error("Empresa não encontrada");
+    setSaving(true);
+    try {
+      if (config) {
+        const { error } = await supabase
+          .from("mercado_pago_configs")
+          .update({ reminder_templates: tpls })
+          .eq("company_id", companyId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("mercado_pago_configs")
+          .insert({ company_id: companyId, access_token: "", reminder_templates: tpls } as any);
+        if (error) throw error;
+      }
+      toast.success("Templates salvos!");
+      onSaved();
+      onClose();
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao salvar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Templates de cobrança</DialogTitle>
+          <p className="text-xs text-muted-foreground font-mono">
+            Variáveis: {"{cliente} {valor} {vencimento} {descricao} {dias_atraso}"}
+          </p>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {TPL_META.map(({ key, label }) => (
+            <Card key={key}>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="font-semibold text-sm">{label}</h4>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={tpls[key].tone}
+                      onValueChange={(v) => update(key, { tone: v })}
+                    >
+                      <SelectTrigger className="w-[110px] h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Cordial">Cordial</SelectItem>
+                        <SelectItem value="Firme">Firme</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={genKey === key}
+                      onClick={() => generateAI(key)}
+                    >
+                      <Wand2 className="w-3.5 h-3.5 mr-1" />
+                      {genKey === key ? "Gerando..." : "IA"}
+                    </Button>
+                  </div>
+                </div>
+                <Textarea
+                  value={tpls[key].text}
+                  onChange={(e) => update(key, { text: e.target.value })}
+                  rows={3}
+                  className="text-sm"
+                />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={save} disabled={saving}>
+            {saving ? "Salvando..." : "Salvar templates"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
