@@ -301,11 +301,25 @@ async function executeToolCall(
       // Verifica Mercado Pago
       const { data: mpCfg } = await ctx.supabase
         .from("mercado_pago_configs")
-        .select("access_token, auto_send")
+        .select("access_token, auto_send, ondemand_min_valor, ondemand_max_valor")
         .eq("company_id", ctx.companyId)
         .maybeSingle();
       if (!mpCfg?.access_token) {
         return { result: "Erro: Mercado Pago não configurado para esta empresa. Peça para o cliente aguardar um atendente." };
+      }
+
+      // Validação de valor mínimo/máximo configurados pela empresa
+      const minV = mpCfg.ondemand_min_valor != null ? Number(mpCfg.ondemand_min_valor) : null;
+      const maxV = mpCfg.ondemand_max_valor != null ? Number(mpCfg.ondemand_max_valor) : null;
+      if (minV != null && minV > 0 && valor < minV) {
+        return {
+          result: `VALOR ABAIXO DO MÍNIMO: o valor R$ ${valor.toFixed(2)} é menor que o mínimo permitido (R$ ${minV.toFixed(2)}). NÃO gere o PIX. Responda ao cliente: "Esse valor está abaixo do mínimo que consigo gerar (R$ ${minV.toFixed(2)}). Pode me confirmar um valor a partir de R$ ${minV.toFixed(2)}?" e aguarde novo valor antes de chamar criar_cobranca_pix.`,
+        };
+      }
+      if (maxV != null && maxV > 0 && valor > maxV) {
+        return {
+          result: `VALOR ACIMA DO MÁXIMO: o valor R$ ${valor.toFixed(2)} ultrapassa o máximo permitido (R$ ${maxV.toFixed(2)}). NÃO gere o PIX. Responda ao cliente: "Esse valor está acima do limite que consigo gerar por aqui (R$ ${maxV.toFixed(2)}). Pode me confirmar um valor até R$ ${maxV.toFixed(2)}?" e aguarde novo valor antes de chamar criar_cobranca_pix.`,
+        };
       }
 
       // Cria cobrança
