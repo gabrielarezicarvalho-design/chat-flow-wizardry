@@ -2029,7 +2029,19 @@ function TemplatesDialog({
               </div>
 
               <div>
-                <Label className="text-[11px]">Pré-visualização</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-[11px]">Pré-visualização</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7"
+                    onClick={() => setTestOpen(true)}
+                  >
+                    <Wand2 className="w-3.5 h-3.5 mr-1" />
+                    Testar no chat
+                  </Button>
+                </div>
                 <div className="mt-1 rounded-lg border bg-muted/40 p-3">
                   <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500/15 border border-emerald-500/30 px-3 py-2 text-sm whitespace-pre-wrap break-words">
                     {confPreview || <span className="text-muted-foreground italic">Sem conteúdo</span>}
@@ -2039,6 +2051,13 @@ function TemplatesDialog({
                   </p>
                 </div>
               </div>
+
+              <TestConfirmationDialog
+                open={testOpen}
+                onClose={() => setTestOpen(false)}
+                template={confTemplate}
+              />
+
             </CardContent>
           </Card>
         </div>
