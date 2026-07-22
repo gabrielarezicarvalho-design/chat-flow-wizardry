@@ -38,6 +38,7 @@ Deno.serve(async (req) => {
     if (cfgErr) throw cfgErr;
 
     for (const cfg of configs || []) {
+     if (cfg.reminders_enabled) {
       const daysBefore = cfg.reminder_days_before ?? 3;
       const intervalHours = cfg.reminder_interval_hours ?? 24;
       const remindAfter = cfg.remind_after_due ?? true;
