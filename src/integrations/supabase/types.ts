@@ -561,6 +561,88 @@ export type Database = {
           },
         ]
       }
+      cobrancas_recorrentes: {
+        Row: {
+          cliente_nome: string
+          company_id: string
+          connection_id: string | null
+          cpf_cnpj: string | null
+          created_at: string
+          descricao: string | null
+          dia_vencimento: number
+          email: string | null
+          id: string
+          status: string
+          telefone: string
+          total_geradas: number
+          ultima_cobranca_id: string | null
+          ultima_geracao_em: string | null
+          updated_at: string
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          cliente_nome: string
+          company_id: string
+          connection_id?: string | null
+          cpf_cnpj?: string | null
+          created_at?: string
+          descricao?: string | null
+          dia_vencimento: number
+          email?: string | null
+          id?: string
+          status?: string
+          telefone: string
+          total_geradas?: number
+          ultima_cobranca_id?: string | null
+          ultima_geracao_em?: string | null
+          updated_at?: string
+          user_id?: string | null
+          valor: number
+        }
+        Update: {
+          cliente_nome?: string
+          company_id?: string
+          connection_id?: string | null
+          cpf_cnpj?: string | null
+          created_at?: string
+          descricao?: string | null
+          dia_vencimento?: number
+          email?: string | null
+          id?: string
+          status?: string
+          telefone?: string
+          total_geradas?: number
+          ultima_cobranca_id?: string | null
+          ultima_geracao_em?: string | null
+          updated_at?: string
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobrancas_recorrentes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobrancas_recorrentes_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobrancas_recorrentes_ultima_cobranca_id_fkey"
+            columns: ["ultima_cobranca_id"]
+            isOneToOne: false
+            referencedRelation: "cobrancas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
