@@ -413,12 +413,55 @@ const InternalChatContent = () => {
                             msg.is_pinned && "ring-2 ring-yellow-400"
                           )}>
                             <p className="text-xs font-medium mb-1 opacity-70">{senderName}</p>
-                            <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+
+                            {msg.reply_message && (
+                              <div className="mb-2 border-l-2 border-primary/60 bg-background/60 rounded px-2 py-1">
+                                <p className="text-[10px] font-medium text-primary">
+                                  {msg.reply_message.sender?.full_name || msg.reply_message.sender?.username || 'Usuário'}
+                                </p>
+                                <p className="text-xs text-muted-foreground truncate max-w-[240px]">
+                                  {msg.reply_message.type === 'image'
+                                    ? '📷 Imagem'
+                                    : msg.reply_message.type === 'file'
+                                      ? `📎 ${msg.reply_message.file_name ?? 'Arquivo'}`
+                                      : msg.reply_message.content}
+                                </p>
+                              </div>
+                            )}
+
+                            {msg.type === 'image' && msg.file_url && (
+                              <a href={msg.file_url} target="_blank" rel="noreferrer">
+                                <img
+                                  src={msg.file_url}
+                                  alt={msg.file_name ?? 'imagem'}
+                                  className="max-w-full max-h-64 rounded mb-1 object-cover"
+                                />
+                              </a>
+                            )}
+                            {msg.type === 'file' && msg.file_url && (
+                              <a
+                                href={msg.file_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-2 bg-background/60 rounded px-2 py-1.5 mb-1 text-sm hover:bg-background"
+                              >
+                                <FileText className="h-4 w-4 shrink-0" />
+                                <span className="truncate flex-1">{msg.file_name ?? 'Arquivo'}</span>
+                                <Download className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                              </a>
+                            )}
+
+                            {msg.content && (
+                              <p className="whitespace-pre-wrap break-words">
+                                {renderContent(msg.content)}
+                              </p>
+                            )}
                             <span className="text-[10px] mt-1 block text-muted-foreground">
                               {format(new Date(msg.created_at), 'HH:mm')}
                               {msg.is_pinned && <Pin className="h-3 w-3 inline ml-1 text-yellow-600" />}
                             </span>
                           </div>
+
 
                           {/* Reactions display */}
                           {Object.keys(reactionGroups).length > 0 && (
