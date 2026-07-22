@@ -22,7 +22,9 @@ import {
   History,
   FileText,
   Wand2,
+  Repeat,
 } from "lucide-react";
+import { RecorrentesPanel } from "@/components/pagamentos/RecorrentesPanel";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -359,6 +361,9 @@ export default function Pagamentos() {
           </TabsTrigger>
           <TabsTrigger value="vendas">Vendas ({vendas.length})</TabsTrigger>
           <TabsTrigger value="custos">Custos ({custos.length})</TabsTrigger>
+          <TabsTrigger value="recorrentes" className="gap-2">
+            <Repeat className="w-4 h-4" /> Recorrências
+          </TabsTrigger>
           <TabsTrigger value="historico" className="gap-2">
             <History className="w-4 h-4" /> Histórico de lembretes
           </TabsTrigger>
@@ -499,6 +504,11 @@ export default function Pagamentos() {
         {/* HISTÓRICO DE LEMBRETES */}
         <TabsContent value="historico">
           <ReminderHistoryPanel companyId={companyId} />
+        </TabsContent>
+
+        {/* RECORRÊNCIAS */}
+        <TabsContent value="recorrentes">
+          <RecorrentesPanel companyId={companyId} userId={user?.id ?? null} />
         </TabsContent>
       </Tabs>
 
