@@ -737,6 +737,11 @@ function MercadoPagoPanel({
       setPixTemplate(config.pix_template || "");
       setAutoSend(config.auto_send !== false);
       setDefaultConnId(config.default_connection_id || "");
+      setRemindersEnabled(config.reminders_enabled !== false);
+      setReminderDaysBefore(config.reminder_days_before ?? 3);
+      setReminderIntervalHours(config.reminder_interval_hours ?? 24);
+      setRemindAfterDue(config.remind_after_due !== false);
+      setReminderTemplate(config.reminder_template || "");
     }
   }, [config]);
 
