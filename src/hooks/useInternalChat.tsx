@@ -395,6 +395,7 @@ export const useInternalChat = () => {
       replyTo?: string;
       fileUrl?: string;
       fileName?: string;
+      mentions?: string[];
     }) => {
       if (!userId) throw new Error('Não autenticado');
       const { data: msg, error } = await db
@@ -411,6 +412,12 @@ export const useInternalChat = () => {
         .select()
         .single();
       if (error) throw error;
+      const mentionIds = Array.from(new Set((data.mentions ?? []).filter(Boolean)));
+      if (mentionIds.length && msg?.id) {
+        await db.from('chat_mentions').insert(
+          mentionIds.map((uid) => ({ message_id: msg.id, user_id: uid }))
+        );
+      }
       return msg as ChatMessage;
     },
     onSuccess: (_msg, vars) => {
@@ -418,6 +425,7 @@ export const useInternalChat = () => {
       queryClient.invalidateQueries({ queryKey: ['chat-rooms', userId] });
     },
   });
+
 
   const deleteMessage = useMutation({
     mutationFn: async (messageId: string) => {
