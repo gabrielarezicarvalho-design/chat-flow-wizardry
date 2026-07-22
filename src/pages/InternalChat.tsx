@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useInternalChat, ChatRoom, ChatMessage, useCompanyUsers } from '@/hooks/useInternalChat';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+
 import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,6 +50,7 @@ const MENTION_TOKEN_RE = /@([\w.-]+)/g;
 
 const InternalChatContent = () => {
   const { isAdmin } = useUserRole();
+  const { user } = useAuth();
   const {
     rooms,
     roomsLoading,
@@ -60,8 +64,10 @@ const InternalChatContent = () => {
     deleteMessage,
     markAsRead,
     uploadFile,
+    unreadMentions,
   } = useInternalChat();
   const { data: companyUsers = [] } = useCompanyUsers();
+
   const allUsers = companyUsers.map(u => ({
     id: u.id,
     full_name: u.full_name,
@@ -85,10 +91,61 @@ const InternalChatContent = () => {
   const [activeTab, setActiveTab] = useState('chats');
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<Record<string, { name: string; ts: number }>>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const lastTypingSentRef = useRef<number>(0);
+
+  const myName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Alguém';
+
+  // Typing broadcast: join room channel
+  useEffect(() => {
+    if (!selectedRoom?.id || !user?.id) return;
+    const ch = supabase
+      .channel(`chat-typing-${selectedRoom.id}`, { config: { broadcast: { self: false } } })
+      .on('broadcast', { event: 'typing' }, (payload) => {
+        const { userId: uid, name } = (payload.payload ?? {}) as { userId: string; name: string };
+        if (!uid || uid === user.id) return;
+        setTypingUsers((prev) => ({ ...prev, [uid]: { name, ts: Date.now() } }));
+      })
+      .subscribe();
+    typingChannelRef.current = ch;
+    return () => {
+      supabase.removeChannel(ch);
+      typingChannelRef.current = null;
+      setTypingUsers({});
+    };
+  }, [selectedRoom?.id, user?.id]);
+
+  // Expire stale typing indicators
+  useEffect(() => {
+    const t = setInterval(() => {
+      setTypingUsers((prev) => {
+        const now = Date.now();
+        const next: typeof prev = {};
+        for (const [k, v] of Object.entries(prev)) {
+          if (now - v.ts < 4000) next[k] = v;
+        }
+        return next;
+      });
+    }, 1500);
+    return () => clearInterval(t);
+  }, []);
+
+  const broadcastTyping = () => {
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 2000) return;
+    lastTypingSentRef.current = now;
+    typingChannelRef.current?.send({
+      type: 'broadcast',
+      event: 'typing',
+      payload: { userId: user?.id, name: myName },
+    });
+  };
+
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -146,11 +203,13 @@ const InternalChatContent = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
     setMessageInput(v);
+    broadcastTyping();
     const caret = e.target.selectionStart ?? v.length;
     const before = v.slice(0, caret);
     const m = before.match(/@([\w.-]*)$/);
     setMentionQuery(m ? m[1] : null);
   };
+
 
   const insertMention = (u: { full_name: string | null; username: string | null }) => {
     const slug = slugify(u);
@@ -310,11 +369,19 @@ const InternalChatContent = () => {
                           <span className={cn("font-medium truncate", (room.unread_count ?? 0) > 0 && "font-semibold")}>
                             {getRoomDisplayName(room)}
                           </span>
-                          {(room.unread_count ?? 0) > 0 && (
-                            <Badge className="h-5 min-w-[20px] px-1.5 rounded-full text-[10px] shrink-0">
-                              {room.unread_count! > 99 ? '99+' : room.unread_count}
-                            </Badge>
-                          )}
+                          <div className="flex items-center gap-1 shrink-0">
+                            {(unreadMentions?.[room.id] ?? 0) > 0 && (
+                              <Badge variant="destructive" className="h-5 px-1.5 rounded-full text-[10px]">
+                                @{unreadMentions[room.id]}
+                              </Badge>
+                            )}
+                            {(room.unread_count ?? 0) > 0 && (
+                              <Badge className="h-5 min-w-[20px] px-1.5 rounded-full text-[10px]">
+                                {room.unread_count! > 99 ? '99+' : room.unread_count}
+                              </Badge>
+                            )}
+                          </div>
+
                         </div>
                         {room.last_message?.content && (
                           <p className="text-xs text-muted-foreground truncate mt-0.5">
@@ -438,18 +505,54 @@ const InternalChatContent = () => {
                                 />
                               </a>
                             )}
-                            {msg.type === 'file' && msg.file_url && (
-                              <a
-                                href={msg.file_url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center gap-2 bg-background/60 rounded px-2 py-1.5 mb-1 text-sm hover:bg-background"
-                              >
-                                <FileText className="h-4 w-4 shrink-0" />
-                                <span className="truncate flex-1">{msg.file_name ?? 'Arquivo'}</span>
-                                <Download className="h-3.5 w-3.5 shrink-0 opacity-60" />
-                              </a>
-                            )}
+                            {msg.type === 'file' && msg.file_url && (() => {
+                              const name = (msg.file_name ?? msg.file_url ?? '').toLowerCase();
+                              const isPdf = name.endsWith('.pdf');
+                              const isAudio = /\.(mp3|wav|ogg|m4a|webm|aac)$/.test(name);
+                              if (isPdf) {
+                                return (
+                                  <div className="mb-1 space-y-1">
+                                    <iframe
+                                      src={msg.file_url}
+                                      title={msg.file_name ?? 'PDF'}
+                                      className="w-full h-72 rounded border bg-background"
+                                    />
+                                    <a
+                                      href={msg.file_url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="flex items-center gap-2 text-xs text-primary hover:underline"
+                                    >
+                                      <Download className="h-3 w-3" />
+                                      {msg.file_name ?? 'Baixar PDF'}
+                                    </a>
+                                  </div>
+                                );
+                              }
+                              if (isAudio) {
+                                return (
+                                  <div className="mb-1">
+                                    <audio controls src={msg.file_url} className="w-full max-w-xs" />
+                                    <p className="text-[10px] text-muted-foreground truncate">
+                                      {msg.file_name}
+                                    </p>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <a
+                                  href={msg.file_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="flex items-center gap-2 bg-background/60 rounded px-2 py-1.5 mb-1 text-sm hover:bg-background"
+                                >
+                                  <FileText className="h-4 w-4 shrink-0" />
+                                  <span className="truncate flex-1">{msg.file_name ?? 'Arquivo'}</span>
+                                  <Download className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                                </a>
+                              );
+                            })()}
+
 
                             {msg.content && (
                               <p className="whitespace-pre-wrap break-words">
@@ -547,8 +650,17 @@ const InternalChatContent = () => {
               </div>
             )}
 
+            {/* Typing indicator */}
+            {Object.keys(typingUsers).length > 0 && (
+              <div className="px-4 py-1 text-xs text-muted-foreground italic border-t bg-card shrink-0">
+                {Object.values(typingUsers).map((u) => u.name).join(', ')}
+                {Object.keys(typingUsers).length === 1 ? ' está digitando…' : ' estão digitando…'}
+              </div>
+            )}
+
             {/* Message Input */}
             <div className="p-4 border-t bg-card shrink-0 relative">
+
               {mentionQuery !== null && mentionSuggestions.length > 0 && (
                 <div className="absolute bottom-full left-4 right-4 mb-1 max-h-56 overflow-y-auto bg-popover border rounded-md shadow-md z-10">
                   {mentionSuggestions.map((u) => (

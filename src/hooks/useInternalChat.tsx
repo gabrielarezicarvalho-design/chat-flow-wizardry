@@ -1,7 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+
 
 // ============ Types ============
 export interface ChatProfile {
@@ -280,6 +282,44 @@ export const useInternalChat = () => {
     },
   });
 
+
+
+  // ---- Unread mentions per room ----
+  const mentionsQuery = useQuery({
+    queryKey: ['chat-unread-mentions', userId],
+    enabled: !!userId,
+    queryFn: async (): Promise<Record<string, number>> => {
+      const { data: mentions } = await db
+        .from('chat_mentions')
+        .select('message_id')
+        .eq('user_id', userId);
+      const msgIds = Array.from(new Set((mentions ?? []).map((m: any) => m.message_id)));
+      if (!msgIds.length) return {};
+      const { data: msgs } = await db
+        .from('chat_messages')
+        .select('id, room_id, created_at, sender_id')
+        .in('id', msgIds);
+      const { data: parts } = await db
+        .from('chat_participants')
+        .select('room_id, last_read_at')
+        .eq('user_id', userId);
+      const lastReadMap = new Map<string, string | null>(
+        (parts ?? []).map((p: any) => [p.room_id, p.last_read_at])
+      );
+      const counts: Record<string, number> = {};
+      for (const m of (msgs ?? []) as any[]) {
+        if (m.sender_id === userId) continue;
+        const lr = lastReadMap.get(m.room_id);
+        if (!lr || new Date(m.created_at) > new Date(lr)) {
+          counts[m.room_id] = (counts[m.room_id] ?? 0) + 1;
+        }
+      }
+      return counts;
+    },
+  });
+
+
+
   // ---- Realtime ----
   useEffect(() => {
     if (!userId) return;
@@ -318,7 +358,32 @@ export const useInternalChat = () => {
         { event: '*', schema: 'public', table: 'internal_tasks' },
         () => queryClient.invalidateQueries({ queryKey: ['internal-tasks', userId] })
       )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'chat_mentions', filter: `user_id=eq.${userId}` },
+        async (payload: any) => {
+          queryClient.invalidateQueries({ queryKey: ['chat-unread-mentions', userId] });
+          const messageId = payload.new?.message_id;
+          if (!messageId) return;
+          const { data: msg } = await db
+            .from('chat_messages')
+            .select('content, sender_id, room_id')
+            .eq('id', messageId)
+            .maybeSingle();
+          if (!msg || msg.sender_id === userId) return;
+          const { data: sender } = await db
+            .from('profiles')
+            .select('full_name, username')
+            .eq('id', msg.sender_id)
+            .maybeSingle();
+          const name = sender?.full_name || sender?.username || 'Alguém';
+          toast(`${name} mencionou você`, {
+            description: (msg.content ?? '').slice(0, 120),
+          });
+        }
+      )
       .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
     };
@@ -556,8 +621,10 @@ export const useInternalChat = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chat-rooms', userId] });
+      queryClient.invalidateQueries({ queryKey: ['chat-unread-mentions', userId] });
     },
   });
+
 
 
 
@@ -593,6 +660,8 @@ export const useInternalChat = () => {
     deleteTask,
     uploadFile,
     markAsRead,
+    unreadMentions: mentionsQuery.data ?? {},
+
   };
 
 };
