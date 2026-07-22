@@ -2087,11 +2087,55 @@ function TestConfirmationDialog({
   const [nome, setNome] = useState("Maria Silva");
   const [valor, setValor] = useState("149,90");
   const [descricao, setDescricao] = useState("Mensalidade Novembro");
+  const [applied, setApplied] = useState<{ nome: string; valor: string; descricao: string } | null>({
+    nome: "Maria Silva",
+    valor: "149,90",
+    descricao: "Mensalidade Novembro",
+  });
 
+  const testSchema = z.object({
+    nome: z
+      .string()
+      .trim()
+      .min(2, "Nome deve ter ao menos 2 caracteres")
+      .max(80, "Nome muito longo (máx. 80)")
+      .regex(/^[\p{L}\p{M}\s'.-]+$/u, "Use apenas letras e espaços"),
+    valor: z
+      .string()
+      .trim()
+      .min(1, "Informe o valor")
+      .regex(/^\d{1,7}([.,]\d{1,2})?$/, "Formato inválido (ex.: 149,90)"),
+    descricao: z
+      .string()
+      .trim()
+      .min(3, "Mínimo de 3 caracteres")
+      .max(120, "Descrição muito longa (máx. 120)"),
+  });
+
+  const parsed = testSchema.safeParse({ nome, valor, descricao });
+  const errors: Record<string, string> = {};
+  if (!parsed.success) {
+    for (const issue of parsed.error.issues) {
+      const k = String(issue.path[0]);
+      if (!errors[k]) errors[k] = issue.message;
+    }
+  }
+  const valid = parsed.success;
+
+  const source = applied ?? { nome: "", valor: "", descricao: "" };
   const rendered = (template || "")
-    .replace(/\{nome\}/g, nome || "")
-    .replace(/\{valor\}/g, valor || "")
-    .replace(/\{descricao\}/g, descricao || "");
+    .replace(/\{nome\}/g, source.nome)
+    .replace(/\{valor\}/g, source.valor)
+    .replace(/\{descricao\}/g, source.descricao);
+
+  const handleApply = () => {
+    if (!valid) {
+      toast.error("Corrija os campos destacados antes de testar");
+      return;
+    }
+    setApplied({ nome: nome.trim(), valor: valor.trim().replace(".", ","), descricao: descricao.trim() });
+    toast.success("Pré-visualização atualizada");
+  };
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -2106,15 +2150,37 @@ function TestConfirmationDialog({
         <div className="grid grid-cols-3 gap-2">
           <div className="col-span-3">
             <Label className="text-[11px]">Nome</Label>
-            <Input value={nome} onChange={(e) => setNome(e.target.value)} className="h-8" />
+            <Input
+              value={nome}
+              maxLength={80}
+              onChange={(e) => setNome(e.target.value)}
+              className={`h-8 ${errors.nome ? "border-destructive" : ""}`}
+              aria-invalid={!!errors.nome}
+            />
+            {errors.nome && <p className="text-[10px] text-destructive mt-1">{errors.nome}</p>}
           </div>
           <div className="col-span-1">
             <Label className="text-[11px]">Valor</Label>
-            <Input value={valor} onChange={(e) => setValor(e.target.value)} className="h-8" />
+            <Input
+              value={valor}
+              inputMode="decimal"
+              maxLength={12}
+              onChange={(e) => setValor(e.target.value)}
+              className={`h-8 ${errors.valor ? "border-destructive" : ""}`}
+              aria-invalid={!!errors.valor}
+            />
+            {errors.valor && <p className="text-[10px] text-destructive mt-1">{errors.valor}</p>}
           </div>
           <div className="col-span-2">
             <Label className="text-[11px]">Descrição</Label>
-            <Input value={descricao} onChange={(e) => setDescricao(e.target.value)} className="h-8" />
+            <Input
+              value={descricao}
+              maxLength={120}
+              onChange={(e) => setDescricao(e.target.value)}
+              className={`h-8 ${errors.descricao ? "border-destructive" : ""}`}
+              aria-invalid={!!errors.descricao}
+            />
+            {errors.descricao && <p className="text-[10px] text-destructive mt-1">{errors.descricao}</p>}
           </div>
         </div>
 
@@ -2131,9 +2197,13 @@ function TestConfirmationDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Fechar</Button>
+          <Button onClick={handleApply} disabled={!valid}>
+            Aplicar exemplo
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
 
