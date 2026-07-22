@@ -280,6 +280,9 @@ export const useInternalChat = () => {
       );
       return tasks.map((t) => ({ ...t, assignee: profMap.get(t.assigned_to) }));
     },
+  });
+
+
 
   // ---- Unread mentions per room ----
   const mentionsQuery = useQuery({
