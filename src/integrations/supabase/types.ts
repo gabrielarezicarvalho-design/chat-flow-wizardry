@@ -1357,6 +1357,71 @@ export type Database = {
           },
         ]
       }
+      pix_reminder_history: {
+        Row: {
+          cliente_nome: string | null
+          cobranca_id: string | null
+          company_id: string | null
+          connection_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          link_pagamento: string | null
+          message_text: string
+          pix_copia_cola: string | null
+          source: string
+          success: boolean
+          telefone: string | null
+          template: string
+          valor: number | null
+          vencimento: string | null
+        }
+        Insert: {
+          cliente_nome?: string | null
+          cobranca_id?: string | null
+          company_id?: string | null
+          connection_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          link_pagamento?: string | null
+          message_text: string
+          pix_copia_cola?: string | null
+          source?: string
+          success?: boolean
+          telefone?: string | null
+          template: string
+          valor?: number | null
+          vencimento?: string | null
+        }
+        Update: {
+          cliente_nome?: string | null
+          cobranca_id?: string | null
+          company_id?: string | null
+          connection_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          link_pagamento?: string | null
+          message_text?: string
+          pix_copia_cola?: string | null
+          source?: string
+          success?: boolean
+          telefone?: string | null
+          template?: string
+          valor?: number | null
+          vencimento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pix_reminder_history_cobranca_id_fkey"
+            columns: ["cobranca_id"]
+            isOneToOne: false
+            referencedRelation: "cobrancas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
