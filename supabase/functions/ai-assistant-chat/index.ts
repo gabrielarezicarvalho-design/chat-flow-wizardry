@@ -289,10 +289,12 @@ async function executeToolCall(
         };
       }
 
-      // Guarda de confirmação: se o valor veio do cliente, exige confirmação explícita antes de gerar o PIX
-      if (valorOrigem === "cliente" && !confirmado) {
+      // Resumo + confirmação final obrigatória antes de gerar o PIX
+      if (!confirmado) {
+        const vencimento = new Date().toLocaleDateString("pt-BR");
+        const identificador = `PIX-${referencia}`.slice(0, 40);
         return {
-          result: `AGUARDANDO CONFIRMAÇÃO: o valor R$ ${valor.toFixed(2)} foi informado pelo cliente para a referência "${referencia}". NÃO gere o PIX ainda. Responda ao cliente EXATAMENTE assim: "Só para confirmar: você quer gerar um PIX de *R$ ${valor.toFixed(2)}* para ${descricao} (ref: ${referencia})? Se o valor estiver errado, é só me dizer o valor correto que eu ajusto. (sim / corrigir)". REGRAS PÓS-PERGUNTA: (a) se o cliente confirmar ("sim", "pode gerar", "confirmo", "ok"), chame criar_cobranca_pix de novo com "confirmado": true e o MESMO valor. (b) se o cliente informar um NOVO valor ("na verdade é 250", "o certo é 199,90", "corrigir para 300"), CANCELE o envio anterior e chame criar_cobranca_pix novamente com o NOVO valor, "valor_origem":"cliente" e "confirmado":false — pedindo nova confirmação. (c) se o cliente disser "não", "cancelar", "desistir", NÃO gere o PIX e responda "Sem problemas, cancelei a cobrança. Se mudar de ideia é só me avisar. 👍" sem chamar a ferramenta.`,
+          result: `AGUARDANDO CONFIRMAÇÃO FINAL: NÃO gere o PIX ainda. Envie ao cliente EXATAMENTE este resumo (mantendo as quebras de linha e o negrito com *):\n\n*Resumo da cobrança*\n• Valor: *R$ ${valor.toFixed(2)}*\n• Descrição: ${descricao}\n• Referência: ${referencia}\n• Vencimento: ${vencimento}\n• Identificador: ${identificador}\n\nPosso gerar o PIX agora? (responda *sim* para confirmar, *corrigir* para ajustar o valor, ou *cancelar*)\n\nREGRAS PÓS-RESUMO: (a) se o cliente confirmar ("sim", "pode gerar", "confirmo", "ok", "isso"), chame criar_cobranca_pix novamente com os MESMOS dados e "confirmado": true. (b) se o cliente informar um NOVO valor ou pedir correção, chame criar_cobranca_pix de novo com o novo valor, "valor_origem":"cliente" e "confirmado":false para reapresentar o resumo. (c) se o cliente disser "não", "cancelar" ou "desistir", NÃO chame a ferramenta e responda "Sem problemas, cancelei a cobrança. Se mudar de ideia é só me avisar. 👍".`,
         };
       }
 
