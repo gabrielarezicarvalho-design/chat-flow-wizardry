@@ -518,6 +518,23 @@ export const useInternalChat = () => {
     return { url: data.publicUrl, name: file.name };
   };
 
+  const markAsRead = useMutation({
+    mutationFn: async (roomId: string) => {
+      if (!userId) return;
+      const { error } = await db
+        .from('chat_participants')
+        .update({ last_read_at: new Date().toISOString() })
+        .eq('room_id', roomId)
+        .eq('user_id', userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat-rooms', userId] });
+    },
+  });
+
+
+
   // Enrich rooms with a display name for private chats (the other person)
   const rooms = useMemo<ChatRoom[]>(() => {
     const list = roomsQuery.data ?? [];
