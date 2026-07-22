@@ -660,6 +660,8 @@ export const useInternalChat = () => {
     deleteTask,
     uploadFile,
     markAsRead,
+    unreadMentions: mentionsQuery.data ?? {},
+
   };
 
 };
