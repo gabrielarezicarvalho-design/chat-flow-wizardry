@@ -49,12 +49,33 @@ Deno.serve(async (req) => {
       .eq("company_id", cobranca.company_id)
       .maybeSingle();
 
-    const connectionId =
+    let connectionId =
       overrideConnId ||
       cobranca.whatsapp_connection_id ||
       config?.default_connection_id;
 
-    if (!connectionId) throw new Error("Nenhuma conexão WhatsApp definida para envio");
+    // Fallback: pega qualquer conexão ativa da empresa
+    if (!connectionId) {
+      const { data: anyConn } = await supabase
+        .from("connections")
+        .select("id, status")
+        .eq("company_id", cobranca.company_id)
+        .in("status", ["connected", "open", "active", "ready"])
+        .limit(1)
+        .maybeSingle();
+      connectionId = anyConn?.id;
+    }
+    if (!connectionId) {
+      const { data: anyConn2 } = await supabase
+        .from("connections")
+        .select("id")
+        .eq("company_id", cobranca.company_id)
+        .limit(1)
+        .maybeSingle();
+      connectionId = anyConn2?.id;
+    }
+
+    if (!connectionId) throw new Error("Nenhuma conexão WhatsApp definida para envio. Configure uma conexão padrão em Pagamentos → Configurações.");
 
     const tpl =
       config?.pix_template ||
