@@ -1025,6 +1025,7 @@ ${asaasContext}`;
           agentUserId: agent.user_id,
           contactName,
           contactPhone,
+          companyId,
         });
         toolsExecuted.push(call.name);
         toolResults.push(`Resultado de ${call.name}: ${result}`);
