@@ -37,8 +37,10 @@ import {
   Eye,
   Palette,
   DollarSign,
-  CreditCard
+  CreditCard,
+  Lock
 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -216,8 +218,10 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
 
   const getFilteredNavItems = () => {
     const baseItems = isAdmin ? adminNavItems : agentNavItems;
+    // Manter "Agentes IA" visível mesmo bloqueado; demais features seguem regra padrão
     return baseItems.filter(item => {
       if (!item.feature) return true;
+      if (item.to === "/agents") return true;
       return hasAccess(item.feature);
     });
   };
@@ -300,15 +304,50 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
 
         {/* Navigation */}
         <nav className="flex-1 p-2 space-y-1 overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {navItems.map((item) => (
-            item.children ? (
-              <NavItemWithChildren 
-                key={item.to} 
-                item={item} 
-                collapsed={collapsed} 
-                hasAccess={hasAccess}
-              />
-            ) : (
+          {navItems.map((item) => {
+            const locked = !!item.feature && !hasAccess(item.feature);
+            if (item.children) {
+              return (
+                <NavItemWithChildren
+                  key={item.to}
+                  item={item}
+                  collapsed={collapsed}
+                  hasAccess={hasAccess}
+                />
+              );
+            }
+            if (locked) {
+              return (
+                <button
+                  key={item.to}
+                  type="button"
+                  onClick={() =>
+                    toast({
+                      title: "Recurso bloqueado",
+                      description: `"${item.label}" não está disponível no seu plano. Faça upgrade para desbloquear.`,
+                    })
+                  }
+                  className={cn(
+                    "w-full flex items-center gap-3 rounded-lg text-white/50 hover:bg-white/10 transition-all group relative cursor-not-allowed",
+                    collapsed ? "px-3 py-3 justify-center" : "px-4 py-3"
+                  )}
+                >
+                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                  {!collapsed && (
+                    <>
+                      <span className="flex-1 text-left">{item.label}</span>
+                      <Lock className="w-3.5 h-3.5 opacity-70" />
+                    </>
+                  )}
+                  {collapsed && (
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
+                      {item.label} (bloqueado)
+                    </div>
+                  )}
+                </button>
+              );
+            }
+            return (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -321,15 +360,14 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
               >
                 <item.icon className="w-5 h-5 flex-shrink-0" />
                 {!collapsed && <span>{item.label}</span>}
-                {/* Tooltip for collapsed state */}
                 {collapsed && (
                   <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
                     {item.label}
                   </div>
                 )}
               </NavLink>
-            )
-          ))}
+            );
+          })}
         </nav>
 
         {/* User info & logout */}
