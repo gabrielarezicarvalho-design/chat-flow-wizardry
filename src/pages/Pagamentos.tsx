@@ -1752,6 +1752,13 @@ function TemplatesDialog({
   const [odTemplate, setOdTemplate] = useState(
     "Oi {cliente}! 👋 Notei que o PIX de *R$ {valor}* ({descricao} — ref: {referencia}) ainda não foi pago. Envio novamente para facilitar: {pix_copia_cola} — Qualquer dúvida é só me chamar. 🙌"
   );
+  const [confEnabled, setConfEnabled] = useState(true);
+  const DEFAULT_CONF_TPL = `✅ *Pagamento confirmado!*\n\nOlá {nome}, recebemos seu pagamento de *R$ {valor}* referente a *{descricao}*.\n\nMuito obrigado! 🙌`;
+  const [confTemplate, setConfTemplate] = useState(DEFAULT_CONF_TPL);
+  const confPreview = confTemplate
+    .replace(/\{nome\}/g, "Maria Silva")
+    .replace(/\{valor\}/g, "149,90")
+    .replace(/\{descricao\}/g, "Mensalidade Novembro");
 
   useEffect(() => {
     if (open) {
@@ -1770,6 +1777,8 @@ function TemplatesDialog({
         setOdMinValor(config.ondemand_min_valor != null ? String(config.ondemand_min_valor) : "");
         setOdMaxValor(config.ondemand_max_valor != null ? String(config.ondemand_max_valor) : "");
         if (config.ondemand_template) setOdTemplate(config.ondemand_template);
+        setConfEnabled(config.confirmation_enabled ?? true);
+        if (config.confirmation_template) setConfTemplate(config.confirmation_template);
       }
     }
   }, [open, config]);
@@ -1820,6 +1829,8 @@ function TemplatesDialog({
         ondemand_min_valor: minN,
         ondemand_max_valor: maxN,
         ondemand_template: odTemplate,
+        confirmation_enabled: confEnabled,
+        confirmation_template: confTemplate,
       };
       if (config) {
         const { error } = await supabase
@@ -1987,7 +1998,51 @@ function TemplatesDialog({
               </div>
             </CardContent>
           </Card>
+
+          {/* Confirmação de pagamento */}
+          <Card className="border-emerald-500/40">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <h4 className="font-semibold text-sm">Confirmação de pagamento</h4>
+                  <p className="text-[11px] text-muted-foreground">
+                    Enviada automaticamente ao cliente quando o PIX é pago.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs">Ativo</Label>
+                  <Switch checked={confEnabled} onCheckedChange={setConfEnabled} />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-[11px]">Mensagem</Label>
+                <Textarea
+                  value={confTemplate}
+                  onChange={(e) => setConfTemplate(e.target.value)}
+                  rows={5}
+                  className="text-sm font-mono"
+                />
+                <p className="text-[10px] text-muted-foreground font-mono mt-1">
+                  Variáveis: {"{nome} {valor} {descricao}"}
+                </p>
+              </div>
+
+              <div>
+                <Label className="text-[11px]">Pré-visualização</Label>
+                <div className="mt-1 rounded-lg border bg-muted/40 p-3">
+                  <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500/15 border border-emerald-500/30 px-3 py-2 text-sm whitespace-pre-wrap break-words">
+                    {confPreview || <span className="text-muted-foreground italic">Sem conteúdo</span>}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-2">
+                    Exemplo com <span className="font-mono">nome=Maria Silva</span>, <span className="font-mono">valor=149,90</span>, <span className="font-mono">descricao=Mensalidade Novembro</span>.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
+
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
