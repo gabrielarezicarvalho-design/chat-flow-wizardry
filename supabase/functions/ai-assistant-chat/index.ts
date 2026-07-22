@@ -877,10 +877,19 @@ Ferramentas:
    Exemplo: [[TOOL:criar_ticket|{"motivo":"Cobrança indevida","resumo":"Cliente contesta fatura de R$ 200","prioridade":"alta"}]]
 
 4. criar_cobranca_pix — Gera uma cobrança PIX sob demanda e envia o QR Code + copia-e-cola no WhatsApp do próprio cliente automaticamente.
-   Args: {"valor": 150.00, "descricao": "Mensalidade novembro", "cliente_nome": "opcional — usa o nome do contato se vazio"}
+   Args: {"valor": 150.00, "descricao": "Mensalidade novembro", "cliente_nome": "opcional", "valor_origem": "cliente|tabela|atendente", "confirmado": true|false}
    Use quando: cliente pedir para pagar algo, solicitar cobrança, informar valor de serviço, ou aceitar orçamento.
-   IMPORTANTE: confirme o valor e o serviço com o cliente ANTES de chamar. Nunca invente valores.
-   Exemplo: [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Mensalidade novembro"}]]
+
+   REGRA DE CONFIRMAÇÃO OBRIGATÓRIA:
+   - Se o valor foi DIGITADO/INFORMADO pelo próprio cliente (ex: "quero pagar 200 reais"), passe SEMPRE "valor_origem":"cliente" e "confirmado":false na primeira chamada. O sistema vai bloquear o envio e pedir para você confirmar com o cliente. Só chame de novo com "confirmado":true depois que o cliente responder "sim", "pode gerar", "confirmo" ou equivalente.
+   - Se o valor veio da SUA base (tabela de preços, plano do cliente, orçamento fechado), use "valor_origem":"tabela" e pode chamar direto com "confirmado":true.
+   - Se um atendente humano já validou, use "valor_origem":"atendente" com "confirmado":true.
+   - IMPORTANTE: nunca invente valores. Se não sabe, pergunte.
+
+   Exemplos:
+   - Cliente diz "me manda o pix de 150": [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Serviço solicitado","valor_origem":"cliente","confirmado":false}]]
+   - Cliente confirmou "sim, pode gerar": [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Serviço solicitado","valor_origem":"cliente","confirmado":true}]]
+   - Mensalidade padrão do plano: [[TOOL:criar_cobranca_pix|{"valor":99.90,"descricao":"Mensalidade novembro","valor_origem":"tabela","confirmado":true}]]
    Após executar, o PIX é enviado automaticamente ao cliente — apenas confirme na mensagem seguinte.
 
 REGRAS:
