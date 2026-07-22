@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "e70435ed-c05e-455d-90b7-e603330e948c",
-  "project_id": "cd172c85-0871-4174-8108-29a9d270eeec",
-  "url": "/__l5e/assets-v1/e70435ed-c05e-455d-90b7-e603330e948c/next-pro-logo.png",
-  "r2_key": "a/v1/cd172c85-0871-4174-8108-29a9d270eeec/e70435ed-c05e-455d-90b7-e603330e948c/next-pro-logo.png",
-  "original_filename": "next-pro-logo.png",
-  "size": 1067116,
   "content_type": "image/png",
-  "created_at": "2026-07-20T16:25:17Z"
+  "created_at": "2026-07-20T16:25:17Z",
+  "original_filename": "next-pro-logo.png",
+  "project_id": "21dd7b9f-c0bf-4b8e-957f-c6952c532fb1",
+  "r2_key": "a/v1/21dd7b9f-c0bf-4b8e-957f-c6952c532fb1/e70435ed-c05e-455d-90b7-e603330e948c/next-pro-logo.png",
+  "size": 1067116,
+  "url": "/__l5e/assets-v1/e70435ed-c05e-455d-90b7-e603330e948c/next-pro-logo.png",
+  "version": 1
 }
