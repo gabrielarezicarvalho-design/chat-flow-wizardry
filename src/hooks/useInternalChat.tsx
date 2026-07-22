@@ -358,7 +358,32 @@ export const useInternalChat = () => {
         { event: '*', schema: 'public', table: 'internal_tasks' },
         () => queryClient.invalidateQueries({ queryKey: ['internal-tasks', userId] })
       )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'chat_mentions', filter: `user_id=eq.${userId}` },
+        async (payload: any) => {
+          queryClient.invalidateQueries({ queryKey: ['chat-unread-mentions', userId] });
+          const messageId = payload.new?.message_id;
+          if (!messageId) return;
+          const { data: msg } = await db
+            .from('chat_messages')
+            .select('content, sender_id, room_id')
+            .eq('id', messageId)
+            .maybeSingle();
+          if (!msg || msg.sender_id === userId) return;
+          const { data: sender } = await db
+            .from('profiles')
+            .select('full_name, username')
+            .eq('id', msg.sender_id)
+            .maybeSingle();
+          const name = sender?.full_name || sender?.username || 'Alguém';
+          toast(`${name} mencionou você`, {
+            description: (msg.content ?? '').slice(0, 120),
+          });
+        }
+      )
       .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
     };
