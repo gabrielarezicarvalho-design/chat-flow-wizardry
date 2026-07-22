@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MessageSquare, 
-  Plus, 
-  Send, 
-  Users, 
+import {
+  MessageSquare,
+  Plus,
+  Send,
+  Users,
   Search,
   Pin,
   Reply,
@@ -18,8 +18,12 @@ import {
   FileText,
   MoreVertical,
   UserPlus,
-  Settings
+  Settings,
+  Paperclip,
+  X,
+  Download,
 } from 'lucide-react';
+
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CreateGroupDialog } from '@/components/internal-chat/CreateGroupDialog';
