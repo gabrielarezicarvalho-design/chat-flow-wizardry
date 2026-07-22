@@ -354,14 +354,14 @@ const InternalChatContent = () => {
       <CreateGroupDialog 
         open={showCreateGroup} 
         onOpenChange={setShowCreateGroup}
-        allUsers={[]}
+        allUsers={allUsers}
       />
 
       {/* Create Task Dialog */}
       <CreateTaskDialog 
         open={showCreateTask} 
         onOpenChange={setShowCreateTask}
-        allUsers={[]}
+        allUsers={allUsers}
       />
     </div>
   );
