@@ -317,13 +317,18 @@ export default function Users() {
 
       return data;
     },
-    onSuccess: () => {
-      toast.success("Usuário criado com sucesso!");
+    onSuccess: (data) => {
+      toast.success("Usuário criado com sucesso!", {
+        description: data?.user_id
+          ? `Perfil vinculado à empresa (ID: ${String(data.user_id).slice(0, 8)}…)`
+          : "Perfil vinculado à empresa com sucesso.",
+      });
       setIsDialogOpen(false);
       setNewUser({ username: "", password: "", full_name: "", role: "agent", permissions: { ...defaultPermissions } });
       refetch();
       queryClient.invalidateQueries({ queryKey: ["all-user-permissions"] });
     },
+
     onError: (error: any) => {
       toast.error(error.message || "Erro ao criar usuário");
     },
