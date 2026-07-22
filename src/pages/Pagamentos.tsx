@@ -524,6 +524,13 @@ export default function Pagamentos() {
         userId={user?.id}
         onSaved={invalidateAll}
       />
+      <TemplatesDialog
+        open={openTemplates}
+        onClose={() => setOpenTemplates(false)}
+        companyId={companyId}
+        config={mpConfig}
+        onSaved={refetchMP}
+      />
     </div>
   );
 }
