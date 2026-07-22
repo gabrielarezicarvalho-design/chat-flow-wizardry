@@ -411,6 +411,38 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
           </Button>
         </div>
       </div>
+
+      <Dialog open={!!upgradeItem} onOpenChange={(open) => !open && setUpgradeItem(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+              <SparklesIcon className="w-6 h-6 text-primary" />
+            </div>
+            <DialogTitle className="text-center">
+              {upgradeItem?.label} está bloqueado
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Este recurso não está incluído no seu plano atual. Faça upgrade para desbloquear{" "}
+              <span className="font-medium text-foreground">{upgradeItem?.label}</span> e outras
+              funcionalidades avançadas.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center gap-2">
+            <Button variant="outline" onClick={() => setUpgradeItem(null)}>
+              Agora não
+            </Button>
+            <Button
+              onClick={() => {
+                setUpgradeItem(null);
+                navigate("/settings?tab=billing");
+              }}
+            >
+              <SparklesIcon className="w-4 h-4 mr-2" />
+              Gerenciar Plano
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </aside>
   );
 };
