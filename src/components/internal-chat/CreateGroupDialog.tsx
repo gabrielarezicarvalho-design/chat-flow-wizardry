@@ -85,10 +85,11 @@ export const CreateGroupDialog = ({ open, onOpenChange, allUsers }: CreateGroupD
               <User className="h-4 w-4" />
               Privado
             </TabsTrigger>
-            <TabsTrigger value="group" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
+            <TabsTrigger value="group" className="flex items-center gap-2" disabled={!isAdmin}>
+              {isAdmin ? <Users className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
               Grupo
             </TabsTrigger>
+
           </TabsList>
 
           <TabsContent value="private" className="space-y-4">
