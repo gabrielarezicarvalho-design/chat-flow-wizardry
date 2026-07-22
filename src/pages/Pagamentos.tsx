@@ -1767,6 +1767,8 @@ function TemplatesDialog({
         setOdDeadline(config.ondemand_deadline_hours ?? 24);
         setOdInterval(config.ondemand_interval_hours ?? 12);
         setOdMax(config.ondemand_max_reminders ?? 3);
+        setOdMinValor(config.ondemand_min_valor != null ? String(config.ondemand_min_valor) : "");
+        setOdMaxValor(config.ondemand_max_valor != null ? String(config.ondemand_max_valor) : "");
         if (config.ondemand_template) setOdTemplate(config.ondemand_template);
       }
     }
