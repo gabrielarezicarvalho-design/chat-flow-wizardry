@@ -40,6 +40,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+const slugify = (u: { full_name: string | null; username: string | null }) =>
+  (u.username || u.full_name || '').toLowerCase().replace(/\s+/g, '');
+
+const MENTION_TOKEN_RE = /@([\w.-]+)/g;
+
 const InternalChatContent = () => {
   const { isAdmin } = useUserRole();
   const {
@@ -54,6 +59,7 @@ const InternalChatContent = () => {
     removeReaction,
     deleteMessage,
     markAsRead,
+    uploadFile,
   } = useInternalChat();
   const { data: companyUsers = [] } = useCompanyUsers();
   const allUsers = companyUsers.map(u => ({
@@ -63,6 +69,11 @@ const InternalChatContent = () => {
     is_online: u.is_online ?? null,
   }));
 
+  const userSlugMap = useMemo(() => {
+    const m = new Map<string, typeof allUsers[number]>();
+    allUsers.forEach((u) => m.set(slugify(u), u));
+    return m;
+  }, [allUsers]);
 
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,8 +83,12 @@ const InternalChatContent = () => {
   const [taskForUser, setTaskForUser] = useState<string | null>(null);
   const [reactionFor, setReactionFor] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('chats');
-  
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -87,6 +102,72 @@ const InternalChatContent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRoom?.id, messages?.length]);
 
+  const parseMentions = (text: string): string[] => {
+    const ids: string[] = [];
+    for (const match of text.matchAll(MENTION_TOKEN_RE)) {
+      const u = userSlugMap.get(match[1].toLowerCase());
+      if (u) ids.push(u.id);
+    }
+    return ids;
+  };
+
+  const renderContent = (text: string | null) => {
+    if (!text) return null;
+    const parts = text.split(/(@[\w.-]+)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('@')) {
+        const slug = part.slice(1).toLowerCase();
+        if (userSlugMap.has(slug)) {
+          return (
+            <span key={i} className="text-primary font-medium bg-primary/10 rounded px-1">
+              {part}
+            </span>
+          );
+        }
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
+  const mentionSuggestions = useMemo(() => {
+    if (mentionQuery === null) return [];
+    const q = mentionQuery.toLowerCase();
+    return allUsers
+      .filter((u) => {
+        if (!q) return true;
+        return (
+          slugify(u).includes(q) ||
+          (u.full_name || '').toLowerCase().includes(q)
+        );
+      })
+      .slice(0, 6);
+  }, [mentionQuery, allUsers]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setMessageInput(v);
+    const caret = e.target.selectionStart ?? v.length;
+    const before = v.slice(0, caret);
+    const m = before.match(/@([\w.-]*)$/);
+    setMentionQuery(m ? m[1] : null);
+  };
+
+  const insertMention = (u: { full_name: string | null; username: string | null }) => {
+    const slug = slugify(u);
+    const el = inputRef.current;
+    const caret = el?.selectionStart ?? messageInput.length;
+    const before = messageInput.slice(0, caret);
+    const after = messageInput.slice(caret);
+    const replaced = before.replace(/@([\w.-]*)$/, `@${slug} `);
+    const next = replaced + after;
+    setMessageInput(next);
+    setMentionQuery(null);
+    setTimeout(() => {
+      el?.focus();
+      const pos = replaced.length;
+      el?.setSelectionRange(pos, pos);
+    }, 0);
+  };
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedRoom) return;
@@ -95,11 +176,13 @@ const InternalChatContent = () => {
       roomId: selectedRoom.id,
       content: messageInput,
       type: 'text',
-      replyTo: replyTo?.id
+      replyTo: replyTo?.id,
+      mentions: parseMentions(messageInput),
     });
 
     setMessageInput('');
     setReplyTo(null);
+    setMentionQuery(null);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -108,6 +191,31 @@ const InternalChatContent = () => {
       handleSendMessage();
     }
   };
+
+  const handleFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !selectedRoom) return;
+    try {
+      setUploading(true);
+      const { url, name } = await uploadFile(file, selectedRoom.id);
+      const isImage = file.type.startsWith('image/');
+      await sendMessage.mutateAsync({
+        roomId: selectedRoom.id,
+        content: messageInput.trim() || (isImage ? '' : name),
+        type: isImage ? 'image' : 'file',
+        replyTo: replyTo?.id,
+        fileUrl: url,
+        fileName: name,
+        mentions: parseMentions(messageInput),
+      });
+      setMessageInput('');
+      setReplyTo(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
 
   const getRoomDisplayName = (room: ChatRoom) => {
     if (room.type === 'group') return room.name || 'Grupo';
