@@ -505,6 +505,11 @@ export default function Pagamentos() {
         <TabsContent value="historico">
           <ReminderHistoryPanel companyId={companyId} />
         </TabsContent>
+
+        {/* RECORRÊNCIAS */}
+        <TabsContent value="recorrentes">
+          <RecorrentesPanel companyId={companyId} userId={user?.id ?? null} />
+        </TabsContent>
       </Tabs>
 
       {/* DIALOGS */}
