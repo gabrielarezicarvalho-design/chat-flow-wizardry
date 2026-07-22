@@ -1304,6 +1304,11 @@ export type Database = {
           created_at: string
           default_connection_id: string | null
           id: string
+          ondemand_deadline_hours: number
+          ondemand_interval_hours: number
+          ondemand_max_reminders: number
+          ondemand_reminders_enabled: boolean
+          ondemand_template: string
           pix_template: string | null
           remind_after_due: boolean
           reminder_days_before: number
@@ -1323,6 +1328,11 @@ export type Database = {
           created_at?: string
           default_connection_id?: string | null
           id?: string
+          ondemand_deadline_hours?: number
+          ondemand_interval_hours?: number
+          ondemand_max_reminders?: number
+          ondemand_reminders_enabled?: boolean
+          ondemand_template?: string
           pix_template?: string | null
           remind_after_due?: boolean
           reminder_days_before?: number
@@ -1342,6 +1352,11 @@ export type Database = {
           created_at?: string
           default_connection_id?: string | null
           id?: string
+          ondemand_deadline_hours?: number
+          ondemand_interval_hours?: number
+          ondemand_max_reminders?: number
+          ondemand_reminders_enabled?: boolean
+          ondemand_template?: string
           pix_template?: string | null
           remind_after_due?: boolean
           reminder_days_before?: number
