@@ -292,9 +292,10 @@ async function executeToolCall(
       // Guarda de confirmação: se o valor veio do cliente, exige confirmação explícita antes de gerar o PIX
       if (valorOrigem === "cliente" && !confirmado) {
         return {
-          result: `AGUARDANDO CONFIRMAÇÃO: o valor R$ ${valor.toFixed(2)} foi informado pelo cliente para a referência "${referencia}". NÃO gere o PIX ainda. Responda ao cliente confirmando explicitamente: "Só para confirmar: você quer gerar um PIX de R$ ${valor.toFixed(2)} para ${descricao} (ref: ${referencia})? (sim/não)". Só chame criar_cobranca_pix novamente com "confirmado": true depois que o cliente responder "sim" ou equivalente.`,
+          result: `AGUARDANDO CONFIRMAÇÃO: o valor R$ ${valor.toFixed(2)} foi informado pelo cliente para a referência "${referencia}". NÃO gere o PIX ainda. Responda ao cliente EXATAMENTE assim: "Só para confirmar: você quer gerar um PIX de *R$ ${valor.toFixed(2)}* para ${descricao} (ref: ${referencia})? Se o valor estiver errado, é só me dizer o valor correto que eu ajusto. (sim / corrigir)". REGRAS PÓS-PERGUNTA: (a) se o cliente confirmar ("sim", "pode gerar", "confirmo", "ok"), chame criar_cobranca_pix de novo com "confirmado": true e o MESMO valor. (b) se o cliente informar um NOVO valor ("na verdade é 250", "o certo é 199,90", "corrigir para 300"), CANCELE o envio anterior e chame criar_cobranca_pix novamente com o NOVO valor, "valor_origem":"cliente" e "confirmado":false — pedindo nova confirmação. (c) se o cliente disser "não", "cancelar", "desistir", NÃO gere o PIX e responda "Sem problemas, cancelei a cobrança. Se mudar de ideia é só me avisar. 👍" sem chamar a ferramenta.`,
         };
       }
+
 
 
       // Verifica Mercado Pago
