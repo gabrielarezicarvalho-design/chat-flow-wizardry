@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       description: cobranca.descricao || `Cobrança ${cobranca.cliente_nome}`,
       payment_method_id: "pix",
       payer: {
-        email: `cliente-${cobranca.id.slice(0, 8)}@marketflow.local`,
+        email: `cliente${cobranca.id.slice(0, 8)}@nextpro.com.br`,
         first_name: cobranca.cliente_nome?.split(" ")[0] || "Cliente",
       },
     };
