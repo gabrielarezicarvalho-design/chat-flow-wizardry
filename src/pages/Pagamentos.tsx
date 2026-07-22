@@ -1747,6 +1747,8 @@ function TemplatesDialog({
   const [odDeadline, setOdDeadline] = useState(24);
   const [odInterval, setOdInterval] = useState(12);
   const [odMax, setOdMax] = useState(3);
+  const [odMinValor, setOdMinValor] = useState<string>("");
+  const [odMaxValor, setOdMaxValor] = useState<string>("");
   const [odTemplate, setOdTemplate] = useState(
     "Oi {cliente}! 👋 Notei que o PIX de *R$ {valor}* ({descricao} — ref: {referencia}) ainda não foi pago. Envio novamente para facilitar: {pix_copia_cola} — Qualquer dúvida é só me chamar. 🙌"
   );
@@ -1765,6 +1767,8 @@ function TemplatesDialog({
         setOdDeadline(config.ondemand_deadline_hours ?? 24);
         setOdInterval(config.ondemand_interval_hours ?? 12);
         setOdMax(config.ondemand_max_reminders ?? 3);
+        setOdMinValor(config.ondemand_min_valor != null ? String(config.ondemand_min_valor) : "");
+        setOdMaxValor(config.ondemand_max_valor != null ? String(config.ondemand_max_valor) : "");
         if (config.ondemand_template) setOdTemplate(config.ondemand_template);
       }
     }
@@ -1797,12 +1801,24 @@ function TemplatesDialog({
     if (!companyId) return toast.error("Empresa não encontrada");
     setSaving(true);
     try {
+      const parseNum = (v: string) => {
+        const n = parseFloat(String(v).replace(",", "."));
+        return Number.isFinite(n) && n > 0 ? n : null;
+      };
+      const minN = parseNum(odMinValor);
+      const maxN = parseNum(odMaxValor);
+      if (minN != null && maxN != null && minN > maxN) {
+        setSaving(false);
+        return toast.error("Valor mínimo não pode ser maior que o máximo");
+      }
       const payload: any = {
         reminder_templates: tpls,
         ondemand_reminders_enabled: odEnabled,
         ondemand_deadline_hours: Number(odDeadline) || 24,
         ondemand_interval_hours: Number(odInterval) || 12,
         ondemand_max_reminders: Number(odMax) || 3,
+        ondemand_min_valor: minN,
+        ondemand_max_valor: maxN,
         ondemand_template: odTemplate,
       };
       if (config) {
@@ -1925,6 +1941,37 @@ function TemplatesDialog({
                   />
                 </div>
               </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[11px]">Valor mínimo (R$)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    placeholder="Sem limite"
+                    value={odMinValor}
+                    onChange={(e) => setOdMinValor(e.target.value)}
+                    className="h-8"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[11px]">Valor máximo (R$)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    placeholder="Sem limite"
+                    value={odMaxValor}
+                    onChange={(e) => setOdMaxValor(e.target.value)}
+                    className="h-8"
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground -mt-1">
+                A IA bloqueia PIX fora desta faixa e pede um novo valor ao cliente. Deixe em branco para não limitar.
+              </p>
+
 
               <div>
                 <Label className="text-[11px]">Mensagem</Label>
