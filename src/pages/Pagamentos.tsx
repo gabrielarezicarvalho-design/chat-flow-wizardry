@@ -1759,6 +1759,7 @@ function TemplatesDialog({
     .replace(/\{nome\}/g, "Maria Silva")
     .replace(/\{valor\}/g, "149,90")
     .replace(/\{descricao\}/g, "Mensalidade Novembro");
+  const [testOpen, setTestOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
