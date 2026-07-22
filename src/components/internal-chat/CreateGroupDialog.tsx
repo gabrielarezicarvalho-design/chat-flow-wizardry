@@ -33,10 +33,12 @@ interface CreateGroupDialogProps {
 export const CreateGroupDialog = ({ open, onOpenChange, allUsers }: CreateGroupDialogProps) => {
   const { createRoom } = useInternalChat();
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const currentUserId = user?.id;
   const [chatType, setChatType] = useState<'private' | 'group'>('private');
   const [groupName, setGroupName] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+
 
   const availableUsers = allUsers.filter(u => u.id !== currentUserId);
 
