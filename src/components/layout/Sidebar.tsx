@@ -218,8 +218,10 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
 
   const getFilteredNavItems = () => {
     const baseItems = isAdmin ? adminNavItems : agentNavItems;
+    // Manter "Agentes IA" visível mesmo bloqueado; demais features seguem regra padrão
     return baseItems.filter(item => {
       if (!item.feature) return true;
+      if (item.to === "/agents") return true;
       return hasAccess(item.feature);
     });
   };
