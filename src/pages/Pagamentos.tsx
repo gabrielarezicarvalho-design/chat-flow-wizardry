@@ -1777,6 +1777,8 @@ function TemplatesDialog({
         setOdMinValor(config.ondemand_min_valor != null ? String(config.ondemand_min_valor) : "");
         setOdMaxValor(config.ondemand_max_valor != null ? String(config.ondemand_max_valor) : "");
         if (config.ondemand_template) setOdTemplate(config.ondemand_template);
+        setConfEnabled(config.confirmation_enabled ?? true);
+        if (config.confirmation_template) setConfTemplate(config.confirmation_template);
       }
     }
   }, [open, config]);
