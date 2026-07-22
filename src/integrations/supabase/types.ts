@@ -1307,6 +1307,8 @@ export type Database = {
           ondemand_deadline_hours: number
           ondemand_interval_hours: number
           ondemand_max_reminders: number
+          ondemand_max_valor: number | null
+          ondemand_min_valor: number | null
           ondemand_reminders_enabled: boolean
           ondemand_template: string
           pix_template: string | null
@@ -1331,6 +1333,8 @@ export type Database = {
           ondemand_deadline_hours?: number
           ondemand_interval_hours?: number
           ondemand_max_reminders?: number
+          ondemand_max_valor?: number | null
+          ondemand_min_valor?: number | null
           ondemand_reminders_enabled?: boolean
           ondemand_template?: string
           pix_template?: string | null
@@ -1355,6 +1359,8 @@ export type Database = {
           ondemand_deadline_hours?: number
           ondemand_interval_hours?: number
           ondemand_max_reminders?: number
+          ondemand_max_valor?: number | null
+          ondemand_min_valor?: number | null
           ondemand_reminders_enabled?: boolean
           ondemand_template?: string
           pix_template?: string | null
