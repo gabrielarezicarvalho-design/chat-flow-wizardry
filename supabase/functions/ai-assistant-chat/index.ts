@@ -866,10 +866,17 @@ Ferramentas:
    Use quando: problema complexo, cliente insatisfeito, ou solicitação exige acompanhamento.
    Exemplo: [[TOOL:criar_ticket|{"motivo":"Cobrança indevida","resumo":"Cliente contesta fatura de R$ 200","prioridade":"alta"}]]
 
+4. criar_cobranca_pix — Gera uma cobrança PIX sob demanda e envia o QR Code + copia-e-cola no WhatsApp do próprio cliente automaticamente.
+   Args: {"valor": 150.00, "descricao": "Mensalidade novembro", "cliente_nome": "opcional — usa o nome do contato se vazio"}
+   Use quando: cliente pedir para pagar algo, solicitar cobrança, informar valor de serviço, ou aceitar orçamento.
+   IMPORTANTE: confirme o valor e o serviço com o cliente ANTES de chamar. Nunca invente valores.
+   Exemplo: [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Mensalidade novembro"}]]
+   Após executar, o PIX é enviado automaticamente ao cliente — apenas confirme na mensagem seguinte.
+
 REGRAS:
 - Chame ferramentas apenas quando fizer sentido; nunca invente dados.
 - NÃO escreva a tag [[TOOL:...]] entre aspas ou como exemplo — sempre que aparecer no texto será executada.
-- Após buscar_pedido, aguarde o resultado antes de responder ao cliente com os dados.`;
+- Após buscar_pedido ou criar_cobranca_pix, aguarde o resultado antes de responder ao cliente com os dados.`;
 
     // ============ RAG: busca semântica na base de conhecimento ============
     let knowledgeContent = "";
