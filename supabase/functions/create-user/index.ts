@@ -215,8 +215,8 @@ serve(async (req) => {
     
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
-      .update(profileUpdate)
-      .eq('id', userId);
+      .upsert({ id: userId, ...profileUpdate }, { onConflict: 'id' });
+
 
     if (profileError) {
       console.error("Profile update error:", profileError);
