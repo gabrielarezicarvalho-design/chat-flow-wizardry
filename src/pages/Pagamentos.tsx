@@ -1393,6 +1393,10 @@ function NovoCustoDialog({
 function ReminderHistoryPanel({ companyId }: { companyId?: string | null }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "success" | "error">("all");
+  const [cobrancaFilter, setCobrancaFilter] = useState<string>("all");
+  const [clienteFilter, setClienteFilter] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
   const [selected, setSelected] = useState<any | null>(null);
 
   const { data: items = [], isLoading } = useQuery({
@@ -1401,7 +1405,7 @@ function ReminderHistoryPanel({ companyId }: { companyId?: string | null }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pix_reminder_history")
-        .select("*")
+        .select("*, cobrancas(descricao, cliente_nome)")
         .eq("company_id", companyId)
         .order("created_at", { ascending: false })
         .limit(500);
@@ -1410,49 +1414,151 @@ function ReminderHistoryPanel({ companyId }: { companyId?: string | null }) {
     },
   });
 
+  // Opções únicas para os selects
+  const cobrancaOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    (items as any[]).forEach((r) => {
+      if (r.cobranca_id) {
+        const label =
+          r.cobrancas?.descricao ||
+          r.cobrancas?.cliente_nome ||
+          r.cliente_nome ||
+          r.cobranca_id.slice(0, 8);
+        map.set(r.cobranca_id, label);
+      }
+    });
+    return Array.from(map.entries());
+  }, [items]);
+
+  const clienteOptions = useMemo(() => {
+    const set = new Set<string>();
+    (items as any[]).forEach((r) => {
+      if (r.cliente_nome) set.add(r.cliente_nome);
+    });
+    return Array.from(set).sort();
+  }, [items]);
+
   const filtered = useMemo(() => {
     const s = search.trim().toLowerCase();
+    const fromTs = dateFrom ? new Date(dateFrom + "T00:00:00").getTime() : null;
+    const toTs = dateTo ? new Date(dateTo + "T23:59:59").getTime() : null;
+
     return (items as any[]).filter((r) => {
       if (statusFilter === "success" && !r.success) return false;
       if (statusFilter === "error" && r.success) return false;
+      if (cobrancaFilter !== "all" && r.cobranca_id !== cobrancaFilter) return false;
+      if (clienteFilter !== "all" && r.cliente_nome !== clienteFilter) return false;
+
+      const ts = new Date(r.created_at).getTime();
+      if (fromTs && ts < fromTs) return false;
+      if (toTs && ts > toTs) return false;
+
       if (!s) return true;
       return (
         (r.cliente_nome || "").toLowerCase().includes(s) ||
         (r.telefone || "").toLowerCase().includes(s) ||
-        (r.message_text || "").toLowerCase().includes(s)
+        (r.message_text || "").toLowerCase().includes(s) ||
+        (r.pix_copia_cola || "").toLowerCase().includes(s) ||
+        (r.link_pagamento || "").toLowerCase().includes(s)
       );
     });
-  }, [items, search, statusFilter]);
+  }, [items, search, statusFilter, cobrancaFilter, clienteFilter, dateFrom, dateTo]);
+
+  const clearFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+    setCobrancaFilter("all");
+    setClienteFilter("all");
+    setDateFrom("");
+    setDateTo("");
+  };
+
+  const hasFilters =
+    !!search ||
+    statusFilter !== "all" ||
+    cobrancaFilter !== "all" ||
+    clienteFilter !== "all" ||
+    !!dateFrom ||
+    !!dateTo;
 
   return (
     <Card>
       <CardContent className="p-4 space-y-4">
-        <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-          <div>
-            <p className="font-semibold">Histórico de lembretes de Pix</p>
-            <p className="text-xs text-muted-foreground">
-              Registros de todos os envios (manuais e automáticos)
-            </p>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-semibold">Histórico de lembretes de Pix</p>
+              <p className="text-xs text-muted-foreground">
+                {filtered.length} de {items.length} registros
+              </p>
+            </div>
+            {hasFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                Limpar filtros
+              </Button>
+            )}
           </div>
-          <div className="flex gap-2">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2">
             <Input
-              placeholder="Buscar cliente, telefone ou mensagem…"
+              placeholder="Buscar cliente, telefone, mensagem, pix ou link…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="md:w-72"
+              className="lg:col-span-2"
             />
+            <Select value={cobrancaFilter} onValueChange={setCobrancaFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Cobrança" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas cobranças</SelectItem>
+                {cobrancaOptions.map(([id, label]) => (
+                  <SelectItem key={id} value={id}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={clienteFilter} onValueChange={setClienteFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Cliente" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos clientes</SelectItem>
+                {clienteOptions.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="all">Todos status</SelectItem>
                 <SelectItem value="success">Sucesso</SelectItem>
                 <SelectItem value="error">Falhas</SelectItem>
               </SelectContent>
             </Select>
+            <div className="flex gap-1">
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                title="De"
+              />
+              <Input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                title="Até"
+              />
+            </div>
           </div>
         </div>
+
 
         {isLoading ? (
           <EmptyState label="Carregando..." />
