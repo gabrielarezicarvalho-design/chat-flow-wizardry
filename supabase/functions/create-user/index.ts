@@ -42,17 +42,18 @@ serve(async (req) => {
     const caller = { id: claimsData.claims.sub as string };
 
     // Check if caller has admin role
-    const { data: callerRole, error: roleError } = await supabaseAdmin
+    const { data: callerRoles, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('role')
-      .eq('user_id', caller.id)
-      .single();
+      .eq('user_id', caller.id);
 
-    if (roleError || callerRole?.role !== 'admin') {
-      console.error("Role check failed:", roleError, callerRole);
+    const isAdmin = !roleError && (callerRoles ?? []).some((r: any) => r.role === 'admin');
+    if (!isAdmin) {
+      console.error("Role check failed:", roleError, callerRoles);
       return new Response(
         JSON.stringify({ success: false, error: "Apenas administradores podem criar usuários" }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+
       );
     }
 
