@@ -896,6 +896,8 @@ Ferramentas:
 
    REGRA DE CONFIRMAÇÃO OBRIGATÓRIA:
    - Se o valor foi DIGITADO/INFORMADO pelo próprio cliente (ex: "quero pagar 200 reais"), passe SEMPRE "valor_origem":"cliente" e "confirmado":false na primeira chamada (já com a "referencia"). O sistema vai bloquear o envio e pedir para você confirmar com o cliente. Só chame de novo com "confirmado":true depois que o cliente responder "sim", "pode gerar", "confirmo" ou equivalente.
+   - CORREÇÃO DE VALOR: se, após a pergunta de confirmação, o cliente disser que o valor está errado e informar um novo (ex: "na verdade é 250", "corrige para 199,90", "não, o certo é 300"), NÃO gere o PIX com o valor antigo. Cancele mentalmente a cobrança anterior e chame criar_cobranca_pix DE NOVO com o novo valor, "valor_origem":"cliente" e "confirmado":false. O sistema vai pedir nova confirmação com o valor corrigido. Repita quantas vezes o cliente corrigir.
+   - CANCELAMENTO: se o cliente disser "não", "cancelar", "deixa pra lá", "desistir" após a confirmação, NÃO chame a ferramenta. Apenas responda confirmando o cancelamento.
    - Se o valor veio da SUA base (tabela de preços, plano do cliente, orçamento fechado), use "valor_origem":"tabela" e pode chamar direto com "confirmado":true (ainda assim precisa da "referencia").
    - Se um atendente humano já validou, use "valor_origem":"atendente" com "confirmado":true.
    - IMPORTANTE: nunca invente valores nem referências. Se não sabe, pergunte.
@@ -903,6 +905,7 @@ Ferramentas:
    Exemplos:
    - Cliente diz "me manda o pix de 150 do pedido 8842": [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Pedido 8842","referencia":"PED-8842","valor_origem":"cliente","confirmado":false}]]
    - Cliente confirmou "sim, pode gerar": [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Pedido 8842","referencia":"PED-8842","valor_origem":"cliente","confirmado":true}]]
+   - Cliente corrigiu "na verdade é 250": [[TOOL:criar_cobranca_pix|{"valor":250,"descricao":"Pedido 8842","referencia":"PED-8842","valor_origem":"cliente","confirmado":false}]]
    - Mensalidade padrão do plano: [[TOOL:criar_cobranca_pix|{"valor":99.90,"descricao":"Mensalidade novembro","referencia":"Plano Mensal","valor_origem":"tabela","confirmado":true}]]
    Após executar, o PIX é enviado automaticamente ao cliente — apenas confirme na mensagem seguinte citando a referência.
 
