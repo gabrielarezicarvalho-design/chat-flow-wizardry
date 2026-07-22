@@ -1214,7 +1214,7 @@ export type Database = {
           created_at: string
           default_connection_id: string | null
           id: string
-          pix_template: string
+          pix_template: string | null
           remind_after_due: boolean
           reminder_days_before: number
           reminder_interval_hours: number
@@ -1231,7 +1231,7 @@ export type Database = {
           created_at?: string
           default_connection_id?: string | null
           id?: string
-          pix_template?: string
+          pix_template?: string | null
           remind_after_due?: boolean
           reminder_days_before?: number
           reminder_interval_hours?: number
@@ -1248,7 +1248,7 @@ export type Database = {
           created_at?: string
           default_connection_id?: string | null
           id?: string
-          pix_template?: string
+          pix_template?: string | null
           remind_after_due?: boolean
           reminder_days_before?: number
           reminder_interval_hours?: number
