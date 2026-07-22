@@ -333,12 +333,7 @@ export const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
                 <button
                   key={item.to}
                   type="button"
-                  onClick={() =>
-                    toast({
-                      title: "Recurso bloqueado",
-                      description: `"${item.label}" não está disponível no seu plano. Faça upgrade para desbloquear.`,
-                    })
-                  }
+                  onClick={() => setUpgradeItem(item)}
                   className={cn(
                     "w-full flex items-center gap-3 rounded-lg text-white/50 hover:bg-white/10 transition-all group relative cursor-not-allowed",
                     collapsed ? "px-3 py-3 justify-center" : "px-4 py-3"
