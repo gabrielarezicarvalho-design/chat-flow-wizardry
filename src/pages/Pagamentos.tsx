@@ -22,7 +22,9 @@ import {
   History,
   FileText,
   Wand2,
+  Repeat,
 } from "lucide-react";
+import { RecorrentesPanel } from "@/components/pagamentos/RecorrentesPanel";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
