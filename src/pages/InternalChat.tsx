@@ -282,6 +282,11 @@ const InternalChatContent = () => {
                 ) : (
                   messages?.map((msg) => {
                     const senderName = msg.sender?.full_name || msg.sender?.username || 'Usuário';
+                    // Group reactions by emoji
+                    const reactionGroups = (msg.reactions ?? []).reduce<Record<string, typeof msg.reactions>>((acc, r) => {
+                      (acc[r.emoji] = acc[r.emoji] || []).push(r);
+                      return acc;
+                    }, {} as any);
 
                     return (
                       <div key={msg.id} className="flex gap-2 group">
@@ -290,7 +295,7 @@ const InternalChatContent = () => {
                             {getInitials(senderName)}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="max-w-[70%]">
+                        <div className="max-w-[70%] relative">
                           <div className={cn(
                             "rounded-lg px-3 py-2 relative bg-muted",
                             msg.is_pinned && "ring-2 ring-yellow-400"
@@ -299,12 +304,70 @@ const InternalChatContent = () => {
                             <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                             <span className="text-[10px] mt-1 block text-muted-foreground">
                               {format(new Date(msg.created_at), 'HH:mm')}
+                              {msg.is_pinned && <Pin className="h-3 w-3 inline ml-1 text-yellow-600" />}
                             </span>
+                          </div>
+
+                          {/* Reactions display */}
+                          {Object.keys(reactionGroups).length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {Object.entries(reactionGroups).map(([emoji, list]) => (
+                                <button
+                                  key={emoji}
+                                  onClick={() => {
+                                    const mine = list!.find((r) => r.user_id === msg.sender_id);
+                                    if (mine) removeReaction.mutate(mine.id);
+                                    else addReaction.mutate({ messageId: msg.id, emoji });
+                                  }}
+                                  className="bg-background border rounded-full px-1.5 py-0.5 text-xs hover:bg-accent"
+                                >
+                                  {emoji} {list!.length}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Hover action bar */}
+                          <div className="absolute -top-3 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-card border rounded-md shadow-sm px-1">
+                            <Popover open={reactionFor === msg.id} onOpenChange={(o) => setReactionFor(o ? msg.id : null)}>
+                              <PopoverTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-6 w-6">
+                                  <Smile className="h-3.5 w-3.5" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-2">
+                                <EmojiPicker
+                                  onSelect={(emoji) => {
+                                    addReaction.mutate({ messageId: msg.id, emoji });
+                                    setReactionFor(null);
+                                  }}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => setReplyTo(msg)}
+                              title="Responder"
+                            >
+                              <Reply className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => pinMessage.mutate(msg.id)}
+                              title={msg.is_pinned ? 'Desafixar' : 'Fixar'}
+                            >
+                              <Pin className={cn("h-3.5 w-3.5", msg.is_pinned && "text-yellow-600 fill-yellow-600")} />
+                            </Button>
                           </div>
                         </div>
                       </div>
                     );
                   })
+
                 )}
                 <div ref={messagesEndRef} />
               </div>
