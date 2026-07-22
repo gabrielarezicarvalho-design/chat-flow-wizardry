@@ -1385,3 +1385,199 @@ function NovoCustoDialog({
     </Dialog>
   );
 }
+
+/* ============================================================ */
+/*                 HISTÓRICO DE LEMBRETES                        */
+/* ============================================================ */
+
+function ReminderHistoryPanel({ companyId }: { companyId?: string | null }) {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "success" | "error">("all");
+  const [selected, setSelected] = useState<any | null>(null);
+
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ["pix-reminder-history", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pix_reminder_history")
+        .select("*")
+        .eq("company_id", companyId)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const filtered = useMemo(() => {
+    const s = search.trim().toLowerCase();
+    return (items as any[]).filter((r) => {
+      if (statusFilter === "success" && !r.success) return false;
+      if (statusFilter === "error" && r.success) return false;
+      if (!s) return true;
+      return (
+        (r.cliente_nome || "").toLowerCase().includes(s) ||
+        (r.telefone || "").toLowerCase().includes(s) ||
+        (r.message_text || "").toLowerCase().includes(s)
+      );
+    });
+  }, [items, search, statusFilter]);
+
+  return (
+    <Card>
+      <CardContent className="p-4 space-y-4">
+        <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+          <div>
+            <p className="font-semibold">Histórico de lembretes de Pix</p>
+            <p className="text-xs text-muted-foreground">
+              Registros de todos os envios (manuais e automáticos)
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Buscar cliente, telefone ou mensagem…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="md:w-72"
+            />
+            <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="success">Sucesso</SelectItem>
+                <SelectItem value="error">Falhas</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <EmptyState label="Carregando..." />
+        ) : filtered.length === 0 ? (
+          <EmptyState label="Nenhum lembrete registrado." />
+        ) : (
+          <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
+            {filtered.map((r: any) => (
+              <button
+                key={r.id}
+                onClick={() => setSelected(r)}
+                className="w-full text-left px-4 py-3 hover:bg-muted/30 flex items-center justify-between gap-3"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium truncate">
+                      {r.cliente_nome || r.telefone || "Sem cliente"}
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[10px]",
+                        r.success
+                          ? "border-emerald-500/40 text-emerald-500"
+                          : "border-red-500/40 text-red-500"
+                      )}
+                    >
+                      {r.success ? "Enviado" : "Falha"}
+                    </Badge>
+                    <Badge variant="outline" className="text-[10px]">
+                      {r.source === "manual" ? "manual" : "auto"}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {r.telefone || "—"} • {r.message_text?.slice(0, 80) || ""}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(r.created_at).toLocaleString("pt-BR")}
+                  </p>
+                  {r.valor != null && (
+                    <p className="text-xs font-semibold">
+                      {formatBRL(Number(r.valor))}
+                    </p>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </CardContent>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Detalhes do lembrete</DialogTitle>
+          </DialogHeader>
+          {selected && (
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <Info label="Data/hora" value={new Date(selected.created_at).toLocaleString("pt-BR")} />
+                <Info label="Status" value={selected.success ? "Enviado" : "Falha"} />
+                <Info label="Origem" value={selected.source === "manual" ? "Manual" : "Cron automático"} />
+                <Info label="Cliente" value={selected.cliente_nome || "—"} />
+                <Info label="Telefone" value={selected.telefone || "—"} />
+                <Info label="Valor" value={selected.valor != null ? formatBRL(Number(selected.valor)) : "—"} />
+                <Info
+                  label="Vencimento"
+                  value={selected.vencimento ? new Date(selected.vencimento + "T00:00:00").toLocaleDateString("pt-BR") : "—"}
+                />
+              </div>
+
+              <div>
+                <Label className="text-xs">Template usado</Label>
+                <Textarea readOnly value={selected.template || ""} className="font-mono text-xs" rows={4} />
+              </div>
+
+              <div>
+                <Label className="text-xs">Mensagem enviada</Label>
+                <Textarea readOnly value={selected.message_text || ""} rows={5} />
+              </div>
+
+              {selected.pix_copia_cola && (
+                <div>
+                  <Label className="text-xs">Pix copia e cola</Label>
+                  <Textarea readOnly value={selected.pix_copia_cola} className="font-mono text-xs" rows={3} />
+                </div>
+              )}
+
+              {selected.link_pagamento && (
+                <div>
+                  <Label className="text-xs">Link de pagamento</Label>
+                  <div className="flex gap-2">
+                    <Input readOnly value={selected.link_pagamento} />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => window.open(selected.link_pagamento, "_blank")}
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {!selected.success && selected.error_message && (
+                <div>
+                  <Label className="text-xs text-red-500">Erro</Label>
+                  <Textarea readOnly value={selected.error_message} rows={2} className="text-red-500" />
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[11px] uppercase text-muted-foreground">{label}</p>
+      <p className="font-medium">{value}</p>
+    </div>
+  );
+}
