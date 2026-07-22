@@ -489,6 +489,11 @@ export default function Pagamentos() {
             onSaved={() => refetchMP()}
           />
         </TabsContent>
+
+        {/* HISTÓRICO DE LEMBRETES */}
+        <TabsContent value="historico">
+          <ReminderHistoryPanel companyId={companyId} />
+        </TabsContent>
       </Tabs>
 
       {/* DIALOGS */}
