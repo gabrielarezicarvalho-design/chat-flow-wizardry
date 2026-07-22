@@ -1829,6 +1829,8 @@ function TemplatesDialog({
         ondemand_min_valor: minN,
         ondemand_max_valor: maxN,
         ondemand_template: odTemplate,
+        confirmation_enabled: confEnabled,
+        confirmation_template: confTemplate,
       };
       if (config) {
         const { error } = await supabase
