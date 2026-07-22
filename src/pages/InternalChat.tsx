@@ -50,6 +50,7 @@ const MENTION_TOKEN_RE = /@([\w.-]+)/g;
 
 const InternalChatContent = () => {
   const { isAdmin } = useUserRole();
+  const { user } = useAuth();
   const {
     rooms,
     roomsLoading,
@@ -63,8 +64,10 @@ const InternalChatContent = () => {
     deleteMessage,
     markAsRead,
     uploadFile,
+    unreadMentions,
   } = useInternalChat();
   const { data: companyUsers = [] } = useCompanyUsers();
+
   const allUsers = companyUsers.map(u => ({
     id: u.id,
     full_name: u.full_name,
