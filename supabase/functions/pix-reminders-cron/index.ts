@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     // Load all MP configs with reminders enabled
     const { data: configs, error: cfgErr } = await supabase
       .from("mercado_pago_configs")
-      .select("company_id, reminders_enabled, reminder_days_before, reminder_interval_hours, remind_after_due, reminder_template, pix_template, default_connection_id")
+      .select("company_id, reminders_enabled, reminder_days_before, reminder_interval_hours, remind_after_due, reminder_template, reminder_templates, pix_template, default_connection_id")
       .eq("reminders_enabled", true);
     if (cfgErr) throw cfgErr;
 
