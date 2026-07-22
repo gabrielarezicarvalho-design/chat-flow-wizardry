@@ -566,5 +566,7 @@ export const useInternalChat = () => {
     updateTask,
     deleteTask,
     uploadFile,
+    markAsRead,
   };
+
 };
