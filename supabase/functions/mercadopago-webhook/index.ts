@@ -127,6 +127,19 @@ Deno.serve(async (req) => {
         console.error("Erro atualizando cobrança", upErr);
       } else {
         console.log("Cobrança atualizada", { id: cobranca.id, status: newStatus });
+
+        // Dispara envio automático da confirmação de pagamento no WhatsApp
+        if (newStatus === "paid") {
+          try {
+            const { error: sendErr } = await supabase.functions.invoke(
+              "pix-send-confirmation",
+              { body: { cobrancaId: cobranca.id } }
+            );
+            if (sendErr) console.error("Falha ao enviar confirmação", sendErr);
+          } catch (e) {
+            console.error("Erro invocando pix-send-confirmation", e);
+          }
+        }
       }
     }
 
