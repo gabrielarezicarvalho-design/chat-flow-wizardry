@@ -212,7 +212,8 @@ function RecorrenteDialog({
     },
   });
 
-  useState(() => {
+  useEffect(() => {
+    if (!open) return;
     if (editing) {
       setForm({
         cliente_nome: editing.cliente_nome || "",
@@ -236,7 +237,7 @@ function RecorrenteDialog({
         connection_id: "",
       });
     }
-  });
+  }, [open, editing]);
 
   const submit = async () => {
     if (!companyId) return toast.error("Empresa não identificada");
