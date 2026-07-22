@@ -650,8 +650,17 @@ const InternalChatContent = () => {
               </div>
             )}
 
+            {/* Typing indicator */}
+            {Object.keys(typingUsers).length > 0 && (
+              <div className="px-4 py-1 text-xs text-muted-foreground italic border-t bg-card shrink-0">
+                {Object.values(typingUsers).map((u) => u.name).join(', ')}
+                {Object.keys(typingUsers).length === 1 ? ' está digitando…' : ' estão digitando…'}
+              </div>
+            )}
+
             {/* Message Input */}
             <div className="p-4 border-t bg-card shrink-0 relative">
+
               {mentionQuery !== null && mentionSuggestions.length > 0 && (
                 <div className="absolute bottom-full left-4 right-4 mb-1 max-h-56 overflow-y-auto bg-popover border rounded-md shadow-md z-10">
                   {mentionSuggestions.map((u) => (
