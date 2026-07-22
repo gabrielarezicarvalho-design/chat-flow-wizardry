@@ -91,10 +91,61 @@ const InternalChatContent = () => {
   const [activeTab, setActiveTab] = useState('chats');
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<Record<string, { name: string; ts: number }>>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const lastTypingSentRef = useRef<number>(0);
+
+  const myName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Alguém';
+
+  // Typing broadcast: join room channel
+  useEffect(() => {
+    if (!selectedRoom?.id || !user?.id) return;
+    const ch = supabase
+      .channel(`chat-typing-${selectedRoom.id}`, { config: { broadcast: { self: false } } })
+      .on('broadcast', { event: 'typing' }, (payload) => {
+        const { userId: uid, name } = (payload.payload ?? {}) as { userId: string; name: string };
+        if (!uid || uid === user.id) return;
+        setTypingUsers((prev) => ({ ...prev, [uid]: { name, ts: Date.now() } }));
+      })
+      .subscribe();
+    typingChannelRef.current = ch;
+    return () => {
+      supabase.removeChannel(ch);
+      typingChannelRef.current = null;
+      setTypingUsers({});
+    };
+  }, [selectedRoom?.id, user?.id]);
+
+  // Expire stale typing indicators
+  useEffect(() => {
+    const t = setInterval(() => {
+      setTypingUsers((prev) => {
+        const now = Date.now();
+        const next: typeof prev = {};
+        for (const [k, v] of Object.entries(prev)) {
+          if (now - v.ts < 4000) next[k] = v;
+        }
+        return next;
+      });
+    }, 1500);
+    return () => clearInterval(t);
+  }, []);
+
+  const broadcastTyping = () => {
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 2000) return;
+    lastTypingSentRef.current = now;
+    typingChannelRef.current?.send({
+      type: 'broadcast',
+      event: 'typing',
+      payload: { userId: user?.id, name: myName },
+    });
+  };
+
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
