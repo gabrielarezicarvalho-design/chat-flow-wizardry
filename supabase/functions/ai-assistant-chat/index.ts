@@ -280,11 +280,19 @@ async function executeToolCall(
       const clienteNome = String(call.args.cliente_nome || ctx.contactName || "Cliente").slice(0, 120);
       const valorOrigem = String(call.args.valor_origem || "").toLowerCase(); // "cliente" | "tabela" | "atendente"
       const confirmado = call.args.confirmado === true || call.args.confirmado === "true";
+      const referencia = String(call.args.referencia || call.args.pedido || call.args.servico_ref || "").trim().slice(0, 80);
+
+      // Exige referência (nº do pedido ou nome do serviço) antes de gerar o PIX
+      if (!referencia) {
+        return {
+          result: `AGUARDANDO REFERÊNCIA: peça ao cliente o número do pedido ou o nome do serviço vinculado a este PIX antes de gerar. Exemplo: "Para eu gerar o PIX, me confirma por favor: qual é o número do pedido ou o serviço referente a esta cobrança?". Só chame criar_cobranca_pix novamente incluindo o campo "referencia" com o valor informado pelo cliente.`,
+        };
+      }
 
       // Guarda de confirmação: se o valor veio do cliente, exige confirmação explícita antes de gerar o PIX
       if (valorOrigem === "cliente" && !confirmado) {
         return {
-          result: `AGUARDANDO CONFIRMAÇÃO: o valor R$ ${valor.toFixed(2)} foi informado pelo cliente. NÃO gere o PIX ainda. Responda ao cliente confirmando explicitamente: "Só para confirmar: você quer gerar um PIX de R$ ${valor.toFixed(2)} para ${descricao}? (sim/não)". Só chame criar_cobranca_pix novamente com "confirmado": true depois que o cliente responder "sim" ou equivalente.`,
+          result: `AGUARDANDO CONFIRMAÇÃO: o valor R$ ${valor.toFixed(2)} foi informado pelo cliente para a referência "${referencia}". NÃO gere o PIX ainda. Responda ao cliente confirmando explicitamente: "Só para confirmar: você quer gerar um PIX de R$ ${valor.toFixed(2)} para ${descricao} (ref: ${referencia})? (sim/não)". Só chame criar_cobranca_pix novamente com "confirmado": true depois que o cliente responder "sim" ou equivalente.`,
         };
       }
 
@@ -310,6 +318,7 @@ async function executeToolCall(
           telefone: ctx.contactPhone,
           valor,
           descricao,
+          referencia,
           vencimento: today,
           status: "pending",
           recorrencia: "avulsa",
@@ -379,8 +388,8 @@ async function executeToolCall(
 
         return {
           result: sent
-            ? `Cobrança PIX de R$ ${valor.toFixed(2)} criada e enviada ao cliente pelo WhatsApp com sucesso. Descrição: ${descricao}. Confirme o envio ao cliente de forma cordial.`
-            : `Cobrança PIX de R$ ${valor.toFixed(2)} criada (código PIX: ${copiaCola?.slice(0, 40)}...). O envio automático falhou — informe o cliente que um atendente vai encaminhar o PIX.`,
+            ? `Cobrança PIX de R$ ${valor.toFixed(2)} criada e enviada ao cliente pelo WhatsApp com sucesso. Referência: ${referencia}. Descrição: ${descricao}. Confirme o envio ao cliente citando a referência.`
+            : `Cobrança PIX de R$ ${valor.toFixed(2)} criada para a referência ${referencia} (código PIX: ${copiaCola?.slice(0, 40)}...). O envio automático falhou — informe o cliente que um atendente vai encaminhar o PIX.`,
         };
       } catch (e) {
         console.error("Erro gerando PIX:", e);
@@ -877,20 +886,24 @@ Ferramentas:
    Exemplo: [[TOOL:criar_ticket|{"motivo":"Cobrança indevida","resumo":"Cliente contesta fatura de R$ 200","prioridade":"alta"}]]
 
 4. criar_cobranca_pix — Gera uma cobrança PIX sob demanda e envia o QR Code + copia-e-cola no WhatsApp do próprio cliente automaticamente.
-   Args: {"valor": 150.00, "descricao": "Mensalidade novembro", "cliente_nome": "opcional", "valor_origem": "cliente|tabela|atendente", "confirmado": true|false}
+   Args: {"valor": 150.00, "descricao": "Mensalidade novembro", "referencia": "PED-1234 ou nome do serviço", "cliente_nome": "opcional", "valor_origem": "cliente|tabela|atendente", "confirmado": true|false}
    Use quando: cliente pedir para pagar algo, solicitar cobrança, informar valor de serviço, ou aceitar orçamento.
 
+   REGRA DE REFERÊNCIA OBRIGATÓRIA:
+   - SEMPRE peça e envie o campo "referencia" — pode ser o número do pedido, código do serviço, nome do serviço contratado ou identificador equivalente. Sem referência o sistema bloqueia a geração.
+   - Se o cliente não informou, pergunte antes: "Para eu gerar o PIX, me confirma por favor: qual o número do pedido ou serviço referente a esta cobrança?".
+
    REGRA DE CONFIRMAÇÃO OBRIGATÓRIA:
-   - Se o valor foi DIGITADO/INFORMADO pelo próprio cliente (ex: "quero pagar 200 reais"), passe SEMPRE "valor_origem":"cliente" e "confirmado":false na primeira chamada. O sistema vai bloquear o envio e pedir para você confirmar com o cliente. Só chame de novo com "confirmado":true depois que o cliente responder "sim", "pode gerar", "confirmo" ou equivalente.
-   - Se o valor veio da SUA base (tabela de preços, plano do cliente, orçamento fechado), use "valor_origem":"tabela" e pode chamar direto com "confirmado":true.
+   - Se o valor foi DIGITADO/INFORMADO pelo próprio cliente (ex: "quero pagar 200 reais"), passe SEMPRE "valor_origem":"cliente" e "confirmado":false na primeira chamada (já com a "referencia"). O sistema vai bloquear o envio e pedir para você confirmar com o cliente. Só chame de novo com "confirmado":true depois que o cliente responder "sim", "pode gerar", "confirmo" ou equivalente.
+   - Se o valor veio da SUA base (tabela de preços, plano do cliente, orçamento fechado), use "valor_origem":"tabela" e pode chamar direto com "confirmado":true (ainda assim precisa da "referencia").
    - Se um atendente humano já validou, use "valor_origem":"atendente" com "confirmado":true.
-   - IMPORTANTE: nunca invente valores. Se não sabe, pergunte.
+   - IMPORTANTE: nunca invente valores nem referências. Se não sabe, pergunte.
 
    Exemplos:
-   - Cliente diz "me manda o pix de 150": [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Serviço solicitado","valor_origem":"cliente","confirmado":false}]]
-   - Cliente confirmou "sim, pode gerar": [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Serviço solicitado","valor_origem":"cliente","confirmado":true}]]
-   - Mensalidade padrão do plano: [[TOOL:criar_cobranca_pix|{"valor":99.90,"descricao":"Mensalidade novembro","valor_origem":"tabela","confirmado":true}]]
-   Após executar, o PIX é enviado automaticamente ao cliente — apenas confirme na mensagem seguinte.
+   - Cliente diz "me manda o pix de 150 do pedido 8842": [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Pedido 8842","referencia":"PED-8842","valor_origem":"cliente","confirmado":false}]]
+   - Cliente confirmou "sim, pode gerar": [[TOOL:criar_cobranca_pix|{"valor":150,"descricao":"Pedido 8842","referencia":"PED-8842","valor_origem":"cliente","confirmado":true}]]
+   - Mensalidade padrão do plano: [[TOOL:criar_cobranca_pix|{"valor":99.90,"descricao":"Mensalidade novembro","referencia":"Plano Mensal","valor_origem":"tabela","confirmado":true}]]
+   Após executar, o PIX é enviado automaticamente ao cliente — apenas confirme na mensagem seguinte citando a referência.
 
 REGRAS:
 - Chame ferramentas apenas quando fizer sentido; nunca invente dados.
