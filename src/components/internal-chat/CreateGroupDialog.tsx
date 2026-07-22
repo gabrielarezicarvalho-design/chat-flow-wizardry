@@ -13,9 +13,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useInternalChat } from '@/hooks/useInternalChat';
-import { Users, User } from 'lucide-react';
+import { Users, User, Lock } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
+
 
 interface CreateGroupDialogProps {
   open: boolean;
@@ -31,10 +33,12 @@ interface CreateGroupDialogProps {
 export const CreateGroupDialog = ({ open, onOpenChange, allUsers }: CreateGroupDialogProps) => {
   const { createRoom } = useInternalChat();
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const currentUserId = user?.id;
   const [chatType, setChatType] = useState<'private' | 'group'>('private');
   const [groupName, setGroupName] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+
 
   const availableUsers = allUsers.filter(u => u.id !== currentUserId);
 
@@ -81,10 +85,11 @@ export const CreateGroupDialog = ({ open, onOpenChange, allUsers }: CreateGroupD
               <User className="h-4 w-4" />
               Privado
             </TabsTrigger>
-            <TabsTrigger value="group" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
+            <TabsTrigger value="group" className="flex items-center gap-2" disabled={!isAdmin}>
+              {isAdmin ? <Users className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
               Grupo
             </TabsTrigger>
+
           </TabsList>
 
           <TabsContent value="private" className="space-y-4">

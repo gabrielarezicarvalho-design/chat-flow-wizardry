@@ -121,19 +121,22 @@ export const useInternalChat = () => {
   const userId = user?.id;
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
 
-  // ---- Rooms (with participants + last message) ----
+  // ---- Rooms (with participants + last message + unread count) ----
   const roomsQuery = useQuery({
     queryKey: ['chat-rooms', userId],
     enabled: !!userId,
     queryFn: async (): Promise<ChatRoom[]> => {
-      // Rooms I participate in
+      // Rooms I participate in (with my last_read_at)
       const { data: parts, error: pErr } = await db
         .from('chat_participants')
-        .select('room_id')
+        .select('room_id, last_read_at')
         .eq('user_id', userId);
       if (pErr) throw pErr;
       const roomIds = (parts ?? []).map((p: any) => p.room_id);
       if (roomIds.length === 0) return [];
+      const lastReadMap = new Map<string, string | null>(
+        (parts ?? []).map((p: any) => [p.room_id as string, p.last_read_at as string | null])
+      );
 
       const { data: rooms, error: rErr } = await db
         .from('chat_rooms')
@@ -161,15 +164,20 @@ export const useInternalChat = () => {
         (profs ?? []).map((p: any) => [p.id as string, p as ChatProfile])
       );
 
-      // Last message per room
+      // Last message per room + unread count
       const { data: lastMsgs } = await db
         .from('chat_messages')
         .select('*')
         .in('room_id', roomIds)
         .order('created_at', { ascending: false });
       const lastMsgMap = new Map<string, ChatMessage>();
+      const unreadMap = new Map<string, number>();
       for (const m of (lastMsgs ?? []) as ChatMessage[]) {
         if (!lastMsgMap.has(m.room_id)) lastMsgMap.set(m.room_id, m);
+        const lastRead = lastReadMap.get(m.room_id);
+        if (m.sender_id !== userId && (!lastRead || new Date(m.created_at) > new Date(lastRead))) {
+          unreadMap.set(m.room_id, (unreadMap.get(m.room_id) ?? 0) + 1);
+        }
       }
 
       return (rooms ?? []).map((r: any) => {
@@ -180,10 +188,12 @@ export const useInternalChat = () => {
           ...r,
           participants: roomParts,
           last_message: lastMsgMap.get(r.id),
+          unread_count: unreadMap.get(r.id) ?? 0,
         } as ChatRoom;
       });
     },
   });
+
 
   // ---- Messages of selected room ----
   const messagesQuery = useQuery({
@@ -508,6 +518,23 @@ export const useInternalChat = () => {
     return { url: data.publicUrl, name: file.name };
   };
 
+  const markAsRead = useMutation({
+    mutationFn: async (roomId: string) => {
+      if (!userId) return;
+      const { error } = await db
+        .from('chat_participants')
+        .update({ last_read_at: new Date().toISOString() })
+        .eq('room_id', roomId)
+        .eq('user_id', userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat-rooms', userId] });
+    },
+  });
+
+
+
   // Enrich rooms with a display name for private chats (the other person)
   const rooms = useMemo<ChatRoom[]>(() => {
     const list = roomsQuery.data ?? [];
@@ -539,5 +566,7 @@ export const useInternalChat = () => {
     updateTask,
     deleteTask,
     uploadFile,
+    markAsRead,
   };
+
 };
