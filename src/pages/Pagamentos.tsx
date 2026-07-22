@@ -92,6 +92,7 @@ export default function Pagamentos() {
   const [openCob, setOpenCob] = useState(false);
   const [openVenda, setOpenVenda] = useState(false);
   const [openCusto, setOpenCusto] = useState(false);
+  const [openTemplates, setOpenTemplates] = useState(false);
 
   const monthOptions = useMemo(() => {
     const opts: { value: string; label: string }[] = [];
