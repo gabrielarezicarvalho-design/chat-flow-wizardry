@@ -2074,3 +2074,66 @@ function TemplatesDialog({
     </Dialog>
   );
 }
+
+function TestConfirmationDialog({
+  open,
+  onClose,
+  template,
+}: {
+  open: boolean;
+  onClose: () => void;
+  template: string;
+}) {
+  const [nome, setNome] = useState("Maria Silva");
+  const [valor, setValor] = useState("149,90");
+  const [descricao, setDescricao] = useState("Mensalidade Novembro");
+
+  const rendered = (template || "")
+    .replace(/\{nome\}/g, nome || "")
+    .replace(/\{valor\}/g, valor || "")
+    .replace(/\{descricao\}/g, descricao || "");
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Testar confirmação no chat</DialogTitle>
+          <p className="text-xs text-muted-foreground">
+            Ajuste os dados de exemplo e veja como a mensagem será entregue ao cliente.
+          </p>
+        </DialogHeader>
+
+        <div className="grid grid-cols-3 gap-2">
+          <div className="col-span-3">
+            <Label className="text-[11px]">Nome</Label>
+            <Input value={nome} onChange={(e) => setNome(e.target.value)} className="h-8" />
+          </div>
+          <div className="col-span-1">
+            <Label className="text-[11px]">Valor</Label>
+            <Input value={valor} onChange={(e) => setValor(e.target.value)} className="h-8" />
+          </div>
+          <div className="col-span-2">
+            <Label className="text-[11px]">Descrição</Label>
+            <Input value={descricao} onChange={(e) => setDescricao(e.target.value)} className="h-8" />
+          </div>
+        </div>
+
+        <div className="rounded-xl border bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22><rect width=%2240%22 height=%2240%22 fill=%22%230b141a%22/></svg>')] p-3 min-h-[180px]">
+          <div className="flex justify-end">
+            <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500/90 text-white px-3 py-2 text-sm whitespace-pre-wrap break-words shadow">
+              {rendered || <span className="italic opacity-70">Sem conteúdo</span>}
+              <div className="text-[10px] opacity-80 text-right mt-1">
+                {new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} ✓✓
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Fechar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
