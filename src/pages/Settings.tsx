@@ -501,6 +501,14 @@ const Settings = () => {
             </Card>
           )}
 
+          {activeTab === "voz" && (
+            <Suspense fallback={<SettingsSectionFallback />}>
+              <ElevenLabsSettingsSection />
+            </Suspense>
+          )}
+
+
+
           {activeTab === "integracoes" && (
             <Card className="p-6">
               <h2 className="text-xl font-bold text-foreground mb-4">Integrações</h2>
