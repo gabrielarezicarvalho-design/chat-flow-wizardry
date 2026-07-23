@@ -19,6 +19,7 @@ import Auth from "./pages/Auth";
 import PublicForm from "./pages/PublicForm";
 import FlowForm from "./pages/FlowForm";
 import BetaLanding from "./pages/BetaLanding";
+import Landing from "./pages/Landing";
 
 // Lazy load heavier pages
 const Home = lazy(() => import("./pages/Home"));
