@@ -4,7 +4,7 @@ import {
   MessageCircle, Bot, CreditCard, Mic, Users, TrendingUp,
   Zap, Check, Star, ArrowRight, Search, MapPin, Sparkles,
   BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope, PhoneCall,
-  GraduationCap, Scissors, Utensils
+  GraduationCap, Scissors, Utensils, Plus, Smile
 } from "lucide-react";
 
 const stats = [
