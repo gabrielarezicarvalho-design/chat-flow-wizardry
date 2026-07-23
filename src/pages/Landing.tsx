@@ -29,6 +29,15 @@ const segments = [
 export default function Landing() {
   const [visibleCount, setVisibleCount] = useState(0);
   const [showTyping, setShowTyping] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordSeconds, setRecordSeconds] = useState(0);
+  const [userMessages, setUserMessages] = useState<Array<{ id: string; kind: "text" | "audio" | "file"; content: string; fileName?: string; previewUrl?: string; duration?: number }>>([]);
+  const [interacted, setInteracted] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recordTimerRef = useRef<number | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const chatMessages = [
     { id: 1, sender: "client", content: "Vi sua mensagem, do que se trata?", delay: 0 },
