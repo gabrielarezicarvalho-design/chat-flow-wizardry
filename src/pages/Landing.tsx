@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   MessageCircle, Bot, CreditCard, Mic, Users, TrendingUp,
   Zap, Check, Star, ArrowRight, Search, MapPin, Sparkles,
-  BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope,
+  BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope, PhoneCall,
   GraduationCap, Scissors, Utensils
 } from "lucide-react";
 
