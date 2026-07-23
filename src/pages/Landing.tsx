@@ -48,6 +48,7 @@ export default function Landing() {
   ];
 
   useEffect(() => {
+    if (interacted) return;
     let timers: number[] = [];
 
     const clearTimers = () => {
@@ -77,7 +78,76 @@ export default function Landing() {
 
     runSequence();
     return () => clearTimers();
-  }, []);
+  }, [interacted]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [visibleCount, userMessages, showTyping]);
+
+  const stopDemo = () => {
+    if (!interacted) {
+      setInteracted(true);
+      setVisibleCount(chatMessages.length);
+      setShowTyping(false);
+    }
+  };
+
+  const simulateAIReply = (text: string) => {
+    setShowTyping(true);
+    window.setTimeout(() => {
+      setShowTyping(false);
+      setUserMessages((prev) => [...prev, { id: `ai-${Date.now()}`, kind: "text", content: text }]);
+    }, 1200);
+  };
+
+  const sendText = () => {
+    const v = inputValue.trim();
+    if (!v) return;
+    stopDemo();
+    setUserMessages((prev) => [...prev, { id: `u-${Date.now()}`, kind: "text", content: v }]);
+    setInputValue("");
+    setShowEmoji(false);
+    simulateAIReply("Perfeito! Já registrei aqui, posso te enviar mais detalhes? ✨");
+  };
+
+  const handleFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    stopDemo();
+    const isImage = file.type.startsWith("image/");
+    const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
+    setUserMessages((prev) => [...prev, {
+      id: `f-${Date.now()}`,
+      kind: "file",
+      content: isImage ? "image" : "file",
+      fileName: file.name,
+      previewUrl,
+    }]);
+    e.target.value = "";
+    simulateAIReply(isImage ? "Recebi sua imagem! 📎 Já anotei aqui." : "Arquivo recebido, obrigado! 📎");
+  };
+
+  const toggleRecording = () => {
+    stopDemo();
+    if (!isRecording) {
+      setIsRecording(true);
+      setRecordSeconds(0);
+      recordTimerRef.current = window.setInterval(() => {
+        setRecordSeconds((s) => s + 1);
+      }, 1000);
+    } else {
+      setIsRecording(false);
+      if (recordTimerRef.current) window.clearInterval(recordTimerRef.current);
+      const duration = recordSeconds || 1;
+      setUserMessages((prev) => [...prev, { id: `a-${Date.now()}`, kind: "audio", content: "audio", duration }]);
+      setRecordSeconds(0);
+      simulateAIReply("Escutei seu áudio 🎧 vou responder já já!");
+    }
+  };
+
+  const insertEmoji = (emoji: string) => {
+    setInputValue((v) => v + emoji);
+  };
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
