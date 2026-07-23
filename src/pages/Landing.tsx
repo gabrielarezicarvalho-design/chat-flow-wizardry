@@ -174,6 +174,7 @@ export default function Landing() {
       recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
       recorder.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
+        if (audioChunksRef.current.length === 0) return;
         const duration = recordSeconds || 1;
         const blob = new Blob(audioChunksRef.current, { type: mime });
         const audioUrl = URL.createObjectURL(blob);
