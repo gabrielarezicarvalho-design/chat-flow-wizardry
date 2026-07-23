@@ -323,8 +323,11 @@ export const useInternalChat = () => {
   // ---- Realtime ----
   useEffect(() => {
     if (!userId) return;
-    const channel = supabase
-      .channel(`internal-chat-${userId}`)
+    // Unique channel name per effect run avoids supabase-js reusing a
+    // still-subscribed channel (which makes `.on()` throw).
+    const channelName = `internal-chat-${userId}-${Math.random().toString(36).slice(2)}`;
+    const channel = supabase.channel(channelName);
+    channel
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'chat_messages' },
