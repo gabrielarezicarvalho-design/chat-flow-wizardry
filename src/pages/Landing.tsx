@@ -104,14 +104,33 @@ export default function Landing() {
     }, 1200);
   };
 
-  const sendText = () => {
+  const callAurora = async (payload: { message?: string; audio?: string; audioMime?: string }): Promise<{ text: string; audio?: string | null; transcript?: string | null } | null> => {
+    try {
+      const { data, error } = await supabase.functions.invoke("landing-aurora-chat", {
+        body: { ...payload, history: conversationRef.current.slice(-10) },
+      });
+      if (error) throw error;
+      return data as any;
+    } catch (e) {
+      console.error("Aurora error:", e);
+      return null;
+    }
+  };
+
+  const sendText = async () => {
     const v = inputValue.trim();
     if (!v) return;
     stopDemo();
     setUserMessages((prev) => [...prev, { id: `u-${Date.now()}`, kind: "text", content: v }]);
+    conversationRef.current.push({ role: "user", content: v });
     setInputValue("");
     setShowEmoji(false);
-    simulateAIReply("Perfeito! Já registrei aqui, posso te enviar mais detalhes? ✨");
+    setShowTyping(true);
+    const res = await callAurora({ message: v });
+    setShowTyping(false);
+    const replyText = res?.text || "Desculpe, tive um problema pra responder agora 🙈";
+    conversationRef.current.push({ role: "assistant", content: replyText });
+    setUserMessages((prev) => [...prev, { id: `ai-${Date.now()}`, kind: "text", content: replyText }]);
   };
 
   const handleFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,27 +150,84 @@ export default function Landing() {
     simulateAIReply(isImage ? "Recebi sua imagem! 📎 Já anotei aqui." : "Arquivo recebido, obrigado! 📎");
   };
 
-  const toggleRecording = () => {
+  const blobToBase64 = (blob: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result.split(",")[1] || "");
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+  const startRecording = async () => {
     stopDemo();
-    if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4";
+      const recorder = new MediaRecorder(stream, { mimeType: mime });
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const duration = recordSeconds || 1;
+        const blob = new Blob(audioChunksRef.current, { type: mime });
+        const audioUrl = URL.createObjectURL(blob);
+        setUserMessages((prev) => [...prev, { id: `a-${Date.now()}`, kind: "audio", content: "audio", duration, audioUrl }]);
+        setShowTyping(true);
+        const base64 = await blobToBase64(blob);
+        const res = await callAurora({ audio: base64, audioMime: mime });
+        setShowTyping(false);
+        if (res?.transcript) conversationRef.current.push({ role: "user", content: res.transcript });
+        const replyText = res?.text || "Não consegui escutar direito, pode repetir? 🙏";
+        conversationRef.current.push({ role: "assistant", content: replyText });
+        if (res?.audio) {
+          const audioBlob = new Blob(
+            [Uint8Array.from(atob(res.audio), (c) => c.charCodeAt(0))],
+            { type: "audio/mpeg" },
+          );
+          const replyUrl = URL.createObjectURL(audioBlob);
+          setUserMessages((prev) => [...prev, { id: `ai-a-${Date.now()}`, kind: "audio", content: replyText, duration: 3, audioUrl: replyUrl }]);
+          new Audio(replyUrl).play().catch(() => {});
+        } else {
+          setUserMessages((prev) => [...prev, { id: `ai-${Date.now()}`, kind: "text", content: replyText }]);
+        }
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
       setIsRecording(true);
       setRecordSeconds(0);
-      recordTimerRef.current = window.setInterval(() => {
-        setRecordSeconds((s) => s + 1);
-      }, 1000);
-    } else {
-      setIsRecording(false);
-      if (recordTimerRef.current) window.clearInterval(recordTimerRef.current);
-      const duration = recordSeconds || 1;
-      setUserMessages((prev) => [...prev, { id: `a-${Date.now()}`, kind: "audio", content: "audio", duration }]);
-      setRecordSeconds(0);
-      simulateAIReply("Escutei seu áudio 🎧 vou responder já já!");
+      recordTimerRef.current = window.setInterval(() => setRecordSeconds((s) => s + 1), 1000);
+    } catch (e) {
+      console.error("Mic error:", e);
+      alert("Não consegui acessar o microfone. Autoriza o acesso no navegador 🎙️");
     }
+  };
+
+  const stopRecording = (send = true) => {
+    if (recordTimerRef.current) window.clearInterval(recordTimerRef.current);
+    setIsRecording(false);
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      if (!send) recorder.ondataavailable = null as any;
+      recorder.stop();
+    }
+    if (!send) {
+      setRecordSeconds(0);
+      audioChunksRef.current = [];
+    }
+  };
+
+  const toggleRecording = () => {
+    if (!isRecording) startRecording();
+    else stopRecording(true);
   };
 
   const insertEmoji = (emoji: string) => {
     setInputValue((v) => v + emoji);
   };
+
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
