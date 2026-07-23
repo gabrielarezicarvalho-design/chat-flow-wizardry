@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-type Action = "list_settings" | "upsert_key" | "delete_key" | "save_model";
+type Action = "list_settings" | "upsert_key" | "delete_key" | "save_model" | "save_setting";
 type Provider = "openai" | "google" | "asaas";
 
 interface RequestBody {
@@ -14,6 +14,8 @@ interface RequestBody {
   provider?: Provider;
   apiKey?: string;
   model?: string;
+  key?: string;
+  value?: unknown;
 }
 
 const keyNameByProvider: Record<Provider, string> = {
@@ -27,12 +29,17 @@ const modelNameByProvider: Partial<Record<Provider, string>> = {
   google: "ai_gemini_model",
 };
 
+const allowedGenericSettingKeys = new Set([
+  "elevenlabs_prefs",
+]);
+
 const aiSettingKeys = [
   "ai_openai_key",
   "ai_openai_model",
   "ai_gemini_key",
   "ai_gemini_model",
   "ai_asaas_key",
+  "elevenlabs_prefs",
 ];
 
 const extractStringValue = (value: unknown): string | null => {
