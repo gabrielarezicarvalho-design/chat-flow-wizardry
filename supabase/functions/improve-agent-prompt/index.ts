@@ -113,7 +113,7 @@ async function callLovableAI(systemPrompt: string, userMessage: string, chatHist
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "google/gemini-2.5-flash", messages }),
+    body: JSON.stringify({ model: "google/gemini-3.6-flash", messages }),
   });
   if (!response.ok) {
     const t = await response.text();
@@ -369,43 +369,33 @@ ${configInfo}`;
 
     let result: string | null = null;
 
-    const tryLovable = async () => {
+    // Padrão: Lovable AI Gateway (google/gemini-3.6-flash). Plano B: chaves do usuário (Gemini/OpenAI).
+    const tryGemini = async () => {
+      if (!geminiKey) return null;
       try {
-        return await callLovableAI(sysPrompt, userMessage, formattedHistory, images);
+        return await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
       } catch (e) {
-        console.error("Lovable AI fallback failed:", e);
+        console.error("Gemini (fallback) failed:", e);
         return null;
       }
     };
 
-    if (openaiKey) {
+    const tryOpenAI = async () => {
+      if (!openaiKey) return null;
       try {
-        result = await callOpenAI(openaiKey, sysPrompt, userMessage, formattedHistory, images);
+        return await callOpenAI(openaiKey, sysPrompt, userMessage, formattedHistory, images);
       } catch (e) {
-        console.error("OpenAI failed, trying Gemini:", e);
-        if (geminiKey) {
-          try {
-            result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
-          } catch (e2) {
-            console.error("Gemini failed, trying Lovable AI:", e2);
-            result = await tryLovable();
-            if (!result) throw e2;
-          }
-        } else {
-          result = await tryLovable();
-          if (!result) throw e;
-        }
+        console.error("OpenAI (fallback) failed:", e);
+        return null;
       }
-    } else if (geminiKey) {
-      try {
-        result = await callGemini(geminiKey, sysPrompt, userMessage, formattedHistory, images);
-      } catch (e) {
-        console.error("Gemini failed, trying Lovable AI:", e);
-        result = await tryLovable();
-        if (!result) throw e;
-      }
-    } else {
+    };
+
+    try {
       result = await callLovableAI(sysPrompt, userMessage, formattedHistory, images);
+    } catch (e) {
+      console.error("Lovable AI (primary) failed, trying user keys as fallback:", e);
+      result = (await tryGemini()) || (await tryOpenAI());
+      if (!result) throw e;
     }
 
     return new Response(JSON.stringify({ result }), {
