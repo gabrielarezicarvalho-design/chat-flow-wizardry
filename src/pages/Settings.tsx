@@ -99,6 +99,7 @@ const Settings = () => {
     { id: "perfil", icon: User, label: "Perfil" },
     { id: "apikeys", icon: Key, label: "API Keys" },
     { id: "webhooks", icon: Webhook, label: "Webhooks" },
+    { id: "voz", icon: Mic, label: "Voz IA" },
     { id: "integracoes", icon: LinkIcon, label: "Integrações" },
     { id: "politicas", icon: Shield, label: "Políticas" },
     { id: "plano", icon: CreditCard, label: "Plano" },
