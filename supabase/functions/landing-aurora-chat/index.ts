@@ -30,45 +30,35 @@ async function transcribeAudio(base64Audio: string, mimeType: string, apiKey: st
   return String(json.text || "").trim();
 }
 
-async function askAI(userText: string, history: Array<{ role: string; content: string }>, lovableKey: string, geminiKey?: string): Promise<string> {
-  // Preferência: Lovable AI Gateway (google/gemini-3.6-flash)
+async function askAI(userText: string, history: Array<{ role: string; content: string }>, lovableKey: string, openaiKey?: string): Promise<string> {
+  const messages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    ...history.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
+    { role: "user", content: userText },
+  ];
+
+  // Preferência: OpenAI GPT via Lovable AI Gateway
   try {
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...history.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
-      { role: "user", content: userText },
-    ];
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${lovableKey}` },
-      body: JSON.stringify({ model: "google/gemini-3.6-flash", messages, temperature: 0.8, max_tokens: 300 }),
+      body: JSON.stringify({ model: "openai/gpt-5-mini", messages, max_completion_tokens: 400 }),
     });
     if (!res.ok) throw new Error(`Gateway falhou: ${res.status} ${await res.text()}`);
     const json = await res.json();
     const text = json?.choices?.[0]?.message?.content ?? "";
     return String(text).trim() || "Desculpe, pode repetir? 🙏";
   } catch (gwErr) {
-    console.warn("Gateway indisponível, tentando Gemini direto:", gwErr);
-    if (!geminiKey) throw gwErr;
-    const contents = [
-      ...history.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })),
-      { role: "user", parts: [{ text: userText }] },
-    ];
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents,
-          generationConfig: { temperature: 0.8, maxOutputTokens: 300 },
-        }),
-      },
-    );
-    if (!res.ok) throw new Error(`Gemini falhou: ${res.status} ${await res.text()}`);
+    console.warn("Gateway indisponível, tentando OpenAI direto:", gwErr);
+    if (!openaiKey) throw gwErr;
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${openaiKey}` },
+      body: JSON.stringify({ model: "gpt-4o-mini", messages, temperature: 0.8, max_tokens: 400 }),
+    });
+    if (!res.ok) throw new Error(`OpenAI falhou: ${res.status} ${await res.text()}`);
     const json = await res.json();
-    const text = json?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") ?? "";
+    const text = json?.choices?.[0]?.message?.content ?? "";
     return String(text).trim() || "Desculpe, pode repetir? 🙏";
   }
 }
