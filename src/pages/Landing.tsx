@@ -105,6 +105,9 @@ export default function Landing() {
   };
 
   const callAurora = async (payload: { message?: string; audio?: string; audioMime?: string }): Promise<{ text: string; audio?: string | null; transcript?: string | null } | null> => {
+    const hasMessage = !!payload.message && payload.message.trim().length > 0;
+    const hasAudio = !!payload.audio && payload.audio.length > 0;
+    if (!hasMessage && !hasAudio) return null;
     try {
       const { data, error } = await supabase.functions.invoke("landing-aurora-chat", {
         body: { ...payload, history: conversationRef.current.slice(-10) },
