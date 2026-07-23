@@ -135,7 +135,7 @@ function App() {
                           <MainLayout>
                             <Suspense fallback={<Loading />}>
                               <Routes>
-                                <Route path="/" element={<Home />} />
+                                <Route path="/home" element={<Home />} />
                                 <Route path="/agents" element={<Agents />} />
                                 
                                 <Route path="/departments" element={<Departments />} />
