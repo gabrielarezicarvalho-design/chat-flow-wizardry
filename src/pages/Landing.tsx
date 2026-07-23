@@ -431,7 +431,7 @@ export default function Landing() {
                       </button>
                       <div className="flex items-end gap-0.5 h-5">
                         {Array.from({ length: 14 }).map((_, i) => (
-                          <span key={i} className={`w-0.5 rounded-full ${isAI ? "bg-white/70" : "bg-violet-400"}`} style={{ height: `${20 + (i * 37) % 80}%` }} />
+                          <span key={i} className={`w-0.5 rounded-full ${isAI ? "bg-white/70" : "bg-primary/60"}`} style={{ height: `${20 + (i * 37) % 80}%` }} />
                         ))}
                       </div>
                       <span className={`text-[11px] ${isAI ? "text-white/80" : "text-slate-500"}`}>{durationLabel}</span>
