@@ -1,15 +1,24 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
-const SYSTEM_PROMPT = `Você é a Aurora AI, uma assistente comercial da MarketFlow — uma plataforma de prospecção, atendimento e cobrança automatizada por WhatsApp com IA.
+const SYSTEM_PROMPT = `Você é a Aurora AI, consultora comercial inteligente da MarketFlow. Responda como uma pessoa brasileira, acolhedora, clara e segura, usando o contexto da conversa.
 
-Personalidade: acolhedora, direta, brasileira, entusiasmada e curta. Emojis com moderação.
-Objetivo: apresentar a MarketFlow, tirar dúvidas sobre prospecção, IA, WhatsApp e pagamentos, e convidar o visitante a testar ou marcar uma demo.
-Regras:
-- Respostas curtas (1-3 frases). Nunca escreva parágrafos gigantes.
-- Português do Brasil, informal e cordial.
-- Se não souber, diga que um humano vai retornar e peça o WhatsApp.
-- Nunca invente preços; se perguntarem, diga "temos planos a partir de R$ 97/mês, quer que eu te chame no WhatsApp?".`;
+Sobre a MarketFlow:
+- É uma plataforma de prospecção, atendimento, vendas e cobrança automatizada pelo WhatsApp com inteligência artificial.
+- Capta e organiza leads de fontes como Google Maps, Instagram, TikTok e pesquisa de anúncios.
+- Centraliza conversas, contatos, funil/CRM, formulários e acompanhamento comercial.
+- Permite criar agentes de IA e fluxos automatizados para responder clientes, qualificar leads, fazer follow-up, enviar textos, arquivos e áudios e encaminhar para atendentes.
+- Oferece recursos de pagamentos e cobranças, incluindo automações de cobrança recorrente.
+- Ajuda empresas a atender e prospectar 24 horas por dia, mantendo a equipe humana no controle.
+
+Como responder:
+- Entenda a intenção real da pergunta e dê uma resposta útil, específica e completa.
+- Para perguntas amplas, como produtos, recursos ou funcionamento, explique os pontos principais em 3 a 6 frases naturais, com começo, desenvolvimento e conclusão.
+- Para perguntas simples, responda de forma mais curta, mas nunca com uma frase incompleta ou genérica.
+- Escreva para ser falado em voz alta: frases fluidas, sem listas, títulos, markdown, links ou emojis.
+- Termine toda resposta de forma natural. Nunca interrompa uma explicação no meio.
+- Não invente recursos, condições ou preços. Se não souber algo, diga que vai confirmar com um especialista e ofereça atendimento humano.
+- Quando fizer sentido, finalize com apenas uma pergunta objetiva para avançar a conversa.`;
 
 async function transcribeAudio(base64Audio: string, mimeType: string, apiKey: string): Promise<string> {
   const binary = Uint8Array.from(atob(base64Audio), (c) => c.charCodeAt(0));
@@ -31,18 +40,41 @@ async function transcribeAudio(base64Audio: string, mimeType: string, apiKey: st
 }
 
 async function askAI(userText: string, history: Array<{ role: string; content: string }>, lovableKey: string, openaiKey?: string): Promise<string> {
-  const messages = [
-    { role: "system", content: SYSTEM_PROMPT },
-    ...history.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
+  const normalizedHistory = history
+    .filter((m) => typeof m?.content === "string" && m.content.trim())
+    .slice(-12)
+    .map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content.trim() }));
+
+  // O frontend pode incluir a mensagem atual no histórico. Remova a duplicata para
+  // evitar que o modelo interprete a mesma pergunta como dois turnos diferentes.
+  const lastMessage = normalizedHistory.at(-1);
+  if (lastMessage?.role === "user" && lastMessage.content === userText.trim()) {
+    normalizedHistory.pop();
+  }
+
+  const input = [
+    ...normalizedHistory,
     { role: "user", content: userText },
   ];
 
-  // Preferência: OpenAI GPT via Lovable AI Gateway
+  // OpenAI GPT via Lovable AI Gateway. Esta implantação do Gateway expõe a
+  // compatibilidade de chat; um limite amplo evita cortar o texto antes do TTS.
   try {
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${lovableKey}` },
-      body: JSON.stringify({ model: "openai/gpt-5-mini", messages, max_completion_tokens: 400 }),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${lovableKey}`,
+        "Lovable-API-Key": lovableKey,
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-5.4",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...input,
+        ],
+        max_completion_tokens: 1200,
+      }),
     });
     if (!res.ok) throw new Error(`Gateway falhou: ${res.status} ${await res.text()}`);
     const json = await res.json();
@@ -51,10 +83,14 @@ async function askAI(userText: string, history: Array<{ role: string; content: s
   } catch (gwErr) {
     console.warn("Gateway indisponível, tentando OpenAI direto:", gwErr);
     if (!openaiKey) throw gwErr;
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...input,
+    ];
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${openaiKey}` },
-      body: JSON.stringify({ model: "gpt-4o-mini", messages, temperature: 0.8, max_tokens: 400 }),
+      body: JSON.stringify({ model: "gpt-4o-mini", messages, temperature: 0.6, max_tokens: 1200 }),
     });
     if (!res.ok) throw new Error(`OpenAI falhou: ${res.status} ${await res.text()}`);
     const json = await res.json();
@@ -64,15 +100,27 @@ async function askAI(userText: string, history: Array<{ role: string; content: s
 }
 
 async function synthesizeAudio(text: string, voiceId: string, apiKey: string): Promise<string> {
+  const spokenText = text
+    .replace(/[*_#>`~]/g, "")
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
   const res = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
     {
       method: "POST",
       headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
       body: JSON.stringify({
-        text,
+        text: spokenText,
         model_id: "eleven_multilingual_v2",
-        voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.3, use_speaker_boost: true },
+        voice_settings: {
+          stability: 0.55,
+          similarity_boost: 0.8,
+          style: 0.35,
+          use_speaker_boost: true,
+          speed: 0.95,
+        },
       }),
     },
   );
