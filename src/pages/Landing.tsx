@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   MessageCircle, Bot, CreditCard, Mic, Users, TrendingUp,
