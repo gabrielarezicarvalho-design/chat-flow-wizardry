@@ -373,17 +373,22 @@ export default function Landing() {
                   }
                   // audio
                   const dur = m.duration ?? 1;
+                  const isAI = m.id.startsWith("ai-");
                   return (
-                    <div key={m.id} className="max-w-[75%] rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-700 flex items-center gap-2 animate-fade-in">
-                      <button className="h-7 w-7 flex items-center justify-center rounded-full bg-violet-600 text-white">
+                    <div key={m.id} className={`${isAI ? "ml-auto bg-violet-600 text-white" : "bg-slate-100 text-slate-700"} max-w-[75%] rounded-2xl px-3 py-2 text-sm flex items-center gap-2 animate-fade-in`}>
+                      <button
+                        type="button"
+                        onClick={() => { if (m.audioUrl) new Audio(m.audioUrl).play().catch(() => {}); }}
+                        className={`h-7 w-7 flex items-center justify-center rounded-full ${isAI ? "bg-white text-violet-600" : "bg-violet-600 text-white"}`}
+                      >
                         <PlayCircle className="h-4 w-4" />
                       </button>
                       <div className="flex items-end gap-0.5 h-5">
                         {Array.from({ length: 14 }).map((_, i) => (
-                          <span key={i} className="w-0.5 rounded-full bg-violet-400" style={{ height: `${20 + (i * 37) % 80}%` }} />
+                          <span key={i} className={`w-0.5 rounded-full ${isAI ? "bg-white/70" : "bg-violet-400"}`} style={{ height: `${20 + (i * 37) % 80}%` }} />
                         ))}
                       </div>
-                      <span className="text-[11px] text-slate-500">0:{String(dur).padStart(2, "0")}</span>
+                      <span className={`text-[11px] ${isAI ? "text-white/80" : "text-slate-500"}`}>0:{String(dur).padStart(2, "0")}</span>
                     </div>
                   );
                 })}
