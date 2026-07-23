@@ -25,6 +25,43 @@ const segments = [
 ];
 
 export default function Landing() {
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [showTyping, setShowTyping] = useState(false);
+
+  const chatMessages = [
+    { id: 1, sender: "client", content: "Vi sua mensagem, do que se trata?", delay: 0 },
+    { id: 2, sender: "ai", content: "Oi! Achei sua clínica no Google Maps e queria te apresentar uma IA que prospecta e atende no WhatsApp por você 🚀", delay: 1400, typingDelay: 400 },
+    { id: 3, sender: "client", content: "Interessante, como funciona?", delay: 3200 },
+    { id: 4, sender: "ai", content: "Posso te mostrar em 5 min numa demo? Amanhã 14h tá bom?", delay: 4600, typingDelay: 500 },
+    { id: 5, sender: "status", content: "✦ respondeu em 2s", delay: 6400 },
+  ];
+
+  useEffect(() => {
+    let timers: number[] = [];
+
+    const reset = () => {
+      setVisibleCount(0);
+      setShowTyping(false);
+      runSequence();
+    };
+
+    const runSequence = () => {
+      chatMessages.forEach((msg) => {
+        if (msg.typingDelay !== undefined) {
+          timers.push(window.setTimeout(() => setShowTyping(true), msg.delay - msg.typingDelay));
+        }
+        timers.push(window.setTimeout(() => {
+          setShowTyping(false);
+          setVisibleCount((c) => c + 1);
+        }, msg.delay));
+      });
+      timers.push(window.setTimeout(reset, 9000));
+    };
+
+    runSequence();
+    return () => timers.forEach((t) => clearTimeout(t));
+  }, []);
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* NAV */}
