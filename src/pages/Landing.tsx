@@ -28,7 +28,15 @@ const segments = [
   { icon: Utensils, label: "Restaurantes" },
 ];
 
+declare global {
+  interface Window {
+    initLandingMap?: () => void;
+  }
+}
+
 export default function Landing() {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(0);
   const [showTyping, setShowTyping] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -88,6 +96,48 @@ export default function Landing() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [visibleCount, userMessages, showTyping]);
+
+  useEffect(() => {
+    const key = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
+    const channel = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID;
+    if (!key || !mapRef.current) return;
+
+    const initMap = () => {
+      const mapDiv = mapRef.current;
+      if (!mapDiv) return;
+      const g = (window as any).google;
+      const map = new g.maps.Map(mapDiv, {
+        center: { lat: -23.55052, lng: -46.633308 },
+        zoom: 12,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+      });
+      const places = [
+        { lat: -23.548, lng: -46.636, title: "Padaria do João" },
+        { lat: -23.553, lng: -46.628, title: "Clínica Bem Estar" },
+        { lat: -23.545, lng: -46.642, title: "Studio de Beleza" },
+        { lat: -23.558, lng: -46.62, title: "Auto Escola Rápida" },
+        { lat: -23.552, lng: -46.638, title: "Restaurante Sabor" },
+      ];
+      places.forEach((p) => new g.maps.Marker({ position: p, map, title: p.title }));
+      setMapLoaded(true);
+    };
+
+    if ((window as any).google?.maps) {
+      initMap();
+      return;
+    }
+
+    (window as any).initLandingMap = initMap;
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&callback=initLandingMap&channel=${channel}`;
+    script.async = true;
+    document.head.appendChild(script);
+    return () => {
+      script.remove();
+    };
+  }, []);
 
   const stopDemo = () => {
     if (!interacted) {
@@ -589,16 +639,12 @@ export default function Landing() {
               <MapPin className="h-4 w-4 text-primary" /> Google Maps Leads
             </div>
             <div className="relative h-56 rounded-xl bg-slate-100 overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(139,92,246,0.25),transparent_40%),radial-gradient(circle_at_70%_60%,rgba(99,102,241,0.25),transparent_40%)]" />
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute h-6 w-6 rounded-full bg-primary border-2 border-white shadow-lg flex items-center justify-center text-white text-[10px]"
-                  style={{ top: `${20 + (i * 11) % 60}%`, left: `${15 + (i * 17) % 70}%` }}
-                >
-                  <MapPin className="h-3 w-3" />
+              <div ref={mapRef} className="absolute inset-0" />
+              {!mapLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
