@@ -270,7 +270,7 @@ export default function Landing() {
               alt="NEXT PRO"
               className="h-8 w-8 rounded-full object-cover"
             />
-            NEXT PRO
+            NEXT <span className="text-[#004DFF]">PRO</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm text-slate-600">
             <a href="#recursos" className="hover:text-slate-900">Recursos</a>
