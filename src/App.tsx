@@ -97,6 +97,7 @@ function App() {
                 <MultiSessionAlert />
                 <Suspense fallback={<Loading />}>
                   <Routes>
+                    <Route path="/" element={<Landing />} />
                     <Route path="/auth" element={<Auth />} />
                     {/* Admin routes - separate login flow */}
                     <Route path="/admin-login" element={<AdminLogin />} />
