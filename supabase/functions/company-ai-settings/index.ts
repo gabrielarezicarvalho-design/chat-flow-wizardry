@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-type Action = "list_settings" | "upsert_key" | "delete_key" | "save_model";
+type Action = "list_settings" | "upsert_key" | "delete_key" | "save_model" | "save_setting";
 type Provider = "openai" | "google" | "asaas";
 
 interface RequestBody {
@@ -14,6 +14,8 @@ interface RequestBody {
   provider?: Provider;
   apiKey?: string;
   model?: string;
+  key?: string;
+  value?: unknown;
 }
 
 const keyNameByProvider: Record<Provider, string> = {
@@ -27,12 +29,17 @@ const modelNameByProvider: Partial<Record<Provider, string>> = {
   google: "ai_gemini_model",
 };
 
+const allowedGenericSettingKeys = new Set([
+  "elevenlabs_prefs",
+]);
+
 const aiSettingKeys = [
   "ai_openai_key",
   "ai_openai_model",
   "ai_gemini_key",
   "ai_gemini_model",
   "ai_asaas_key",
+  "elevenlabs_prefs",
 ];
 
 const extractStringValue = (value: unknown): string | null => {
@@ -82,13 +89,13 @@ const saveSetting = async (
   supabaseAdmin: ReturnType<typeof createClient>,
   companyId: string | null,
   key: string,
-  value: string,
+  value: unknown,
 ) => {
   const existingId = await findExistingSetting(supabaseAdmin, companyId, key);
   const payload = {
     company_id: companyId,
     key,
-    value,
+    value: value as never,
     updated_at: new Date().toISOString(),
   };
 
@@ -275,6 +282,21 @@ serve(async (req) => {
       if (error) {
         console.error("Erro ao salvar modelo IA:", error);
         return jsonResponse({ error: "Não foi possível salvar o modelo" }, 500);
+      }
+
+      return jsonResponse({ success: true });
+    }
+
+    if (body.action === "save_setting") {
+      const key = body.key?.trim();
+      if (!key || !allowedGenericSettingKeys.has(key)) {
+        return jsonResponse({ error: "Chave de configuração não permitida" }, 400);
+      }
+
+      const { error } = await saveSetting(supabaseAdmin, companyId, key, body.value ?? null);
+      if (error) {
+        console.error("Erro ao salvar configuração:", error);
+        return jsonResponse({ error: "Não foi possível salvar a configuração" }, 500);
       }
 
       return jsonResponse({ success: true });

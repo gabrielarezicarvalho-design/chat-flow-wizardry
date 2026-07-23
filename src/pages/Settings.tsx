@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Building, User, Key, Webhook, Link as LinkIcon, CreditCard, Eye, EyeOff, Check, AlertCircle, Loader2, HardDrive, RefreshCw, FileText, Image, Database, Shield, X, Trash2 } from "lucide-react";
+import { Building, User, Key, Webhook, Link as LinkIcon, CreditCard, Eye, EyeOff, Check, AlertCircle, Loader2, HardDrive, RefreshCw, FileText, Image, Database, Shield, X, Trash2, Mic } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -20,6 +20,7 @@ import { useStorageStats } from "@/hooks/useStorageStats";
 import { toast } from "sonner";
 
 const AISettingsSection = lazy(() => import("@/components/settings/AISettingsSection").then((module) => ({ default: module.AISettingsSection })));
+const ElevenLabsSettingsSection = lazy(() => import("@/components/settings/ElevenLabsSettingsSection").then((module) => ({ default: module.ElevenLabsSettingsSection })));
 const PrivacyPolicyContent = lazy(() => import("@/components/settings/PrivacyPolicyContent"));
 const TermsOfServiceContent = lazy(() => import("@/components/settings/TermsOfServiceContent"));
 
@@ -98,6 +99,7 @@ const Settings = () => {
     { id: "perfil", icon: User, label: "Perfil" },
     { id: "apikeys", icon: Key, label: "API Keys" },
     { id: "webhooks", icon: Webhook, label: "Webhooks" },
+    { id: "voz", icon: Mic, label: "Voz IA" },
     { id: "integracoes", icon: LinkIcon, label: "Integrações" },
     { id: "politicas", icon: Shield, label: "Políticas" },
     { id: "plano", icon: CreditCard, label: "Plano" },
@@ -498,6 +500,14 @@ const Settings = () => {
               </div>
             </Card>
           )}
+
+          {activeTab === "voz" && (
+            <Suspense fallback={<SettingsSectionFallback />}>
+              <ElevenLabsSettingsSection />
+            </Suspense>
+          )}
+
+
 
           {activeTab === "integracoes" && (
             <Card className="p-6">

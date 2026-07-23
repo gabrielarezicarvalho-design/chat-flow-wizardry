@@ -64,6 +64,11 @@ export const useAIProviderKeys = () => {
     return normalizeSettingValue(setting?.value);
   };
 
+  const getRawSetting = <T = unknown,>(key: string): T | null => {
+    const setting = providerKeys.find((s) => s.key === key);
+    return (setting?.value ?? null) as T | null;
+  };
+
   const upsertKeyMutation = useMutation({
     mutationFn: async (data: { provider: string; apiKey: string }) => {
       const { data: result, error } = await supabase.functions.invoke('company-ai-settings', {
@@ -145,6 +150,18 @@ export const useAIProviderKeys = () => {
     queryClient.invalidateQueries({ queryKey: ['settings'] });
   };
 
+  const saveSetting = async (key: string, value: unknown) => {
+    const { data: result, error } = await supabase.functions.invoke('company-ai-settings', {
+      body: { action: 'save_setting', key, value },
+    });
+
+    if (error) throw error;
+    if (result?.error) throw new Error(result.error);
+
+    queryClient.invalidateQueries({ queryKey: ['ai-provider-keys'] });
+    queryClient.invalidateQueries({ queryKey: ['settings'] });
+  };
+
   return {
     providerKeys,
     isLoading,
@@ -153,6 +170,8 @@ export const useAIProviderKeys = () => {
     getKeyStatus,
     isProviderAvailable,
     getSettingValue,
-    saveModel
+    getRawSetting,
+    saveModel,
+    saveSetting,
   };
 };
