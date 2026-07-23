@@ -69,7 +69,7 @@ export function RecorrentesPanel({ companyId, userId }: Props) {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("cobrancas_recorrentes").delete().eq("id", id);
+      const { error } = await (supabase as any).from("cobrancas_recorrentes").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -270,7 +270,7 @@ function RecorrenteDialog({
         if (error) throw error;
         toast.success("Recorrência atualizada");
       } else {
-        const { error } = await supabase.from("cobrancas_recorrentes").insert(payload);
+        const { error } = await (supabase as any).from("cobrancas_recorrentes").insert(payload);
         if (error) throw error;
         toast.success("Recorrência criada");
       }
