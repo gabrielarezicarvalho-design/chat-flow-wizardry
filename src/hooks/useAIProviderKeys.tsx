@@ -170,6 +170,7 @@ export const useAIProviderKeys = () => {
     getKeyStatus,
     isProviderAvailable,
     getSettingValue,
+    getRawSetting,
     saveModel,
     saveSetting,
   };
