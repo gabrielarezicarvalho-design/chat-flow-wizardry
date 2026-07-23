@@ -42,7 +42,7 @@ export function RecorrentesPanel({ companyId, userId }: Props) {
     queryKey: ["cobrancas_recorrentes", companyId],
     enabled: !!companyId,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("cobrancas_recorrentes")
         .select("*")
         .eq("company_id", companyId!)
@@ -55,7 +55,7 @@ export function RecorrentesPanel({ companyId, userId }: Props) {
   const toggle = useMutation({
     mutationFn: async (row: any) => {
       const next = row.status === "ativa" ? "pausada" : "ativa";
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("cobrancas_recorrentes")
         .update({ status: next })
         .eq("id", row.id);
@@ -263,8 +263,8 @@ function RecorrenteDialog({
       };
 
       if (editing) {
-        const { error } = await supabase
-          .from("cobrancas_recorrentes")
+        const { error } = await (supabase as any)
+        .from("cobrancas_recorrentes")
           .update(payload)
           .eq("id", editing.id);
         if (error) throw error;
