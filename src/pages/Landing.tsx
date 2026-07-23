@@ -226,7 +226,8 @@ export default function Landing() {
                 <PhoneCall className="h-4 w-4 text-slate-400" />
               </div>
 
-              <div className="mt-6 h-[260px] space-y-3 overflow-y-auto flex flex-col justify-end">
+              <div ref={scrollRef} className="mt-6 h-[260px] space-y-3 overflow-y-auto flex flex-col">
+                <div className="mt-auto space-y-3">
                 {chatMessages.slice(0, visibleCount).map((msg, idx) => {
                   if (msg.sender === "status") {
                     return (
@@ -262,6 +263,51 @@ export default function Landing() {
                   );
                 })}
 
+                {userMessages.map((m) => {
+                  const isAI = m.id.startsWith("ai-");
+                  if (m.kind === "text") {
+                    return isAI ? (
+                      <div key={m.id} className="ml-auto max-w-[80%] rounded-2xl bg-violet-600 px-4 py-3 text-sm text-white shadow-md animate-fade-in">
+                        <div className="text-[11px] font-semibold opacity-90 mb-1">✦ Aurora AI</div>
+                        {m.content}
+                      </div>
+                    ) : (
+                      <div key={m.id} className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-sm text-slate-700 animate-fade-in">
+                        {m.content}
+                      </div>
+                    );
+                  }
+                  if (m.kind === "file") {
+                    return (
+                      <div key={m.id} className="max-w-[75%] rounded-2xl bg-slate-100 p-2 text-sm text-slate-700 animate-fade-in">
+                        {m.previewUrl ? (
+                          <img src={m.previewUrl} alt={m.fileName} className="rounded-lg max-h-32 object-cover" />
+                        ) : (
+                          <div className="flex items-center gap-2 px-2 py-1">
+                            <Paperclip className="h-4 w-4 text-slate-500" />
+                            <span className="truncate max-w-[160px]">{m.fileName}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  // audio
+                  const dur = m.duration ?? 1;
+                  return (
+                    <div key={m.id} className="max-w-[75%] rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-700 flex items-center gap-2 animate-fade-in">
+                      <button className="h-7 w-7 flex items-center justify-center rounded-full bg-violet-600 text-white">
+                        <PlayCircle className="h-4 w-4" />
+                      </button>
+                      <div className="flex items-end gap-0.5 h-5">
+                        {Array.from({ length: 14 }).map((_, i) => (
+                          <span key={i} className="w-0.5 rounded-full bg-violet-400" style={{ height: `${20 + (i * 37) % 80}%` }} />
+                        ))}
+                      </div>
+                      <span className="text-[11px] text-slate-500">0:{String(dur).padStart(2, "0")}</span>
+                    </div>
+                  );
+                })}
+
                 {showTyping && (
                   <div className="max-w-[55%] rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-700 animate-fade-in">
                     <div className="flex items-center gap-1">
@@ -271,20 +317,104 @@ export default function Landing() {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
 
-              <div className="mt-6 flex items-center gap-3 rounded-full bg-slate-100 px-3 py-2 text-slate-500">
-                <button className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200">
-                  <Plus className="h-5 w-5" />
-                </button>
-                <button className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200">
-                  <Smile className="h-5 w-5" />
-                </button>
-                <div className="flex-1 text-sm text-slate-400">Digite uma mensagem</div>
-                <button className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200">
-                  <Mic className="h-5 w-5" />
-                </button>
-              </div>
+              {showEmoji && (
+                <div className="mt-3 grid grid-cols-10 gap-1 rounded-2xl bg-slate-50 border border-slate-200 p-2 animate-fade-in">
+                  {EMOJIS.map((e) => (
+                    <button
+                      key={e}
+                      type="button"
+                      onClick={() => insertEmoji(e)}
+                      className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-slate-200 text-base"
+                    >
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {isRecording ? (
+                <div className="mt-6 flex items-center gap-3 rounded-full bg-red-50 px-3 py-2 text-red-600 border border-red-200">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+                  </span>
+                  <span className="flex-1 text-sm font-medium">Gravando… 0:{String(recordSeconds).padStart(2, "0")}</span>
+                  <button
+                    type="button"
+                    onClick={() => { setIsRecording(false); if (recordTimerRef.current) window.clearInterval(recordTimerRef.current); setRecordSeconds(0); }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-red-100"
+                    aria-label="Cancelar gravação"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={toggleRecording}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white hover:bg-red-700"
+                    aria-label="Parar e enviar"
+                  >
+                    <Square className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-6 flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-slate-500">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,application/pdf,audio/*,video/*"
+                    className="hidden"
+                    onChange={handleFilePick}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200"
+                    aria-label="Anexar arquivo"
+                  >
+                    <Plus className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEmoji((v) => !v)}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200 ${showEmoji ? "text-violet-600" : ""}`}
+                    aria-label="Emojis"
+                  >
+                    <Smile className="h-5 w-5" />
+                  </button>
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") sendText(); }}
+                    onFocus={stopDemo}
+                    placeholder="Digite uma mensagem"
+                    className="flex-1 bg-transparent text-sm text-slate-700 placeholder:text-slate-400 outline-none min-w-0"
+                  />
+                  {inputValue.trim() ? (
+                    <button
+                      type="button"
+                      onClick={sendText}
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-white hover:bg-violet-700"
+                      aria-label="Enviar"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={toggleRecording}
+                      className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200"
+                      aria-label="Gravar áudio"
+                    >
+                      <Mic className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
+              )}
+
             </div>
           </div>
         </div>
