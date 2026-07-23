@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Bot, CreditCard, Mic, Users, TrendingUp,
   Zap, Check, Star, ArrowRight, Search, MapPin, Sparkles,
