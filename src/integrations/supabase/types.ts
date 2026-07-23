@@ -747,6 +747,75 @@ export type Database = {
           },
         ]
       }
+      cobrancas_recorrentes: {
+        Row: {
+          cliente_nome: string
+          company_id: string
+          connection_id: string | null
+          cpf_cnpj: string | null
+          created_at: string
+          descricao: string | null
+          dia_vencimento: number
+          email: string | null
+          id: string
+          last_generated_at: string | null
+          status: string
+          telefone: string
+          updated_at: string
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          cliente_nome: string
+          company_id: string
+          connection_id?: string | null
+          cpf_cnpj?: string | null
+          created_at?: string
+          descricao?: string | null
+          dia_vencimento: number
+          email?: string | null
+          id?: string
+          last_generated_at?: string | null
+          status?: string
+          telefone: string
+          updated_at?: string
+          user_id?: string | null
+          valor: number
+        }
+        Update: {
+          cliente_nome?: string
+          company_id?: string
+          connection_id?: string | null
+          cpf_cnpj?: string | null
+          created_at?: string
+          descricao?: string | null
+          dia_vencimento?: number
+          email?: string | null
+          id?: string
+          last_generated_at?: string | null
+          status?: string
+          telefone?: string
+          updated_at?: string
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobrancas_recorrentes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobrancas_recorrentes_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
@@ -1199,6 +1268,63 @@ export type Database = {
           },
         ]
       }
+      flow_forms: {
+        Row: {
+          answered: boolean
+          company_id: string | null
+          connection_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          initial_message: string | null
+          phone: string
+          questions: Json
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          answered?: boolean
+          company_id?: string | null
+          connection_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          initial_message?: string | null
+          phone: string
+          questions?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          answered?: boolean
+          company_id?: string | null
+          connection_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          initial_message?: string | null
+          phone?: string
+          questions?: Json
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flow_forms_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flow_forms_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       flow_sessions: {
         Row: {
           company_id: string
@@ -1450,6 +1576,54 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads_forms_responses: {
+        Row: {
+          address: string | null
+          answers: Json
+          connection_id: string | null
+          created_at: string
+          form_id: string
+          id: string
+          name: string
+          phone: string
+        }
+        Insert: {
+          address?: string | null
+          answers?: Json
+          connection_id?: string | null
+          created_at?: string
+          form_id: string
+          id?: string
+          name: string
+          phone: string
+        }
+        Update: {
+          address?: string | null
+          answers?: Json
+          connection_id?: string | null
+          created_at?: string
+          form_id?: string
+          id?: string
+          name?: string
+          phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_forms_responses_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_forms_responses_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "flow_forms"
             referencedColumns: ["id"]
           },
         ]
