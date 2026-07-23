@@ -653,6 +653,12 @@ serve(async (req) => {
       applyAiSettings(globalAiSettings);
     }
 
+    // Fallback global: chave Gemini mestre do site (secret GEMINI_API_KEY_GLOBAL)
+    if (!geminiKey) {
+      const globalGemini = Deno.env.get("GEMINI_API_KEY_GLOBAL");
+      if (globalGemini) geminiKey = globalGemini;
+    }
+
     console.log("🔑 OpenAI key disponível:", !!openaiKey);
     console.log("🔑 Gemini key disponível:", !!geminiKey);
 
