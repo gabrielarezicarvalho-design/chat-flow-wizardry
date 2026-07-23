@@ -64,6 +64,7 @@ const nodeTypes = {
   businessHours: BusinessHoursNode,
   aiAgent: AiAgentNode,
   automation: AutomationNode,
+  elevenLabsAudio: ElevenLabsAudioNode,
 };
 
 interface FlowCanvasProps {
@@ -300,6 +301,7 @@ const FlowCanvasInner = ({
       input: 'Aguardar resposta',
       error: 'Erro',
       automation: 'Executar Automação',
+      elevenLabsAudio: 'Áudio ElevenLabs',
     };
     return labels[type] || 'Novo bloco';
   };

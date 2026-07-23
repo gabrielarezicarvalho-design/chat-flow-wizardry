@@ -146,7 +146,8 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
     tag: 'Tag',
     aiAgent: 'Assistente IA',
     forward: 'Transferir',
-    error: 'Erro'
+    error: 'Erro',
+    elevenLabsAudio: 'Áudio ElevenLabs'
   };
 
   const renderForwardEditor = () => {
@@ -1544,6 +1545,7 @@ return { vars: {}, next: null };`}
       case 'http': return renderHttpEditor();
       case 'code': return renderCodeEditor();
       case 'smartForm': return renderSmartFormEditor();
+      case 'elevenLabsAudio': return renderElevenLabsAudioEditor();
       default:
         return <p className="text-muted-foreground text-sm">Configuração não disponível para este bloco.</p>;
     }

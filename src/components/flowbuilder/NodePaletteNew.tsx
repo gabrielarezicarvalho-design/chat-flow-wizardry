@@ -14,7 +14,8 @@ import {
   Bot,
   LayoutList,
   CalendarClock,
-  Workflow
+  Workflow,
+  Mic
 } from 'lucide-react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -23,6 +24,7 @@ import { cn } from '@/lib/utils';
 const nodeTypes = [
   { type: 'start', label: 'Início', description: 'Ponto de entrada do fluxo', icon: Play, color: 'from-emerald-500 to-emerald-600' },
   { type: 'message', label: 'Mensagem', description: 'Enviar texto simples', icon: MessageSquare, color: 'from-sky-500 to-sky-600' },
+  { type: 'elevenLabsAudio', label: 'Áudio IA', description: 'Enviar áudio gerado por ElevenLabs', icon: Mic, color: 'from-violet-500 to-fuchsia-500' },
   { type: 'menu', label: 'Menu', description: 'Menu com opções e regras de erro', icon: LayoutList, color: 'from-blue-500 to-blue-600' },
   { type: 'input', label: 'Aguardar', description: 'Aguardar resposta do usuário', icon: MessageCircleQuestion, color: 'from-teal-500 to-teal-600' },
   { type: 'businessHours', label: 'Horário', description: 'Verificar horário comercial', icon: CalendarClock, color: 'from-lime-500 to-lime-600' },
