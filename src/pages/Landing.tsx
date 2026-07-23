@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logoAurora from "@/assets/logo-aurora.png.asset.json";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -264,9 +265,11 @@ export default function Landing() {
       <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <div className="flex items-center gap-2 font-bold text-lg">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white">
-              <Zap className="h-4 w-4" />
-            </div>
+            <img
+              src={logoAurora.url}
+              alt="MarketFlow"
+              className="h-8 w-8 rounded-full object-cover"
+            />
             MarketFlow
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm text-slate-600">
