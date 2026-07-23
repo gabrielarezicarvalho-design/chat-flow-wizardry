@@ -38,6 +38,8 @@ export default function AdminPanel() {
         return <AdminAgentes />;
       case "integracoes":
         return <AdminIntegracoes />;
+      case "apify":
+        return <AdminApify />;
       case "whatsapp-meta":
         return <AdminWhatsAppMeta />;
       case "armazenamento":
