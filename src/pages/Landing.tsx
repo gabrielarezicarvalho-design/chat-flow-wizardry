@@ -139,24 +139,51 @@ export default function Landing() {
                 <PhoneCall className="h-4 w-4 text-slate-400" />
               </div>
 
-              <div className="mt-6 space-y-3">
-                <div className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-sm text-slate-700">
-                  Vi sua mensagem, do que se trata?
-                </div>
-                <div className="ml-auto max-w-[80%] rounded-2xl bg-violet-600 px-4 py-3 text-sm text-white shadow-md">
-                  <div className="text-[11px] font-semibold opacity-90 mb-1">✦ Aurora AI</div>
-                  Oi! Achei sua clínica no Google Maps e queria te apresentar uma IA que prospecta e atende no WhatsApp por você 🚀
-                </div>
-                <div className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-sm text-slate-700">
-                  Interessante, como funciona?
-                </div>
-                <div className="ml-auto max-w-[80%] rounded-2xl bg-violet-600 px-4 py-3 text-sm text-white shadow-md">
-                  <div className="text-[11px] font-semibold opacity-90 mb-1">✦ Aurora AI</div>
-                  Posso te mostrar em 5 min numa demo? Amanhã 14h tá bom?
-                </div>
-                <div className="text-[11px] text-violet-500 flex items-center gap-1">
-                  ✦ respondeu em 2s
-                </div>
+              <div className="mt-6 space-y-3 min-h-[260px]">
+                {chatMessages.slice(0, visibleCount).map((msg, idx) => {
+                  if (msg.sender === "status") {
+                    return (
+                      <div
+                        key={msg.id}
+                        className="text-[11px] text-violet-500 flex items-center gap-1 animate-fade-in"
+                        style={{ animationDelay: `${idx * 50}ms` }}
+                      >
+                        {msg.content}
+                      </div>
+                    );
+                  }
+                  if (msg.sender === "client") {
+                    return (
+                      <div
+                        key={msg.id}
+                        className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-sm text-slate-700 animate-fade-in"
+                        style={{ animationDelay: `${idx * 50}ms` }}
+                      >
+                        {msg.content}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div
+                      key={msg.id}
+                      className="ml-auto max-w-[80%] rounded-2xl bg-violet-600 px-4 py-3 text-sm text-white shadow-md animate-fade-in"
+                      style={{ animationDelay: `${idx * 50}ms` }}
+                    >
+                      <div className="text-[11px] font-semibold opacity-90 mb-1">✦ Aurora AI</div>
+                      {msg.content}
+                    </div>
+                  );
+                })}
+
+                {showTyping && (
+                  <div className="max-w-[55%] rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-700 animate-fade-in">
+                    <div className="flex items-center gap-1">
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0ms]" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:150ms]" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:300ms]" />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 flex items-center gap-3 rounded-full bg-[#1e2a36] px-3 py-2 text-slate-300">
