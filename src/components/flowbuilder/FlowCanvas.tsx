@@ -33,6 +33,7 @@ import { SendFormNode } from './nodes/SendFormNode';
 import { ErrorNode } from './nodes/ErrorNode';
 import { BusinessHoursNode } from './nodes/BusinessHoursNode';
 import AutomationNode from './nodes/AutomationNode';
+import { ElevenLabsAudioNode } from './nodes/ElevenLabsAudioNode';
 
 import AiAgentNode from './nodes/AiAgentNode';
 import { toast } from 'sonner';
