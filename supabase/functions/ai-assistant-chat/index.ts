@@ -128,7 +128,7 @@ async function callLovableAI(messages: any[], temperature: number) {
       "Lovable-API-Key": apiKey,
     },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "google/gemini-3.6-flash",
       messages,
       temperature,
       max_tokens: 2000,
@@ -444,8 +444,11 @@ async function callBestAvailableAI(options: {
   const addLovableAttempt = () => {
     if (!lovableKey) return;
     if (attempts.some((attempt) => attempt.provider === "lovable")) return;
-    attempts.push({ provider: "lovable", key: lovableKey, model: "google/gemini-3-flash-preview" });
+    attempts.push({ provider: "lovable", key: lovableKey, model: "google/gemini-3.6-flash" });
   };
+
+  // Padrão: Lovable AI Gateway (google/gemini-3.6-flash) primeiro; chaves do usuário como plano B.
+  addLovableAttempt();
 
   if (options.preferredProvider === "openai") {
     addAttempt("openai", options.openaiKey, options.agentModel.includes("gpt") ? options.agentModel : "gpt-4o-mini");
@@ -456,7 +459,6 @@ async function callBestAvailableAI(options: {
   }
 
   addAttempt("openai", fallbackOpenAIKey, "gpt-4o-mini");
-  addLovableAttempt();
 
   if (attempts.length === 0) {
     throw new Error("Nenhuma chave de IA configurada. Configure OpenAI/Gemini nas configurações ou habilite o Lovable AI Gateway.");
