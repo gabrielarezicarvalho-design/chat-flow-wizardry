@@ -112,10 +112,16 @@ export default function Landing() {
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center gap-2 rounded-full bg-slate-100 pl-4 pr-1 py-1">
-                <div className="flex-1 h-8" />
-                <button className="h-9 w-9 rounded-full bg-violet-600 text-white flex items-center justify-center">
-                  <Mic className="h-4 w-4" />
+              <div className="mt-6 flex items-center gap-3 rounded-full bg-[#1e2a36] px-3 py-2 text-slate-300">
+                <button className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10">
+                  <Plus className="h-5 w-5" />
+                </button>
+                <button className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10">
+                  <Smile className="h-5 w-5" />
+                </button>
+                <div className="flex-1 text-sm text-slate-400">Digite uma mensagem</div>
+                <button className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10">
+                  <Mic className="h-5 w-5" />
                 </button>
               </div>
             </div>
