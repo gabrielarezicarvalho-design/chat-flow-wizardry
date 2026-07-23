@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (!subdomainValid) return;
           
           toast.success('Login realizado com sucesso!');
-          navigate('/');
+          navigate('/home');
           return;
         }
 
@@ -106,7 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               if (!subdomainValid) return;
               
               toast.success('Login realizado com sucesso!');
-              navigate('/');
+              navigate('/home');
               return;
             }
           }
@@ -128,7 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!subdomainValid) return;
 
       toast.success('Login realizado com sucesso!');
-      navigate('/');
+      navigate('/home');
     } catch (error: any) {
       toast.error('Credenciais inválidas');
       throw error;
@@ -165,7 +165,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string, fullName: string, companyName: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/home`;
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -182,7 +182,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) throw error;
 
       toast.success('Conta criada com sucesso! Verifique seu email.');
-      navigate('/');
+      navigate('/home');
     } catch (error: any) {
       toast.error(error.message || 'Erro ao criar conta');
       throw error;

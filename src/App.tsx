@@ -19,6 +19,7 @@ import Auth from "./pages/Auth";
 import PublicForm from "./pages/PublicForm";
 import FlowForm from "./pages/FlowForm";
 import BetaLanding from "./pages/BetaLanding";
+import Landing from "./pages/Landing";
 
 // Lazy load heavier pages
 const Home = lazy(() => import("./pages/Home"));
@@ -96,6 +97,7 @@ function App() {
                 <MultiSessionAlert />
                 <Suspense fallback={<Loading />}>
                   <Routes>
+                    <Route path="/" element={<Landing />} />
                     <Route path="/auth" element={<Auth />} />
                     {/* Admin routes - separate login flow */}
                     <Route path="/admin-login" element={<AdminLogin />} />
@@ -133,7 +135,7 @@ function App() {
                           <MainLayout>
                             <Suspense fallback={<Loading />}>
                               <Routes>
-                                <Route path="/" element={<Home />} />
+                                <Route path="/home" element={<Home />} />
                                 <Route path="/agents" element={<Agents />} />
                                 
                                 <Route path="/departments" element={<Departments />} />
