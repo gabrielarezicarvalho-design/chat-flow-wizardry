@@ -428,7 +428,7 @@ export default function Landing() {
                   <span className="flex-1 text-sm font-medium">Gravando… 0:{String(recordSeconds).padStart(2, "0")}</span>
                   <button
                     type="button"
-                    onClick={() => { setIsRecording(false); if (recordTimerRef.current) window.clearInterval(recordTimerRef.current); setRecordSeconds(0); }}
+                    onClick={() => stopRecording(false)}
                     className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-red-100"
                     aria-label="Cancelar gravação"
                   >
