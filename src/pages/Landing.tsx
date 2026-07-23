@@ -267,10 +267,10 @@ export default function Landing() {
           <div className="flex items-center gap-2 font-bold text-lg">
             <img
               src={logoAurora.url}
-              alt="MarketFlow"
+              alt="NEXT PRO"
               className="h-8 w-8 rounded-full object-cover"
             />
-            MarketFlow
+            NEXT PRO
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm text-slate-600">
             <a href="#recursos" className="hover:text-slate-900">Recursos</a>
