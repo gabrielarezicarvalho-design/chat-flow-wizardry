@@ -272,16 +272,18 @@ export default function Landing() {
             />
             NEXT <span className="text-[#004DFF]">PRO</span>
           </div>
-          <nav className="hidden md:flex items-center gap-8 text-sm text-slate-600">
-            <a href="#recursos" className="hover:text-slate-900">Recursos</a>
-            <a href="#ia" className="hover:text-slate-900">IA</a>
-            <a href="#pagamentos" className="hover:text-slate-900">Pagamentos</a>
-            <a href="#segmentos" className="hover:text-slate-900">Segmentos</a>
-            <a href="#depoimentos" className="hover:text-slate-900">Clientes</a>
-          </nav>
-          <Link to="/auth">
-            <Button className="bg-primary hover:bg-primary-dark rounded-full px-5">Entrar</Button>
-          </Link>
+          <div className="hidden md:flex items-center gap-4">
+            <nav className="flex items-center gap-8 text-sm text-slate-600">
+              <a href="#recursos" className="hover:text-slate-900">Recursos</a>
+              <a href="#ia" className="hover:text-slate-900">IA</a>
+              <a href="#pagamentos" className="hover:text-slate-900">Pagamentos</a>
+              <a href="#segmentos" className="hover:text-slate-900">Segmentos</a>
+              <a href="#depoimentos" className="hover:text-slate-900">Clientes</a>
+            </nav>
+            <Link to="/auth">
+              <Button className="bg-primary hover:bg-primary-dark rounded-full px-5">Entrar</Button>
+            </Link>
+          </div>
         </div>
       </header>
 
