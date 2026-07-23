@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const reply = await askGemini(userText, history || [], geminiKey);
+    const reply = await askAI(userText, history || [], lovableKey || "", geminiKey);
 
     let audioBase64: string | null = null;
     if (isAudio && elevenKey && voiceId) {
