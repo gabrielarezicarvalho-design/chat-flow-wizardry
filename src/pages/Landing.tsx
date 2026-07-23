@@ -164,6 +164,22 @@ export default function Landing() {
       reader.readAsDataURL(blob);
     });
 
+  const getAudioDuration = async (blob: Blob): Promise<number> => {
+    try {
+      const audioContext = new AudioContext();
+      const decoded = await audioContext.decodeAudioData(await blob.arrayBuffer());
+      const duration = decoded.duration;
+      await audioContext.close();
+      if (Number.isFinite(duration) && duration > 0) return duration;
+    } catch (error) {
+      console.warn("Não foi possível decodificar a duração do áudio:", error);
+    }
+
+    // ElevenLabs retorna MP3 a 128 kbps; o tamanho fornece uma duração confiável
+    // quando o navegador não disponibiliza os metadados do arquivo.
+    return Math.max(1, (blob.size * 8) / 128_000);
+  };
+
   const startRecording = async () => {
     stopDemo();
     try {
@@ -194,29 +210,14 @@ export default function Landing() {
           const replyUrl = URL.createObjectURL(audioBlob);
           const replyAudio = new Audio(replyUrl);
           const msgId = `ai-a-${Date.now()}`;
-          const insertWithDuration = (dur: number) => {
-            setUserMessages((prev) => [...prev, { id: msgId, kind: "audio", content: replyText, duration: Math.max(1, Math.round(dur)), audioUrl: replyUrl }]);
-          };
-          const onMeta = () => {
-            const d = replyAudio.duration;
-            if (isFinite(d) && d > 0) {
-              insertWithDuration(d);
-            } else {
-              // Fallback: force metadata by seeking to the end
-              replyAudio.currentTime = 1e10;
-              replyAudio.ontimeupdate = () => {
-                replyAudio.ontimeupdate = null;
-                const dd = replyAudio.duration;
-                insertWithDuration(isFinite(dd) && dd > 0 ? dd : 3);
-                replyAudio.currentTime = 0;
-              };
-            }
-          };
-          if (replyAudio.readyState >= 1 && isFinite(replyAudio.duration) && replyAudio.duration > 0) {
-            onMeta();
-          } else {
-            replyAudio.addEventListener("loadedmetadata", onMeta, { once: true });
-          }
+          const duration = await getAudioDuration(audioBlob);
+          setUserMessages((prev) => [...prev, {
+            id: msgId,
+            kind: "audio",
+            content: replyText,
+            duration: Math.max(1, Math.ceil(duration)),
+            audioUrl: replyUrl,
+          }]);
           replyAudio.play().catch(() => {});
         } else {
           setUserMessages((prev) => [...prev, { id: `ai-${Date.now()}`, kind: "text", content: replyText }]);
@@ -400,7 +401,8 @@ export default function Landing() {
                     );
                   }
                   // audio
-                  const dur = m.duration ?? 1;
+                  const dur = Math.max(1, Math.round(m.duration ?? 1));
+                  const durationLabel = `${Math.floor(dur / 60)}:${String(dur % 60).padStart(2, "0")}`;
                   return (
                     <div key={m.id} className={`${isAI ? "ml-auto bg-violet-600 text-white" : "bg-slate-100 text-slate-700"} max-w-[75%] rounded-2xl px-3 py-2 text-sm flex items-center gap-2 animate-fade-in`}>
                       <button
@@ -415,7 +417,7 @@ export default function Landing() {
                           <span key={i} className={`w-0.5 rounded-full ${isAI ? "bg-white/70" : "bg-violet-400"}`} style={{ height: `${20 + (i * 37) % 80}%` }} />
                         ))}
                       </div>
-                      <span className={`text-[11px] ${isAI ? "text-white/80" : "text-slate-500"}`}>0:{String(dur).padStart(2, "0")}</span>
+                      <span className={`text-[11px] ${isAI ? "text-white/80" : "text-slate-500"}`}>{durationLabel}</span>
                     </div>
                   );
                 })}
