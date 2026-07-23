@@ -83,7 +83,7 @@ export default function Landing() {
                     <Bot className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-slate-900">MarketFlow IA</div>
+                    <div className="text-sm font-semibold text-slate-900">Aurora AI</div>
                     <div className="flex items-center gap-1 text-[11px] text-emerald-500">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> digitando...
                     </div>
