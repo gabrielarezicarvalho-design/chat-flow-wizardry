@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   MessageCircle, Bot, CreditCard, Mic, Users, TrendingUp,
   Zap, Check, Star, ArrowRight, Search, MapPin, Sparkles,
-  BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope,
+  BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope, PhoneCall,
   GraduationCap, Scissors, Utensils
 } from "lucide-react";
 
@@ -73,32 +73,50 @@ export default function Landing() {
             </Button>
           </div>
 
-          {/* Phone mockup */}
-          <div className="relative mx-auto mt-14 w-full max-w-sm">
+          {/* Chat mockup */}
+          <div className="relative mx-auto mt-14 w-full max-w-md">
             <div className="absolute -inset-6 bg-gradient-to-tr from-violet-200 to-indigo-200 blur-3xl opacity-60 rounded-full" />
-            <div className="relative rounded-[2.5rem] border-8 border-slate-900 bg-slate-900 shadow-2xl overflow-hidden">
-              <div className="bg-[#075E54] px-4 py-3 text-white flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-violet-500 flex items-center justify-center">
-                  <Bot className="h-5 w-5" />
+            <div className="relative rounded-3xl bg-white shadow-2xl p-6 text-left">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-violet-600 flex items-center justify-center text-white">
+                    <Bot className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-slate-900">MarketFlow IA</div>
+                    <div className="flex items-center gap-1 text-[11px] text-emerald-500">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> digitando...
+                    </div>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <div className="text-sm font-semibold">MarketFlow IA</div>
-                  <div className="text-[10px] opacity-80">online agora</div>
+                <PhoneCall className="h-4 w-4 text-slate-400" />
+              </div>
+
+              <div className="mt-6 space-y-3">
+                <div className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-sm text-slate-700">
+                  Vi sua mensagem, do que se trata?
+                </div>
+                <div className="ml-auto max-w-[80%] rounded-2xl bg-violet-600 px-4 py-3 text-sm text-white shadow-md">
+                  <div className="text-[11px] font-semibold opacity-90 mb-1">✦ IA MarketFlow</div>
+                  Oi! Achei sua clínica no Google Maps e queria te apresentar uma IA que prospecta e atende no WhatsApp por você 🚀
+                </div>
+                <div className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-sm text-slate-700">
+                  Interessante, como funciona?
+                </div>
+                <div className="ml-auto max-w-[80%] rounded-2xl bg-violet-600 px-4 py-3 text-sm text-white shadow-md">
+                  <div className="text-[11px] font-semibold opacity-90 mb-1">✦ IA MarketFlow</div>
+                  Posso te mostrar em 5 min numa demo? Amanhã 14h tá bom?
+                </div>
+                <div className="text-[11px] text-violet-500 flex items-center gap-1">
+                  ✦ respondeu em 2s
                 </div>
               </div>
-              <div className="bg-[#ECE5DD] p-4 space-y-2 min-h-[320px]">
-                <div className="ml-auto max-w-[80%] rounded-lg bg-[#DCF8C6] p-2 text-xs shadow-sm">
-                  Olá! Quero saber sobre o plano
-                </div>
-                <div className="max-w-[85%] rounded-lg bg-white p-2 text-xs shadow-sm">
-                  Oi Ana! 👋 Temos 3 planos que se encaixam no seu perfil. Posso te enviar uma proposta agora mesmo?
-                </div>
-                <div className="ml-auto max-w-[70%] rounded-lg bg-[#DCF8C6] p-2 text-xs shadow-sm">
-                  Sim, por favor!
-                </div>
-                <div className="max-w-[85%] rounded-lg bg-white p-2 text-xs shadow-sm">
-                  ✅ Proposta enviada. Link de pagamento Pix gerado 👇
-                </div>
+
+              <div className="mt-6 flex items-center gap-2 rounded-full bg-slate-100 pl-4 pr-1 py-1">
+                <div className="flex-1 h-8" />
+                <button className="h-9 w-9 rounded-full bg-violet-600 text-white flex items-center justify-center">
+                  <Mic className="h-4 w-4" />
+                </button>
               </div>
             </div>
           </div>
