@@ -33,6 +33,7 @@ import { SendFormNode } from './nodes/SendFormNode';
 import { ErrorNode } from './nodes/ErrorNode';
 import { BusinessHoursNode } from './nodes/BusinessHoursNode';
 import AutomationNode from './nodes/AutomationNode';
+import { ElevenLabsAudioNode } from './nodes/ElevenLabsAudioNode';
 
 import AiAgentNode from './nodes/AiAgentNode';
 import { toast } from 'sonner';
@@ -63,6 +64,7 @@ const nodeTypes = {
   businessHours: BusinessHoursNode,
   aiAgent: AiAgentNode,
   automation: AutomationNode,
+  elevenLabsAudio: ElevenLabsAudioNode,
 };
 
 interface FlowCanvasProps {
@@ -299,6 +301,7 @@ const FlowCanvasInner = ({
       input: 'Aguardar resposta',
       error: 'Erro',
       automation: 'Executar Automação',
+      elevenLabsAudio: 'Áudio ElevenLabs',
     };
     return labels[type] || 'Novo bloco';
   };

@@ -146,7 +146,117 @@ export const NodeEditorNew = ({ node, onUpdate, onClose }: NodeEditorNewProps) =
     tag: 'Tag',
     aiAgent: 'Assistente IA',
     forward: 'Transferir',
-    error: 'Erro'
+    error: 'Erro',
+    elevenLabsAudio: 'Áudio ElevenLabs'
+  };
+
+  const renderElevenLabsAudioEditor = () => {
+    const testAudio = async () => {
+      try {
+        if (!nodeData.text) return;
+        const { data, error } = await supabase.functions.invoke('elevenlabs-tts', {
+          body: {
+            text: nodeData.text,
+            voice: nodeData.voiceId || undefined,
+            stability: nodeData.stability,
+            similarity: nodeData.similarity,
+            speed: nodeData.speed,
+          },
+        });
+        if (error) throw error;
+        if (data?.audioContent) {
+          const audio = new Audio(`data:audio/mpeg;base64,${data.audioContent}`);
+          await audio.play();
+        }
+      } catch (e) {
+        console.error('Preview TTS failed', e);
+      }
+    };
+
+    const voices = [
+      { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah (feminina, suave)' },
+      { id: 'FGY2WhTYpPnrIDTdsKH5', name: 'Laura (feminina)' },
+      { id: 'XrExE9yKIg1WjnnlVkGX', name: 'Matilda (feminina)' },
+      { id: 'JBFqnCBsd6RMkjVDRZzb', name: 'George (masculina)' },
+      { id: 'onwK4e9ZLuTAKqWW03F9', name: 'Daniel (masculina)' },
+      { id: 'nPczCjzI2devNBz1zQrb', name: 'Brian (masculina)' },
+      { id: 'TX3LPaxmHKxFdv7VOQHJ', name: 'Liam (masculina)' },
+    ];
+
+    return (
+      <div className="space-y-5">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Texto do áudio</Label>
+          <Textarea
+            value={nodeData.text || ''}
+            onChange={(e) => handleUpdate('text', e.target.value)}
+            placeholder="Escreva o que a IA deve falar. Use {{nome}} para variáveis."
+            rows={5}
+            className="resize-none"
+          />
+          <p className="text-xs text-muted-foreground">
+            O áudio será gerado com ElevenLabs e enviado ao contato como mensagem de voz.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Voz</Label>
+          <Select
+            value={nodeData.voiceId || 'EXAVITQu4vr4xnSDxMaL'}
+            onValueChange={(v) => handleUpdate('voiceId', v)}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {voices.map((v) => (
+                <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-1">
+            <Label className="text-xs">Estabilidade</Label>
+            <Input
+              type="number" step="0.05" min={0} max={1}
+              value={nodeData.stability ?? 0.45}
+              onChange={(e) => handleUpdate('stability', parseFloat(e.target.value))}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Similaridade</Label>
+            <Input
+              type="number" step="0.05" min={0} max={1}
+              value={nodeData.similarity ?? 0.8}
+              onChange={(e) => handleUpdate('similarity', parseFloat(e.target.value))}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Velocidade</Label>
+            <Input
+              type="number" step="0.05" min={0.7} max={1.2}
+              value={nodeData.speed ?? 0.95}
+              onChange={(e) => handleUpdate('speed', parseFloat(e.target.value))}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+          <div>
+            <Label className="text-sm font-medium">Enviar como PTT (voz)</Label>
+            <p className="text-xs text-muted-foreground">Marca a mensagem como áudio de voz do WhatsApp</p>
+          </div>
+          <Switch
+            checked={nodeData.asVoiceNote ?? true}
+            onCheckedChange={(v) => handleUpdate('asVoiceNote', v)}
+          />
+        </div>
+
+        <Button type="button" variant="outline" onClick={testAudio} disabled={!nodeData.text}>
+          Testar áudio
+        </Button>
+      </div>
+    );
   };
 
   const renderForwardEditor = () => {
@@ -1544,6 +1654,7 @@ return { vars: {}, next: null };`}
       case 'http': return renderHttpEditor();
       case 'code': return renderCodeEditor();
       case 'smartForm': return renderSmartFormEditor();
+      case 'elevenLabsAudio': return renderElevenLabsAudioEditor();
       default:
         return <p className="text-muted-foreground text-sm">Configuração não disponível para este bloco.</p>;
     }
