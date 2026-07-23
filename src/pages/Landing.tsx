@@ -145,7 +145,7 @@ export default function Landing() {
                 <PhoneCall className="h-4 w-4 text-slate-400" />
               </div>
 
-              <div className="mt-6 space-y-3 min-h-[260px]">
+              <div className="mt-6 h-[260px] space-y-3 overflow-y-auto flex flex-col justify-end">
                 {chatMessages.slice(0, visibleCount).map((msg, idx) => {
                   if (msg.sender === "status") {
                     return (
