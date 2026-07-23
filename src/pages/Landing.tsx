@@ -264,7 +264,7 @@ export default function Landing() {
       {/* NAV */}
       <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2 font-bold text-lg">
+          <div className="flex items-center gap-2 font-bold text-lg font-space-grotesk">
             <img
               src={logoAurora.url}
               alt="NEXT PRO"
