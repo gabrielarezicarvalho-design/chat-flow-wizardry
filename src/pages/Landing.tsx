@@ -550,16 +550,14 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="border-y border-slate-200 bg-white">
-          <div className="mx-auto grid max-w-6xl grid-cols-2 md:grid-cols-4 gap-6 px-6 py-10">
-            {stats.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-                  {s.value}
-                </div>
-                <div className="text-sm text-slate-500 mt-1">{s.label}</div>
-              </div>
+        {/* Cities strip */}
+        <div className="border-t border-slate-200 bg-white">
+          <div className="mx-auto max-w-6xl px-6 py-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
+            <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Usado por times no</span>
+            {["Rio de Janeiro", "São Paulo", "Distrito Federal", "Mato Grosso", "Santa Catarina", "Rio Grande do Sul"].map((c) => (
+              <span key={c} className="text-sm text-slate-700" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+                {c}
+              </span>
             ))}
           </div>
         </div>
