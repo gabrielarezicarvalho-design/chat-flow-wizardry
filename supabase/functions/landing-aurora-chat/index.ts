@@ -57,29 +57,28 @@ async function askAI(userText: string, history: Array<{ role: string; content: s
     { role: "user", content: userText },
   ];
 
-  // OpenAI GPT via Lovable AI Gateway. A Responses API é a rota correta para
-  // modelos OpenAI e max_output_tokens evita respostas cortadas antes do TTS.
+  // OpenAI GPT via Lovable AI Gateway. Esta implantação do Gateway expõe a
+  // compatibilidade de chat; um limite amplo evita cortar o texto antes do TTS.
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${lovableKey}`,
         "Lovable-API-Key": lovableKey,
       },
       body: JSON.stringify({
         model: "openai/gpt-5.4",
-        instructions: SYSTEM_PROMPT,
-        input,
-        max_output_tokens: 1200,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...input,
+        ],
+        max_completion_tokens: 1200,
       }),
     });
     if (!res.ok) throw new Error(`Gateway falhou: ${res.status} ${await res.text()}`);
     const json = await res.json();
-    const text = json?.output_text ?? json?.output
-      ?.flatMap((item: { content?: Array<{ type?: string; text?: string }> }) => item.content || [])
-      ?.filter((item: { type?: string; text?: string }) => item.type === "output_text" && item.text)
-      ?.map((item: { text?: string }) => item.text)
-      ?.join("\n") ?? "";
+    const text = json?.choices?.[0]?.message?.content ?? "";
     return String(text).trim() || "Desculpe, pode repetir? 🙏";
   } catch (gwErr) {
     console.warn("Gateway indisponível, tentando OpenAI direto:", gwErr);
