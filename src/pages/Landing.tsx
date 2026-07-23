@@ -106,14 +106,14 @@ export default function Landing() {
                   Vi sua mensagem, do que se trata?
                 </div>
                 <div className="ml-auto max-w-[80%] rounded-2xl bg-violet-600 px-4 py-3 text-sm text-white shadow-md">
-                  <div className="text-[11px] font-semibold opacity-90 mb-1">✦ IA MarketFlow</div>
+                  <div className="text-[11px] font-semibold opacity-90 mb-1">✦ Aurora AI</div>
                   Oi! Achei sua clínica no Google Maps e queria te apresentar uma IA que prospecta e atende no WhatsApp por você 🚀
                 </div>
                 <div className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-sm text-slate-700">
                   Interessante, como funciona?
                 </div>
                 <div className="ml-auto max-w-[80%] rounded-2xl bg-violet-600 px-4 py-3 text-sm text-white shadow-md">
-                  <div className="text-[11px] font-semibold opacity-90 mb-1">✦ IA MarketFlow</div>
+                  <div className="text-[11px] font-semibold opacity-90 mb-1">✦ Aurora AI</div>
                   Posso te mostrar em 5 min numa demo? Amanhã 14h tá bom?
                 </div>
                 <div className="text-[11px] text-violet-500 flex items-center gap-1">
