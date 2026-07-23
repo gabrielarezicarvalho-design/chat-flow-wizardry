@@ -284,31 +284,48 @@ export default function Landing() {
 
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-b from-violet-50 via-white to-white">
-        <div className="mx-auto max-w-6xl px-6 pt-20 pb-16 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight">
-            Encontra clientes.
-            <br />
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-              Vende sozinho.
-            </span>{" "}
-            No seu WhatsApp.
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600">
-            Uma plataforma completa que prospecta, atende, vende e cobra automaticamente pelo WhatsApp — com IA treinada pro seu negócio.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link to="/auth">
-              <Button size="lg" className="bg-violet-600 hover:bg-violet-700 rounded-full px-8 h-12">
-                Começar agora <ArrowRight className="ml-2 h-4 w-4" />
+        <div className="mx-auto max-w-6xl px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
+          <div className="text-center md:text-left">
+            <div className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-medium text-violet-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-violet-600" />
+              Prospecção · Atendimento · Cobrança
+            </div>
+            <h1 className="mt-5 text-4xl md:text-6xl font-bold tracking-tight leading-[1.05]">
+              Encontra clientes.
+              <br />
+              <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                Vende sozinho.
+              </span>
+              <br />
+              No seu WhatsApp.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg text-slate-600 md:mx-0 mx-auto">
+              Uma plataforma completa que prospecta, atende, vende e cobra automaticamente pelo WhatsApp — com IA treinada pro seu negócio.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row items-center md:justify-start justify-center gap-3">
+              <Link to="/auth">
+                <Button size="lg" className="bg-violet-600 hover:bg-violet-700 rounded-full px-8 h-12">
+                  Começar agora <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Button size="lg" variant="outline" className="rounded-full px-8 h-12 border-slate-300">
+                <PlayCircle className="mr-2 h-4 w-4" /> Ver demonstração
               </Button>
-            </Link>
-            <Button size="lg" variant="outline" className="rounded-full px-8 h-12 border-slate-300">
-              <PlayCircle className="mr-2 h-4 w-4" /> Ver demonstração
-            </Button>
+            </div>
+            <div className="mt-10 grid grid-cols-3 gap-6 max-w-lg md:mx-0 mx-auto">
+              {stats.slice(0, 3).map((s) => (
+                <div key={s.label} className="text-center md:text-left">
+                  <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                    {s.value}
+                  </div>
+                  <div className="text-[11px] uppercase tracking-wider text-slate-500 mt-1">{s.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Chat mockup */}
-          <div className="relative mx-auto mt-14 w-full max-w-sm">
+          <div className="relative mx-auto w-full max-w-sm">
             <div className="absolute -inset-6 bg-gradient-to-tr from-violet-200 to-indigo-200 blur-3xl opacity-60 rounded-full" />
             <div className="relative rounded-3xl bg-white shadow-2xl p-6 text-left">
               <div className="flex items-center justify-between">
