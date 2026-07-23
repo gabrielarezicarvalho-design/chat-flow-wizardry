@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { 
   LayoutDashboard, Building2, Users, Bot, Plug, Brain, BarChart3, 
   CreditCard, Shield, Settings, LogOut, ChevronLeft,
-  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, BookOpen, Code2, TrendingUp
+  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, BookOpen, Code2, TrendingUp, Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
