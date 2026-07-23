@@ -74,7 +74,7 @@ export default function Landing() {
           </div>
 
           {/* Chat mockup */}
-          <div className="relative mx-auto mt-14 w-full max-w-md">
+          <div className="relative mx-auto mt-14 w-full max-w-sm">
             <div className="absolute -inset-6 bg-gradient-to-tr from-violet-200 to-indigo-200 blur-3xl opacity-60 rounded-full" />
             <div className="relative rounded-3xl bg-white shadow-2xl p-6 text-left">
               <div className="flex items-center justify-between">
