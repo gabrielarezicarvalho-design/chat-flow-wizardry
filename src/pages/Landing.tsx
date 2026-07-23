@@ -293,7 +293,7 @@ export default function Landing() {
             <h1 className="mt-5 text-4xl md:text-6xl font-bold tracking-tight leading-[1.05]">
               Encontra clientes.
               <br />
-              <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+              <span className="text-[#004DFF]">
                 Vende sozinho.
               </span>
               <br />
