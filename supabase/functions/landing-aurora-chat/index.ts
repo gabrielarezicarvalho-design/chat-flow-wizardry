@@ -96,11 +96,12 @@ Deno.serve(async (req) => {
 
   try {
     const geminiKey = Deno.env.get("GEMINI_API_KEY_GLOBAL");
+    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
     const elevenKey = Deno.env.get("ELEVENLABS_API_KEY");
     const voiceId = Deno.env.get("AURORA_VOICE_ID");
 
-    if (!geminiKey) {
-      return new Response(JSON.stringify({ error: "GEMINI_API_KEY_GLOBAL não configurada" }), {
+    if (!lovableKey && !geminiKey) {
+      return new Response(JSON.stringify({ error: "Nenhuma chave de IA configurada (LOVABLE_API_KEY ou GEMINI_API_KEY_GLOBAL)" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
