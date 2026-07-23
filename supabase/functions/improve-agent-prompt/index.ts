@@ -187,6 +187,12 @@ serve(async (req) => {
       applySettings(data);
     }
 
+    // Fallback global: chave Gemini mestre do site (secret GEMINI_API_KEY_GLOBAL)
+    if (!geminiKey) {
+      const globalGemini = Deno.env.get("GEMINI_API_KEY_GLOBAL");
+      if (globalGemini) geminiKey = globalGemini;
+    }
+
     // Sem chaves de empresa/globais? Usaremos o Lovable AI Gateway como fallback automático.
 
     let sysPrompt = "";
