@@ -64,6 +64,11 @@ export const useAIProviderKeys = () => {
     return normalizeSettingValue(setting?.value);
   };
 
+  const getRawSetting = <T = unknown,>(key: string): T | null => {
+    const setting = providerKeys.find((s) => s.key === key);
+    return (setting?.value ?? null) as T | null;
+  };
+
   const upsertKeyMutation = useMutation({
     mutationFn: async (data: { provider: string; apiKey: string }) => {
       const { data: result, error } = await supabase.functions.invoke('company-ai-settings', {
