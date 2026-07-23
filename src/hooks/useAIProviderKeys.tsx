@@ -145,6 +145,18 @@ export const useAIProviderKeys = () => {
     queryClient.invalidateQueries({ queryKey: ['settings'] });
   };
 
+  const saveSetting = async (key: string, value: unknown) => {
+    const { data: result, error } = await supabase.functions.invoke('company-ai-settings', {
+      body: { action: 'save_setting', key, value },
+    });
+
+    if (error) throw error;
+    if (result?.error) throw new Error(result.error);
+
+    queryClient.invalidateQueries({ queryKey: ['ai-provider-keys'] });
+    queryClient.invalidateQueries({ queryKey: ['settings'] });
+  };
+
   return {
     providerKeys,
     isLoading,
@@ -153,6 +165,7 @@ export const useAIProviderKeys = () => {
     getKeyStatus,
     isProviderAvailable,
     getSettingValue,
-    saveModel
+    saveModel,
+    saveSetting,
   };
 };
