@@ -89,13 +89,13 @@ const saveSetting = async (
   supabaseAdmin: ReturnType<typeof createClient>,
   companyId: string | null,
   key: string,
-  value: string,
+  value: unknown,
 ) => {
   const existingId = await findExistingSetting(supabaseAdmin, companyId, key);
   const payload = {
     company_id: companyId,
     key,
-    value,
+    value: value as never,
     updated_at: new Date().toISOString(),
   };
 
