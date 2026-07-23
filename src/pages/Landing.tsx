@@ -264,7 +264,7 @@ export default function Landing() {
       <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <div className="flex items-center gap-2 font-bold text-lg">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white">
               <Zap className="h-4 w-4" />
             </div>
             MarketFlow
@@ -277,23 +277,23 @@ export default function Landing() {
             <a href="#depoimentos" className="hover:text-slate-900">Clientes</a>
           </nav>
           <Link to="/auth">
-            <Button className="bg-violet-600 hover:bg-violet-700 rounded-full px-5">Entrar</Button>
+            <Button className="bg-primary hover:bg-primary-dark rounded-full px-5">Entrar</Button>
           </Link>
         </div>
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-violet-50 via-white to-white">
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-white to-white">
         <div className="mx-auto max-w-6xl px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
           <div className="text-center md:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-medium text-violet-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-violet-600" />
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary-dark">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               Prospecção · Atendimento · Cobrança
             </div>
             <h1 className="mt-5 text-4xl md:text-6xl font-bold tracking-tight leading-[1.05]">
               Encontra clientes.
               <br />
-              <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
                 Vende sozinho.
               </span>
               <br />
@@ -304,7 +304,7 @@ export default function Landing() {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center md:justify-start justify-center gap-3">
               <Link to="/auth">
-                <Button size="lg" className="bg-violet-600 hover:bg-violet-700 rounded-full px-8 h-12">
+                <Button size="lg" className="bg-primary hover:bg-primary-dark rounded-full px-8 h-12">
                   Começar agora <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -315,7 +315,7 @@ export default function Landing() {
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-lg md:mx-0 mx-auto">
               {stats.slice(0, 3).map((s) => (
                 <div key={s.label} className="text-center md:text-left">
-                  <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                  <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
                     {s.value}
                   </div>
                   <div className="text-[11px] uppercase tracking-wider text-slate-500 mt-1">{s.label}</div>
@@ -326,11 +326,11 @@ export default function Landing() {
 
           {/* Chat mockup */}
           <div className="relative mx-auto w-full max-w-sm">
-            <div className="absolute -inset-6 bg-gradient-to-tr from-violet-200 to-indigo-200 blur-3xl opacity-60 rounded-full" />
+            <div className="absolute -inset-6 bg-gradient-to-tr from-primary/20 to-primary/10 blur-3xl opacity-60 rounded-full" />
             <div className="relative rounded-3xl bg-white shadow-2xl p-6 text-left">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-violet-600 flex items-center justify-center text-white">
+                  <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white">
                     <Bot className="h-5 w-5" />
                   </div>
                   <div>
@@ -359,7 +359,7 @@ export default function Landing() {
                     return (
                       <div
                         key={msg.id}
-                        className="text-[11px] text-violet-500 flex items-center gap-1 animate-fade-in"
+                        className="text-[11px] text-primary flex items-center gap-1 animate-fade-in"
                         style={{ animationDelay: `${idx * 50}ms` }}
                       >
                         {msg.content}
@@ -380,7 +380,7 @@ export default function Landing() {
                   return (
                     <div
                       key={msg.id}
-                      className="ml-auto max-w-[80%] rounded-2xl bg-violet-600 px-4 py-3 text-sm text-white shadow-md animate-fade-in"
+                      className="ml-auto max-w-[80%] rounded-2xl bg-primary px-4 py-3 text-sm text-white shadow-md animate-fade-in"
                       style={{ animationDelay: `${idx * 50}ms` }}
                     >
                       <div className="text-[11px] font-semibold opacity-90 mb-1">✦ Aurora AI</div>
@@ -393,7 +393,7 @@ export default function Landing() {
                   const isAI = m.id.startsWith("ai-");
                   if (m.kind === "text") {
                     return isAI ? (
-                      <div key={m.id} className="ml-auto max-w-[80%] rounded-2xl bg-violet-600 px-4 py-3 text-sm text-white shadow-md animate-fade-in">
+                      <div key={m.id} className="ml-auto max-w-[80%] rounded-2xl bg-primary px-4 py-3 text-sm text-white shadow-md animate-fade-in">
                         <div className="text-[11px] font-semibold opacity-90 mb-1">✦ Aurora AI</div>
                         {m.content}
                       </div>
@@ -421,17 +421,17 @@ export default function Landing() {
                   const dur = Math.max(1, Math.round(m.duration ?? 1));
                   const durationLabel = `${Math.floor(dur / 60)}:${String(dur % 60).padStart(2, "0")}`;
                   return (
-                    <div key={m.id} className={`${isAI ? "ml-auto bg-violet-600 text-white" : "bg-slate-100 text-slate-700"} max-w-[75%] rounded-2xl px-3 py-2 text-sm flex items-center gap-2 animate-fade-in`}>
+                    <div key={m.id} className={`${isAI ? "ml-auto bg-primary text-white" : "bg-slate-100 text-slate-700"} max-w-[75%] rounded-2xl px-3 py-2 text-sm flex items-center gap-2 animate-fade-in`}>
                       <button
                         type="button"
                         onClick={() => { if (m.audioUrl) new Audio(m.audioUrl).play().catch(() => {}); }}
-                        className={`h-7 w-7 flex items-center justify-center rounded-full ${isAI ? "bg-white text-violet-600" : "bg-violet-600 text-white"}`}
+                        className={`h-7 w-7 flex items-center justify-center rounded-full ${isAI ? "bg-white text-primary" : "bg-primary text-white"}`}
                       >
                         <PlayCircle className="h-4 w-4" />
                       </button>
                       <div className="flex items-end gap-0.5 h-5">
                         {Array.from({ length: 14 }).map((_, i) => (
-                          <span key={i} className={`w-0.5 rounded-full ${isAI ? "bg-white/70" : "bg-violet-400"}`} style={{ height: `${20 + (i * 37) % 80}%` }} />
+                          <span key={i} className={`w-0.5 rounded-full ${isAI ? "bg-white/70" : "bg-primary/60"}`} style={{ height: `${20 + (i * 37) % 80}%` }} />
                         ))}
                       </div>
                       <span className={`text-[11px] ${isAI ? "text-white/80" : "text-slate-500"}`}>{durationLabel}</span>
@@ -510,7 +510,7 @@ export default function Landing() {
                   <button
                     type="button"
                     onClick={() => setShowEmoji((v) => !v)}
-                    className={`flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200 ${showEmoji ? "text-violet-600" : ""}`}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-200 ${showEmoji ? "text-primary" : ""}`}
                     aria-label="Emojis"
                   >
                     <Smile className="h-5 w-5" />
@@ -528,7 +528,7 @@ export default function Landing() {
                     <button
                       type="button"
                       onClick={sendText}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-white hover:bg-violet-700"
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white hover:bg-primary-dark"
                       aria-label="Enviar"
                     >
                       <Send className="h-4 w-4" />
@@ -566,10 +566,10 @@ export default function Landing() {
       {/* PROSPECÇÃO */}
       <section id="recursos" className="mx-auto max-w-6xl px-6 py-24">
         <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-violet-600">Prospecção automática</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">Prospecção automática</span>
           <h2 className="mt-3 text-3xl md:text-4xl font-bold">
             Encontre clientes{" "}
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
               automaticamente.
             </span>
           </h2>
@@ -579,16 +579,16 @@ export default function Landing() {
         </div>
 
         <div className="mt-12 grid md:grid-cols-2 gap-6">
-          <div className="rounded-2xl border border-slate-200 p-6 bg-gradient-to-br from-violet-50 to-white">
+          <div className="rounded-2xl border border-slate-200 p-6 bg-gradient-to-br from-primary/5 to-white">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4">
-              <MapPin className="h-4 w-4 text-violet-600" /> Google Maps Leads
+              <MapPin className="h-4 w-4 text-primary" /> Google Maps Leads
             </div>
             <div className="relative h-56 rounded-xl bg-slate-100 overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(139,92,246,0.25),transparent_40%),radial-gradient(circle_at_70%_60%,rgba(99,102,241,0.25),transparent_40%)]" />
               {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
-                  className="absolute h-6 w-6 rounded-full bg-violet-600 border-2 border-white shadow-lg flex items-center justify-center text-white text-[10px]"
+                  className="absolute h-6 w-6 rounded-full bg-primary border-2 border-white shadow-lg flex items-center justify-center text-white text-[10px]"
                   style={{ top: `${20 + (i * 11) % 60}%`, left: `${15 + (i * 17) % 70}%` }}
                 >
                   <MapPin className="h-3 w-3" />
@@ -599,7 +599,7 @@ export default function Landing() {
 
           <div className="rounded-2xl border border-slate-200 p-6">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4">
-              <Search className="h-4 w-4 text-violet-600" /> +150 leads encontrados
+              <Search className="h-4 w-4 text-primary" /> +150 leads encontrados
             </div>
             <div className="space-y-2">
               {["Padaria do João", "Clínica Bem Estar", "Studio de Beleza", "Auto Escola Rápida", "Restaurante Sabor"].map((n, i) => (
@@ -622,7 +622,7 @@ export default function Landing() {
             { icon: TrendingUp, title: "Espionar Anúncios", desc: "Descubra o que a concorrência vende" },
           ].map((f) => (
             <div key={f.title} className="rounded-xl border border-slate-200 p-5">
-              <f.icon className="h-5 w-5 text-violet-600" />
+              <f.icon className="h-5 w-5 text-primary" />
               <div className="mt-3 font-semibold">{f.title}</div>
               <div className="text-sm text-slate-500 mt-1">{f.desc}</div>
             </div>
@@ -634,10 +634,10 @@ export default function Landing() {
       <section id="ia" className="bg-slate-50 py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-violet-600">Inteligência Artificial</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">Inteligência Artificial</span>
             <h2 className="mt-3 text-3xl md:text-4xl font-bold">
               Uma IA que{" "}
-              <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
                 vende sozinha.
               </span>
             </h2>
@@ -653,19 +653,19 @@ export default function Landing() {
                 Quanto custa o pacote premium com atendimento 24h?
               </div>
               <div className="mt-4 text-xs text-slate-500 mb-2">MarketFlow IA</div>
-              <div className="rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 p-3 text-sm text-white">
+              <div className="rounded-lg bg-gradient-to-r from-primary to-primary-dark p-3 text-sm text-white">
                 O Premium sai por R$ 297/mês com IA 24h, WhatsApp ilimitado e cobranças automáticas. Quer que eu já envie o link de pagamento?
               </div>
             </div>
 
             <div className="grid grid-rows-2 gap-6">
               <div className="rounded-2xl bg-white p-6 border border-slate-200">
-                <Bot className="h-6 w-6 text-violet-600" />
+                <Bot className="h-6 w-6 text-primary" />
                 <div className="mt-3 font-semibold">Base de conhecimento</div>
                 <div className="text-sm text-slate-500 mt-1">Upload de PDFs, sites e planilhas — a IA aprende tudo do seu negócio.</div>
               </div>
               <div className="rounded-2xl bg-white p-6 border border-slate-200">
-                <BellRing className="h-6 w-6 text-violet-600" />
+                <BellRing className="h-6 w-6 text-primary" />
                 <div className="mt-3 font-semibold">Respostas em segundos</div>
                 <div className="text-sm text-slate-500 mt-1">Nunca perca um lead por demora — resposta instantânea 24/7.</div>
               </div>
@@ -728,10 +728,10 @@ export default function Landing() {
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-6xl px-6 grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-violet-600">Áudio com IA</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">Áudio com IA</span>
             <h2 className="mt-3 text-3xl md:text-4xl font-bold">
               Sua{" "}
-              <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
                 voz clonada,
               </span>{" "}
               respondendo por você.
@@ -742,19 +742,19 @@ export default function Landing() {
             <ul className="mt-6 space-y-2 text-sm text-slate-700">
               {["Áudios personalizados por cliente", "Sotaque e entonação preservados", "Aprova antes de enviar", "Compatível com todas as conexões"].map((i) => (
                 <li key={i} className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-violet-600" /> {i}
+                  <Check className="h-4 w-4 text-primary" /> {i}
                 </li>
               ))}
             </ul>
             <Link to="/auth">
-              <Button className="mt-6 bg-violet-600 hover:bg-violet-700 rounded-full">Testar agora</Button>
+              <Button className="mt-6 bg-primary hover:bg-primary-dark rounded-full">Testar agora</Button>
             </Link>
           </div>
 
           <div className="rounded-2xl bg-white p-6 border border-slate-200 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-violet-100 flex items-center justify-center">
-                <Mic className="h-5 w-5 text-violet-600" />
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Mic className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <div className="font-semibold text-sm">Sua Voz IA</div>
@@ -765,7 +765,7 @@ export default function Landing() {
               {[...Array(40)].map((_, i) => (
                 <div
                   key={i}
-                  className="flex-1 rounded-full bg-gradient-to-t from-violet-600 to-indigo-500"
+                  className="flex-1 rounded-full bg-gradient-to-t from-primary to-primary-dark"
                   style={{ height: `${20 + Math.abs(Math.sin(i)) * 60}%` }}
                 />
               ))}
@@ -777,10 +777,10 @@ export default function Landing() {
       {/* SEGMENTOS */}
       <section id="segmentos" className="mx-auto max-w-6xl px-6 py-24">
         <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-violet-600">Feito para o seu negócio</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">Feito para o seu negócio</span>
           <h2 className="mt-3 text-3xl md:text-4xl font-bold">
             Funciona pro{" "}
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
               seu segmento.
             </span>
           </h2>
@@ -788,8 +788,8 @@ export default function Landing() {
 
         <div className="mt-12 grid grid-cols-2 md:grid-cols-6 gap-4">
           {segments.map((s) => (
-            <div key={s.label} className="rounded-xl border border-slate-200 p-5 text-center hover:border-violet-300 hover:bg-violet-50/30 transition-colors">
-              <s.icon className="h-6 w-6 text-violet-600 mx-auto" />
+            <div key={s.label} className="rounded-xl border border-slate-200 p-5 text-center hover:border-primary/30 hover:bg-primary/5/30 transition-colors">
+              <s.icon className="h-6 w-6 text-primary mx-auto" />
               <div className="mt-3 text-sm font-medium">{s.label}</div>
             </div>
           ))}
@@ -800,7 +800,7 @@ export default function Landing() {
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-violet-600">Tudo em um lugar</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">Tudo em um lugar</span>
             <h2 className="mt-3 text-3xl md:text-4xl font-bold">Sua central comercial completa.</h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
               CRM, atendimento, campanhas em massa, funis, cobranças, relatórios — tudo integrado.
@@ -815,8 +815,8 @@ export default function Landing() {
               { i: ShieldCheck, t: "Segurança total", d: "Criptografia e permissões granulares" },
             ].map((c) => (
               <div key={c.t} className="rounded-xl bg-white border border-slate-200 p-5 flex items-start gap-4">
-                <div className="h-10 w-10 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0">
-                  <c.i className="h-5 w-5 text-violet-600" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <c.i className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <div className="font-semibold">{c.t}</div>
@@ -841,13 +841,13 @@ export default function Landing() {
 
       {/* CTA FINAL */}
       <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="rounded-3xl bg-gradient-to-br from-violet-600 to-indigo-700 p-12 md:p-16 text-center text-white shadow-2xl">
+        <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
           <h2 className="text-3xl md:text-5xl font-bold">Quero vender no automático.</h2>
           <p className="mt-4 opacity-90 max-w-xl mx-auto">
             Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
           </p>
           <Link to="/auth">
-            <Button size="lg" className="mt-8 bg-white text-violet-700 hover:bg-slate-100 rounded-full px-8 h-12 font-semibold">
+            <Button size="lg" className="mt-8 bg-white text-primary-dark hover:bg-slate-100 rounded-full px-8 h-12 font-semibold">
               Começar Teste Grátis <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -858,7 +858,7 @@ export default function Landing() {
       <footer className="border-t border-slate-200">
         <div className="mx-auto max-w-6xl px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <div className="flex items-center gap-2 font-bold text-slate-900">
-            <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white">
+            <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white">
               <Zap className="h-3.5 w-3.5" />
             </div>
             MarketFlow
