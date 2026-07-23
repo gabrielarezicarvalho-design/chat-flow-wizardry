@@ -373,7 +373,6 @@ export default function Landing() {
                   }
                   // audio
                   const dur = m.duration ?? 1;
-                  const isAI = m.id.startsWith("ai-") || m.id.startsWith("ai-a-");
                   return (
                     <div key={m.id} className={`${isAI ? "ml-auto bg-violet-600 text-white" : "bg-slate-100 text-slate-700"} max-w-[75%] rounded-2xl px-3 py-2 text-sm flex items-center gap-2 animate-fade-in`}>
                       <button
