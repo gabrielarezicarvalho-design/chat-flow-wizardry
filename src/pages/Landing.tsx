@@ -39,7 +39,13 @@ export default function Landing() {
   useEffect(() => {
     let timers: number[] = [];
 
+    const clearTimers = () => {
+      timers.forEach((t) => clearTimeout(t));
+      timers = [];
+    };
+
     const reset = () => {
+      clearTimers();
       setVisibleCount(0);
       setShowTyping(false);
       runSequence();
@@ -59,7 +65,7 @@ export default function Landing() {
     };
 
     runSequence();
-    return () => timers.forEach((t) => clearTimeout(t));
+    return () => clearTimers();
   }, []);
 
   return (
