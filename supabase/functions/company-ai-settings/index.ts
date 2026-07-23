@@ -302,21 +302,6 @@ serve(async (req) => {
       return jsonResponse({ success: true });
     }
 
-    if (body.action === "save_setting") {
-      const key = body.key?.trim();
-      if (!key || !allowedGenericSettingKeys.has(key)) {
-        return jsonResponse({ error: "Chave de configuração não permitida" }, 400);
-      }
-
-      const { error } = await saveSetting(supabaseAdmin, companyId, key, body.value ?? null);
-      if (error) {
-        console.error("Erro ao salvar configuração:", error);
-        return jsonResponse({ error: "Não foi possível salvar a configuração" }, 500);
-      }
-
-      return jsonResponse({ success: true });
-    }
-
     return jsonResponse({ error: "Ação inválida" }, 400);
   } catch (error) {
     console.error("Erro inesperado em company-ai-settings:", error);
