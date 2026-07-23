@@ -6,6 +6,7 @@ import { AdminEmpresas } from "@/components/admin/sections/AdminEmpresas";
 import { AdminUsuarios } from "@/components/admin/sections/AdminUsuarios";
 import { AdminAgentes } from "@/components/admin/sections/AdminAgentes";
 import { AdminIntegracoes } from "@/components/admin/sections/AdminIntegracoes";
+import { AdminApify } from "@/components/admin/sections/AdminApify";
 import { AdminArmazenamento } from "@/components/admin/sections/AdminArmazenamento";
 import { AdminIA } from "@/components/admin/sections/AdminIA";
 import { AdminProgramador } from "@/components/admin/sections/AdminProgramador";
@@ -37,6 +38,8 @@ export default function AdminPanel() {
         return <AdminAgentes />;
       case "integracoes":
         return <AdminIntegracoes />;
+      case "apify":
+        return <AdminApify />;
       case "whatsapp-meta":
         return <AdminWhatsAppMeta />;
       case "armazenamento":

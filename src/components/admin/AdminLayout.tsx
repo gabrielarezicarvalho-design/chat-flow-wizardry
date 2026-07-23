@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { 
   LayoutDashboard, Building2, Users, Bot, Plug, Brain, BarChart3, 
   CreditCard, Shield, Settings, LogOut, ChevronLeft,
-  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, BookOpen, Code2, TrendingUp
+  ChevronRight, Loader2, Menu, HardDrive, FileText, Bug, BookOpen, Code2, TrendingUp, Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +27,7 @@ const menuItems = [
   { id: "agentes", icon: Bot, label: "Agentes", description: "Global" },
   { id: "integracoes", icon: Plug, label: "Integrações", description: "APIs & Webhooks" },
   { id: "whatsapp-meta", icon: Menu, label: "WhatsApp Meta API", description: "Config Global", parent: "integracoes" },
+  { id: "apify", icon: Zap, label: "Apify Scrapers", description: "Instagram/TikTok/FB", parent: "integracoes" },
   { id: "armazenamento", icon: HardDrive, label: "Armazenamento", description: "Drive & Storage" },
   { id: "ia", icon: Brain, label: "IA & Automação", description: "Modelos & Uso" },
   { id: "programador", icon: Code2, label: "Programador IA", description: "Diagnóstico & Debug" },
