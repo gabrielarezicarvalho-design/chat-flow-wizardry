@@ -320,7 +320,7 @@ export default function Landing() {
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-lg md:mx-0 mx-auto">
               {stats.slice(0, 3).map((s) => (
                 <div key={s.label} className="text-center md:text-left">
-                  <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+                  <div className="text-2xl md:text-3xl font-bold text-[#004DFF]">
                     {s.value}
                   </div>
                   <div className="text-[11px] uppercase tracking-wider text-slate-500 mt-1">{s.label}</div>
