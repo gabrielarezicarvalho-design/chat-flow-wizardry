@@ -192,8 +192,32 @@ export default function Landing() {
             { type: "audio/mpeg" },
           );
           const replyUrl = URL.createObjectURL(audioBlob);
-          setUserMessages((prev) => [...prev, { id: `ai-a-${Date.now()}`, kind: "audio", content: replyText, duration: 3, audioUrl: replyUrl }]);
-          new Audio(replyUrl).play().catch(() => {});
+          const replyAudio = new Audio(replyUrl);
+          const msgId = `ai-a-${Date.now()}`;
+          const insertWithDuration = (dur: number) => {
+            setUserMessages((prev) => [...prev, { id: msgId, kind: "audio", content: replyText, duration: Math.max(1, Math.round(dur)), audioUrl: replyUrl }]);
+          };
+          const onMeta = () => {
+            const d = replyAudio.duration;
+            if (isFinite(d) && d > 0) {
+              insertWithDuration(d);
+            } else {
+              // Fallback: force metadata by seeking to the end
+              replyAudio.currentTime = 1e10;
+              replyAudio.ontimeupdate = () => {
+                replyAudio.ontimeupdate = null;
+                const dd = replyAudio.duration;
+                insertWithDuration(isFinite(dd) && dd > 0 ? dd : 3);
+                replyAudio.currentTime = 0;
+              };
+            }
+          };
+          if (replyAudio.readyState >= 1 && isFinite(replyAudio.duration) && replyAudio.duration > 0) {
+            onMeta();
+          } else {
+            replyAudio.addEventListener("loadedmetadata", onMeta, { once: true });
+          }
+          replyAudio.play().catch(() => {});
         } else {
           setUserMessages((prev) => [...prev, { id: `ai-${Date.now()}`, kind: "text", content: replyText }]);
         }
