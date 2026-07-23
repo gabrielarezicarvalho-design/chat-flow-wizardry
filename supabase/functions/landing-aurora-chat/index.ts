@@ -30,31 +30,47 @@ async function transcribeAudio(base64Audio: string, mimeType: string, apiKey: st
   return String(json.text || "").trim();
 }
 
-async function askGemini(userText: string, history: Array<{ role: string; content: string }>, apiKey: string): Promise<string> {
-  const contents = [
-    ...history.map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    })),
-    { role: "user", parts: [{ text: userText }] },
-  ];
-
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
+async function askAI(userText: string, history: Array<{ role: string; content: string }>, lovableKey: string, geminiKey?: string): Promise<string> {
+  // Preferência: Lovable AI Gateway (google/gemini-3.6-flash)
+  try {
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...history.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
+      { role: "user", content: userText },
+    ];
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents,
-        generationConfig: { temperature: 0.8, maxOutputTokens: 300 },
-      }),
-    },
-  );
-  if (!res.ok) throw new Error(`Gemini falhou: ${res.status} ${await res.text()}`);
-  const json = await res.json();
-  const text = json?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") ?? "";
-  return String(text).trim() || "Desculpe, pode repetir? 🙏";
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${lovableKey}` },
+      body: JSON.stringify({ model: "google/gemini-3.6-flash", messages, temperature: 0.8, max_tokens: 300 }),
+    });
+    if (!res.ok) throw new Error(`Gateway falhou: ${res.status} ${await res.text()}`);
+    const json = await res.json();
+    const text = json?.choices?.[0]?.message?.content ?? "";
+    return String(text).trim() || "Desculpe, pode repetir? 🙏";
+  } catch (gwErr) {
+    console.warn("Gateway indisponível, tentando Gemini direto:", gwErr);
+    if (!geminiKey) throw gwErr;
+    const contents = [
+      ...history.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })),
+      { role: "user", parts: [{ text: userText }] },
+    ];
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents,
+          generationConfig: { temperature: 0.8, maxOutputTokens: 300 },
+        }),
+      },
+    );
+    if (!res.ok) throw new Error(`Gemini falhou: ${res.status} ${await res.text()}`);
+    const json = await res.json();
+    const text = json?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") ?? "";
+    return String(text).trim() || "Desculpe, pode repetir? 🙏";
+  }
 }
 
 async function synthesizeAudio(text: string, voiceId: string, apiKey: string): Promise<string> {
