@@ -652,10 +652,15 @@ export default function Landing() {
                 <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
                 <span className="h-3 w-3 rounded-full bg-[#28c840]" />
               </div>
-              <div className="flex-1 flex items-center gap-2 rounded-md bg-slate-100 px-3 py-1.5 text-xs text-slate-500">
+              <a
+                href="https://www.google.com/maps/search/dentistas+em+São+Paulo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center gap-2 rounded-md bg-slate-100 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition cursor-pointer"
+              >
                 <Search className="h-3.5 w-3.5" />
                 dentistas em São Paulo
-              </div>
+              </a>
             </div>
             <div className="p-3 grid grid-cols-[1fr_180px] gap-3">
               <div className="relative h-80 bg-slate-100 rounded-xl overflow-hidden">
