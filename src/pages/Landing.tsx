@@ -992,49 +992,79 @@ export default function Landing() {
       </section>
 
       {/* VOZ CLONADA */}
-      <section className="bg-slate-50 py-24">
-        <div className="mx-auto max-w-6xl px-6 grid md:grid-cols-2 gap-10 items-center">
+      <section className="bg-gradient-to-b from-white to-slate-50 py-24">
+        <div className="mx-auto max-w-6xl px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary">Áudio com IA</span>
-            <h2 className="mt-3 text-3xl md:text-4xl font-bold">
-              Sua{" "}
-              <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
-                voz clonada,
-              </span>{" "}
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-medium text-slate-700 shadow-sm">
+              <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
+              Tecnologia exclusiva
+            </span>
+            <h2 className="mt-5 text-4xl md:text-5xl font-bold tracking-tight leading-[1.1]">
+              Sua <span style={{ color: "#004DFF" }}>voz clonada</span>,<br />
               respondendo por você.
             </h2>
-            <p className="mt-4 text-slate-600">
-              Grave 30 segundos de áudio e nossa IA responde clientes em WhatsApp com a sua própria voz.
+            <p className="mt-5 text-slate-600 text-base leading-relaxed">
+              Grave 60 segundos da sua voz. A IA clona e envia áudios automáticos no WhatsApp — tão naturais que o cliente jura que é você.
             </p>
-            <ul className="mt-6 space-y-2 text-sm text-slate-700">
-              {["Áudios personalizados por cliente", "Sotaque e entonação preservados", "Aprova antes de enviar", "Compatível com todas as conexões"].map((i) => (
-                <li key={i} className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary" /> {i}
+            <ul className="mt-6 space-y-3 text-sm text-slate-700">
+              {["Áudios ultra naturais em português", "Atendimento humanizado em escala", "Mais retenção, mais conversão", "Cliente sente que está falando com gente"].map((i) => (
+                <li key={i} className="flex items-center gap-3">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-300">
+                    <Check className="h-3 w-3 text-slate-500" />
+                  </span>
+                  {i}
                 </li>
               ))}
             </ul>
             <Link to="/auth">
-              <Button className="mt-6 bg-primary hover:bg-primary-dark rounded-full">Testar agora</Button>
+              <Button className="mt-8 rounded-full px-6 py-6 text-white shadow-lg hover:opacity-90" style={{ backgroundColor: "#004DFF" }}>
+                Clonar minha voz <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </Link>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 border border-slate-200 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Mic className="h-5 w-5 text-primary" />
+          <div className="rounded-3xl bg-white p-8 border border-slate-200 shadow-lg">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-12 w-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "#004DFF" }}>
+                <Mic className="h-6 w-6 text-white" />
               </div>
               <div>
-                <div className="font-semibold text-sm">Sua Voz IA</div>
-                <div className="text-xs text-slate-500">0:24 / 0:38</div>
+                <div className="font-semibold text-slate-900">Sua voz · IA Next Pro</div>
+                <div className="text-xs text-slate-500">Clonada com 60s de áudio</div>
               </div>
             </div>
-            <div className="flex gap-1 h-16 items-center">
-              {[...Array(40)].map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-1 rounded-full bg-gradient-to-t from-primary to-primary-dark"
-                  style={{ height: `${20 + Math.abs(Math.sin(i)) * 60}%` }}
-                />
+
+            <div className="flex items-center gap-4">
+              <button className="h-14 w-14 rounded-full flex items-center justify-center shadow-md hover:opacity-90 transition-opacity flex-shrink-0" style={{ backgroundColor: "#004DFF" }}>
+                <Play className="h-5 w-5 text-white ml-0.5" fill="currentColor" />
+              </button>
+              <div className="flex gap-[3px] h-12 items-center flex-1">
+                {[...Array(48)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-full"
+                    style={{
+                      height: `${25 + Math.abs(Math.sin(i * 0.7)) * 70 + Math.abs(Math.cos(i * 1.3)) * 20}%`,
+                      backgroundColor: "#004DFF",
+                      opacity: 0.75,
+                    }}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-slate-500 flex-shrink-0">0:18</span>
+            </div>
+            <p className="text-center text-xs text-slate-500 mt-4">Clique no play e ouça uma amostra agora.</p>
+
+            <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-slate-100">
+              {[
+                { v: "60s", l: "pra clonar" },
+                { v: "100%", l: "natural" },
+                { v: "pt-BR", l: "nativo" },
+              ].map((s) => (
+                <div key={s.l} className="text-center">
+                  <div className="text-xl font-bold" style={{ color: "#004DFF" }}>{s.v}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">{s.l}</div>
+                </div>
               ))}
             </div>
           </div>
