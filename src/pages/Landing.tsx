@@ -638,7 +638,7 @@ export default function Landing() {
             <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4">
               <MapPin className="h-4 w-4 text-primary" /> Google Maps Leads
             </div>
-            <div className="relative h-56 rounded-xl bg-slate-100 overflow-hidden">
+            <div className="relative h-80 rounded-xl bg-slate-100 overflow-hidden">
               <div ref={mapRef} className="absolute inset-0" />
               {!mapLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center">
