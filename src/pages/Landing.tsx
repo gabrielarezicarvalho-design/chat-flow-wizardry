@@ -40,6 +40,8 @@ declare global {
 
 export default function Landing() {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const [searchQuery, setSearchQuery] = useState("dentistas em São Paulo");
   const [mapLoaded, setMapLoaded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(0);
   const [showTyping, setShowTyping] = useState(false);
@@ -124,6 +126,7 @@ export default function Landing() {
         disableDoubleClickZoom: false,
         zoomControl: true,
       });
+      mapInstanceRef.current = map;
       const places = [
         { lat: -23.548, lng: -46.636, title: "Padaria do João" },
         { lat: -23.553, lng: -46.628, title: "Clínica Bem Estar" },
@@ -652,15 +655,30 @@ export default function Landing() {
                 <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
                 <span className="h-3 w-3 rounded-full bg-[#28c840]" />
               </div>
-              <a
-                href="https://www.google.com/maps/search/dentistas+em+São+Paulo"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 flex items-center gap-2 rounded-md bg-slate-100 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition cursor-pointer"
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const g = (window as any).google;
+                  if (g?.maps && mapInstanceRef.current && searchQuery.trim()) {
+                    new g.maps.Geocoder().geocode({ address: searchQuery }, (results: any, status: string) => {
+                      if (status === "OK" && results?.[0]) {
+                        mapInstanceRef.current.setCenter(results[0].geometry.location);
+                        mapInstanceRef.current.setZoom(13);
+                      }
+                    });
+                  }
+                }}
+                className="flex-1 flex items-center gap-2 rounded-md bg-slate-100 px-3 py-1.5 text-xs text-slate-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-primary/40 transition"
               >
-                <Search className="h-3.5 w-3.5" />
-                dentistas em São Paulo
-              </a>
+                <Search className="h-3.5 w-3.5 shrink-0" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar no Google Maps..."
+                  className="flex-1 bg-transparent outline-none text-slate-700 placeholder:text-slate-400"
+                />
+              </form>
             </div>
             <div className="p-3 grid grid-cols-[1fr_180px] gap-3">
               <div className="relative h-80 bg-slate-100 rounded-xl overflow-hidden">
