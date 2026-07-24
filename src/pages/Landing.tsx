@@ -668,7 +668,7 @@ export default function Landing() {
                     });
                   }
                 }}
-                className="flex-1 flex items-center gap-2 rounded-md bg-slate-100 px-3 py-1.5 text-xs text-slate-500 focus-within:bg-white focus-within:ring-1 focus-within:ring-primary/40 transition"
+                className="flex-1 flex items-center gap-2 rounded-md bg-white border border-slate-200 px-3 py-1.5 text-xs text-slate-500 cursor-text hover:border-slate-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition"
               >
                 <Search className="h-3.5 w-3.5 shrink-0" />
                 <input
