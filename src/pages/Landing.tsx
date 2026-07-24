@@ -126,6 +126,7 @@ export default function Landing() {
         disableDoubleClickZoom: false,
         zoomControl: true,
       });
+      mapInstanceRef.current = map;
       const places = [
         { lat: -23.548, lng: -46.636, title: "Padaria do João" },
         { lat: -23.553, lng: -46.628, title: "Clínica Bem Estar" },
