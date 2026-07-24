@@ -625,11 +625,11 @@ export default function Landing() {
         </div>
 
         {/* Cities strip */}
-        <div className="border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-6xl px-6 py-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Usado por times no</span>
+        <div className="border-y border-slate-200 bg-white">
+          <div className="mx-auto max-w-6xl px-6 py-5 flex flex-wrap items-center justify-center gap-x-12 gap-y-2">
+            <span className="text-xs uppercase tracking-[0.25em] text-slate-400">Usado por times no</span>
             {["Rio de Janeiro", "São Paulo", "Distrito Federal", "Mato Grosso", "Santa Catarina", "Rio Grande do Sul"].map((c) => (
-              <span key={c} className="text-sm text-slate-700" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+              <span key={c} className="text-sm text-slate-600">
                 {c}
               </span>
             ))}
