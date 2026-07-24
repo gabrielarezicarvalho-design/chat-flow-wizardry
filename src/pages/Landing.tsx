@@ -2,14 +2,17 @@ import { Link } from "react-router-dom";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Bot, CreditCard, Mic, Users, TrendingUp,
   Zap, Check, Star, ArrowRight, Search, MapPin, Sparkles,
   BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope, PhoneCall,
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
-  Filter
+  Filter, Target
 } from "lucide-react";
+
+type LeadItem = { name: string; phone: string; origin: string };
 
 const EMOJIS = ["😀","😂","😍","🥳","🚀","🔥","👍","🙏","💜","✨","✅","💡","📞","📎","🎉","💬","🤖","💰","📈","🎯"];
 
@@ -46,6 +49,8 @@ export default function Landing() {
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [userMessages, setUserMessages] = useState<Array<{ id: string; kind: "text" | "audio" | "file"; content: string; fileName?: string; previewUrl?: string; duration?: number; audioUrl?: string }>>([]);
   const [interacted, setInteracted] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<LeadItem | null>(null);
+  const [savedLeads, setSavedLeads] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recordTimerRef = useRef<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -662,12 +667,17 @@ export default function Landing() {
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                {[
-                  { name: "Clínica Sorriso+", phone: "(11) 9 9876-***" },
-                  { name: "OdontoCenter Jardins", phone: "(11) 9 4421-***" },
-                  { name: "Dr. Renato Dental", phone: "(11) 9 7766-***" },
-                ].map((lead) => (
-                  <div key={lead.name} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2">
+                {([
+                  { name: "Clínica Sorriso+", phone: "(11) 9 9876-***", origin: "Google Maps" },
+                  { name: "OdontoCenter Jardins", phone: "(11) 9 4421-***", origin: "Google Maps" },
+                  { name: "Dr. Renato Dental", phone: "(11) 9 7766-***", origin: "Google Maps" },
+                ] as LeadItem[]).map((lead) => (
+                  <button
+                    type="button"
+                    key={lead.name}
+                    onClick={() => setSelectedLead(lead)}
+                    className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-left hover:border-primary/40 hover:shadow-sm transition"
+                  >
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
                       <Building2 className="h-4 w-4" />
                     </div>
@@ -676,7 +686,7 @@ export default function Landing() {
                       <div className="text-[10px] text-slate-500 truncate">{lead.phone}</div>
                     </div>
                     <span className="text-[9px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full shrink-0">novo</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -968,6 +978,53 @@ export default function Landing() {
           <div>© {new Date().getFullYear()} MarketFlow. Todos os direitos reservados.</div>
         </div>
       </footer>
+
+      <Dialog open={!!selectedLead} onOpenChange={(o) => !o && setSelectedLead(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Building2 className="h-5 w-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-base">{selectedLead?.name}</DialogTitle>
+                <DialogDescription className="text-xs">Lead capturado automaticamente</DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+              <PhoneCall className="h-4 w-4 text-slate-500" />
+              <span className="font-medium text-slate-900">{selectedLead?.phone}</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+              <MapPin className="h-4 w-4 text-slate-500" />
+              <span className="text-slate-700">Origem: <span className="font-medium text-slate-900">{selectedLead?.origin}</span></span>
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={() => {
+                if (selectedLead) window.open(`tel:${selectedLead.phone.replace(/\D/g, "")}`);
+              }}
+            >
+              <PhoneCall className="h-4 w-4 mr-2" /> Chamar agora
+            </Button>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() => {
+                if (selectedLead) setSavedLeads((s) => Array.from(new Set([...s, selectedLead.name])));
+                setSelectedLead(null);
+              }}
+            >
+              <Target className="h-4 w-4 mr-2" />
+              {selectedLead && savedLeads.includes(selectedLead.name) ? "Já no funil" : "Salvar no funil"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
