@@ -9,7 +9,8 @@ import {
   Zap, Check, Star, ArrowRight, Search, MapPin, Sparkles,
   BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope, PhoneCall,
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
-  Filter, Target, Calendar, Play, Clock, Bell
+  Filter, Target, Calendar, Play, Clock, Bell,
+  Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
@@ -1097,27 +1098,71 @@ export default function Landing() {
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary">Tudo em um lugar</span>
-            <h2 className="mt-3 text-3xl md:text-4xl font-bold">Sua central comercial completa.</h2>
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
+              <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
+              Tudo em um único painel
+            </span>
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold">
+              Sua central comercial <span style={{ color: "#004DFF" }}>completa.</span>
+            </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-              CRM, atendimento, campanhas em massa, funis, cobranças, relatórios — tudo integrado.
+              Prospecção, IA, CRM, cobrança e campanhas — organizados, sem complicação.
             </p>
           </div>
 
-          <div className="mt-12 grid md:grid-cols-2 gap-4">
+          <div className="mt-12 grid md:grid-cols-2 gap-5">
             {[
-              { i: Users, t: "CRM completo", d: "Kanban de leads e histórico de conversas" },
-              { i: MessageCircle, t: "Multi-atendentes", d: "Distribuição automática por departamento" },
-              { i: TrendingUp, t: "Campanhas em massa", d: "Envios inteligentes com anti-bloqueio" },
-              { i: ShieldCheck, t: "Segurança total", d: "Criptografia e permissões granulares" },
-            ].map((c) => (
-              <div key={c.t} className="rounded-xl bg-white border border-slate-200 p-5 flex items-start gap-4">
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <c.i className="h-5 w-5 text-primary" />
+              {
+                icon: Target, title: "Prospecção",
+                items: [
+                  { i: MapPin, l: "Google Maps" },
+                  { i: Instagram, l: "Instagram" },
+                  { i: FileText, l: "Base CNPJ" },
+                  { i: UsersRound, l: "Grupos WhatsApp" },
+                ],
+              },
+              {
+                icon: Bot, title: "IA & Automação",
+                items: [
+                  { i: Headphones, l: "Atendimento IA" },
+                  { i: Volume2, l: "Áudio IA" },
+                  { i: Mic, l: "Clonagem de voz" },
+                  { i: Repeat, l: "Follow-up automático" },
+                ],
+              },
+              {
+                icon: Wallet, title: "Comercial & Cobrança",
+                items: [
+                  { i: TrendingUp, l: "CRM / Funil" },
+                  { i: Receipt, l: "Cobranças automáticas" },
+                  { i: CreditCard, l: "PIX e boleto" },
+                  { i: AlertCircle, l: "Recuperação de inadimplentes" },
+                ],
+              },
+              {
+                icon: Megaphone, title: "Comunicação",
+                items: [
+                  { i: Send, l: "Campanhas em massa" },
+                  { i: MessageSquare, l: "Múltiplos WhatsApps" },
+                  { i: ListChecks, l: "Respostas rápidas" },
+                  { i: Ban, l: "Listas e blacklist" },
+                ],
+              },
+            ].map((group) => (
+              <div key={group.title} className="rounded-2xl bg-white border border-slate-200 p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <group.icon className="h-5 w-5" style={{ color: "#004DFF" }} />
+                  </div>
+                  <div className="font-semibold text-lg">{group.title}</div>
                 </div>
-                <div>
-                  <div className="font-semibold">{c.t}</div>
-                  <div className="text-sm text-slate-500 mt-1">{c.d}</div>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {group.items.map((it) => (
+                    <div key={it.l} className="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700">
+                      <it.i className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                      <span className="truncate">{it.l}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
