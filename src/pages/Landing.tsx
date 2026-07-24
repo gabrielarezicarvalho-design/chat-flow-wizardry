@@ -25,12 +25,15 @@ const stats = [
 ];
 
 const segments = [
-  { icon: Store, label: "Varejo" },
-  { icon: Stethoscope, label: "Clínicas" },
-  { icon: GraduationCap, label: "Educação" },
-  { icon: Building2, label: "Imobiliárias" },
-  { icon: Scissors, label: "Beleza" },
-  { icon: Utensils, label: "Restaurantes" },
+  { icon: Building2, label: "Imobiliária" },
+  { icon: Stethoscope, label: "Dentista" },
+  { icon: Scale, label: "Advogado" },
+  { icon: Activity, label: "Clínica" },
+  { icon: Scissors, label: "Estética" },
+  { icon: Sun, label: "Energia Solar" },
+  { icon: Store, label: "Loja" },
+  { icon: Wrench, label: "Oficina" },
+  { icon: Utensils, label: "Restaurante" },
 ];
 
 declare global {
