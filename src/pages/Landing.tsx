@@ -10,7 +10,8 @@ import {
   BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope, PhoneCall,
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
   Filter, Target, Calendar, Play, Clock, Bell,
-  Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban
+  Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
+  Scale, Activity, Sun, Wrench
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
