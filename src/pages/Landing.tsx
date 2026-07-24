@@ -667,12 +667,17 @@ export default function Landing() {
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                {[
-                  { name: "Clínica Sorriso+", phone: "(11) 9 9876-***" },
-                  { name: "OdontoCenter Jardins", phone: "(11) 9 4421-***" },
-                  { name: "Dr. Renato Dental", phone: "(11) 9 7766-***" },
-                ].map((lead) => (
-                  <div key={lead.name} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2">
+                {([
+                  { name: "Clínica Sorriso+", phone: "(11) 9 9876-***", origin: "Google Maps" },
+                  { name: "OdontoCenter Jardins", phone: "(11) 9 4421-***", origin: "Google Maps" },
+                  { name: "Dr. Renato Dental", phone: "(11) 9 7766-***", origin: "Google Maps" },
+                ] as LeadItem[]).map((lead) => (
+                  <button
+                    type="button"
+                    key={lead.name}
+                    onClick={() => setSelectedLead(lead)}
+                    className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-left hover:border-primary/40 hover:shadow-sm transition"
+                  >
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
                       <Building2 className="h-4 w-4" />
                     </div>
@@ -681,7 +686,7 @@ export default function Landing() {
                       <div className="text-[10px] text-slate-500 truncate">{lead.phone}</div>
                     </div>
                     <span className="text-[9px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full shrink-0">novo</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
