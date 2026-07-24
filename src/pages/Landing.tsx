@@ -1077,22 +1077,25 @@ export default function Landing() {
       </section>
 
       {/* SEGMENTOS */}
-      <section id="segmentos" className="mx-auto max-w-6xl px-6 py-24">
+      <section id="segmentos" className="mx-auto max-w-5xl px-6 py-24">
         <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">Feito para o seu negócio</span>
-          <h2 className="mt-3 text-3xl md:text-4xl font-bold">
+          <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
+            Pra qualquer negócio
+          </span>
+          <h2 className="mt-4 text-3xl md:text-5xl font-bold">
             Funciona pro{" "}
-            <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
-              seu segmento.
-            </span>
+            <span style={{ color: "#004DFF" }}>seu segmento.</span>
           </h2>
+          <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
+            A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
+          </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-6 gap-4">
+        <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-5">
           {segments.map((s) => (
-            <div key={s.label} className="rounded-xl border border-slate-200 p-5 text-center hover:border-primary/30 hover:bg-primary/5/30 transition-colors">
-              <s.icon className="h-6 w-6 text-primary mx-auto" />
-              <div className="mt-3 text-sm font-medium">{s.label}</div>
+            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center hover:border-primary/40 hover:shadow-sm transition-all">
+              <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
+              <div className="mt-4 text-sm font-medium text-slate-700">{s.label}</div>
             </div>
           ))}
         </div>
