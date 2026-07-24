@@ -671,6 +671,9 @@ export default function Landing() {
                   { name: "Clínica Sorriso+", phone: "(11) 9 9876-***", origin: "Google Maps" },
                   { name: "OdontoCenter Jardins", phone: "(11) 9 4421-***", origin: "Google Maps" },
                   { name: "Dr. Renato Dental", phone: "(11) 9 7766-***", origin: "Google Maps" },
+                  { name: "Odonto Vila Mariana", phone: "(11) 9 3312-***", origin: "Google Maps" },
+                  { name: "Sorriso Perfeito SP", phone: "(11) 9 8821-***", origin: "Google Maps" },
+                  { name: "Implantes Paulista", phone: "(11) 9 5540-***", origin: "Google Maps" },
                 ] as LeadItem[]).map((lead) => (
                   <button
                     type="button"
