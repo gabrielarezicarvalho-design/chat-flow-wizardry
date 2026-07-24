@@ -652,13 +652,15 @@ export default function Landing() {
                 dentistas em São Paulo
               </div>
             </div>
-            <div className="relative h-80 bg-slate-100">
-              <div ref={mapRef} className="absolute inset-0" />
-              {!mapLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                </div>
-              )}
+            <div className="p-3">
+              <div className="relative h-80 bg-slate-100 rounded-xl overflow-hidden mx-auto max-w-[92%]">
+                <div ref={mapRef} className="absolute inset-0" />
+                {!mapLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
