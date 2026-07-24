@@ -49,6 +49,8 @@ export default function Landing() {
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [userMessages, setUserMessages] = useState<Array<{ id: string; kind: "text" | "audio" | "file"; content: string; fileName?: string; previewUrl?: string; duration?: number; audioUrl?: string }>>([]);
   const [interacted, setInteracted] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<LeadItem | null>(null);
+  const [savedLeads, setSavedLeads] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recordTimerRef = useRef<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
