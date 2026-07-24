@@ -858,8 +858,8 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Anti-bloqueio — full width */}
-            <div className="md:col-span-3 rounded-2xl bg-white p-6 border border-slate-200">
+            {/* Anti-bloqueio */}
+            <div className="rounded-2xl bg-white p-6 border border-slate-200">
               <ShieldCheck className="h-6 w-6 text-primary" />
               <div className="mt-4 font-semibold text-slate-900">Anti-bloqueio</div>
               <div className="text-sm text-slate-500 mt-1">
