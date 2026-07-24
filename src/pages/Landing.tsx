@@ -9,7 +9,7 @@ import {
   Zap, Check, Star, ArrowRight, Search, MapPin, Sparkles,
   BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope, PhoneCall,
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
-  Filter, Target, Calendar, Play, Clock
+  Filter, Target, Calendar, Play, Clock, Bell
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
