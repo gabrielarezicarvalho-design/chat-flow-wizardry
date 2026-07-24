@@ -1082,7 +1082,7 @@ export default function Landing() {
           <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
             Pra qualquer negócio
           </span>
-          <h2 className="mt-4 text-3xl md:text-5xl font-bold">
+          <h2 className="mt-4 text-3xl md:text-5xl font-bold font-space-grotesk">
             Funciona pro{" "}
             <span style={{ color: "#004DFF" }}>seu segmento.</span>
           </h2>
