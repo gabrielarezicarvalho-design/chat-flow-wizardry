@@ -9,7 +9,7 @@ import {
   Zap, Check, Star, ArrowRight, Search, MapPin, Sparkles,
   BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope, PhoneCall,
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
-  Filter, Target, Calendar
+  Filter, Target, Calendar, Play, Clock
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
@@ -767,40 +767,103 @@ export default function Landing() {
       <section id="ia" className="bg-slate-50 py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary">Inteligência Artificial</span>
-            <h2 className="mt-3 text-3xl md:text-4xl font-bold">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Tudo que você precisa</span>
+            <h2 className="mt-3 text-3xl md:text-5xl font-bold text-slate-900">
               Uma IA que{" "}
               <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
-                vende sozinha.
+                vende sozinha
               </span>
+              .
             </h2>
-            <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-              Treine sua IA com o conhecimento do seu negócio. Ela atende, qualifica, agenda e fecha.
+            <p className="mt-4 text-slate-500 max-w-2xl mx-auto">
+              Do primeiro "oi" até o fechamento. Tudo automático, tudo natural.
             </p>
           </div>
 
-          <div className="mt-12 grid md:grid-cols-2 gap-6">
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <div className="text-xs text-slate-500 mb-2">Cliente</div>
-              <div className="rounded-lg bg-slate-100 p-3 text-sm">
-                Quanto custa o pacote premium com atendimento 24h?
+          <div className="mt-12 grid md:grid-cols-3 gap-6">
+            {/* Chat bento — 2 cols wide, 2 rows tall */}
+            <div className="md:col-span-2 md:row-span-2 rounded-2xl bg-white p-6 border border-slate-200">
+              <MessageCircle className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Atende como um humano</div>
+              <div className="text-sm text-slate-500 mt-1">
+                Responde texto e áudio, entende contexto, lembra do cliente. Conversa de verdade.
               </div>
-              <div className="mt-4 text-xs text-slate-500 mb-2">MarketFlow IA</div>
-              <div className="rounded-lg bg-gradient-to-r from-primary to-primary-dark p-3 text-sm text-white">
-                O Premium sai por R$ 297/mês com IA 24h, WhatsApp ilimitado e cobranças automáticas. Quer que eu já envie o link de pagamento?
+
+              <div className="mt-8 space-y-3">
+                <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-sm text-slate-800">
+                  Oi, vi o anúncio. Tem disponível?
+                </div>
+                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-sm text-white">
+                  <div className="text-[10px] font-semibold opacity-80 mb-0.5">✦ IA Next Pro</div>
+                  Tenho sim! Pra quando você precisa? Posso já reservar 😊
+                </div>
+                <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-sm text-slate-800">
+                  Pode ser amanhã 14h?
+                </div>
+                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-sm text-white">
+                  <div className="text-[10px] font-semibold opacity-80 mb-0.5">✦ IA Next Pro</div>
+                  Agendado! Te mando um lembrete 1h antes ✅
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-rows-2 gap-6">
-              <div className="rounded-2xl bg-white p-6 border border-slate-200">
-                <Bot className="h-6 w-6 text-primary" />
-                <div className="mt-3 font-semibold">Base de conhecimento</div>
-                <div className="text-sm text-slate-500 mt-1">Upload de PDFs, sites e planilhas — a IA aprende tudo do seu negócio.</div>
+            {/* Transcreve áudio */}
+            <div className="rounded-2xl bg-white p-6 border border-slate-200">
+              <Mic className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Transcreve áudio</div>
+              <div className="text-sm text-slate-500 mt-1">
+                Cliente mandou áudio? A IA escuta, entende e responde na hora.
               </div>
-              <div className="rounded-2xl bg-white p-6 border border-slate-200">
-                <BellRing className="h-6 w-6 text-primary" />
-                <div className="mt-3 font-semibold">Respostas em segundos</div>
-                <div className="text-sm text-slate-500 mt-1">Nunca perca um lead por demora — resposta instantânea 24/7.</div>
+              <div className="mt-5 flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-white">
+                  <Play className="h-4 w-4 ml-0.5" />
+                </div>
+                <div className="flex-1 flex gap-0.5 h-6 items-center">
+                  {[...Array(24)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex-1 rounded-full bg-primary/70"
+                      style={{ height: `${25 + Math.abs(Math.sin(i * 0.9)) * 75}%` }}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-slate-400">0:12</span>
+              </div>
+            </div>
+
+            {/* Recupera leads frios */}
+            <div className="rounded-2xl bg-white p-6 border border-slate-200">
+              <Clock className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Recupera leads frios</div>
+              <div className="text-sm text-slate-500 mt-1">
+                Follow-up automático até o cliente responder.
+              </div>
+            </div>
+
+            {/* Agenda automático */}
+            <div className="rounded-2xl bg-white p-6 border border-slate-200">
+              <Calendar className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Agenda automático</div>
+              <div className="text-sm text-slate-500 mt-1">
+                Marca reuniões e visitas sem você abrir a agenda.
+              </div>
+            </div>
+
+            {/* Aviso de lead quente */}
+            <div className="rounded-2xl bg-white p-6 border border-slate-200">
+              <TrendingUp className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Aviso de lead quente</div>
+              <div className="text-sm text-slate-500 mt-1">
+                Quando o cliente tá pronto, você recebe no WhatsApp.
+              </div>
+            </div>
+
+            {/* Anti-bloqueio — full width */}
+            <div className="md:col-span-3 rounded-2xl bg-white p-6 border border-slate-200">
+              <ShieldCheck className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Anti-bloqueio</div>
+              <div className="text-sm text-slate-500 mt-1">
+                Disparos seguros, ritmo natural, simulação humana.
               </div>
             </div>
           </div>
