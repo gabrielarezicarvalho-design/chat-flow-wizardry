@@ -7,7 +7,8 @@ import {
   MessageCircle, Bot, CreditCard, Mic, Users, TrendingUp,
   Zap, Check, Star, ArrowRight, Search, MapPin, Sparkles,
   BellRing, ShieldCheck, PlayCircle, Building2, Store, Stethoscope, PhoneCall,
-  GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square
+  GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
+  Filter
 } from "lucide-react";
 
 const EMOJIS = ["😀","😂","😍","🥳","🚀","🔥","👍","🙏","💜","✨","✅","💡","📞","📎","🎉","💬","🤖","💰","📈","🎯"];
@@ -626,24 +627,32 @@ export default function Landing() {
       {/* PROSPECÇÃO */}
       <section id="recursos" className="mx-auto max-w-6xl px-6 py-24">
         <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">Prospecção automática</span>
-          <h2 className="mt-3 text-3xl md:text-4xl font-bold">
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prospecção automática</span>
+          <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
             Encontre clientes{" "}
-            <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
-              automaticamente.
-            </span>
+            <span className="text-[#004DFF]">automaticamente.</span>
           </h2>
-          <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            Extraímos leads qualificados do Google Maps, Instagram, TikTok e Facebook Ads em minutos.
+          <p className="mt-5 text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Pesquisa no Google Maps, extrai contatos e dispara o primeiro "oi" no WhatsApp.
+            O sistema acha clientes enquanto você dorme.
           </p>
         </div>
 
-        <div className="mt-12 grid md:grid-cols-2 gap-6">
-          <div className="rounded-2xl border border-slate-200 p-6 bg-gradient-to-br from-primary/5 to-white">
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4">
-              <MapPin className="h-4 w-4 text-primary" /> Google Maps Leads
+        <div className="mt-14 grid md:grid-cols-2 gap-6">
+          {/* Card do mapa estilo macOS */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
+              <div className="flex gap-1.5">
+                <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+                <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
+                <span className="h-3 w-3 rounded-full bg-[#28c840]" />
+              </div>
+              <div className="flex-1 flex items-center gap-2 rounded-md bg-slate-100 px-3 py-1.5 text-xs text-slate-500">
+                <Search className="h-3.5 w-3.5" />
+                dentistas em São Paulo
+              </div>
             </div>
-            <div className="relative h-80 rounded-xl bg-slate-100 overflow-hidden">
+            <div className="relative h-80 bg-slate-100">
               <div ref={mapRef} className="absolute inset-0" />
               {!mapLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -653,38 +662,50 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 p-6">
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4">
-              <Search className="h-4 w-4 text-primary" /> +150 leads encontrados
+          {/* Fluxo automatizado */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 mb-5">
+              Fluxo automatizado
             </div>
-            <div className="space-y-2">
-              {["Padaria do João", "Clínica Bem Estar", "Studio de Beleza", "Auto Escola Rápida", "Restaurante Sabor"].map((n, i) => (
-                <div key={n} className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50">
-                  <div>
-                    <div className="text-sm font-medium">{n}</div>
-                    <div className="text-xs text-slate-500">(11) 9{i}xxx-{1000 + i * 111}</div>
+            <div className="space-y-3">
+              {[
+                { icon: Search, title: "Buscar no Maps", desc: "Nicho + cidade" },
+                { icon: Filter, title: "Limpar lista", desc: "Remove duplicados/inválidos" },
+                { icon: Send, title: "Primeira mensagem", desc: "Ritmo humano no WhatsApp" },
+                { icon: Bot, title: "IA conduz a conversa", desc: "Responde, qualifica, agenda" },
+              ].map((step) => (
+                <div key={step.title} className="flex items-center gap-4 rounded-xl px-3 py-3 hover:bg-slate-50 transition">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+                    <step.icon className="h-5 w-5" />
                   </div>
-                  <Check className="h-4 w-4 text-emerald-500" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-slate-900 text-sm">{step.title}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{step.desc}</div>
+                  </div>
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-6 grid md:grid-cols-3 gap-6">
+        {/* Quatro cards de recursos */}
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { icon: Search, title: "Google Maps", desc: "Extraia empresas por região e nicho" },
-            { icon: Sparkles, title: "Instagram & TikTok", desc: "Leads qualificados de perfis reais" },
-            { icon: TrendingUp, title: "Espionar Anúncios", desc: "Descubra o que a concorrência vende" },
+            { icon: MapPin, title: "Google Maps", desc: "Extração por nicho + cidade" },
+            { icon: Filter, title: "Filtros inteligentes", desc: "Tira duplicados e inválidos" },
+            { icon: Send, title: "Disparo no WhatsApp", desc: "Ritmo humano, anti-bloqueio" },
+            { icon: Bot, title: "IA assume a conversa", desc: "Responde, agenda, recupera" },
           ].map((f) => (
-            <div key={f.title} className="rounded-xl border border-slate-200 p-5">
+            <div key={f.title} className="rounded-2xl border border-slate-200 bg-white p-5 hover:border-primary/40 hover:shadow-sm transition">
               <f.icon className="h-5 w-5 text-primary" />
-              <div className="mt-3 font-semibold">{f.title}</div>
-              <div className="text-sm text-slate-500 mt-1">{f.desc}</div>
+              <div className="mt-3 font-semibold text-slate-900 text-sm">{f.title}</div>
+              <div className="text-xs text-slate-500 mt-1 leading-relaxed">{f.desc}</div>
             </div>
           ))}
         </div>
       </section>
+
 
       {/* IA */}
       <section id="ia" className="bg-slate-50 py-24">
