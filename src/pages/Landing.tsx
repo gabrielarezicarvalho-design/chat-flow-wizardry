@@ -651,9 +651,9 @@ export default function Landing() {
           <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
               <div className="flex gap-1.5 group">
-                <span className="h-3 w-3 rounded-full bg-[#ff5f57] transition-all duration-200 group-hover:animate-pulse group-hover:shadow-[0_0_6px_#ff5f57]" />
-                <span className="h-3 w-3 rounded-full bg-[#febc2e] transition-all duration-200 delay-75 group-hover:animate-pulse group-hover:shadow-[0_0_6px_#febc2e]" />
-                <span className="h-3 w-3 rounded-full bg-[#28c840] transition-all duration-200 delay-150 group-hover:animate-pulse group-hover:shadow-[0_0_6px_#28c840]" />
+                <span className="h-3 w-3 rounded-full bg-[#ff5f57] animate-pulse shadow-[0_0_6px_#ff5f57]" />
+                <span className="h-3 w-3 rounded-full bg-[#febc2e] animate-pulse delay-75 shadow-[0_0_6px_#febc2e]" />
+                <span className="h-3 w-3 rounded-full bg-[#28c840] animate-pulse delay-150 shadow-[0_0_6px_#28c840]" />
               </div>
               <form
                 onSubmit={(e) => {
