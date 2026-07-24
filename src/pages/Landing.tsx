@@ -112,6 +112,11 @@ export default function Landing() {
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: false,
+        draggable: true,
+        scrollwheel: true,
+        gestureHandling: "greedy",
+        disableDoubleClickZoom: false,
+        zoomControl: true,
       });
       const places = [
         { lat: -23.548, lng: -46.636, title: "Padaria do João" },
