@@ -4193,7 +4193,9 @@ ${safeTelegramText}`;
       aiAgentIdToUse &&
       conversationData.attendance_type !== "agent" &&
       conversationData.attendance_type !== "human" &&
+      conversationData.attendance_type !== "queue" &&
       !conversationInAttendance;
+
 
     // Se não executou fluxo, verificar se há assistente IA atribuído (conversa ou conexão)
     if (canRouteToAI) {

@@ -30,6 +30,8 @@ import {
   Headphones,
   GitBranch,
   ArrowRightLeft,
+  Users,
+
 } from "lucide-react";
 import { formatDistanceToNow, format, isToday, isYesterday } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -45,7 +47,7 @@ const Conversations = () => {
   const { user } = useAuth();
   const { companyId } = useCompanyId();
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState<"agent" | "ai" | "ura">("ura");
+  const [activeTab, setActiveTab] = useState<"agent" | "ai" | "ura" | "queue">("ura");
   const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
@@ -240,20 +242,39 @@ const Conversations = () => {
     }
   };
 
-  const handleTransferFromURA = async (_agentId?: string, departmentId?: string, humanAgentId?: string) => {
+  const doTransfer = async (aiAgentId?: string, departmentId?: string, humanAgentId?: string) => {
     if (!selectedConversationId || transferring) return;
     setTransferring(true);
     try {
-      const updates: any = { attendance_type: "agent" };
-      if (humanAgentId) updates.assigned_to = humanAgentId;
-      if (departmentId) updates.department_id = departmentId;
-      
+      const updates: any = {};
+      let nextTab: "agent" | "ai" | "ura" | "queue" = activeTab;
+
+      if (humanAgentId) {
+        updates.attendance_type = "agent";
+        updates.assigned_to = humanAgentId;
+        updates.department_id = null;
+        nextTab = "agent";
+      } else if (aiAgentId) {
+        updates.attendance_type = "ai";
+        updates.assigned_to = aiAgentId;
+        updates.department_id = null;
+        nextTab = "ai";
+      } else if (departmentId) {
+        updates.attendance_type = "queue";
+        updates.assigned_to = null;
+        updates.department_id = departmentId;
+        nextTab = "queue";
+      } else {
+        toast.error("Selecione um destino para a transferência");
+        return;
+      }
+
       await updateConversation.mutateAsync({
         id: selectedConversationId,
         updates,
       });
       toast.success("Conversa transferida com sucesso!");
-      setActiveTab("agent");
+      setActiveTab(nextTab);
     } catch {
       toast.error("Erro ao transferir conversa");
     } finally {
@@ -261,26 +282,9 @@ const Conversations = () => {
     }
   };
 
-  const handleHeaderTransfer = async (_agentId?: string, departmentId?: string, humanAgentId?: string) => {
-    if (!selectedConversationId || transferring) return;
-    setTransferring(true);
-    try {
-      const updates: any = { attendance_type: "agent" };
-      if (humanAgentId) updates.assigned_to = humanAgentId;
-      if (departmentId) updates.department_id = departmentId;
-      
-      await updateConversation.mutateAsync({
-        id: selectedConversationId,
-        updates,
-      });
-      toast.success("Conversa transferida com sucesso!");
-      setActiveTab("agent");
-    } catch {
-      toast.error("Erro ao transferir conversa");
-    } finally {
-      setTransferring(false);
-    }
-  };
+  const handleTransferFromURA = doTransfer;
+  const handleHeaderTransfer = doTransfer;
+
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -393,6 +397,24 @@ const Conversations = () => {
               </Badge>
             )}
           </button>
+          <button
+            onClick={() => { setActiveTab("queue"); setSelectedConversationId(null); }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors border-b-2",
+              activeTab === "queue"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Fila</span>
+            {getTabCount("queue") > 0 && (
+              <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px] rounded-full">
+                {getTabCount("queue")}
+              </Badge>
+            )}
+          </button>
+
         </div>
 
         {/* Filter: Meus / Todos (only on agent tab) */}
@@ -424,10 +446,13 @@ const Conversations = () => {
               {activeTab === "agent" && <Headphones className="w-10 h-10 text-muted-foreground/40 mb-3" />}
               {activeTab === "ai" && <Bot className="w-10 h-10 text-muted-foreground/40 mb-3" />}
               {activeTab === "ura" && <GitBranch className="w-10 h-10 text-muted-foreground/40 mb-3" />}
+              {activeTab === "queue" && <Users className="w-10 h-10 text-muted-foreground/40 mb-3" />}
               <p className="text-sm text-muted-foreground">
                 {activeTab === "agent" && "Nenhum atendimento humano"}
                 {activeTab === "ai" && "Nenhum atendimento com IA"}
                 {activeTab === "ura" && "Nenhum cliente na URA"}
+                {activeTab === "queue" && "Nenhuma conversa na fila"}
+
               </p>
             </div>
           ) : (
