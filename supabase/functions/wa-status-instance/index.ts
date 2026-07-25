@@ -68,16 +68,20 @@ serve(async (req) => {
     try {
       result = JSON.parse(responseText);
     } catch (parseError) {
-      console.error("Failed to parse JSON response:", parseError);
+      console.error("Non-JSON response from UAZAPI (likely HTML error page). Status:", response.status);
+      // Return 200 with disconnected state so client polling doesn't blow up
       return new Response(JSON.stringify({
         success: false,
-        error: "Invalid JSON response from UAZAPI",
-        rawResponse: responseText.substring(0, 200)
+        connected: false,
+        status: "unreachable",
+        error: "UAZAPI server returned non-JSON response",
+        upstreamStatus: response.status
       }), {
-        status: 500,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
+
 
     if (!response.ok) {
       console.error("UZAPI status error:", result);
