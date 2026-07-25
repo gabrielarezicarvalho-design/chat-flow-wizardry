@@ -509,18 +509,25 @@ function MassSendingContent() {
 
   const checkConnectionStatus = async (connectionId: string): Promise<boolean> => {
     const conn = connections.find(c => c.id === connectionId);
-    if (!conn || !conn.token) {
+    if (!conn) {
       setConnectionStatus("disconnected");
       return false;
     }
-    
+    const envUpper = (conn.environment || "EVOLUTION").toUpperCase();
+    if (envUpper !== "EVOLUTION" && !conn.token) {
+      setConnectionStatus("disconnected");
+      return false;
+    }
+
     setCheckingStatus(true);
     try {
       const { data, error } = await supabase.functions.invoke("wa-status-instance", {
         body: {
           token: conn.token,
-          environment: conn.environment || "TESTE",
-          base_url: conn.base_url
+          environment: conn.environment || "EVOLUTION",
+          base_url: conn.base_url,
+          instance_name: conn.instance_name,
+          instance_id: conn.id,
         }
       });
       
