@@ -292,49 +292,88 @@ serve(async (req) => {
           const evoMedia = params.media || params.file;
           const dMin = Number(params.delayMin ?? 10);
           const dMax = Number(params.delayMax ?? 30);
-          const results: any[] = [];
-          let sent = 0, failed = 0;
+          const campaignId = params.campaignId;
 
-          for (let i = 0; i < evoNumbers.length; i++) {
-            const phone = String(evoNumbers[i] || "").replace("@s.whatsapp.net", "").replace(/\D/g, "");
-            if (!phone) continue;
-            try {
-              let r;
-              if (evoType === "text" || evoType === "button" || evoType === "list" || evoType === "poll" || evoType === "carousel") {
-                r = await evolutionSendText({ ...creds, phone, text: params.text || "" });
-              } else if (evoType === "audio") {
-                r = await evolutionSendAudio({ ...creds, phone, audio: evoMedia });
-              } else if (evoType === "image" || evoType === "video" || evoType === "document") {
-                r = await evolutionSendMedia({
-                  ...creds,
-                  phone,
-                  mediaType: evoType,
-                  media: evoMedia,
-                  caption: params.text,
-                  fileName: params.docName,
-                });
-              } else {
-                r = await evolutionSendText({ ...creds, phone, text: params.text || "" });
+          const runDispatch = async () => {
+            const results: any[] = [];
+            let sent = 0, failed = 0;
+            for (let i = 0; i < evoNumbers.length; i++) {
+              const phone = String(evoNumbers[i] || "").replace("@s.whatsapp.net", "").replace(/\D/g, "");
+              if (!phone) continue;
+              try {
+                let r;
+                if (evoType === "text" || evoType === "button" || evoType === "list" || evoType === "poll" || evoType === "carousel") {
+                  r = await evolutionSendText({ ...creds, phone, text: params.text || "" });
+                } else if (evoType === "audio") {
+                  r = await evolutionSendAudio({ ...creds, phone, audio: evoMedia });
+                } else if (evoType === "image" || evoType === "video" || evoType === "document") {
+                  r = await evolutionSendMedia({
+                    ...creds, phone, mediaType: evoType, media: evoMedia,
+                    caption: params.text, fileName: params.docName,
+                  });
+                } else {
+                  r = await evolutionSendText({ ...creds, phone, text: params.text || "" });
+                }
+                if (r.ok) sent++; else failed++;
+                results.push({ number: phone, ok: r.ok, data: r.data });
+                if (campaignId) {
+                  await supabase.from("campaign_contacts").update({
+                    status: r.ok ? "sent" : "failed",
+                    sent_at: r.ok ? new Date().toISOString() : null,
+                    error_message: r.ok ? null : JSON.stringify(r.data).slice(0, 500),
+                  }).eq("campaign_id", campaignId).ilike("phone", `%${phone}%`);
+                }
+              } catch (e: any) {
+                failed++;
+                results.push({ number: phone, ok: false, error: e?.message || String(e) });
               }
-              if (r.ok) sent++; else failed++;
-              results.push({ number: phone, ok: r.ok, data: r.data });
-            } catch (e: any) {
-              failed++;
-              results.push({ number: phone, ok: false, error: e?.message || String(e) });
+              if (i < evoNumbers.length - 1) {
+                const wait = (Math.floor(Math.random() * (dMax - dMin + 1)) + dMin) * 1000;
+                await new Promise((res) => setTimeout(res, wait));
+              }
             }
-            if (i < evoNumbers.length - 1) {
-              const wait = (Math.floor(Math.random() * (dMax - dMin + 1)) + dMin) * 1000;
-              await new Promise((res) => setTimeout(res, wait));
+            if (campaignId) {
+              await supabase.from("campaigns").update({
+                status: sent === 0 ? "failed" : "completed",
+                sent_count: sent,
+                failed_count: failed,
+                total_contacts: evoNumbers.length,
+                completed_at: new Date().toISOString(),
+              }).eq("id", campaignId);
             }
+            console.log(`[wa-sender] Evolution dispatch done: sent=${sent} failed=${failed}`);
+          };
+
+          const result = { status: evoNumbers.length > 1 ? "queued" : "completed", count: evoNumbers.length };
+
+          // Fast path for single contact: run inline so UI gets real result.
+          if (evoNumbers.length <= 1) {
+            await runDispatch();
+            return new Response(JSON.stringify({ success: true, data: { ...result, status: "completed", sent: 1, failed: 0 } }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
           }
 
-          const result = { status: "completed", count: evoNumbers.length, sent, failed };
+          // Multiple contacts: dispatch asynchronously, respond immediately.
+          // @ts-ignore Deno edge runtime provides EdgeRuntime.waitUntil
+          const waitUntil = (globalThis as any).EdgeRuntime?.waitUntil;
+          if (typeof waitUntil === "function") {
+            waitUntil(runDispatch());
+          } else {
+            runDispatch().catch((e) => console.error("[wa-sender] bg error:", e));
+          }
           await sendCampaignStartTelegramNotification({ supabase, connection, params, result }).catch(() => {});
-
-          return new Response(JSON.stringify({ success: true, data: { ...result, results } }), {
+          if (campaignId) {
+            await supabase.from("campaigns").update({
+              status: "queued", total_contacts: evoNumbers.length, started_at: new Date().toISOString(),
+            }).eq("id", campaignId);
+          }
+          return new Response(JSON.stringify({ success: true, data: result }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
+
+
 
         // Use UZAPI /sender/advanced endpoint with proper message formatting
         // IMPORTANT: Delay only works when there are MULTIPLE messages in the queue

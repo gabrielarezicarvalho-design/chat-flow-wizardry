@@ -139,42 +139,46 @@ serve(async (req) => {
 
       const { data: existingLeads } = await supabase
         .from("leads")
-        .select("id, phone")
+        .select("phone")
         .eq("user_id", ownerId);
       const existingPhones = new Set((existingLeads || []).map((l: any) => l.phone));
 
-      let addedCount = 0;
       let skippedCount = 0;
-      const processed = new Set<string>();
+      const seen = new Set<string>();
+      const rows: any[] = [];
 
       for (const contact of contacts) {
         const rawJid =
           contact.remoteJid || contact.jid || contact.id || contact.number || "";
-        if (!isIndividualJid(rawJid)) {
-          skippedCount++;
-          continue;
-        }
+        if (!isIndividualJid(rawJid)) { skippedCount++; continue; }
         const p = extractPhoneFromJid(rawJid);
-        const contactName =
-          contact.pushName || contact.name || contact.notify || contact.contact_name || "Sem nome";
-        if (!p || p.length < 8 || p.length > 15) {
-          skippedCount++;
-          continue;
-        }
-        if (processed.has(p) || existingPhones.has(p)) {
-          skippedCount++;
-          continue;
-        }
-        processed.add(p);
-        const { error } = await supabase.from("leads").insert({
+        if (!p || p.length < 8 || p.length > 15) { skippedCount++; continue; }
+        if (seen.has(p) || existingPhones.has(p)) { skippedCount++; continue; }
+        seen.add(p);
+        rows.push({
           user_id: ownerId,
           phone: p,
-          name: contactName,
+          name: contact.pushName || contact.name || contact.notify || contact.contact_name || "Sem nome",
           source: "WhatsApp Sync",
           status: "new",
         });
-        if (error) skippedCount++;
-        else addedCount++;
+      }
+
+      // Bulk insert in chunks (avoids one-by-one round-trips that time out).
+      let addedCount = 0;
+      const CHUNK = 500;
+      for (let i = 0; i < rows.length; i += CHUNK) {
+        const slice = rows.slice(i, i + CHUNK);
+        const { data: inserted, error } = await supabase
+          .from("leads")
+          .insert(slice)
+          .select("id");
+        if (error) {
+          console.error("[wa-contacts] bulk insert error:", error.message);
+          skippedCount += slice.length;
+        } else {
+          addedCount += inserted?.length ?? slice.length;
+        }
       }
 
       return new Response(
