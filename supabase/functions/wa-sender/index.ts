@@ -1,5 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  isEvolutionConnection,
+  resolveEvolutionCreds,
+  evolutionSendText,
+  evolutionSendMedia,
+  evolutionSendAudio,
+} from "../_shared/evolution.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -268,11 +275,72 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
 
-      case "simple":
+      case "simple": {
+        // Evolution API branch: dispatch per-contact via Evolution endpoints.
+        if (isEvolutionConnection(connection)) {
+          const creds = resolveEvolutionCreds(connection);
+          if (!creds) {
+            return new Response(JSON.stringify({
+              success: false,
+              error: "Evolution connection missing base_url, token, or instance_name",
+            }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          }
+
+          const evoNumbers: string[] = params.numbers || [];
+          const evoTypeRaw = params.type || "text";
+          const evoType = evoTypeRaw === "buttons" ? "button" : evoTypeRaw;
+          const evoMedia = params.media || params.file;
+          const dMin = Number(params.delayMin ?? 10);
+          const dMax = Number(params.delayMax ?? 30);
+          const results: any[] = [];
+          let sent = 0, failed = 0;
+
+          for (let i = 0; i < evoNumbers.length; i++) {
+            const phone = String(evoNumbers[i] || "").replace("@s.whatsapp.net", "").replace(/\D/g, "");
+            if (!phone) continue;
+            try {
+              let r;
+              if (evoType === "text" || evoType === "button" || evoType === "list" || evoType === "poll" || evoType === "carousel") {
+                r = await evolutionSendText({ ...creds, phone, text: params.text || "" });
+              } else if (evoType === "audio") {
+                r = await evolutionSendAudio({ ...creds, phone, audio: evoMedia });
+              } else if (evoType === "image" || evoType === "video" || evoType === "document") {
+                r = await evolutionSendMedia({
+                  ...creds,
+                  phone,
+                  mediaType: evoType,
+                  media: evoMedia,
+                  caption: params.text,
+                  fileName: params.docName,
+                });
+              } else {
+                r = await evolutionSendText({ ...creds, phone, text: params.text || "" });
+              }
+              if (r.ok) sent++; else failed++;
+              results.push({ number: phone, ok: r.ok, data: r.data });
+            } catch (e: any) {
+              failed++;
+              results.push({ number: phone, ok: false, error: e?.message || String(e) });
+            }
+            if (i < evoNumbers.length - 1) {
+              const wait = (Math.floor(Math.random() * (dMax - dMin + 1)) + dMin) * 1000;
+              await new Promise((res) => setTimeout(res, wait));
+            }
+          }
+
+          const result = { status: "completed", count: evoNumbers.length, sent, failed };
+          await sendCampaignStartTelegramNotification({ supabase, connection, params, result }).catch(() => {});
+
+          return new Response(JSON.stringify({ success: true, data: { ...result, results } }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
         // Use UZAPI /sender/advanced endpoint with proper message formatting
         // IMPORTANT: Delay only works when there are MULTIPLE messages in the queue
         // For single message, we use scheduled_for to add delay
         endpoint = `${base_url}/sender/advanced`;
+
         
         const simpleNumbers = params.numbers || [];
         const simpleTypeRaw = params.type || "text";
@@ -376,6 +444,8 @@ serve(async (req) => {
         console.log(`[wa-sender] Advanced campaign: ${advancedMessages.length} messages, delay ${body.delayMin}-${body.delayMax}s, immediate: ${params.sendImmediately}`);
         console.log(`[wa-sender] Full body:`, JSON.stringify(body, null, 2));
         break;
+      }
+
 
       case "menu":
         // Send interactive menu (button, list, carousel, poll) to multiple numbers
