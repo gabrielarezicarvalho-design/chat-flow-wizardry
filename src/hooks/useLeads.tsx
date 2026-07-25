@@ -10,19 +10,34 @@ export const useLeads = () => {
   const { data: leads, isLoading } = useQuery({
     queryKey: ['leads', companyId],
     queryFn: async () => {
-      let query = supabase
-        .from('leads')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      // If user belongs to a company, only show that company's leads
-      if (companyId) {
-        query = query.eq('company_id', companyId);
+      const pageSize = 1000;
+      let offset = 0;
+      const allLeads: any[] = [];
+
+      // Supabase limits each response to 1,000 rows. Fetch every page so the
+      // displayed contact total and the available contacts stay accurate.
+      while (true) {
+        let query = supabase
+          .from('leads')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .range(offset, offset + pageSize - 1);
+
+        if (companyId) {
+          query = query.eq('company_id', companyId);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        const page = data || [];
+        allLeads.push(...page);
+
+        if (page.length < pageSize) break;
+        offset += pageSize;
       }
-      
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
+
+      return allLeads;
     },
     enabled: !isLoadingCompany,
   });
