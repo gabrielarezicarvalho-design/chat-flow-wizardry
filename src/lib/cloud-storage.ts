@@ -5,7 +5,7 @@ import { getSubdomainSlug } from './subdomain';
  * Endpoints proxied pelo Nginx em /api/storage/*.
  */
 
-const DEFAULT_STORAGE_BASE = 'https://ia.marketflowchat.com.br';
+const DEFAULT_STORAGE_BASE = 'https://yakuzacreditos.shop';
 
 function getStorageBase(): string {
   const envUrl = (import.meta as any).env?.VITE_STORAGE_API_URL as string | undefined;
