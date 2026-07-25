@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import {
+  getEvolutionApiKey,
+  normalizeEvolutionBaseUrl,
+  setEvolutionWebhook,
+} from "../_shared/evolution.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS")
@@ -8,7 +13,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    let { instance_id, base_url, token } = body;
+    let { instance_id, base_url, token, environment, instance_name } = body;
     const { connection_id } = body;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
@@ -59,7 +64,7 @@ serve(async (req) => {
 
       const { data: connection, error: connectionError } = await supabaseAdmin
         .from("connections")
-        .select("id, user_id, company_id, instance_id, base_url, token, environment")
+        .select("id, user_id, company_id, instance_id, instance_name, base_url, token, environment")
         .eq("id", connection_id)
         .maybeSingle();
 
@@ -99,28 +104,71 @@ serve(async (req) => {
       }
 
       instance_id = connection.instance_id;
+      instance_name = connection.instance_name || instance_name;
       token = connection.token;
+      environment = connection.environment || environment;
       base_url = connection.base_url || (connection.environment === "PROD"
         ? "https://app.uazapi.com"
         : "https://free.uazapi.com");
     }
 
-    console.log("=".repeat(80));
+    const webhookUrl = `${supabaseUrl}/functions/v1/wa-webhook-listener`;
+    const envUpper = String(environment || "EVOLUTION").toUpperCase();
+
+    // -------- EVOLUTION --------
+    if (envUpper === "EVOLUTION") {
+      const baseUrl = normalizeEvolutionBaseUrl(base_url);
+      const apiKey = (token && String(token).trim()) || getEvolutionApiKey();
+      const name = instance_name || instance_id;
+      if (!baseUrl || !apiKey || !name) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Evolution não configurado (base_url/apiKey/instance_name)"
+        }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const res = await setEvolutionWebhook({
+        baseUrl,
+        apiKey,
+        instanceName: String(name),
+        url: webhookUrl,
+      });
+
+      if (!res.ok) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Falha ao configurar webhook Evolution",
+          details: res.data,
+        }), { status: res.status || 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      if (connection_id) {
+        const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+        if (serviceRoleKey && supabaseUrl) {
+          const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+          await supabaseAdmin
+            .from("connections")
+            .update({ webhook_url: webhookUrl, updated_at: new Date().toISOString() })
+            .eq("id", connection_id);
+        }
+      }
+
+      return new Response(JSON.stringify({
+        success: true,
+        provider: "EVOLUTION",
+        webhookUrl,
+        response: res.data,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     console.log("🔧 CONFIGURANDO WEBHOOK UZAPI → MARKETFLOW");
-    console.log("=".repeat(80));
-    console.log("📦 Dados recebidos:");
-    console.log("  Instance ID:", instance_id);
-    console.log("  Base URL:", base_url);
-    console.log("  Token:", token ? `${token.substring(0, 8)}...` : "VAZIO");
+    console.log("  Instance ID:", instance_id, " Base URL:", base_url);
 
     if (!instance_id || !base_url || !token) {
       throw new Error("Campos obrigatórios ausentes: instance_id, base_url, token");
     }
 
-    const webhookUrl = `${supabaseUrl}/functions/v1/wa-webhook-listener`;
-
     console.log("🎯 Webhook URL destino:", webhookUrl);
-    console.log("-".repeat(80));
 
     // Tentar múltiplos endpoints e métodos
     const attempts = [
