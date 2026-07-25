@@ -2632,14 +2632,39 @@ function MassSendingContent() {
                         </div>
                       )}
                       
-                      {/* Message for queued campaigns */}
-                      {c.status === "queued" && (
-                        <div className="mt-2 max-w-md">
-                          <p className="text-xs text-orange-600">
-                            ⏳ {c.total_contacts || 0} mensagens aguardando envio na fila do WhatsApp
-                          </p>
-                        </div>
-                      )}
+                      {/* Live progress bar for queued campaigns */}
+                      {c.status === "queued" && (() => {
+                        const done = (c.sent_count || 0) + (c.failed_count || 0);
+                        const total = c.total_contacts || 0;
+                        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                        return (
+                          <div className="mt-2 max-w-md">
+                            <div className="flex items-center gap-2 text-xs mb-1">
+                              <span className="text-orange-600 font-medium animate-pulse">
+                                Na fila... {done}/{total}
+                              </span>
+                              {(c.failed_count || 0) > 0 && (
+                                <>
+                                  <span className="text-muted-foreground">•</span>
+                                  <span className="text-red-600 font-medium">
+                                    {c.failed_count} falhas
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                            <div className="h-2 bg-muted rounded-full overflow-hidden relative">
+                              <div
+                                className="h-full bg-orange-500 transition-all duration-500"
+                                style={{ width: `${pct}%` }}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {pct}% concluído • {total - done} aguardando envio
+                            </p>
+                          </div>
+                        );
+                      })()}
                       
                       {/* Message for paused_disconnected campaigns */}
                       {c.status === "paused_disconnected" && (
