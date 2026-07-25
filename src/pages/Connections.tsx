@@ -3060,7 +3060,7 @@ const Connections = () => {
 
                 <div>
                   <Label className="mb-3 block">Servidor</Label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 gap-3">
                     <div
                       onClick={() => setFormData({ ...formData, environment: 'EVOLUTION' })}
                       className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
@@ -3074,34 +3074,9 @@ const Connections = () => {
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">Recomendado</p>
                     </div>
-                    <div
-                      onClick={() => setFormData({ ...formData, environment: 'PROD' })}
-                      className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
-                        formData.environment === 'PROD'
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <p className={`text-sm font-medium ${formData.environment === 'PROD' ? 'text-primary' : ''}`}>
-                        Evolution padrão
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">Servidor Evolution oficial</p>
-                    </div>
-                    <div
-                      onClick={() => setFormData({ ...formData, environment: 'BTZAP' })}
-                      className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
-                        formData.environment === 'BTZAP'
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <p className={`text-sm font-medium ${formData.environment === 'BTZAP' ? 'text-primary' : ''}`}>
-                        BTZAP
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1 break-all">server.btzap.com.br</p>
-                    </div>
                   </div>
                 </div>
+
 
                 {formData.environment === 'BTZAP' && (
                   <div className="space-y-3 p-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5">
