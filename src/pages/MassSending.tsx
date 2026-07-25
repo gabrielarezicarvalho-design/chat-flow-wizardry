@@ -326,7 +326,7 @@ function MassSendingContent() {
     };
   }, []);
 
-  // Poll UAZAPI folder status for queued campaigns
+  // Poll Evolution folder status for queued campaigns
   useEffect(() => {
     const queuedCampaigns = campaigns.filter(c => c.status === "queued" && (c as any).folder_id);
     if (queuedCampaigns.length === 0) return;
@@ -348,7 +348,7 @@ function MassSendingContent() {
           if (data?.progress) {
             const { sent, failed, pending, total, completed, folderGone } = data.progress;
             
-            // If folder is gone (404), UAZAPI already processed all messages
+            // If folder is gone (404), Evolution already processed all messages
             // Don't overwrite sent_count with 0 - keep the existing value from the campaign
             if (folderGone) {
               const updates: any = {
@@ -906,7 +906,7 @@ function MassSendingContent() {
             return;
           }
 
-          addLog("error", `Erro UAZAPI: ${data.error || JSON.stringify(data)}`);
+          addLog("error", `Erro Evolution: ${data.error || JSON.stringify(data)}`);
           throw new Error(data.error || "Erro ao enviar campanha");
         }
 

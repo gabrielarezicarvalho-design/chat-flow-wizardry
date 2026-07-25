@@ -165,7 +165,7 @@ serve(async (req) => {
           continue;
         }
 
-        // ---------- Legacy UAZAPI /sender/advanced path ----------
+        // ---------- Legacy Evolution /sender/advanced path ----------
         const messages = contacts.map((contact: string) => {
           const cleanNumber = contact.replace("@s.whatsapp.net", "").replace(/\D/g, "");
           if (isInteractive) {

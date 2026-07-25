@@ -45,7 +45,7 @@ serve(async (req) => {
       });
     }
 
-    // -------- Legacy UAZAPI --------
+    // -------- Legacy Evolution --------
     if (!token) return json({ error: "Missing instance token" }, 400);
 
     let BASE_URL = base_url;

@@ -11,11 +11,11 @@ const PLATFORM_SECRETS = [
   { name: 'META_CONFIG_ID', label: 'Meta Config ID', category: 'whatsapp', description: 'Configuration ID do embedded signup' },
   { name: 'EVOLUTION_BASE_URL', label: 'Evolution API Base URL', category: 'whatsapp', description: 'URL do servidor Evolution API v2 (atual)' },
   { name: 'EVOLUTION_API_KEY', label: 'Evolution API Key', category: 'whatsapp', description: 'API Key global do servidor Evolution' },
-  { name: 'UZAPI_BASE_URL_PROD', label: 'UAZAPI Base URL (Prod)', category: 'whatsapp', description: 'URL do servidor UAZAPI produção (legado)' },
-  { name: 'UZAPI_ADMIN_TOKEN_PROD', label: 'UAZAPI Admin Token (Prod)', category: 'whatsapp', description: 'Token admin UAZAPI produção (legado)' },
-  { name: 'UZAPI_BASE_URL_TESTE', label: 'UAZAPI Base URL (Teste)', category: 'whatsapp', description: 'URL do servidor UAZAPI teste (legado)' },
-  { name: 'UZAPI_ADMIN_TOKEN_TESTE', label: 'UAZAPI Admin Token (Teste)', category: 'whatsapp', description: 'Token admin UAZAPI teste (legado)' },
-  { name: 'UZAPI_ENV', label: 'UAZAPI Ambiente Ativo', category: 'whatsapp', description: 'prod ou teste (legado)' },
+  { name: 'UZAPI_BASE_URL_PROD', label: 'Evolution Base URL (Prod)', category: 'whatsapp', description: 'URL do servidor Evolution produção (legado)' },
+  { name: 'UZAPI_ADMIN_TOKEN_PROD', label: 'Evolution Admin Token (Prod)', category: 'whatsapp', description: 'Token admin Evolution produção (legado)' },
+  { name: 'UZAPI_BASE_URL_TESTE', label: 'Evolution Base URL (Teste)', category: 'whatsapp', description: 'URL do servidor Evolution teste (legado)' },
+  { name: 'UZAPI_ADMIN_TOKEN_TESTE', label: 'Evolution Admin Token (Teste)', category: 'whatsapp', description: 'Token admin Evolution teste (legado)' },
+  { name: 'UZAPI_ENV', label: 'Evolution Ambiente Ativo', category: 'whatsapp', description: 'prod ou teste (legado)' },
   { name: 'GOOGLE_CLIENT_ID', label: 'Google OAuth Client ID', category: 'auth', description: 'Login com Google' },
   { name: 'GOOGLE_CLIENT_SECRET', label: 'Google OAuth Secret', category: 'auth', description: 'Secret do OAuth Google' },
   { name: 'TELEGRAM_BOT_TOKEN', label: 'Telegram Bot Token', category: 'notifications', description: 'Bot de notificações internas' },
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     const projectUrl = Deno.env.get('SUPABASE_URL') || '';
     const webhooks = [
       { name: 'WhatsApp Meta Webhook', url: `${projectUrl}/functions/v1/wa-webhook-listener`, description: 'Recebe eventos do WhatsApp Cloud API' },
-      { name: 'UAZAPI Webhook', url: `${projectUrl}/functions/v1/wa-webhook-uzapi`, description: 'Recebe eventos do UAZAPI' },
+      { name: 'Evolution Webhook', url: `${projectUrl}/functions/v1/wa-webhook-uzapi`, description: 'Recebe eventos do Evolution' },
       { name: 'Asaas Webhook', url: `${projectUrl}/functions/v1/asaas-webhook`, description: 'Recebe eventos de pagamento Asaas' },
     ];
 

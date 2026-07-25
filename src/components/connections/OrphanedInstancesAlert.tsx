@@ -48,7 +48,7 @@ export const OrphanedInstancesAlert = () => {
         setLastCheck(new Date());
         
         if (data.summary.onlyInUazapi > 0) {
-          toast.warning(`⚠️ Encontradas ${data.summary.onlyInUazapi} instância(s) órfã(s) no servidor UAZAPI`);
+          toast.warning(`⚠️ Encontradas ${data.summary.onlyInUazapi} instância(s) órfã(s) no servidor Evolution`);
         } else {
           toast.success("✅ Todas as instâncias estão sincronizadas!");
         }
@@ -78,7 +78,7 @@ export const OrphanedInstancesAlert = () => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <AlertTriangle className="h-5 w-5 text-warning" />
-            Sincronização UAZAPI
+            Sincronização Evolution
           </CardTitle>
           <Button
             variant="outline"
@@ -139,7 +139,7 @@ export const OrphanedInstancesAlert = () => {
                   </AlertTitle>
                   <AlertDescription className="mt-2">
                     <p className="text-sm">
-                      Existem <strong>{report.summary.onlyInUazapi} instância(s)</strong> ativas no servidor UAZAPI 
+                      Existem <strong>{report.summary.onlyInUazapi} instância(s)</strong> ativas no servidor Evolution 
                       que não estão cadastradas no sistema. Essas instâncias consomem seu limite e precisam 
                       ser removidas manualmente.
                     </p>
@@ -179,7 +179,7 @@ export const OrphanedInstancesAlert = () => {
                         </p>
                         <ol className="text-sm space-y-2 list-decimal list-inside text-muted-foreground">
                           <li>
-                            Acesse o painel de administração UAZAPI:
+                            Acesse o painel de administração Evolution:
                             <Button
                               variant="link"
                               size="sm"
@@ -202,7 +202,7 @@ export const OrphanedInstancesAlert = () => {
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <AlertTriangle className="h-3 w-3" />
                         <span>
-                          A API UAZAPI não suporta exclusão programática. A remoção deve ser feita manualmente.
+                          A API Evolution não suporta exclusão programática. A remoção deve ser feita manualmente.
                         </span>
                       </div>
                     </CollapsibleContent>
@@ -217,7 +217,7 @@ export const OrphanedInstancesAlert = () => {
                 <CheckCircle className="h-4 w-4 text-green-500" />
                 <AlertTitle>Tudo sincronizado!</AlertTitle>
                 <AlertDescription>
-                  Todas as instâncias do servidor UAZAPI estão corretamente cadastradas no sistema.
+                  Todas as instâncias do servidor Evolution estão corretamente cadastradas no sistema.
                 </AlertDescription>
               </Alert>
             )}

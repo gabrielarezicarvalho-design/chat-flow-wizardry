@@ -71,7 +71,7 @@ const Connections = () => {
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [pairCode, setPairCode] = useState<string | null>(null);
   const [connectMethod, setConnectMethod] = useState<'qrcode' | 'paircode'>('qrcode');
-  const [selectedProvider, setSelectedProvider] = useState<'uazapi' | 'meta' | 'instagram' | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<'evolution' | 'meta' | 'instagram' | null>(null);
   const [loadingQr, setLoadingQr] = useState(false);
   const [statusCheckInterval, setStatusCheckInterval] = useState<any | null>(null);
   const [pendingConnection, setPendingConnection] = useState<any>(null);
@@ -282,7 +282,7 @@ const Connections = () => {
     }
   }, [connections]);
 
-  // Sync real connection status from UAZAPI periodically
+  // Sync real connection status from Evolution periodically
   useEffect(() => {
     const syncConnectionStatus = async () => {
       for (const connection of connections) {
@@ -311,7 +311,7 @@ const Connections = () => {
               }
             }
 
-            // Handle error responses - instance might have been deleted in UAZAPI
+            // Handle error responses - instance might have been deleted in Evolution
             const instanceDeleted = errorData?.instanceDeleted === true;
             const errorMessage = (errorData?.details?.error || errorData?.error || error?.message || '').toLowerCase();
             const isInstanceGone = instanceDeleted || 
@@ -320,20 +320,20 @@ const Connections = () => {
               (errorData?.status === 500 && errorMessage.includes('details'));
             
             if (isInstanceGone && connection.status !== 'deleted') {
-              console.log(`Connection ${connection.instance_name} instance was deleted in UAZAPI, marking as deleted...`);
+              console.log(`Connection ${connection.instance_name} instance was deleted in Evolution, marking as deleted...`);
               
               // Only update status - don't clear token/instance_id to avoid FK constraint issues
               await updateConnection.mutateAsync({
                 id: connection.id,
                 updates: { status: 'deleted' }
               });
-              toast.error(`🗑️ ${connection.instance_name} foi removida da UAZAPI. Crie uma nova conexão.`);
+              toast.error(`🗑️ ${connection.instance_name} foi removida da Evolution. Crie uma nova conexão.`);
               continue;
             }
 
-            // If UAZAPI reports disconnected but local status is connected, update the database
+            // If Evolution reports disconnected but local status is connected, update the database
             if (data?.success && !data?.connected && connection.status === 'connected') {
-              console.log(`Connection ${connection.instance_name} is disconnected in UAZAPI, updating local status...`);
+              console.log(`Connection ${connection.instance_name} is disconnected in Evolution, updating local status...`);
               await updateConnection.mutateAsync({
                 id: connection.id,
                 updates: { status: 'disconnected' }
@@ -341,9 +341,9 @@ const Connections = () => {
               toast.warning(`⚠️ ${connection.instance_name} foi desconectado do WhatsApp`);
             }
             
-            // If UAZAPI reports connected but local status is not connected, update
+            // If Evolution reports connected but local status is not connected, update
             if (data?.success && data?.connected && (connection.status === 'disconnected' || connection.status === 'connecting')) {
-              console.log(`Connection ${connection.instance_name} is connected in UAZAPI, updating local status...`);
+              console.log(`Connection ${connection.instance_name} is connected in Evolution, updating local status...`);
               await updateConnection.mutateAsync({
                 id: connection.id,
                 updates: { status: 'connected' }
@@ -370,7 +370,7 @@ const Connections = () => {
                 id: connection.id,
                 updates: { status: 'deleted' }
               });
-              toast.error(`🗑️ ${connection.instance_name} foi removida da UAZAPI.`);
+              toast.error(`🗑️ ${connection.instance_name} foi removida da Evolution.`);
             } else {
               console.error(`Error checking status for ${connection.instance_name}:`, err);
             }
@@ -602,7 +602,7 @@ const Connections = () => {
         return;
       }
 
-      // UAZAPI/Conexões padrão: configurações ficam em credentials
+      // Evolution/Conexões padrão: configurações ficam em credentials
       if (selectedConnection?.credentials) {
         const creds = selectedConnection.credentials as any;
         if (creds.settings) {
@@ -732,7 +732,7 @@ const Connections = () => {
           const maxInstances = details.max_instances || 1;
           
           toast.error(
-            `⚠️ Limite de instâncias UAZAPI atingido!\n\nVocê possui ${currentInstances} instância(s) ativa(s) e o limite do seu plano é ${maxInstances}.\n\nPara criar uma nova conexão, acesse o painel UAZAPI e exclua instâncias não utilizadas, ou faça upgrade do seu plano.`,
+            `⚠️ Limite de instâncias Evolution atingido!\n\nVocê possui ${currentInstances} instância(s) ativa(s) e o limite do seu plano é ${maxInstances}.\n\nPara criar uma nova conexão, acesse o painel Evolution e exclua instâncias não utilizadas, ou faça upgrade do seu plano.`,
             { duration: 10000 }
           );
           setQrDialogOpen(false);
@@ -750,7 +750,7 @@ const Connections = () => {
         const maxInstances = details.max_instances || 1;
         
         toast.error(
-          `⚠️ Limite de instâncias UAZAPI atingido!\n\nVocê possui ${currentInstances} instância(s) ativa(s) e o limite do seu plano é ${maxInstances}.\n\nPara criar uma nova conexão, acesse o painel UAZAPI e exclua instâncias não utilizadas, ou faça upgrade do seu plano.`,
+          `⚠️ Limite de instâncias Evolution atingido!\n\nVocê possui ${currentInstances} instância(s) ativa(s) e o limite do seu plano é ${maxInstances}.\n\nPara criar uma nova conexão, acesse o painel Evolution e exclua instâncias não utilizadas, ou faça upgrade do seu plano.`,
           { duration: 10000 }
         );
         setQrDialogOpen(false);
@@ -856,7 +856,7 @@ const Connections = () => {
 
       if (error) throw error;
 
-      // If token is invalid (401), try to find the instance by ID in the UAZAPI list
+      // If token is invalid (401), try to find the instance by ID in the Evolution list
       if (!data?.success && data?.originalStatus === 401) {
         console.log("Token invalid, trying to find instance via list...");
         const conn = connections.find(c => c.id === connectionId);
@@ -1100,7 +1100,7 @@ const Connections = () => {
     const connection = connectionToDelete;
     const id = connection.id;
     
-    // If connection has a token, delete from UAZAPI first
+    // If connection has a token, delete from Evolution first
     if (connection?.token) {
       try {
         const { data, error } = await supabase.functions.invoke('wa-delete-instance', {
@@ -1111,10 +1111,10 @@ const Connections = () => {
         });
         
         if (error) {
-          console.error("Error deleting from UAZAPI:", error);
-          // Continue to delete locally even if UAZAPI fails
+          console.error("Error deleting from Evolution:", error);
+          // Continue to delete locally even if Evolution fails
         } else if (data?.success) {
-          toast.success("Instância removida da UAZAPI");
+          toast.success("Instância removida da Evolution");
         }
       } catch (err) {
         console.error("Error calling wa-delete-instance:", err);
@@ -1668,9 +1668,9 @@ const Connections = () => {
     const activeConnections = connections.filter(c => c.status === 'connected' || c.status === 'connecting').length;
     const isAtLimit = activeConnections >= instanceLimit;
 
-    // Combine UAZAPI + Meta connections for unified table
+    // Combine Evolution + Meta connections for unified table
     const allConnections = [
-      ...connections.map(c => ({ ...c, provider: 'uazapi' as const })),
+      ...connections.map(c => ({ ...c, provider: 'evolution' as const })),
       ...metaConnections.map(c => ({ ...c, provider: 'meta' as const, instance_name: 'Meta Cloud API', name: 'Meta Cloud API' }))
     ];
 
@@ -1881,7 +1881,7 @@ const Connections = () => {
                             </div>
                           </td>
                         </tr>
-                        {/* Expanded config panel - UAZAPI */}
+                        {/* Expanded config panel - Evolution */}
                         {isExpanded && connection.provider !== 'meta' && (
                           <tr>
                             <td colSpan={8} className="p-0">
@@ -2026,7 +2026,7 @@ const Connections = () => {
                                   </div>
                                 </div>
 
-                                {/* Config tabs inside expanded row - same as UAZAPI */}
+                                {/* Config tabs inside expanded row - same as Evolution */}
                                 <Tabs defaultValue="configuracoes" className="w-full">
                                   <TabsList className="w-full justify-start border-b border-border bg-transparent p-0 h-auto px-6">
                                     <TabsTrigger value="configuracoes" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-4 py-3 text-xs">
@@ -2850,7 +2850,7 @@ const Connections = () => {
                   </div>
                 </div>
                 <div 
-                  onClick={() => setSelectedProvider('uazapi')}
+                  onClick={() => setSelectedProvider('evolution')}
                   className="cursor-pointer p-4 rounded-lg border-2 border-border hover:border-primary/50 transition-all group"
                 >
                   <div className="flex items-center gap-4">
@@ -2858,7 +2858,7 @@ const Connections = () => {
                       <QrCode className="w-6 h-6 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-foreground">UAZAPI</p>
+                      <p className="font-medium text-foreground">Evolution</p>
                       <p className="text-xs text-muted-foreground">Conexão via QR Code ou código de pareamento</p>
                     </div>
                   </div>
@@ -3083,9 +3083,9 @@ const Connections = () => {
                       }`}
                     >
                       <p className={`text-sm font-medium ${formData.environment === 'PROD' ? 'text-primary' : ''}`}>
-                        UAZAPI padrão
+                        Evolution padrão
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">Servidor UAZAPI oficial</p>
+                      <p className="text-xs text-muted-foreground mt-1">Servidor Evolution oficial</p>
                     </div>
                     <div
                       onClick={() => setFormData({ ...formData, environment: 'BTZAP' })}

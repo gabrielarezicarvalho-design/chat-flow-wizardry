@@ -23,7 +23,7 @@ function json(body: unknown, status = 200) {
   });
 }
 
-// ---------- UAZAPI legacy helpers (kept for BTZAP/PROD/TESTE fallbacks) ----------
+// ---------- Evolution legacy helpers (kept for BTZAP/PROD/TESTE fallbacks) ----------
 async function configureUazapiWebhook(baseUrl: string, token: string) {
   const url = webhookUrl();
   const body = {
@@ -132,7 +132,7 @@ serve(async (req) => {
       });
     }
 
-    // -------- Legacy UAZAPI paths (BTZAP / PROD / TESTE) --------
+    // -------- Legacy Evolution paths (BTZAP / PROD / TESTE) --------
     let ADMIN_TOKEN: string | undefined;
     let BASE_URL: string | undefined;
     if (envUpper === "BTZAP") {
@@ -147,8 +147,8 @@ serve(async (req) => {
     }
 
     const normalizedBaseUrl = normalizeBaseUrl(BASE_URL);
-    if (!ADMIN_TOKEN?.trim()) return json({ error: "Token admin UAZAPI não configurado." }, 500);
-    if (!normalizedBaseUrl) return json({ error: "URL base da UAZAPI não configurada." }, 500);
+    if (!ADMIN_TOKEN?.trim()) return json({ error: "Token admin Evolution não configurado." }, 500);
+    if (!normalizedBaseUrl) return json({ error: "URL base da Evolution não configurada." }, 500);
 
     const response = await fetch(`${normalizedBaseUrl}/instance/init`, {
       method: "POST",

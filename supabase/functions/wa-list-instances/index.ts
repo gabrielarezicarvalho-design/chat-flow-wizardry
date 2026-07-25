@@ -45,7 +45,7 @@ serve(async (req) => {
       const arr = Array.isArray(res.data) ? res.data : res.data?.instances ?? [];
       remoteInstances = arr.map(normalizeEvolutionInstance).filter((i: any) => i.id);
     } else {
-      // Legacy UAZAPI environments
+      // Legacy Evolution environments
       providerLabel = envUpper;
       let ADMIN_TOKEN: string | undefined;
       if (envUpper === "BTZAP") {
@@ -76,7 +76,7 @@ serve(async (req) => {
       }
       if (!uazData) {
         return new Response(
-          JSON.stringify({ error: "Failed to list UAZAPI instances", status: lastStatus }),
+          JSON.stringify({ error: "Failed to list Evolution instances", status: lastStatus }),
           { status: lastStatus || 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }

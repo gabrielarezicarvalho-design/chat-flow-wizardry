@@ -157,7 +157,7 @@ serve(async (req) => {
       });
     }
 
-    // ---------- Legacy UAZAPI branch ----------
+    // ---------- Legacy Evolution branch ----------
     if (!token || !base_url) {
       return new Response(JSON.stringify({
         success: false,
@@ -259,7 +259,7 @@ serve(async (req) => {
     });
 
     const responseText = await response.text();
-    console.log("[wa-send-media] UAZAPI response:", responseText);
+    console.log("[wa-send-media] Evolution response:", responseText);
 
     let result;
     try {

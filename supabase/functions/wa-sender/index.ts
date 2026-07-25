@@ -1120,7 +1120,7 @@ serve(async (req) => {
         });
 
       case "check_folder": {
-        // Check folder status from UAZAPI sender queue
+        // Check folder status from Evolution sender queue
         const folderId = params.folderId;
         if (!folderId) {
           return new Response(JSON.stringify({ success: false, error: "Missing folderId" }), {
@@ -1143,7 +1143,7 @@ serve(async (req) => {
         let folderResult;
         try { folderResult = JSON.parse(folderText); } catch { folderResult = { raw: folderText }; }
         
-        // If UAZAPI returns 404, the folder was already processed and removed
+        // If Evolution returns 404, the folder was already processed and removed
         // This means all messages were sent - treat as completed
         if (folderResponse.status === 404 || folderResult?.code === 404) {
           console.log(`[wa-sender] Folder ${folderId} returned 404 - treating as completed (messages already processed)`);
@@ -1212,7 +1212,7 @@ serve(async (req) => {
     });
 
     const responseText = await response.text();
-    console.log("[wa-sender] UAZAPI response:", responseText);
+    console.log("[wa-sender] Evolution response:", responseText);
 
     let result;
     try {

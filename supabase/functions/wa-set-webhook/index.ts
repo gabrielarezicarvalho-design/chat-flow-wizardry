@@ -315,7 +315,7 @@ serve(async (req) => {
         // Se recebemos 401 num endpoint válido, o token da instância está inválido/expirado.
         // Não adianta tentar os outros endpoints — parar e pedir reconexão.
         if (response.status === 401) {
-          console.log("🚫 Token UAZAPI inválido/expirado — abortando tentativas");
+          console.log("🚫 Token Evolution inválido/expirado — abortando tentativas");
           return new Response(JSON.stringify({
             success: false,
             needsReconnect: true,

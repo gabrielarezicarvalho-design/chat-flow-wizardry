@@ -516,13 +516,13 @@ const Settings = () => {
               <div className="space-y-4">
                 <Card className="p-4 border-2">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold">WhatsApp UAZAPI</h3>
+                    <h3 className="font-semibold">WhatsApp Evolution</h3>
                     <Badge className={settings?.whatsapp_status === 'online' ? "bg-emerald-500" : "bg-muted"}>
                       {settings?.whatsapp_status === 'online' ? 'Conectado' : 'Desconectado'}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Conecte sua conta UAZAPI para enviar e receber mensagens pelo WhatsApp
+                    Conecte sua conta Evolution para enviar e receber mensagens pelo WhatsApp
                   </p>
                   <div className="space-y-4">
                     <div>

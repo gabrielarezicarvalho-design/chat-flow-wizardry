@@ -166,7 +166,7 @@ serve(async (req) => {
       });
     }
 
-    // ---------- Legacy UAZAPI branch ----------
+    // ---------- Legacy Evolution branch ----------
     if (!token || !base_url) {
       return new Response(JSON.stringify({
         error: "Connection missing token or base_url"
@@ -179,7 +179,7 @@ serve(async (req) => {
     console.log(`📤 Enviando mensagem para ${cleanPhone} via ${base_url}/send/text`);
 
 
-    // Send message via UAZAPI
+    // Send message via Evolution
     const sendUrl = `${base_url}/send/text`;
     const response = await fetch(sendUrl, {
       method: "POST",
@@ -195,7 +195,7 @@ serve(async (req) => {
     });
 
     const responseText = await response.text();
-    console.log("UAZAPI response:", responseText);
+    console.log("Evolution response:", responseText);
 
     let result;
     try {
@@ -204,7 +204,7 @@ serve(async (req) => {
       result = { raw: responseText };
     }
 
-    // Check for "not on WhatsApp" error from UAZAPI
+    // Check for "not on WhatsApp" error from Evolution
     if (result?.error?.includes("not on WhatsApp")) {
       console.log(`❌ Número não está no WhatsApp: ${cleanPhone}`);
       return new Response(JSON.stringify({ 

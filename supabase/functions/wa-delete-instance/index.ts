@@ -55,7 +55,7 @@ serve(async (req) => {
       return json({ success: true, message: "Instance deleted successfully", data: res.data });
     }
 
-    // -------- Legacy UAZAPI --------
+    // -------- Legacy Evolution --------
     if (!token) return json({ error: "Missing instance token" }, 400);
     const BASE_URL = base_url || "https://marketflowchat.uazapi.com";
 

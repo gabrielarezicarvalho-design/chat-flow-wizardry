@@ -56,7 +56,7 @@ serve(async (req) => {
       });
     }
 
-    // -------- Legacy UAZAPI --------
+    // -------- Legacy Evolution --------
     if (!token || String(token).trim() === "") {
       return json({ success: false, error: "Token da instância ausente ou inválido" }, 400);
     }
@@ -75,7 +75,7 @@ serve(async (req) => {
     const responseText = await response.text();
     let result: any;
     try { result = JSON.parse(responseText); } catch {
-      return json({ success: false, connected: false, status: "unreachable", error: "UAZAPI server returned non-JSON response", upstreamStatus: response.status });
+      return json({ success: false, connected: false, status: "unreachable", error: "Evolution server returned non-JSON response", upstreamStatus: response.status });
     }
     if (!response.ok) {
       const errorMessage = (result?.error || "").toLowerCase();
