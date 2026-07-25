@@ -3083,9 +3083,7 @@ const Connections = () => {
                     Cancelar
                   </Button>
                   <Button type="submit" className="flex-1">
-                    {formData.environment === 'BTZAP'
-                      ? 'Importar Instância'
-                      : connectMethod === 'qrcode' ? 'Gerar QR Code' : 'Gerar Código'}
+                    {connectMethod === 'qrcode' ? 'Gerar QR Code' : 'Gerar Código'}
                   </Button>
                 </div>
               </form>
