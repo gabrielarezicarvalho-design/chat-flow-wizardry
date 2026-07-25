@@ -866,8 +866,8 @@ const Connections = () => {
             body: { environment, base_url: baseUrl }
           });
           
-          if (listData?.uazapi_instances) {
-            const match = listData.uazapi_instances.find((inst: any) => inst.id === connAny.instance_id);
+          if (listData?.evolution_instances) {
+            const match = listData.evolution_instances.find((inst: any) => inst.id === connAny.instance_id);
             if (match && match.connected) {
               // Update token in DB and mark as connected
               await updateConnection.mutateAsync({

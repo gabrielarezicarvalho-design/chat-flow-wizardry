@@ -84,7 +84,7 @@ serve(async (req) => {
       baseUrl = conn.base_url || "";
     } else if (token && environment) {
       instanceToken = token;
-      baseUrl = environment === "PROD" ? "https://app.uazapi.com" : "https://free.uazapi.com";
+      baseUrl = environment === "PROD" ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
     }
 
     const isEvo = connection ? isEvolutionConnection(connection) : false;

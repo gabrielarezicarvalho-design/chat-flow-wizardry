@@ -57,7 +57,7 @@ serve(async (req) => {
 
     // -------- Legacy Evolution --------
     if (!token) return json({ error: "Missing instance token" }, 400);
-    const BASE_URL = base_url || "https://marketflowchat.uazapi.com";
+    const BASE_URL = base_url || (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
 
     const response = await fetch(`${BASE_URL}/instance`, {
       method: "DELETE",

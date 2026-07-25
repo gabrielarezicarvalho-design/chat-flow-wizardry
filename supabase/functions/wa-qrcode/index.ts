@@ -50,7 +50,7 @@ serve(async (req) => {
 
     let BASE_URL = base_url;
     if (!BASE_URL) {
-      BASE_URL = envUpper === "PROD" ? "https://app.uazapi.com" : "https://free.uazapi.com";
+      BASE_URL = envUpper === "PROD" ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
     }
 
     const body = phone ? JSON.stringify({ phone }) : JSON.stringify({});

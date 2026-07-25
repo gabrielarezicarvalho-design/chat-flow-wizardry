@@ -60,8 +60,8 @@ serve(async (req) => {
       if (connection?.token) {
         const environment = connection.environment || "TESTE";
         const BASE_URL = environment === "PROD" 
-          ? "https://app.uazapi.com" 
-          : "https://free.uazapi.com";
+          ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+          : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
 
         const confirmationMessage = formConfig.success_message || 
           "✅ *Recebemos suas informações!*\n\nNossa equipe entrará em contato em breve durante o horário comercial.\n\nObrigado pela preferência! 🙏";

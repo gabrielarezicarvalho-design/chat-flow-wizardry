@@ -108,8 +108,8 @@ serve(async (req) => {
       token = connection.token;
       environment = connection.environment || environment;
       base_url = connection.base_url || (connection.environment === "PROD"
-        ? "https://app.uazapi.com"
-        : "https://free.uazapi.com");
+        ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "")
+        : (Deno.env.get("EVOLUTION_BASE_URL") ?? ""));
     }
 
     const webhookUrl = `${supabaseUrl}/functions/v1/wa-webhook-listener`;

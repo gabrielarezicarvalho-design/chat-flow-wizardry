@@ -25,7 +25,7 @@ serve(async (req) => {
       );
     }
 
-    const finalBaseUrl = baseUrl || 'https://free.uazapi.com';
+    const finalBaseUrl = baseUrl || (Deno.env.get('EVOLUTION_BASE_URL') ?? '');
     const sendUrl = `${finalBaseUrl}/instances/${instanceId}/send-text`;
 
     console.log(`Sending message to ${to} via instance ${instanceId}`);

@@ -1255,8 +1255,8 @@ ${asaasContext}`;
     let BASE_URL = connectionBaseUrl;
     if (!BASE_URL) {
       BASE_URL = connectionEnvironment === "PROD" 
-        ? "https://app.uazapi.com" 
-        : "https://free.uazapi.com";
+        ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+        : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
     }
 
     // Detect Evolution connection to route sends to Evolution API v2 instead of Evolution.

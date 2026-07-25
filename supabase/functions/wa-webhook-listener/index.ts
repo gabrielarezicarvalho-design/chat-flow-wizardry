@@ -308,8 +308,8 @@ async function executeInputNode(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
 
   // Send prompt message
@@ -389,8 +389,8 @@ async function executeSmartFormNode(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
 
   try {
@@ -547,8 +547,8 @@ async function executeSendFormNode(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
 
   try {
@@ -694,8 +694,8 @@ async function executeFormNode(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
 
   try {
@@ -810,8 +810,8 @@ async function handleFlowResume(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
 
   // Handle INPUT node response
@@ -1776,8 +1776,8 @@ async function executeMessageNode(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
   
   console.log(`🌐 BASE_URL: ${BASE_URL}`);
@@ -2140,8 +2140,8 @@ async function executeAiAgentNode(
     let BASE_URL = connection.base_url;
     if (!BASE_URL) {
       BASE_URL = connection.environment === "PROD" 
-        ? "https://app.uazapi.com" 
-        : "https://free.uazapi.com";
+        ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+        : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
     }
 
     // Chamar a edge function ai-assistant-chat que tem integração com Asaas
@@ -3450,7 +3450,7 @@ serve(async (req) => {
             mediaKey: audioMediaKey,
             fileSHA256: audioFileSHA256,
             connectionToken: connection.token,
-            connectionBaseUrl: connection.base_url || (connection.environment === "PROD" ? "https://app.uazapi.com" : "https://free.uazapi.com")
+            connectionBaseUrl: connection.base_url || (connection.environment === "PROD" ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") : (Deno.env.get("EVOLUTION_BASE_URL") ?? ""))
           })
         });
         
@@ -3820,8 +3820,8 @@ ${safeTelegramText}`;
         if (!BASE_URL) {
           const environment = connection.environment || "TESTE";
           BASE_URL = environment === "PROD" 
-            ? "https://app.uazapi.com" 
-            : "https://free.uazapi.com";
+            ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+            : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
         }
 
         // Se tem botão configurado, enviar como menu com botão URL
