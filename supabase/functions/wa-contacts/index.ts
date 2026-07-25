@@ -148,12 +148,19 @@ serve(async (req) => {
       const processed = new Set<string>();
 
       for (const contact of contacts) {
-        const p = extractPhoneFromJid(
-          contact.jid || contact.id || contact.remoteJid || contact.number || "",
-        );
+        const rawJid =
+          contact.remoteJid || contact.jid || contact.id || contact.number || "";
+        if (!isIndividualJid(rawJid)) {
+          skippedCount++;
+          continue;
+        }
+        const p = extractPhoneFromJid(rawJid);
         const contactName =
-          contact.pushName || contact.contact_name || contact.name || contact.notify || "Sem nome";
-        if (!p || p.length < 8) continue;
+          contact.pushName || contact.name || contact.notify || contact.contact_name || "Sem nome";
+        if (!p || p.length < 8 || p.length > 15) {
+          skippedCount++;
+          continue;
+        }
         if (processed.has(p) || existingPhones.has(p)) {
           skippedCount++;
           continue;
