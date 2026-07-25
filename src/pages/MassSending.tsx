@@ -45,6 +45,7 @@ interface Connection {
   token?: string;
   environment?: string;
   base_url?: string;
+  instance_name?: string;
 }
 
 interface Campaign {
