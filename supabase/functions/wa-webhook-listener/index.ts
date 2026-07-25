@@ -4261,6 +4261,8 @@ ${safeTelegramText}`;
               connectionToken: connection.token,
               connectionBaseUrl: connection.base_url,
               connectionEnvironment: connection.environment,
+              connectionInstanceName: (connection as any).instance_name,
+
               isAudioMessage: isAudioMessage,
               respondWithAudio: isAudioMessage, // Respond with audio if user sent audio
               // NEW: Support for image and document analysis
