@@ -642,49 +642,6 @@ const Connections = () => {
       return;
     }
 
-    // BTZAP: importa instância já criada no painel (token informado manualmente)
-    if (formData.environment === 'BTZAP') {
-      const tokenClean = formData.token.trim();
-      if (!tokenClean) {
-        toast.error("Cole o Token da Instância do painel BTZAP");
-        return;
-      }
-      if (/^https?:\/\//i.test(tokenClean) || tokenClean.includes('/')) {
-        toast.error("Valor inválido: cole apenas o TOKEN da instância (não a URL do painel).");
-        return;
-      }
-      if (tokenClean.length < 20) {
-        toast.error("Token parece curto demais. Copie o token completo do painel BTZAP.");
-        return;
-      }
-
-      setLoadingQr(true);
-      try {
-        const baseUrl = 'https://server.btzap.com.br';
-        const tempConnection = await createConnection.mutateAsync({
-          name: formData.name,
-          platform: 'whatsapp',
-          environment: 'BTZAP',
-          status: 'connecting',
-          instance_id: formData.instance_id.trim() || formData.name,
-          token: formData.token.trim(),
-          base_url: baseUrl
-        });
-
-        toast.success("Instância BTZAP importada! Verificando status...");
-        setDialogOpen(false);
-
-        // Verifica status imediatamente
-        await checkInstanceStatus(tempConnection.id, formData.token.trim(), 'BTZAP', baseUrl);
-      } catch (err: any) {
-        console.error("Erro ao importar BTZAP:", err);
-        toast.error(err.message || "Erro ao importar instância BTZAP");
-      } finally {
-        setLoadingQr(false);
-        resetForm();
-      }
-      return;
-    }
 
     // Phone is required for pairing code method
     if (connectMethod === 'paircode' && !formData.phone) {
