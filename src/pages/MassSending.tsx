@@ -275,7 +275,7 @@ function MassSendingContent() {
           started_at: null
         })) as Campaign[],
         tags: (tagsRes.data as TagItem[]) || [],
-        leads: (leadsRes.data as Lead[]) || [],
+        leads: leads || [],
         templates: (templatesRes.data as CampaignTemplate[]) || [],
       };
     },
