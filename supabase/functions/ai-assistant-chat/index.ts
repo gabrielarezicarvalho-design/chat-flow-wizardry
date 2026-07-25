@@ -1,5 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
+import {
+  isEvolutionConnection,
+  resolveEvolutionCreds,
+  evolutionSendText,
+  evolutionSendMedia,
+  evolutionSendAudio,
+} from "../_shared/evolution.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
