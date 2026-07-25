@@ -15,6 +15,19 @@ const corsHeaders = {
 const extractPhoneFromJid = (jid: string): string =>
   String(jid || "").replace(/@.*$/, "").replace(/\D/g, "");
 
+// Only real user contacts. Skip groups, broadcasts, newsletters, status, LID (hidden IDs).
+const isIndividualJid = (jid: string): boolean => {
+  const s = String(jid || "").toLowerCase();
+  if (!s) return false;
+  if (s.includes("@g.us")) return false;
+  if (s.includes("@broadcast")) return false;
+  if (s.includes("@newsletter")) return false;
+  if (s.includes("@lid")) return false;
+  if (s.startsWith("status@")) return false;
+  // Accept @s.whatsapp.net, @c.us, or bare numeric ids
+  return s.includes("@s.whatsapp.net") || s.includes("@c.us") || /^\d+$/.test(s);
+};
+
 const normalizeContactsPayload = (result: any): any[] => {
   if (Array.isArray(result)) return result;
   if (result && typeof result === "object") {
@@ -135,12 +148,19 @@ serve(async (req) => {
       const processed = new Set<string>();
 
       for (const contact of contacts) {
-        const p = extractPhoneFromJid(
-          contact.jid || contact.id || contact.remoteJid || contact.number || "",
-        );
+        const rawJid =
+          contact.remoteJid || contact.jid || contact.id || contact.number || "";
+        if (!isIndividualJid(rawJid)) {
+          skippedCount++;
+          continue;
+        }
+        const p = extractPhoneFromJid(rawJid);
         const contactName =
-          contact.pushName || contact.contact_name || contact.name || contact.notify || "Sem nome";
-        if (!p || p.length < 8) continue;
+          contact.pushName || contact.name || contact.notify || contact.contact_name || "Sem nome";
+        if (!p || p.length < 8 || p.length > 15) {
+          skippedCount++;
+          continue;
+        }
         if (processed.has(p) || existingPhones.has(p)) {
           skippedCount++;
           continue;
@@ -167,8 +187,18 @@ serve(async (req) => {
     if (action === "list") {
       if (isEvo && evoCreds) {
         const r = await evolutionFindContacts(evoCreds);
+        const all = normalizeContactsPayload(r.data);
+        const filtered = all
+          .filter((c: any) =>
+            isIndividualJid(c.remoteJid || c.jid || c.id || c.number || ""),
+          )
+          .map((c: any) => ({
+            ...c,
+            phone: extractPhoneFromJid(c.remoteJid || c.jid || c.id || c.number || ""),
+            name: c.pushName || c.name || c.notify || c.contact_name || "",
+          }));
         return new Response(
-          JSON.stringify({ success: r.ok, contacts: normalizeContactsPayload(r.data) }),
+          JSON.stringify({ success: r.ok, contacts: filtered }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
