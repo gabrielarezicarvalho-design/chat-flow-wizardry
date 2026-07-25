@@ -555,6 +555,7 @@ serve(async (req) => {
       connectionToken,
       connectionBaseUrl,
       connectionEnvironment,
+      connectionInstanceName,
       isAudioMessage,
       respondWithAudio,
       // NEW: Support for images and documents
@@ -562,6 +563,7 @@ serve(async (req) => {
       mediaType, // "image", "video", "document", "audio"
       mediaCaption
     } = await req.json();
+
 
     console.log("🤖 AI Assistant Chat");
     console.log("   Agent ID:", agentId);
