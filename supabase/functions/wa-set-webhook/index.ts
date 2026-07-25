@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import {
+  getEvolutionApiKey,
+  normalizeEvolutionBaseUrl,
+  setEvolutionWebhook,
+} from "../_shared/evolution.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS")
