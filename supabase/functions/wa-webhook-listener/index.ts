@@ -4180,12 +4180,37 @@ ${safeTelegramText}`;
     // ========================================
     let aiAssistantUsed = false;
     
-    // Se não executou fluxo, verificar se há assistente IA atribuído
-    if (!flowExecuted && conversationData.attendance_type === "ai" && conversationData.assigned_to) {
+    // Determinar agente de IA: prioridade para agente atribuído à conversa,
+    // depois fallback para agente configurado na conexão (credentials.settings.sendToAiAgent)
+    const connectionAiAgentId =
+      (connection as any)?.credentials?.settings?.sendToAiAgent || null;
+    const conversationAiAgentId =
+      conversationData.attendance_type === "ai" ? conversationData.assigned_to : null;
+    const aiAgentIdToUse = conversationAiAgentId || connectionAiAgentId;
+
+    const canRouteToAI =
+      !flowExecuted &&
+      aiAgentIdToUse &&
+      conversationData.attendance_type !== "agent" &&
+      conversationData.attendance_type !== "human" &&
+      !conversationInAttendance;
+
+    // Se não executou fluxo, verificar se há assistente IA atribuído (conversa ou conexão)
+    if (canRouteToAI) {
       console.log("\n" + "=".repeat(60));
       console.log("🤖 VERIFICANDO ASSISTENTE IA...");
-      console.log("   Agent ID:", conversationData.assigned_to);
+      console.log("   Agent ID:", aiAgentIdToUse);
+      console.log("   Fonte:", conversationAiAgentId ? "conversa" : "conexão");
       console.log("=".repeat(60));
+
+      // Verificar se o agente está ativo
+      const { data: agent } = await supabase
+        .from("agents")
+        .select("id, name, status")
+        .eq("id", aiAgentIdToUse)
+        .eq("status", "active")
+        .single();
+
 
       // Verificar se o agente está ativo
       const { data: agent } = await supabase
