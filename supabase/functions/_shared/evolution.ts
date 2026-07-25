@@ -293,3 +293,72 @@ export function resolveEvolutionCreds(connection: {
   return { baseUrl, apiKey, instanceName };
 }
 
+
+// ---------- Auxiliaries: Contacts / Labels (Phase 3) ----------
+
+export async function evolutionFindContacts(opts: {
+  baseUrl: string;
+  apiKey: string;
+  instanceName: string;
+}) {
+  return evoFetch(
+    opts.baseUrl,
+    `/chat/findContacts/${encodeURIComponent(opts.instanceName)}`,
+    opts.apiKey,
+    { method: "POST", body: JSON.stringify({ where: {} }) },
+  );
+}
+
+export async function evolutionCheckNumbers(opts: {
+  baseUrl: string;
+  apiKey: string;
+  instanceName: string;
+  numbers: string[];
+}) {
+  return evoFetch(
+    opts.baseUrl,
+    `/chat/whatsappNumbers/${encodeURIComponent(opts.instanceName)}`,
+    opts.apiKey,
+    {
+      method: "POST",
+      body: JSON.stringify({ numbers: opts.numbers.map(cleanNumber) }),
+    },
+  );
+}
+
+export async function evolutionFindLabels(opts: {
+  baseUrl: string;
+  apiKey: string;
+  instanceName: string;
+}) {
+  return evoFetch(
+    opts.baseUrl,
+    `/label/findLabels/${encodeURIComponent(opts.instanceName)}`,
+    opts.apiKey,
+    { method: "GET" },
+  );
+}
+
+export async function evolutionHandleLabel(opts: {
+  baseUrl: string;
+  apiKey: string;
+  instanceName: string;
+  phone: string;
+  labelId: string;
+  action: "add" | "remove";
+}) {
+  const number = cleanNumber(opts.phone);
+  return evoFetch(
+    opts.baseUrl,
+    `/label/handleLabel/${encodeURIComponent(opts.instanceName)}`,
+    opts.apiKey,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        number,
+        labelId: opts.labelId,
+        action: opts.action,
+      }),
+    },
+  );
+}
