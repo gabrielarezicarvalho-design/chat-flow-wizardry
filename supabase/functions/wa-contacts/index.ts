@@ -15,6 +15,19 @@ const corsHeaders = {
 const extractPhoneFromJid = (jid: string): string =>
   String(jid || "").replace(/@.*$/, "").replace(/\D/g, "");
 
+// Only real user contacts. Skip groups, broadcasts, newsletters, status, LID (hidden IDs).
+const isIndividualJid = (jid: string): boolean => {
+  const s = String(jid || "").toLowerCase();
+  if (!s) return false;
+  if (s.includes("@g.us")) return false;
+  if (s.includes("@broadcast")) return false;
+  if (s.includes("@newsletter")) return false;
+  if (s.includes("@lid")) return false;
+  if (s.startsWith("status@")) return false;
+  // Accept @s.whatsapp.net, @c.us, or bare numeric ids
+  return s.includes("@s.whatsapp.net") || s.includes("@c.us") || /^\d+$/.test(s);
+};
+
 const normalizeContactsPayload = (result: any): any[] => {
   if (Array.isArray(result)) return result;
   if (result && typeof result === "object") {
