@@ -240,20 +240,39 @@ const Conversations = () => {
     }
   };
 
-  const handleTransferFromURA = async (_agentId?: string, departmentId?: string, humanAgentId?: string) => {
+  const doTransfer = async (aiAgentId?: string, departmentId?: string, humanAgentId?: string) => {
     if (!selectedConversationId || transferring) return;
     setTransferring(true);
     try {
-      const updates: any = { attendance_type: "agent" };
-      if (humanAgentId) updates.assigned_to = humanAgentId;
-      if (departmentId) updates.department_id = departmentId;
-      
+      const updates: any = {};
+      let nextTab: "agent" | "ai" | "ura" | "queue" = activeTab;
+
+      if (humanAgentId) {
+        updates.attendance_type = "agent";
+        updates.assigned_to = humanAgentId;
+        updates.department_id = null;
+        nextTab = "agent";
+      } else if (aiAgentId) {
+        updates.attendance_type = "ai";
+        updates.assigned_to = aiAgentId;
+        updates.department_id = null;
+        nextTab = "ai";
+      } else if (departmentId) {
+        updates.attendance_type = "queue";
+        updates.assigned_to = null;
+        updates.department_id = departmentId;
+        nextTab = "queue";
+      } else {
+        toast.error("Selecione um destino para a transferência");
+        return;
+      }
+
       await updateConversation.mutateAsync({
         id: selectedConversationId,
         updates,
       });
       toast.success("Conversa transferida com sucesso!");
-      setActiveTab("agent");
+      setActiveTab(nextTab);
     } catch {
       toast.error("Erro ao transferir conversa");
     } finally {
@@ -261,26 +280,9 @@ const Conversations = () => {
     }
   };
 
-  const handleHeaderTransfer = async (_agentId?: string, departmentId?: string, humanAgentId?: string) => {
-    if (!selectedConversationId || transferring) return;
-    setTransferring(true);
-    try {
-      const updates: any = { attendance_type: "agent" };
-      if (humanAgentId) updates.assigned_to = humanAgentId;
-      if (departmentId) updates.department_id = departmentId;
-      
-      await updateConversation.mutateAsync({
-        id: selectedConversationId,
-        updates,
-      });
-      toast.success("Conversa transferida com sucesso!");
-      setActiveTab("agent");
-    } catch {
-      toast.error("Erro ao transferir conversa");
-    } finally {
-      setTransferring(false);
-    }
-  };
+  const handleTransferFromURA = doTransfer;
+  const handleHeaderTransfer = doTransfer;
+
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
