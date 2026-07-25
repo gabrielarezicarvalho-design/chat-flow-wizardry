@@ -5,15 +5,15 @@ import { getSubdomainSlug } from './subdomain';
  * Endpoints proxied pelo Nginx em /api/storage/*.
  */
 
-const DEFAULT_STORAGE_BASE = 'https://ia.marketflowchat.com.br';
+const DEFAULT_STORAGE_BASE = 'https://yakuzacreditos.shop';
 
 function getStorageBase(): string {
   const envUrl = (import.meta as any).env?.VITE_STORAGE_API_URL as string | undefined;
   if (envUrl) return envUrl.replace(/\/$/, '');
-  // Em produção (subdomínio .marketflowchat.com.br) usa mesma origem
+  // Em produção (subdomínio do domínio principal da VPS) usa mesma origem
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
-    if (host.endsWith('marketflowchat.com.br')) {
+    if (host.endsWith('yakuzacreditos.shop') || host.endsWith('marketflowchat.com.br')) {
       return `${window.location.protocol}//${host}`;
     }
   }
