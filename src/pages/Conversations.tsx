@@ -395,6 +395,24 @@ const Conversations = () => {
               </Badge>
             )}
           </button>
+          <button
+            onClick={() => { setActiveTab("queue"); setSelectedConversationId(null); }}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors border-b-2",
+              activeTab === "queue"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Fila</span>
+            {getTabCount("queue") > 0 && (
+              <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px] rounded-full">
+                {getTabCount("queue")}
+              </Badge>
+            )}
+          </button>
+
         </div>
 
         {/* Filter: Meus / Todos (only on agent tab) */}
