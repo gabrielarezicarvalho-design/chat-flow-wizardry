@@ -1041,8 +1041,10 @@ async function handleFlowResume(
           connectionToken: connection.token,
           connectionBaseUrl: BASE_URL,
           connectionEnvironment: connection.environment,
+          connectionInstanceName: (connection as any).instance_name,
           isAudioMessage: isAudioMessage,
           respondWithAudio: agent.voice_enabled && isAudioMessage
+
         })
       });
 
