@@ -285,10 +285,9 @@ function MassSendingContent() {
             filter: `user_id=eq.${userData.user.id}`,
           },
           (payload) => {
-            // Update campaign in state with new data
-            setCampaigns(prev => prev.map(c => 
-              c.id === payload.new.id 
-                ? { ...c, ...payload.new, started_at: null } 
+            setCampaigns(prev => prev.map(c =>
+              c.id === (payload.new as any).id
+                ? { ...c, ...(payload.new as any) }
                 : c
             ));
           }
