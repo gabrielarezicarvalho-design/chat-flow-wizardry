@@ -23,14 +23,14 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { token, environment, phone, base_url, instance_name } = await req.json();
+    const { token, environment, phone, base_url, instance_name, instance_id } = await req.json();
     const envUpper = (environment ?? "EVOLUTION").toUpperCase();
 
     // -------- EVOLUTION --------
     if (envUpper === "EVOLUTION") {
       const baseUrl = normalizeEvolutionBaseUrl(base_url);
       const apiKey = (token && String(token).trim()) || getEvolutionApiKey();
-      const name = instance_name || token;
+      const name = instance_name || instance_id || token;
       if (!baseUrl || !apiKey) return json({ error: "Evolution não configurado" }, 500);
       if (!name) return json({ error: "instance_name obrigatório" }, 400);
 
