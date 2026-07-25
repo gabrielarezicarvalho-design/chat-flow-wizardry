@@ -246,7 +246,8 @@ function MassSendingContent() {
           status: c.status,
           token: c.token,
           environment: c.environment,
-          base_url: c.base_url
+          base_url: c.base_url,
+          instance_name: c.instance_name,
         })) as Connection[],
         campaigns: (campaignsRes.data || []).map((c: any) => ({
           ...c,
