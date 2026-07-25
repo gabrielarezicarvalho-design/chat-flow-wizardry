@@ -3075,7 +3075,8 @@ const Connections = () => {
                     </div>
                   </div>
                 </div>
-                )}
+
+
 
                 <div className="flex gap-2">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
