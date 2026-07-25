@@ -362,3 +362,47 @@ export async function evolutionHandleLabel(opts: {
     },
   );
 }
+
+// ---------- Admin / Multi-tenant (Phase 4) ----------
+
+// Fetch all instances from Evolution API (admin-level, requires global apikey).
+export async function evolutionListInstances(opts: {
+  baseUrl: string;
+  apiKey: string;
+}) {
+  return evoFetch(opts.baseUrl, "/instance/fetchInstances", opts.apiKey, {
+    method: "GET",
+  });
+}
+
+// Permanently delete an Evolution instance (admin operation).
+export async function evolutionDeleteInstance(opts: {
+  baseUrl: string;
+  apiKey: string;
+  instanceName: string;
+}) {
+  return evoFetch(
+    opts.baseUrl,
+    `/instance/delete/${encodeURIComponent(opts.instanceName)}`,
+    opts.apiKey,
+    { method: "DELETE" },
+  );
+}
+
+// Normalize an Evolution instance row into the shape used by the UI/sync.
+export function normalizeEvolutionInstance(raw: any) {
+  const inst = raw?.instance ?? raw ?? {};
+  const id =
+    inst?.instanceId ?? inst?.id ?? inst?.instanceName ?? inst?.name ?? null;
+  const name = inst?.instanceName ?? inst?.name ?? id;
+  const state = String(inst?.state ?? inst?.status ?? "").toLowerCase();
+  return {
+    id,
+    name,
+    status: state || "unknown",
+    connected: state === "open" || state === "connected",
+    token: raw?.hash?.apikey ?? raw?.hash ?? inst?.apikey ?? null,
+    owner: inst?.owner ?? inst?.profileName ?? null,
+    created: inst?.createdAt ?? inst?.created ?? null,
+  };
+}
