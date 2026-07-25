@@ -23,7 +23,7 @@ function json(body: unknown, status = 200) {
   });
 }
 
-// ---------- Evolution legacy helpers (kept for BTZAP/PROD/TESTE fallbacks) ----------
+// ---------- Evolution legacy helpers (kept for PROD/TESTE fallbacks) ----------
 async function configureEvolutionWebhook(baseUrl: string, token: string) {
   const url = webhookUrl();
   const body = {
