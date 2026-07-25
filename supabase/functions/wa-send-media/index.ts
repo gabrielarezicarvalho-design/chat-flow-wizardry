@@ -1,5 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  evolutionSendAudio,
+  evolutionSendMedia,
+  evolutionSendText,
+  extractEvolutionMessageId,
+  isEvolutionConnection,
+  resolveEvolutionCreds,
+} from "../_shared/evolution.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -70,20 +79,98 @@ serve(async (req) => {
     }
 
     const { token, base_url } = connection;
-    
+    const cleanPhone = phone.replace(/\D/g, "");
+
+    // ---------- Evolution API branch ----------
+    if (isEvolutionConnection(connection)) {
+      const creds = resolveEvolutionCreds(connection);
+      if (!creds) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Evolution connection missing base_url, apiKey or instance_name",
+        }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      let evoRes: any;
+      if (type === "text") {
+        evoRes = await evolutionSendText({
+          ...creds,
+          phone: cleanPhone,
+          text: (text as string) || (caption as string) || "",
+        });
+      } else if (type === "image" || type === "video" || type === "document") {
+        evoRes = await evolutionSendMedia({
+          ...creds,
+          phone: cleanPhone,
+          mediaType: type,
+          media: file,
+          caption: caption,
+          fileName: type === "document" ? docName : undefined,
+        });
+      } else if (type === "audio") {
+        evoRes = await evolutionSendAudio({
+          ...creds,
+          phone: cleanPhone,
+          audio: file,
+        });
+      } else {
+        return new Response(JSON.stringify({
+          success: false,
+          error: `Type "${type}" not yet supported on Evolution API. Supported: text, image, video, audio, document.`,
+        }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      if (!evoRes.ok) {
+        console.error("[Evolution] send failed:", evoRes.data);
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Failed to send message",
+          details: evoRes.data,
+        }), { status: evoRes.status || 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      if (conversationId) {
+        const messageContent = type === "text"
+          ? ((text as string) || (caption as string) || "")
+          : JSON.stringify({ url: file, caption: caption || "", type });
+
+        await supabase.from("messages").insert({
+          id_da_conversa: conversationId,
+          remetente: "sistema",
+          conteudo: messageContent,
+          tipo: type,
+          recebido: false,
+          uazapi_message_id: extractEvolutionMessageId(evoRes.data),
+        });
+
+        const displayMessage = type === "text"
+          ? messageContent
+          : (caption ? `[${type}] ${caption}` : `[${type}]`);
+        await supabase.from("conversations").update({
+          last_message: displayMessage,
+          updated_at: new Date().toISOString(),
+        }).eq("id", conversationId);
+      }
+
+      return new Response(JSON.stringify({ success: true, data: evoRes.data, provider: "evolution" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ---------- Legacy UAZAPI branch ----------
     if (!token || !base_url) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: "Connection missing token or base_url" 
+      return new Response(JSON.stringify({
+        success: false,
+        error: "Connection missing token or base_url"
       }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    const cleanPhone = phone.replace(/\D/g, "");
     let endpoint: string;
     let body: Record<string, unknown> = { number: cleanPhone };
+
 
     switch (type) {
       case "text":

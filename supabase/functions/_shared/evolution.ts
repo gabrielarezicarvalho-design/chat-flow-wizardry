@@ -177,3 +177,119 @@ export function extractInstanceApiKey(data: any): string | null {
   if (h && typeof h === "object" && typeof h.apikey === "string") return h.apikey;
   return data?.instance?.apikey ?? null;
 }
+
+// ---------- Sending helpers (Evolution API v2) ----------
+
+function cleanNumber(phone: string): string {
+  return String(phone || "").replace(/\D/g, "");
+}
+
+export async function evolutionSendText(opts: {
+  baseUrl: string;
+  apiKey: string;
+  instanceName: string;
+  phone: string;
+  text: string;
+  delay?: number;
+}) {
+  return evoFetch(
+    opts.baseUrl,
+    `/message/sendText/${encodeURIComponent(opts.instanceName)}`,
+    opts.apiKey,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        number: cleanNumber(opts.phone),
+        text: opts.text,
+        delay: opts.delay ?? 0,
+      }),
+    },
+  );
+}
+
+export async function evolutionSendMedia(opts: {
+  baseUrl: string;
+  apiKey: string;
+  instanceName: string;
+  phone: string;
+  mediaType: "image" | "video" | "document";
+  media: string; // URL or base64
+  caption?: string;
+  fileName?: string;
+  mimetype?: string;
+}) {
+  const body: Record<string, unknown> = {
+    number: cleanNumber(opts.phone),
+    mediatype: opts.mediaType,
+    media: opts.media,
+  };
+  if (opts.caption) body.caption = opts.caption;
+  if (opts.fileName) body.fileName = opts.fileName;
+  if (opts.mimetype) body.mimetype = opts.mimetype;
+  return evoFetch(
+    opts.baseUrl,
+    `/message/sendMedia/${encodeURIComponent(opts.instanceName)}`,
+    opts.apiKey,
+    { method: "POST", body: JSON.stringify(body) },
+  );
+}
+
+export async function evolutionSendAudio(opts: {
+  baseUrl: string;
+  apiKey: string;
+  instanceName: string;
+  phone: string;
+  audio: string; // URL or base64
+}) {
+  return evoFetch(
+    opts.baseUrl,
+    `/message/sendWhatsAppAudio/${encodeURIComponent(opts.instanceName)}`,
+    opts.apiKey,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        number: cleanNumber(opts.phone),
+        audio: opts.audio,
+      }),
+    },
+  );
+}
+
+// Extract Evolution/Baileys message id from send responses.
+export function extractEvolutionMessageId(data: any): string | null {
+  return (
+    data?.key?.id ??
+    data?.messageId ??
+    data?.message?.key?.id ??
+    data?.id ??
+    null
+  );
+}
+
+// Determine if a connection row targets Evolution API.
+export function isEvolutionConnection(connection: {
+  environment?: string | null;
+  base_url?: string | null;
+}): boolean {
+  const env = String(connection?.environment || "").toUpperCase();
+  if (env === "EVOLUTION") return true;
+  const base = String(connection?.base_url || "").toLowerCase();
+  return base.includes("yakuzacreditos") || base.includes("evolution");
+}
+
+// Resolve Evolution credentials from a connection row, falling back to env.
+export function resolveEvolutionCreds(connection: {
+  base_url?: string | null;
+  token?: string | null;
+  instance_name?: string | null;
+  instance_id?: string | null;
+}): { baseUrl: string; apiKey: string; instanceName: string } | null {
+  const baseUrl = normalizeEvolutionBaseUrl(connection?.base_url ?? undefined);
+  const apiKey = (connection?.token ?? "").trim() || getEvolutionApiKey();
+  const instanceName =
+    (connection?.instance_name ?? "").trim() ||
+    (connection?.instance_id ?? "").trim();
+  if (!baseUrl || !apiKey || !instanceName) return null;
+  return { baseUrl, apiKey, instanceName };
+}
+

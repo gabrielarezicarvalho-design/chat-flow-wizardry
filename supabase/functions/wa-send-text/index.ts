@@ -1,5 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  evolutionSendText,
+  extractEvolutionMessageId,
+  isEvolutionConnection,
+  resolveEvolutionCreds,
+} from "../_shared/evolution.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -110,10 +117,59 @@ serve(async (req) => {
     }
 
     const { token, base_url } = connection;
-    
+
+    // ---------- Evolution API branch ----------
+    if (isEvolutionConnection(connection)) {
+      const creds = resolveEvolutionCreds(connection);
+      if (!creds) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Evolution connection missing base_url, apiKey or instance_name",
+        }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      console.log(`📤 [Evolution] Enviando texto para ${cleanPhone} via ${creds.baseUrl}`);
+      const evoRes = await evolutionSendText({
+        ...creds,
+        phone: cleanPhone,
+        text,
+      });
+
+      if (!evoRes.ok) {
+        console.error("[Evolution] send failed:", evoRes.data);
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Failed to send message",
+          details: evoRes.data,
+        }), { status: evoRes.status || 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const evoMsgId = extractEvolutionMessageId(evoRes.data);
+
+      if (conversationId) {
+        await supabase.from("messages").insert({
+          id_da_conversa: conversationId,
+          remetente: "sistema",
+          conteudo: text,
+          tipo: "text",
+          recebido: false,
+          uazapi_message_id: evoMsgId,
+        });
+        await supabase.from("conversations").update({
+          last_message: text,
+          updated_at: new Date().toISOString(),
+        }).eq("id", conversationId);
+      }
+
+      return new Response(JSON.stringify({ success: true, data: evoRes.data, provider: "evolution" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ---------- Legacy UAZAPI branch ----------
     if (!token || !base_url) {
-      return new Response(JSON.stringify({ 
-        error: "Connection missing token or base_url" 
+      return new Response(JSON.stringify({
+        error: "Connection missing token or base_url"
       }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -121,6 +177,7 @@ serve(async (req) => {
     }
 
     console.log(`📤 Enviando mensagem para ${cleanPhone} via ${base_url}/send/text`);
+
 
     // Send message via UAZAPI
     const sendUrl = `${base_url}/send/text`;
