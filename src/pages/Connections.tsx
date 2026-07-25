@@ -3118,7 +3118,20 @@ const Connections = () => {
 
                 <div>
                   <Label className="mb-3 block">Servidor</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div
+                      onClick={() => setFormData({ ...formData, environment: 'EVOLUTION' })}
+                      className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
+                        formData.environment === 'EVOLUTION'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <p className={`text-sm font-medium ${formData.environment === 'EVOLUTION' ? 'text-primary' : ''}`}>
+                        Evolution API
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Recomendado</p>
+                    </div>
                     <div
                       onClick={() => setFormData({ ...formData, environment: 'PROD' })}
                       className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
