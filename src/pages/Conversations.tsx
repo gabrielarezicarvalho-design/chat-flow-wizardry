@@ -98,29 +98,65 @@ const Conversations = () => {
     }).length;
   };
 
-  // Auto-scroll to bottom on new messages
+  const markAsRead = (id: string) => {
+    supabase
+      .from("conversations")
+      .update({ unread_count: 0 })
+      .eq("id", id)
+      .then(() => {
+        updateConversation.mutate({ id, updates: { unread_count: 0 } });
+      });
+  };
+
+  const isNearBottom = () => {
+    const el = messagesEndRef.current?.parentElement?.parentElement as HTMLElement | null;
+    // Fallback: find scrollable viewport ancestor
+    const viewport =
+      (messagesEndRef.current?.closest("[data-radix-scroll-area-viewport]") as HTMLElement | null) ||
+      el;
+    if (!viewport) return true;
+    return viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 120;
+  };
+
+  // Auto-scroll to bottom on new messages + auto-mark-as-read if near bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (
+      selectedConversationId &&
+      selectedConversation &&
+      (selectedConversation.unread_count ?? 0) > 0 &&
+      isNearBottom()
+    ) {
+      markAsRead(selectedConversationId);
+    }
+  }, [messages, selectedConversationId, selectedConversation?.unread_count]);
 
   // Focus input and reset unread count when conversation selected
   useEffect(() => {
     if (selectedConversationId) {
       setTimeout(() => inputRef.current?.focus(), 100);
-      // Reset unread count
-      supabase
-        .from("conversations")
-        .update({ unread_count: 0 })
-        .eq("id", selectedConversationId)
-        .then(() => {
-          // Also update local cache
-          updateConversation.mutate({
-            id: selectedConversationId,
-            updates: { unread_count: 0 },
-          });
-        });
+      markAsRead(selectedConversationId);
     }
   }, [selectedConversationId]);
+
+  // Mark as read when user scrolls to bottom
+  useEffect(() => {
+    const viewport = document.querySelector(
+      '[data-conversation-viewport] [data-radix-scroll-area-viewport]'
+    ) as HTMLElement | null;
+    if (!viewport || !selectedConversationId) return;
+    const handler = () => {
+      if (
+        viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 120 &&
+        (selectedConversation?.unread_count ?? 0) > 0
+      ) {
+        markAsRead(selectedConversationId);
+      }
+    };
+    viewport.addEventListener("scroll", handler, { passive: true });
+    return () => viewport.removeEventListener("scroll", handler);
+  }, [selectedConversationId, selectedConversation?.unread_count]);
+
 
   const getInitials = (name: string | null) => {
     if (!name) return "??";
