@@ -3125,8 +3125,13 @@ serve(async (req) => {
       }
     }
 
-    // Skip non-message events
-    if (eventType && !["messages", "message", "RECEIVE_MESSAGE"].includes(eventType)) {
+    // Skip non-message events (aceita eventos UAZAPI e Evolution)
+    const messageEventTypes = [
+      "messages", "message", "RECEIVE_MESSAGE",
+      "messages.upsert", "MESSAGES_UPSERT",
+      "message.any", "message.received", "message-received"
+    ];
+    if (eventType && !messageEventTypes.includes(eventType)) {
       console.log("⚠️ Evento não é mensagem, ignorando:", eventType);
       return new Response(JSON.stringify({ 
         success: true, 
