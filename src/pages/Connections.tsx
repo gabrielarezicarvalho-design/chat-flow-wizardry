@@ -1197,7 +1197,9 @@ const Connections = () => {
         body: {
           token: connection.token,
           environment: connection.environment || 'TESTE',
-          base_url: connection.base_url
+          base_url: connection.base_url,
+          instance_id: connection.instance_id,
+          instance_name: connection.instance_name || connection.instance_id
         }
       });
 
