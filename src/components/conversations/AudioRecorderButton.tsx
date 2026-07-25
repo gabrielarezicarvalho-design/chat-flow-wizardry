@@ -163,7 +163,7 @@ export const AudioRecorderButton = ({
       if (!uploadResult.success) throw new Error(uploadResult.error || 'Erro no upload');
       const publicUrl = uploadResult.url;
 
-      // Send via UZAPI
+      // Send via Evolution
       const { data, error } = await supabase.functions.invoke('wa-send-media', {
         body: {
           connectionId,

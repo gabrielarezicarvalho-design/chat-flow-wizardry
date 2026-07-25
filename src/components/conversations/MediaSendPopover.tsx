@@ -102,7 +102,7 @@ export const MediaSendPopover = ({
 
       const fileType = getFileType(selectedFile);
 
-      // Send via UZAPI
+      // Send via Evolution
       const { data, error } = await supabase.functions.invoke('wa-send-media', {
         body: {
           connectionId,

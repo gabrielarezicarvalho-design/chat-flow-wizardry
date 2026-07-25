@@ -172,7 +172,7 @@ const endpoints: EndpointDoc[] = [
     method: "POST",
     path: "/messages/send",
     title: "Enviar Mensagem",
-    description: "Envia uma mensagem WhatsApp via conexão UZAPI.",
+    description: "Envia uma mensagem WhatsApp via conexão Evolution.",
     permission: "messages",
     headers: [
       { name: "X-Api-Key", value: "sua_api_key", required: true },
@@ -1285,7 +1285,7 @@ Route::post('/marketflow/webhook', function (Request $request) {
             <div className="border-t border-white/10 pt-4 space-y-2 text-slate-300">
               <p className="text-blue-400 font-bold">═══ ENVIO DE MENSAGENS ═══</p>
               <p>1. Seu Sistema  →  POST /messages/send              →  MarketFlow</p>
-              <p>2. MarketFlow   →  Envia via UZAPI/Meta             →  WhatsApp</p>
+              <p>2. MarketFlow   →  Envia via Evolution/Meta             →  WhatsApp</p>
               <p>3. WhatsApp     →  Entrega ao contato               →  📱 Cliente</p>
             </div>
             <div className="border-t border-white/10 pt-4 space-y-2 text-slate-300">

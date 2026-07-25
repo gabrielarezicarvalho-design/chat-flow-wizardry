@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface UazapiInstance {
+interface EvolutionInstance {
   id: string;
   name: string;
   status: string;
@@ -17,13 +17,13 @@ interface UazapiInstance {
 
 interface SyncReport {
   summary: {
-    totalUazapi: number;
+    totalEvolution: number;
     totalDb: number;
     synced: number;
-    onlyInUazapi: number;
+    onlyInEvolution: number;
     onlyInDb: number;
   };
-  onlyInUazapi: UazapiInstance[];
+  onlyInEvolution: EvolutionInstance[];
   onlyInDb: any[];
   synced: any[];
 }
@@ -47,8 +47,8 @@ export const OrphanedInstancesAlert = () => {
         setReport(data);
         setLastCheck(new Date());
         
-        if (data.summary.onlyInUazapi > 0) {
-          toast.warning(`⚠️ Encontradas ${data.summary.onlyInUazapi} instância(s) órfã(s) no servidor Evolution`);
+        if (data.summary.onlyInEvolution > 0) {
+          toast.warning(`⚠️ Encontradas ${data.summary.onlyInEvolution} instância(s) órfã(s) no servidor Evolution`);
         } else {
           toast.success("✅ Todas as instâncias estão sincronizadas!");
         }
@@ -66,7 +66,7 @@ export const OrphanedInstancesAlert = () => {
     fetchSyncReport();
   }, []);
 
-  const hasOrphans = report && report.summary.onlyInUazapi > 0;
+  const hasOrphans = report && report.summary.onlyInEvolution > 0;
 
   if (!report && !loading) {
     return null;
@@ -110,10 +110,10 @@ export const OrphanedInstancesAlert = () => {
                 <CheckCircle className="h-3 w-3 text-green-500" />
                 {report.summary.synced} sincronizadas
               </Badge>
-              {report.summary.onlyInUazapi > 0 && (
+              {report.summary.onlyInEvolution > 0 && (
                 <Badge variant="destructive" className="flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3" />
-                  {report.summary.onlyInUazapi} órfãs no servidor
+                  {report.summary.onlyInEvolution} órfãs no servidor
                 </Badge>
               )}
               {report.summary.onlyInDb > 0 && (
@@ -139,7 +139,7 @@ export const OrphanedInstancesAlert = () => {
                   </AlertTitle>
                   <AlertDescription className="mt-2">
                     <p className="text-sm">
-                      Existem <strong>{report.summary.onlyInUazapi} instância(s)</strong> ativas no servidor Evolution 
+                      Existem <strong>{report.summary.onlyInEvolution} instância(s)</strong> ativas no servidor Evolution 
                       que não estão cadastradas no sistema. Essas instâncias consomem seu limite e precisam 
                       ser removidas manualmente.
                     </p>
@@ -149,7 +149,7 @@ export const OrphanedInstancesAlert = () => {
                       <div className="space-y-2">
                         <p className="text-sm font-medium">Instâncias para remover:</p>
                         <div className="rounded-md border border-destructive/30 bg-background/50 p-3">
-                          {report.onlyInUazapi.map((instance) => (
+                          {report.onlyInEvolution.map((instance) => (
                             <div 
                               key={instance.id} 
                               className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
