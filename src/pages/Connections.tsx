@@ -837,10 +837,11 @@ const Connections = () => {
     }
   };
 
-  const checkInstanceStatus = async (connectionId: string, token: string, environment: string, baseUrl?: string) => {
+  const checkInstanceStatus = async (connectionId: string, token: string, environment: string, baseUrl?: string, instanceName?: string) => {
     try {
+      const conn = connections.find(c => c.id === connectionId) as any;
       const { data, error } = await supabase.functions.invoke('wa-status-instance', {
-        body: { token, environment, base_url: baseUrl }
+        body: { token, environment, base_url: baseUrl, instance_id: conn?.instance_id, instance_name: instanceName || conn?.instance_name || conn?.instance_id }
       });
 
       if (error) throw error;
