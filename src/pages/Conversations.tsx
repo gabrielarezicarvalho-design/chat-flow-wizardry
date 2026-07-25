@@ -566,7 +566,7 @@ const Conversations = () => {
             </div>
 
             {/* Messages area */}
-            <ScrollArea className="flex-1 px-4 py-3">
+            <ScrollArea className="flex-1 px-4 py-3" data-conversation-viewport>
               <div className="max-w-3xl mx-auto space-y-1">
                 {messagesLoading ? (
                   <div className="flex items-center justify-center py-16">
