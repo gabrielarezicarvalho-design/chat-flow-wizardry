@@ -1259,6 +1259,73 @@ ${asaasContext}`;
         : "https://free.uazapi.com";
     }
 
+    // Detect Evolution connection to route sends to Evolution API v2 instead of UAZAPI.
+    const evoConnLike = {
+      environment: connectionEnvironment,
+      base_url: connectionBaseUrl,
+      token: connectionToken,
+      instance_name: connectionInstanceName,
+    };
+    const useEvolution = isEvolutionConnection(evoConnLike as any);
+    const evoCreds = useEvolution ? resolveEvolutionCreds(evoConnLike as any) : null;
+    if (useEvolution && !evoCreds) {
+      console.error("❌ Evolution connection sem base_url/token/instance_name — envio não vai funcionar");
+    }
+    console.log("   Provider envio:", useEvolution ? "Evolution API v2" : "UAZAPI");
+
+    // Unified WhatsApp send helpers. Return { ok, status, data }.
+    const okShape = (ok: boolean, status = ok ? 200 : 500, data: any = null) => ({ ok, status, data });
+    async function sendWaText(text: string) {
+      if (useEvolution && evoCreds) {
+        return await evolutionSendText({ ...evoCreds, phone: contactPhone, text });
+      }
+      const r = await fetch(`${BASE_URL}/send/text`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", token: connectionToken },
+        body: JSON.stringify({ number: contactPhone, text }),
+      });
+      return okShape(r.ok, r.status, await r.text().catch(() => null));
+    }
+    async function sendWaMedia(opts: { type: "image" | "video" | "document" | "audio"; file: string; caption?: string; filename?: string; }) {
+      if (useEvolution && evoCreds) {
+        if (opts.type === "audio") {
+          return await evolutionSendAudio({ ...evoCreds, phone: contactPhone, audio: opts.file });
+        }
+        return await evolutionSendMedia({
+          ...evoCreds,
+          phone: contactPhone,
+          mediaType: opts.type,
+          media: opts.file,
+          caption: opts.caption,
+          fileName: opts.filename,
+        });
+      }
+      const body: any = { number: contactPhone, type: opts.type, file: opts.file };
+      if (opts.caption) body.caption = opts.caption;
+      if (opts.filename) body.filename = opts.filename;
+      const r = await fetch(`${BASE_URL}/send/media`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", token: connectionToken },
+        body: JSON.stringify(body),
+      });
+      return okShape(r.ok, r.status, await r.text().catch(() => null));
+    }
+    async function sendWaInteractive(body: any) {
+      if (useEvolution) {
+        // Evolution v2 não suporta cta_copy nativamente — cair para texto com o código.
+        const fallback = `${body.header ? `*${body.header}*\n\n` : ""}${body.body || ""}${body.copy_code ? `\n\n${body.copy_code}` : ""}`;
+        return await sendWaText(fallback);
+      }
+      const r = await fetch(`${BASE_URL}/send/interactive`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", token: connectionToken },
+        body: JSON.stringify({ number: contactPhone, ...body }),
+      });
+      return okShape(r.ok, r.status, await r.text().catch(() => null));
+    }
+
+
+
     console.log("📤 Enviando via WhatsApp...");
     console.log("   Base URL:", BASE_URL);
     console.log("   Telefone:", contactPhone);
