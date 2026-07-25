@@ -184,9 +184,10 @@ export const OrphanedInstancesAlert = () => {
                               variant="link"
                               size="sm"
                               className="h-auto p-0 ml-1"
-                              onClick={() => window.open('https://marketflowchat.uazapi.com', '_blank')}
+                              onClick={() => window.open('#', '_blank')}
                             >
-                              marketflowchat.uazapi.com
+                              Painel Evolution
+
                               <ExternalLink className="h-3 w-3 ml-1" />
                             </Button>
                           </li>
