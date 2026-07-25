@@ -2161,6 +2161,8 @@ async function executeAiAgentNode(
         connectionToken: connection.token,
         connectionBaseUrl: BASE_URL,
         connectionEnvironment: connection.environment,
+        connectionInstanceName: (connection as any).instance_name,
+
         // Suporte a mídia
         mediaUrl: context.media?.url,
         mediaType: context.media?.type,
