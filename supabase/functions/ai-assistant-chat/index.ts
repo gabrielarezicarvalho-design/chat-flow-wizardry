@@ -1415,40 +1415,21 @@ ${asaasContext}`;
           // A URL do Asaas já é o link da fatura - vamos usar direto
           const invoiceLink = payment.invoiceUrl;
           
-          const pdfResponse = await fetch(`${BASE_URL}/send/media`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "token": connectionToken
-            },
-            body: JSON.stringify({
-              number: contactPhone,
-              type: "document",
-              file: invoiceLink,
-              filename: `Fatura_${asaasData.customerName.replace(/\s/g, '_')}.pdf`,
-              caption: `📄 *Fatura - ${asaasData.customerName}*\n💰 Valor: ${payment.valueFormatted}\n📅 Vencimento: ${payment.dueDateFormatted}`
-            })
+          const pdfResponse = await sendWaMedia({
+            type: "document",
+            file: invoiceLink,
+            filename: `Fatura_${asaasData.customerName.replace(/\s/g, '_')}.pdf`,
+            caption: `📄 *Fatura - ${asaasData.customerName}*\n💰 Valor: ${payment.valueFormatted}\n📅 Vencimento: ${payment.dueDateFormatted}`,
           });
-          
+
           if (pdfResponse.ok) {
             console.log("✅ PDF da fatura enviado");
           } else {
-            const pdfError = await pdfResponse.text();
-            console.error("❌ Erro ao enviar PDF:", pdfError);
-            
+            console.error("❌ Erro ao enviar PDF:", pdfResponse.data);
             // Se falhar o PDF, envia como link
-            await fetch(`${BASE_URL}/send/text`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "token": connectionToken
-              },
-              body: JSON.stringify({
-                number: contactPhone,
-                text: `📄 *Sua Fatura*\n\n💰 Valor: ${payment.valueFormatted}\n📅 Vencimento: ${payment.dueDateFormatted}\n\n🔗 Link: ${invoiceLink}`
-              })
-            });
+            await sendWaText(`📄 *Sua Fatura*\n\n💰 Valor: ${payment.valueFormatted}\n📅 Vencimento: ${payment.dueDateFormatted}\n\n🔗 Link: ${invoiceLink}`);
           }
+
         } catch (pdfError) {
           console.error("❌ Erro PDF:", pdfError);
         }
