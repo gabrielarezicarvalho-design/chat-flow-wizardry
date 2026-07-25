@@ -55,15 +55,23 @@ export async function evoFetch(
   apiKey: string,
   init: RequestInit = {},
 ) {
-  const res = await fetch(`${baseUrl}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      apikey: apiKey,
-      ...(init.headers as Record<string, string> | undefined),
-    },
-  });
-  return readJson(res);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+  try {
+    const res = await fetch(`${baseUrl}${path}`, {
+      ...init,
+      signal: init.signal ?? controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        apikey: apiKey,
+        ...(init.headers as Record<string, string> | undefined),
+      },
+    });
+    return readJson(res);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export async function createEvolutionInstance(opts: {
