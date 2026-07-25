@@ -446,10 +446,13 @@ const Conversations = () => {
               {activeTab === "agent" && <Headphones className="w-10 h-10 text-muted-foreground/40 mb-3" />}
               {activeTab === "ai" && <Bot className="w-10 h-10 text-muted-foreground/40 mb-3" />}
               {activeTab === "ura" && <GitBranch className="w-10 h-10 text-muted-foreground/40 mb-3" />}
+              {activeTab === "queue" && <Users className="w-10 h-10 text-muted-foreground/40 mb-3" />}
               <p className="text-sm text-muted-foreground">
                 {activeTab === "agent" && "Nenhum atendimento humano"}
                 {activeTab === "ai" && "Nenhum atendimento com IA"}
                 {activeTab === "ura" && "Nenhum cliente na URA"}
+                {activeTab === "queue" && "Nenhuma conversa na fila"}
+
               </p>
             </div>
           ) : (
