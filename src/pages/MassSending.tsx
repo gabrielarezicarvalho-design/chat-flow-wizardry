@@ -228,16 +228,37 @@ function MassSendingContent() {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     queryFn: async (): Promise<MassSendingData> => {
-      const [connectionsRes, campaignsRes, tagsRes, leadsRes, templatesRes] = await Promise.all([
+      // Paginated leads fetch to bypass 1000-row default limit
+      const fetchAllLeads = async (): Promise<Lead[]> => {
+        const pageSize = 1000;
+        let from = 0;
+        const all: Lead[] = [];
+        while (true) {
+          const { data, error } = await supabase
+            .from("leads")
+            .select("*")
+            .eq("user_id", user!.id)
+            .range(from, from + pageSize - 1);
+          if (error) throw error;
+          const batch = (data as Lead[]) || [];
+          all.push(...batch);
+          if (batch.length < pageSize) break;
+          from += pageSize;
+        }
+        return all;
+      };
+
+      const [connectionsRes, campaignsRes, tagsRes, leads, templatesRes] = await Promise.all([
         supabase.from("connections").select("id, name, instance_name, status, token, environment, base_url"),
         supabase.from("campaigns").select("*").eq("user_id", user!.id).order("created_at", { ascending: false }),
         supabase.from("tags").select("*").eq("user_id", user!.id),
-        supabase.from("leads").select("*").eq("user_id", user!.id),
+        fetchAllLeads(),
         supabase.from("campaign_templates").select("*").eq("user_id", user!.id).order("created_at", { ascending: false })
       ]);
 
-      const queryError = connectionsRes.error || campaignsRes.error || tagsRes.error || leadsRes.error || templatesRes.error;
+      const queryError = connectionsRes.error || campaignsRes.error || tagsRes.error || templatesRes.error;
       if (queryError) throw queryError;
+
 
       return {
         connections: (connectionsRes.data || []).map((c: any) => ({
@@ -254,7 +275,7 @@ function MassSendingContent() {
           started_at: null
         })) as Campaign[],
         tags: (tagsRes.data as TagItem[]) || [],
-        leads: (leadsRes.data as Lead[]) || [],
+        leads: leads || [],
         templates: (templatesRes.data as CampaignTemplate[]) || [],
       };
     },
