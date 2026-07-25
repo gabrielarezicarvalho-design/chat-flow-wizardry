@@ -1369,26 +1369,14 @@ ${asaasContext}`;
             audioUrl = ttsData.audioUrl;
             console.log("✅ Áudio TTS gerado:", audioUrl);
             
-            // Send audio via WhatsApp using /send/media with type "audio"
-            const whatsappAudioResponse = await fetch(`${BASE_URL}/send/media`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "token": connectionToken
-              },
-              body: JSON.stringify({
-                number: contactPhone,
-                type: "audio",
-                file: audioUrl
-              })
-            });
+            // Send audio via WhatsApp
+            const whatsappAudioResponse = await sendWaMedia({ type: "audio", file: audioUrl });
 
             if (whatsappAudioResponse.ok) {
               console.log("✅ Áudio enviado via WhatsApp");
               audioSent = true;
             } else {
-              const waAudioError = await whatsappAudioResponse.text();
-              console.error("❌ Erro ao enviar áudio WhatsApp:", waAudioError);
+              console.error("❌ Erro ao enviar áudio WhatsApp:", whatsappAudioResponse.data);
             }
           }
         } else {
@@ -1401,25 +1389,14 @@ ${asaasContext}`;
 
     // Also send text response (or only text if audio failed)
     if (!audioSent || !shouldRespondWithAudio) {
-      const whatsappResponse = await fetch(`${BASE_URL}/send/text`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "token": connectionToken
-        },
-        body: JSON.stringify({
-          number: contactPhone,
-          text: finalAiResponse
-        })
-      });
-
+      const whatsappResponse = await sendWaText(finalAiResponse);
       if (!whatsappResponse.ok) {
-        const waError = await whatsappResponse.text();
-        console.error("❌ Erro WhatsApp:", waError);
+        console.error("❌ Erro WhatsApp:", whatsappResponse.data);
       } else {
         console.log("✅ Mensagem texto enviada via WhatsApp");
       }
     }
+
 
     // Send Asaas payment data via buttons and media if available
     // Usar mesma condição rigorosa
