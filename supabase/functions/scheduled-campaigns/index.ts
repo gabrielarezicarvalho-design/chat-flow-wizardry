@@ -73,7 +73,8 @@ serve(async (req) => {
       
       const connection = campaign.connections;
       
-      if (!connection?.token || !connection?.base_url) {
+      const isEvo = isEvolutionConnection(connection || {});
+      if (!isEvo && (!connection?.token || !connection?.base_url)) {
         console.error(`[scheduled-campaigns] Campaign ${campaign.id} has no valid connection`);
         await supabase
           .from("campaigns")
@@ -82,6 +83,7 @@ serve(async (req) => {
         results.push({ id: campaign.id, success: false, error: "No valid connection" });
         continue;
       }
+
 
       const contacts = campaign.contacts || [];
       if (!Array.isArray(contacts) || contacts.length === 0) {
