@@ -97,75 +97,114 @@ serve(async (req) => {
       }
 
       try {
-        // Determine message type and build messages
+        // Determine message type
         const messageType = campaign.message_type || "text";
         const isInteractive = messageType.startsWith("interactive_");
-        const interactiveType = isInteractive ? messageType.replace("interactive_", "") : null;
-        
-        // Build messages array for UZAPI /sender/advanced
+
+        console.log(`[scheduled-campaigns] Sending ${contacts.length} messages for campaign ${campaign.id} (evolution=${isEvo}, type=${messageType})`);
+
+        // ---------- Evolution API path ----------
+        if (isEvo) {
+          const creds = resolveEvolutionCreds(connection);
+          if (!creds) {
+            await supabase.from("campaigns").update({ status: "failed" }).eq("id", campaign.id);
+            results.push({ id: campaign.id, success: false, error: "Missing Evolution credentials" });
+            continue;
+          }
+          if (isInteractive) {
+            await supabase.from("campaigns").update({ status: "failed" }).eq("id", campaign.id);
+            results.push({ id: campaign.id, success: false, error: "Interactive messages not supported on Evolution yet" });
+            continue;
+          }
+
+          let sent = 0;
+          let failed = 0;
+          const errors: any[] = [];
+
+          for (const contact of contacts) {
+            const number = String(contact).replace("@s.whatsapp.net", "").replace(/\D/g, "");
+            try {
+              let res;
+              if (messageType === "text") {
+                res = await evolutionSendText({ ...creds, phone: number, text: campaign.message_content || "" });
+              } else if (messageType === "audio") {
+                res = await evolutionSendAudio({ ...creds, phone: number, audio: campaign.media_url });
+              } else if (messageType === "image" || messageType === "video" || messageType === "document") {
+                res = await evolutionSendMedia({
+                  ...creds,
+                  phone: number,
+                  mediaType: messageType,
+                  media: campaign.media_url,
+                  caption: campaign.message_content || undefined,
+                });
+              } else {
+                failed++;
+                errors.push({ number, error: `Unsupported type ${messageType}` });
+                continue;
+              }
+              if (res.ok) sent++;
+              else { failed++; errors.push({ number, error: res.data }); }
+
+              // Human-like delay between sends (10-30s)
+              const delayMs = 10000 + Math.floor(Math.random() * 20000);
+              await new Promise((r) => setTimeout(r, delayMs));
+            } catch (e) {
+              failed++;
+              errors.push({ number, error: String(e) });
+            }
+          }
+
+          const status = failed === 0 ? "sent" : (sent === 0 ? "failed" : "sent");
+          await supabase.from("campaigns").update({
+            status,
+            sent_count: sent,
+            completed_at: new Date().toISOString(),
+            results: { provider: "evolution", sent, failed, errors: errors.slice(0, 20) },
+          }).eq("id", campaign.id);
+          results.push({ id: campaign.id, success: sent > 0, sent, failed });
+          continue;
+        }
+
+        // ---------- Legacy UAZAPI /sender/advanced path ----------
         const messages = contacts.map((contact: string) => {
           const cleanNumber = contact.replace("@s.whatsapp.net", "").replace(/\D/g, "");
-          
-          if (isInteractive && interactiveType) {
+          if (isInteractive) {
             return {
               number: cleanNumber,
-              type: interactiveType, // button, list, carousel
-              text: campaign.message_content || ""
+              type: messageType.replace("interactive_", ""),
+              text: campaign.message_content || "",
             };
           }
-          
           return {
             number: cleanNumber,
             type: messageType === "text" ? "text" : messageType,
             text: campaign.message_content || "",
-            file: messageType !== "text" ? campaign.media_url : undefined
+            file: messageType !== "text" ? campaign.media_url : undefined,
           };
         });
 
-        // Call UZAPI /sender/advanced
-        const body = {
-          delayMin: 10,
-          delayMax: 30,
-          info: campaign.name,
-          messages: messages
-        };
-
-        console.log(`[scheduled-campaigns] Sending ${messages.length} messages for campaign ${campaign.id}`);
-
+        const body = { delayMin: 10, delayMax: 30, info: campaign.name, messages };
         const response = await fetch(`${connection.base_url}/sender/advanced`, {
           method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "token": connection.token
-          },
-          body: JSON.stringify(body)
+          headers: { "Accept": "application/json", "Content-Type": "application/json", "token": connection.token },
+          body: JSON.stringify(body),
         });
-
         const responseData = await response.json();
         console.log(`[scheduled-campaigns] UZAPI response:`, JSON.stringify(responseData));
 
         if (!response.ok || responseData.error) {
-          await supabase
-            .from("campaigns")
-            .update({ 
-              status: "failed",
-              results: responseData 
-            })
-            .eq("id", campaign.id);
+          await supabase.from("campaigns").update({ status: "failed", results: responseData }).eq("id", campaign.id);
           results.push({ id: campaign.id, success: false, error: responseData.error || "UZAPI error" });
         } else {
-          await supabase
-            .from("campaigns")
-            .update({ 
-              status: "sent",
-              sent_count: messages.length,
-              completed_at: new Date().toISOString(),
-              results: responseData
-            })
-            .eq("id", campaign.id);
+          await supabase.from("campaigns").update({
+            status: "sent",
+            sent_count: messages.length,
+            completed_at: new Date().toISOString(),
+            results: responseData,
+          }).eq("id", campaign.id);
           results.push({ id: campaign.id, success: true, sent: messages.length });
         }
+
 
       } catch (err) {
         console.error(`[scheduled-campaigns] Error processing campaign ${campaign.id}:`, err);
