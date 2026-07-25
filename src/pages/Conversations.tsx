@@ -30,6 +30,8 @@ import {
   Headphones,
   GitBranch,
   ArrowRightLeft,
+  Users,
+
 } from "lucide-react";
 import { formatDistanceToNow, format, isToday, isYesterday } from "date-fns";
 import { ptBR } from "date-fns/locale";
