@@ -1,9 +1,26 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  isEvolutionConnection,
+  resolveEvolutionCreds,
+  evolutionFindContacts,
+  evolutionCheckNumbers,
+} from "../_shared/evolution.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const extractPhoneFromJid = (jid: string): string =>
+  String(jid || "").replace(/@.*$/, "").replace(/\D/g, "");
+
+const normalizeContactsPayload = (result: any): any[] => {
+  if (Array.isArray(result)) return result;
+  if (result && typeof result === "object") {
+    return result.contacts || result.data || result.response || [];
+  }
+  return [];
 };
 
 serve(async (req) => {
@@ -12,317 +29,223 @@ serve(async (req) => {
   }
 
   try {
-    const { action, connectionId, phone, name, numbers, token, environment, userId } = await req.json();
+    const { action, connectionId, phone, name, numbers, token, environment, userId } =
+      await req.json();
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    let connection: any = null;
     let instanceToken = token;
     let baseUrl = "";
-    let connection: any = null;
 
-    // If connectionId is provided, fetch connection details
     if (connectionId) {
       const { data: conn, error: connError } = await supabase
         .from("connections")
         .select("*")
         .eq("id", connectionId)
         .single();
-
       if (connError || !conn) {
-        console.error("Connection not found:", connError);
-        return new Response(JSON.stringify({ 
-          error: "Connection not found" 
-        }), {
+        return new Response(JSON.stringify({ error: "Connection not found" }), {
           status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-
       connection = conn;
       instanceToken = conn.token;
       baseUrl = conn.base_url || "";
     } else if (token && environment) {
-      // Use token and environment directly
       instanceToken = token;
       baseUrl = environment === "PROD" ? "https://app.uazapi.com" : "https://free.uazapi.com";
     }
-    
-    if (!instanceToken) {
-      return new Response(JSON.stringify({ 
-        error: "Missing required field: token or connectionId" 
-      }), {
+
+    const isEvo = connection ? isEvolutionConnection(connection) : false;
+    const evoCreds = isEvo ? resolveEvolutionCreds(connection) : null;
+
+    if (!isEvo && !instanceToken) {
+      return new Response(JSON.stringify({ error: "Missing token or connectionId" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    if (!baseUrl) {
-      return new Response(JSON.stringify({ 
-        error: "Could not determine base_url" 
-      }), {
+    if (!isEvo && !baseUrl) {
+      return new Response(JSON.stringify({ error: "Could not determine base_url" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (isEvo && !evoCreds) {
+      return new Response(
+        JSON.stringify({ error: "Evolution connection missing base_url, token or instance_name" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
-    // Helper to extract phone from JID
-    const extractPhoneFromJid = (jid: string): string => {
-      return jid?.replace(/@.*$/, '') || '';
-    };
-
-    // Action: sync - Fetch from WhatsApp and save to leads table
+    // ---------- SYNC ----------
     if (action === "sync") {
       const ownerId = userId || connection?.user_id;
       if (!ownerId) {
-        return new Response(JSON.stringify({ 
-          error: "Missing user_id for sync action" 
-        }), {
+        return new Response(JSON.stringify({ error: "Missing user_id for sync" }), {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
-      }
-
-      console.log("Syncing contacts for user:", ownerId);
-
-      // Fetch contacts from WhatsApp
-      const response = await fetch(`${baseUrl}/contacts`, {
-        method: "GET",
-        headers: { 
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "token": instanceToken
-        }
-      });
-
-      if (!response.ok) {
-        const errText = await response.text().catch(() => "");
-        console.error("Failed to fetch contacts from WhatsApp:", response.status, errText);
-        const isAuth = response.status === 401 || /invalid token/i.test(errText);
-        return new Response(JSON.stringify({
-          success: false,
-          error: isAuth
-            ? "Token da instância WhatsApp inválido ou expirado. Reconecte a instância em Conexões (escaneie o QR Code novamente)."
-            : `Falha ao buscar contatos do WhatsApp (HTTP ${response.status})`,
-          details: errText?.slice(0, 300),
-          needsReconnect: isAuth,
-        }), {
-          status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        });
-      }
-
-      const responseText = await response.text();
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch {
-        result = [];
       }
 
       let contacts: any[] = [];
-      if (Array.isArray(result)) {
-        contacts = result;
-      } else if (result && typeof result === 'object') {
-        contacts = result.contacts || result.data || [];
+      if (isEvo && evoCreds) {
+        const r = await evolutionFindContacts(evoCreds);
+        if (!r.ok) {
+          return new Response(
+            JSON.stringify({ success: false, error: "Falha ao buscar contatos (Evolution)", details: r.data }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        contacts = normalizeContactsPayload(r.data);
+      } else {
+        const response = await fetch(`${baseUrl}/contacts`, {
+          method: "GET",
+          headers: { Accept: "application/json", "Content-Type": "application/json", token: instanceToken },
+        });
+        if (!response.ok) {
+          const errText = await response.text().catch(() => "");
+          const isAuth = response.status === 401 || /invalid token/i.test(errText);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: isAuth
+                ? "Token da instância WhatsApp inválido ou expirado. Reconecte em Conexões."
+                : `Falha ao buscar contatos (HTTP ${response.status})`,
+              needsReconnect: isAuth,
+            }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        contacts = normalizeContactsPayload(await response.json().catch(() => []));
       }
 
-      console.log(`Found ${contacts.length} contacts from WhatsApp`);
-
-      // Get existing leads for this user
       const { data: existingLeads } = await supabase
         .from("leads")
-        .select("id, phone, name")
+        .select("id, phone")
         .eq("user_id", ownerId);
+      const existingPhones = new Set((existingLeads || []).map((l: any) => l.phone));
 
-      const existingPhones = new Set((existingLeads || []).map(l => l.phone));
-      
       let addedCount = 0;
       let skippedCount = 0;
+      const processed = new Set<string>();
 
-      // Process contacts - deduplicate by phone and save new ones
-      const processedPhones = new Set<string>();
-      
       for (const contact of contacts) {
-        const phone = extractPhoneFromJid(contact.jid || contact.id || '');
-        const contactName = contact.contact_name || contact.name || contact.notify || 'Sem nome';
-        
-        if (!phone || phone.length < 8) continue;
-        
-        // Skip if already processed in this batch (dedupe)
-        if (processedPhones.has(phone)) {
+        const p = extractPhoneFromJid(
+          contact.jid || contact.id || contact.remoteJid || contact.number || "",
+        );
+        const contactName =
+          contact.pushName || contact.contact_name || contact.name || contact.notify || "Sem nome";
+        if (!p || p.length < 8) continue;
+        if (processed.has(p) || existingPhones.has(p)) {
           skippedCount++;
           continue;
         }
-        processedPhones.add(phone);
-        
-        // Skip if already exists in database
-        if (existingPhones.has(phone)) {
-          skippedCount++;
-          continue;
-        }
-        
-        // Insert new lead
-        const { error: insertError } = await supabase
-          .from("leads")
-          .insert({
-            user_id: ownerId,
-            phone,
-            name: contactName,
-            source: "WhatsApp Sync",
-            status: "new"
-          });
-
-        if (insertError) {
-          console.error("Error inserting lead:", insertError);
-          skippedCount++;
-        } else {
-          addedCount++;
-        }
-      }
-
-      console.log(`Sync complete: ${addedCount} added, ${skippedCount} skipped`);
-
-      return new Response(JSON.stringify({
-        success: true,
-        added: addedCount,
-        skipped: skippedCount,
-        total: contacts.length
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    let url = "";
-    let method = "GET";
-    let body = null;
-
-    switch (action) {
-      case "list":
-        // Get all contacts
-        url = `${baseUrl}/contacts`;
-        method = "GET";
-        break;
-
-      case "add":
-        // Add contact to agenda
-        if (!phone || !name) {
-          return new Response(JSON.stringify({ 
-            error: "Missing required fields: phone, name" 
-          }), {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" }
-          });
-        }
-        url = `${baseUrl}/contact/add`;
-        method = "POST";
-        body = JSON.stringify({ phone: phone.replace(/\D/g, ""), name });
-        break;
-
-      case "check":
-        // Check if numbers are valid WhatsApp numbers
-        if (!numbers || !Array.isArray(numbers)) {
-          return new Response(JSON.stringify({ 
-            error: "Missing required field: numbers (array)" 
-          }), {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" }
-          });
-        }
-        url = `${baseUrl}/chat/check`;
-        method = "POST";
-        body = JSON.stringify({ numbers: numbers.map((n: string) => n.replace(/\D/g, "")) });
-        break;
-
-      default:
-        return new Response(JSON.stringify({ 
-          error: "Invalid action. Use: list, add, check, or sync" 
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        processed.add(p);
+        const { error } = await supabase.from("leads").insert({
+          user_id: ownerId,
+          phone: p,
+          name: contactName,
+          source: "WhatsApp Sync",
+          status: "new",
         });
-    }
-
-    console.log(`${action} contacts via ${url}`);
-
-    const response = await fetch(url, {
-      method,
-      headers: { 
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "token": instanceToken
-      },
-      ...(body && { body })
-    });
-
-    const responseText = await response.text();
-    console.log("UAZAPI response:", responseText);
-
-    let result;
-    try {
-      result = JSON.parse(responseText);
-    } catch {
-      result = { raw: responseText };
-    }
-
-    if (!response.ok) {
-      console.error(`Failed to ${action} contacts:`, result);
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: `Failed to ${action} contacts`,
-        details: result 
-      }), {
-        status: response.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    // Format response based on action
-    if (action === "list") {
-      // Handle various response formats from UZAPI
-      let contacts: any[] = [];
-      if (Array.isArray(result)) {
-        contacts = result;
-      } else if (result && typeof result === 'object') {
-        contacts = result.contacts || result.data || [];
+        if (error) skippedCount++;
+        else addedCount++;
       }
-      
-      console.log(`Found ${contacts.length} contacts`);
-      
-      return new Response(JSON.stringify({
-        success: true,
-        contacts: contacts
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+
+      return new Response(
+        JSON.stringify({ success: true, added: addedCount, skipped: skippedCount, total: contacts.length }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
+    // ---------- LIST ----------
+    if (action === "list") {
+      if (isEvo && evoCreds) {
+        const r = await evolutionFindContacts(evoCreds);
+        return new Response(
+          JSON.stringify({ success: r.ok, contacts: normalizeContactsPayload(r.data) }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      const r = await fetch(`${baseUrl}/contacts`, {
+        headers: { Accept: "application/json", token: instanceToken },
+      });
+      const data = await r.json().catch(() => []);
+      return new Response(
+        JSON.stringify({ success: r.ok, contacts: normalizeContactsPayload(data) }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // ---------- CHECK numbers exist on WhatsApp ----------
     if (action === "check") {
-      return new Response(JSON.stringify({
-        success: true,
-        results: result
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      if (!numbers || !Array.isArray(numbers)) {
+        return new Response(JSON.stringify({ error: "Missing numbers array" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (isEvo && evoCreds) {
+        const r = await evolutionCheckNumbers({ ...evoCreds, numbers });
+        return new Response(JSON.stringify({ success: r.ok, results: r.data }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const r = await fetch(`${baseUrl}/chat/check`, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json", token: instanceToken },
+        body: JSON.stringify({ numbers: numbers.map((n: string) => n.replace(/\D/g, "")) }),
+      });
+      return new Response(JSON.stringify({ success: r.ok, results: await r.json().catch(() => ({})) }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({
-      success: true,
-      data: result
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
+    // ---------- ADD contact to WhatsApp phonebook ----------
+    if (action === "add") {
+      if (!phone || !name) {
+        return new Response(JSON.stringify({ error: "Missing phone or name" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Evolution API v2 has no native phonebook endpoint; store locally.
+      if (isEvo) {
+        const ownerId = userId || connection?.user_id;
+        if (ownerId) {
+          await supabase.from("leads").upsert(
+            { user_id: ownerId, phone: phone.replace(/\D/g, ""), name, source: "Manual", status: "new" },
+            { onConflict: "user_id,phone", ignoreDuplicates: true },
+          );
+        }
+        return new Response(JSON.stringify({ success: true, localOnly: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const r = await fetch(`${baseUrl}/contact/add`, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json", token: instanceToken },
+        body: JSON.stringify({ phone: phone.replace(/\D/g, ""), name }),
+      });
+      return new Response(JSON.stringify({ success: r.ok, data: await r.json().catch(() => ({})) }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-  } catch (error) {
-    console.error("Error:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ 
-      success: false,
-      error: errorMessage 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    return new Response(JSON.stringify({ error: "Invalid action. Use list, add, check, sync" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  } catch (error) {
+    console.error("[wa-contacts] error:", error);
+    return new Response(
+      JSON.stringify({ success: false, error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   }
 });
