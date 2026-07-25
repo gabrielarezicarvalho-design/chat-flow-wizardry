@@ -1022,8 +1022,10 @@ const Connections = () => {
       const { data, error } = await supabase.functions.invoke('wa-disconnect-instance', {
         body: {
           token: connection.token,
-          environment: connection.environment || 'TESTE',
-          base_url: connection.base_url
+          environment: connection.environment || 'EVOLUTION',
+          base_url: connection.base_url,
+          instance_name: (connection as any).instance_name,
+          instance_id: connection.id,
         }
       });
 
