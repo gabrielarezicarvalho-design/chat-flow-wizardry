@@ -36,6 +36,20 @@ const normalizeContactsPayload = (result: any): any[] => {
   return [];
 };
 
+// Evolution also returns unsaved numbers discovered in groups/chats. Those are
+// not phonebook contacts and must never be imported into the leads list.
+const isSavedEvolutionContact = (contact: any): boolean => {
+  if (contact?.isGroup === true) return false;
+  if (typeof contact?.isSaved === "boolean" && !contact.isSaved) return false;
+  if (typeof contact?.type === "string" && contact.type.toLowerCase() !== "contact") return false;
+  return true;
+};
+
+const contactName = (contact: any): string => {
+  const value = contact?.name || contact?.pushName || contact?.notify || contact?.contact_name;
+  return typeof value === "string" && value.trim() ? value.trim() : "Sem nome";
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -139,15 +153,21 @@ serve(async (req) => {
 
       const { data: existingLeads } = await supabase
         .from("leads")
-        .select("phone")
+        .select("phone, source")
         .eq("user_id", ownerId);
-      const existingPhones = new Set((existingLeads || []).map((l: any) => l.phone));
+      const existingPhones = new Set(
+        (existingLeads || [])
+          .filter((lead: any) => lead.source !== "WhatsApp Sync")
+          .map((lead: any) => String(lead.phone || "").replace(/\D/g, ""))
+          .filter(Boolean),
+      );
 
       let skippedCount = 0;
       const seen = new Set<string>();
       const rows: any[] = [];
 
       for (const contact of contacts) {
+        if (isEvo && !isSavedEvolutionContact(contact)) { skippedCount++; continue; }
         const rawJid =
           contact.remoteJid || contact.jid || contact.id || contact.number || "";
         if (!isIndividualJid(rawJid)) { skippedCount++; continue; }
@@ -158,10 +178,21 @@ serve(async (req) => {
         rows.push({
           user_id: ownerId,
           phone: p,
-          name: contact.pushName || contact.name || contact.notify || contact.contact_name || "Sem nome",
+          name: contactName(contact),
           source: "WhatsApp Sync",
           status: "new",
         });
+      }
+
+      // A sync is a fresh mirror of the connected phonebook. Remove records from
+      // earlier syncs (including group members imported by previous versions).
+      const { error: clearError } = await supabase
+        .from("leads")
+        .delete()
+        .eq("user_id", ownerId)
+        .eq("source", "WhatsApp Sync");
+      if (clearError) {
+        throw new Error(`Falha ao limpar sincronização anterior: ${clearError.message}`);
       }
 
       // Bulk insert in chunks (avoids one-by-one round-trips that time out).
@@ -194,12 +225,13 @@ serve(async (req) => {
         const all = normalizeContactsPayload(r.data);
         const filtered = all
           .filter((c: any) =>
+            isSavedEvolutionContact(c) &&
             isIndividualJid(c.remoteJid || c.jid || c.id || c.number || ""),
           )
           .map((c: any) => ({
             ...c,
             phone: extractPhoneFromJid(c.remoteJid || c.jid || c.id || c.number || ""),
-            name: c.pushName || c.name || c.notify || c.contact_name || "",
+            name: contactName(c),
           }));
         return new Response(
           JSON.stringify({ success: r.ok, contacts: filtered }),
