@@ -190,11 +190,11 @@ serve(async (req) => {
           body: JSON.stringify(body),
         });
         const responseData = await response.json();
-        console.log(`[scheduled-campaigns] UZAPI response:`, JSON.stringify(responseData));
+        console.log(`[scheduled-campaigns] Evolution response:`, JSON.stringify(responseData));
 
         if (!response.ok || responseData.error) {
           await supabase.from("campaigns").update({ status: "failed", results: responseData }).eq("id", campaign.id);
-          results.push({ id: campaign.id, success: false, error: responseData.error || "UZAPI error" });
+          results.push({ id: campaign.id, success: false, error: responseData.error || "Evolution error" });
         } else {
           await supabase.from("campaigns").update({
             status: "sent",

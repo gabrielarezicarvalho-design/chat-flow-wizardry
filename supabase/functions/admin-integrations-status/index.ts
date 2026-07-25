@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     const projectUrl = Deno.env.get('SUPABASE_URL') || '';
     const webhooks = [
       { name: 'WhatsApp Meta Webhook', url: `${projectUrl}/functions/v1/wa-webhook-listener`, description: 'Recebe eventos do WhatsApp Cloud API' },
-      { name: 'Evolution Webhook', url: `${projectUrl}/functions/v1/wa-webhook-uzapi`, description: 'Recebe eventos do Evolution' },
+      { name: 'Evolution Webhook', url: `${projectUrl}/functions/v1/wa-webhook-listener`, description: 'Recebe eventos do Evolution' },
       { name: 'Asaas Webhook', url: `${projectUrl}/functions/v1/asaas-webhook`, description: 'Recebe eventos de pagamento Asaas' },
     ];
 

@@ -59,7 +59,7 @@ serve(async (req) => {
       });
     }
 
-    // Send via QR provider (Z-API/UAzapi pattern)
+    // Send via QR provider (Evolution API pattern)
     const sendUrl = `${conn.qr_api_url}/instances/${conn.qr_instance_id}/messages/text/${conn.qr_api_token}`;
     const response = await fetch(sendUrl, {
       method: "POST",
