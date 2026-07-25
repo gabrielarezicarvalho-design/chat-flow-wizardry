@@ -2494,8 +2494,49 @@ serve(async (req) => {
       return String(content);
     };
 
+    // FORMATO EVOLUTION API v2: payload.data com key.remoteJid + message.*
+    if (payload.data && typeof payload.data === "object" && (payload.data.key || payload.data.remoteJid)) {
+      const d: any = payload.data;
+      const key = d.key || {};
+      const jid: string = key.remoteJid || d.remoteJid || d.senderPn || "";
+      // Evolution às vezes traz o número real em senderPn (para JIDs @lid)
+      telefone = key.senderPn || d.senderPn || jid || "";
+      const m = d.message || {};
+      const rawMessageType: string = d.messageType || "";
+      // Extrai texto conforme o tipo de mensagem Evolution
+      mensagem =
+        (typeof m.conversation === "string" ? m.conversation : "") ||
+        m.extendedTextMessage?.text ||
+        m.imageMessage?.caption ||
+        m.videoMessage?.caption ||
+        m.documentMessage?.caption ||
+        m.documentWithCaptionMessage?.message?.documentMessage?.caption ||
+        m.buttonsResponseMessage?.selectedDisplayText ||
+        m.listResponseMessage?.title ||
+        m.templateButtonReplyMessage?.selectedDisplayText ||
+        m.reactionMessage?.text ||
+        "";
+
+      if (m.imageMessage || rawMessageType === "imageMessage") tipo = "image";
+      else if (m.videoMessage || rawMessageType === "videoMessage") tipo = "video";
+      else if (m.audioMessage || rawMessageType === "audioMessage") tipo = m.audioMessage?.ptt ? "audio" : "audio";
+      else if (m.documentMessage || m.documentWithCaptionMessage || rawMessageType.includes("document")) tipo = "document";
+      else if (m.stickerMessage) tipo = "sticker";
+      else if (m.locationMessage) tipo = "location";
+      else if (m.contactMessage || m.contactsArrayMessage) tipo = "contact";
+      else tipo = "text";
+
+      timestamp = (d.messageTimestamp ? Number(d.messageTimestamp) * 1000 : Date.now());
+      messageId = key.id || d.messageId || null;
+      contactName = d.pushName || d.notifyName || "";
+      isFromMe = key.fromMe === true;
+      instanceToken = payload.apikey || "";
+
+      console.log("📋 FORMATO: Evolution API v2 (payload.data)");
+      console.log(`📱 remoteJid: ${jid}, senderPn: ${key.senderPn || d.senderPn}, messageType: ${rawMessageType} -> tipo: ${tipo}`);
+    }
     // FORMATO UZAPI: Dados dentro de payload.message
-    if (payload.message && typeof payload.message === "object") {
+    else if (payload.message && typeof payload.message === "object") {
       const msg = payload.message;
       // IMPORTANTE: Preferir sender_pn (número real) sobre sender (que pode ser LID do Facebook/Instagram)
       // O sender_pn contém o número de telefone real no formato "555121601725@s.whatsapp.net"
@@ -3084,8 +3125,13 @@ serve(async (req) => {
       }
     }
 
-    // Skip non-message events
-    if (eventType && !["messages", "message", "RECEIVE_MESSAGE"].includes(eventType)) {
+    // Skip non-message events (aceita eventos UAZAPI e Evolution)
+    const messageEventTypes = [
+      "messages", "message", "RECEIVE_MESSAGE",
+      "messages.upsert", "MESSAGES_UPSERT",
+      "message.any", "message.received", "message-received"
+    ];
+    if (eventType && !messageEventTypes.includes(eventType)) {
       console.log("⚠️ Evento não é mensagem, ignorando:", eventType);
       return new Response(JSON.stringify({ 
         success: true, 
