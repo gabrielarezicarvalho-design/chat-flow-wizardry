@@ -25,6 +25,19 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
+const withTimeout = async <T,>(operation: PromiseLike<T>, timeoutMs = 30000): Promise<T> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error("A sincronização excedeu o tempo limite")), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([Promise.resolve(operation), timeout]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+};
+
 const Connections = () => {
   const { connections, isLoading, createConnection, updateConnection, deleteConnection } = useConnections();
   const { flows } = useFlows();
@@ -405,13 +418,17 @@ const Connections = () => {
           setSyncingContacts(true);
           const { data: { user } } = await supabase.auth.getUser();
           
-          const { data: contactsData } = await supabase.functions.invoke('wa-contacts', {
-            body: {
-              action: 'sync',
-              connectionId: selectedConnection.id,
-              userId: user?.id
-            }
-          });
+          const { data: contactsData, error: contactsError } = await withTimeout(
+            supabase.functions.invoke('wa-contacts', {
+              body: {
+                action: 'sync',
+                connectionId: selectedConnection.id,
+                userId: user?.id
+              }
+            })
+          );
+
+          if (contactsError) throw contactsError;
 
           if (contactsData?.success) {
             setContactsStats({
@@ -431,65 +448,58 @@ const Connections = () => {
         // Auto-sync labels
         try {
           setSyncingLabels(true);
-          const baseUrl = connAny.base_url || "https://marketflowchat.uazapi.com";
-          
-          const response = await fetch(`${baseUrl}/chat/labels`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'token': connAny.token
-            }
-          });
+          const { data: result, error: labelsError } = await withTimeout(
+            supabase.functions.invoke('wa-labels', {
+              body: {
+                action: 'list',
+                connectionId: selectedConnection.id
+              }
+            })
+          );
 
-          if (response.ok) {
-            const result = await response.json();
-            let labels: any[] = [];
+          if (labelsError) throw labelsError;
+          if (!result?.success) throw new Error(result?.error || 'Falha ao buscar etiquetas');
+
+          const labels = Array.isArray(result.labels) ? result.labels : [];
+
+          const { data: { user } } = await supabase.auth.getUser();
+          let addedTagsCount = 0;
+
+          for (const label of labels) {
+            const labelName = label.name || label.displayName || label.title;
+            const labelColor = label.color || label.hexColor || '#3b82f6';
             
-            if (Array.isArray(result)) {
-              labels = result;
-            } else if (result?.labels || result?.data) {
-              labels = result.labels || result.data;
-            }
+            if (!labelName) continue;
 
-            const { data: { user } } = await supabase.auth.getUser();
-            let addedTagsCount = 0;
+            const { data: existing } = await supabase
+              .from('tags')
+              .select('id')
+              .eq('user_id', user?.id)
+              .eq('name', labelName)
+              .maybeSingle();
 
-            for (const label of labels) {
-              const labelName = label.name || label.displayName || label.title;
-              const labelColor = label.color || label.hexColor || '#3b82f6';
-              
-              if (!labelName) continue;
-
-              const { data: existing } = await supabase
+            if (!existing) {
+              const { error: insertError } = await supabase
                 .from('tags')
-                .select('id')
-                .eq('user_id', user?.id)
-                .eq('name', labelName)
-                .maybeSingle();
+                .insert({
+                  user_id: user?.id,
+                  name: labelName,
+                  color: labelColor
+                });
 
-              if (!existing) {
-                const { error: insertError } = await supabase
-                  .from('tags')
-                  .insert({
-                    user_id: user?.id,
-                    name: labelName,
-                    color: labelColor
-                  });
-
-                if (!insertError) {
-                  addedTagsCount++;
-                }
+              if (!insertError) {
+                addedTagsCount++;
               }
             }
+          }
 
-            setLabelsStats({
-              synced: addedTagsCount,
-              lastSync: new Date().toLocaleTimeString('pt-BR')
-            });
+          setLabelsStats({
+            synced: addedTagsCount,
+            lastSync: new Date().toLocaleTimeString('pt-BR')
+          });
 
-            if (addedTagsCount > 0) {
-              toast.success(`🏷️ ${addedTagsCount} etiquetas sincronizadas automaticamente!`);
-            }
+          if (addedTagsCount > 0) {
+            toast.success(`🏷️ ${addedTagsCount} etiquetas sincronizadas automaticamente!`);
           }
         } catch (err) {
           console.error("Auto-sync labels error:", err);
@@ -1424,13 +1434,15 @@ const Connections = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      const { data, error } = await supabase.functions.invoke('wa-contacts', {
-        body: {
-          action: 'sync',
-          connectionId: selectedConnection.id,
-          userId: user?.id
-        }
-      });
+      const { data, error } = await withTimeout(
+        supabase.functions.invoke('wa-contacts', {
+          body: {
+            action: 'sync',
+            connectionId: selectedConnection.id,
+            userId: user?.id
+          }
+        })
+      );
 
       if (error) throw error;
 
@@ -1466,29 +1478,19 @@ const Connections = () => {
 
     setSyncingLabels(true);
     try {
-      const baseUrl = connAny.base_url || "https://marketflowchat.uazapi.com";
-      
-      // Fetch labels from WhatsApp using UAZAPI
-      const response = await fetch(`${baseUrl}/chat/labels`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'token': connAny.token
-        }
-      });
+      const { data: result, error } = await withTimeout(
+        supabase.functions.invoke('wa-labels', {
+          body: {
+            action: 'list',
+            connectionId: selectedConnection.id
+          }
+        })
+      );
 
-      if (!response.ok) {
-        throw new Error("Falha ao buscar etiquetas");
-      }
+      if (error) throw error;
+      if (!result?.success) throw new Error(result?.error || "Falha ao buscar etiquetas");
 
-      const result = await response.json();
-      let labels: any[] = [];
-      
-      if (Array.isArray(result)) {
-        labels = result;
-      } else if (result?.labels || result?.data) {
-        labels = result.labels || result.data;
-      }
+      const labels = Array.isArray(result.labels) ? result.labels : [];
 
       const { data: { user } } = await supabase.auth.getUser();
       let addedTagsCount = 0;
@@ -1508,7 +1510,6 @@ const Connections = () => {
       for (const label of labels) {
         const labelName = label.name || label.displayName || label.title;
         const labelColor = label.color || label.hexColor || '#3b82f6';
-        const labelId = label.id || label.labelId;
         
         if (!labelName) continue;
 
@@ -1520,83 +1521,17 @@ const Connections = () => {
           .eq('name', labelName)
           .maybeSingle();
 
-        let tagId = existing?.id;
-
         if (!existing) {
-          const { data: newTag, error: insertError } = await supabase
+          const { error: insertError } = await supabase
             .from('tags')
             .insert({
               user_id: user?.id,
               name: labelName,
               color: labelColor
-            })
-            .select('id')
-            .single();
-
-          if (!insertError && newTag) {
-            addedTagsCount++;
-            tagId = newTag.id;
-          }
-        }
-
-        // Try to fetch contacts with this label
-        if (labelId && tagId) {
-          try {
-            const labelContactsResp = await fetch(`${baseUrl}/chat/labels/${labelId}/contacts`, {
-              method: 'GET',
-              headers: {
-                'Accept': 'application/json',
-                'token': connAny.token
-              }
             });
 
-            if (labelContactsResp.ok) {
-              const labelContacts = await labelContactsResp.json();
-              const contacts = Array.isArray(labelContacts) ? labelContacts : (labelContacts?.contacts || labelContacts?.data || []);
-
-              for (const contact of contacts) {
-                const phone = contact.phone || contact.jid?.replace(/@.*$/, '') || contact.id?.replace(/@.*$/, '');
-                const contactName = contact.name || contact.notify || contact.pushName || 'Sem nome';
-                
-                if (!phone || phone.length < 8) continue;
-
-                // Check if lead exists
-                const { data: existingLead } = await supabase
-                  .from('leads')
-                  .select('id, tags')
-                  .eq('user_id', user?.id)
-                  .eq('phone', phone)
-                  .maybeSingle();
-
-                if (existingLead) {
-                  // Add tag to existing lead
-                  const currentTags = existingLead.tags || [];
-                  if (!currentTags.includes(labelName)) {
-                    await supabase
-                      .from('leads')
-                      .update({ tags: [...currentTags, labelName] })
-                      .eq('id', existingLead.id);
-                    addedContactsCount++;
-                  }
-                } else {
-                  // Create new lead with tag
-                  const { error: insertErr } = await supabase
-                    .from('leads')
-                    .insert({
-                      user_id: user?.id,
-                      phone,
-                      name: contactName,
-                      source: 'WhatsApp Label',
-                      status: 'new',
-                      tags: [labelName]
-                    });
-                  
-                  if (!insertErr) addedContactsCount++;
-                }
-              }
-            }
-          } catch (labelContactsErr) {
-            console.log(`Não foi possível buscar contatos da etiqueta ${labelName}`);
+          if (!insertError) {
+            addedTagsCount++;
           }
         }
       }
