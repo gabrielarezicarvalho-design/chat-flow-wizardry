@@ -4212,16 +4212,21 @@ ${safeTelegramText}`;
         .single();
 
 
-      // Verificar se o agente está ativo
-      const { data: agent } = await supabase
-        .from("agents")
-        .select("id, name, status")
-        .eq("id", conversationData.assigned_to)
-        .eq("status", "active")
-        .single();
-
       if (agent) {
         console.log("✅ Assistente IA ativo:", agent.name);
+
+        // Se a conversa ainda não estava marcada como IA, atualizar agora
+        if (
+          conversationData.attendance_type !== "ai" ||
+          conversationData.assigned_to !== agent.id
+        ) {
+          await supabase
+            .from("conversations")
+            .update({ attendance_type: "ai", assigned_to: agent.id })
+            .eq("id", conversationData.id);
+          console.log("🔄 Conversa marcada como IA e atribuída ao agente");
+        }
+
         
         // Chamar edge function de IA
         const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
