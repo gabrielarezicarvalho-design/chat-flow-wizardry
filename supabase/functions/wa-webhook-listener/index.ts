@@ -2536,8 +2536,7 @@ serve(async (req) => {
       console.log(`📱 remoteJid: ${jid}, senderPn: ${key.senderPn || d.senderPn}, messageType: ${rawMessageType} -> tipo: ${tipo}`);
     }
     // FORMATO UZAPI: Dados dentro de payload.message
-    else if (payload.message && typeof payload.message === "object")
-    if (payload.message && typeof payload.message === "object") {
+    else if (payload.message && typeof payload.message === "object") {
       const msg = payload.message;
       // IMPORTANTE: Preferir sender_pn (número real) sobre sender (que pode ser LID do Facebook/Instagram)
       // O sender_pn contém o número de telefone real no formato "555121601725@s.whatsapp.net"
