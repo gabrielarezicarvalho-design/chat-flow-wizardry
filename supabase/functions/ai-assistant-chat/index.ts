@@ -1475,22 +1475,11 @@ ${asaasContext}`;
           }
           boletoText += `🔗 *Link do Boleto:* ${payment.bankSlipUrl}`;
           
-          const boletoResponse = await fetch(`${BASE_URL}/send/text`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "token": connectionToken
-            },
-            body: JSON.stringify({
-              number: contactPhone,
-              text: boletoText
-            })
-          });
-          
+          const boletoResponse = await sendWaText(boletoText);
           if (boletoResponse.ok) {
             console.log("✅ Boleto enviado");
           } else {
-            console.error("❌ Erro ao enviar boleto:", await boletoResponse.text());
+            console.error("❌ Erro ao enviar boleto:", boletoResponse.data);
           }
         } catch (boletoError) {
           console.error("❌ Erro boleto:", boletoError);
@@ -1503,47 +1492,28 @@ ${asaasContext}`;
         console.log("   PIX Payload:", asaasData.pixPayload.substring(0, 50) + "...");
         
         try {
-          const pixButtonResponse = await fetch(`${BASE_URL}/send/interactive`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "token": connectionToken
-            },
-            body: JSON.stringify({
-              number: contactPhone,
-              type: "cta_copy",
-              header: "💰 PIX Copia e Cola",
-              body: `*Valor:* ${payment.valueFormatted}\n*Vencimento:* ${payment.dueDateFormatted}\n\n_Clique no botão abaixo para copiar o código PIX:_`,
-              footer: "Código copiado automaticamente",
-              copy_code: asaasData.pixPayload,
-              button_text: "📋 Copiar código PIX"
-            })
+          const pixButtonResponse = await sendWaInteractive({
+            type: "cta_copy",
+            header: "💰 PIX Copia e Cola",
+            body: `*Valor:* ${payment.valueFormatted}\n*Vencimento:* ${payment.dueDateFormatted}\n\n_Clique no botão abaixo para copiar o código PIX:_`,
+            footer: "Código copiado automaticamente",
+            copy_code: asaasData.pixPayload,
+            button_text: "📋 Copiar código PIX",
           });
           
           if (pixButtonResponse.ok) {
             console.log("✅ PIX enviado como botão copiável");
           } else {
-            const pixError = await pixButtonResponse.text();
-            console.error("❌ Erro ao enviar PIX botão:", pixError);
-            
+            console.error("❌ Erro ao enviar PIX botão:", pixButtonResponse.data);
             // Fallback: enviar como texto
-            await fetch(`${BASE_URL}/send/text`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "token": connectionToken
-              },
-              body: JSON.stringify({
-                number: contactPhone,
-                text: `💰 *PIX Copia e Cola*\n\n*Valor:* ${payment.valueFormatted}\n*Vencimento:* ${payment.dueDateFormatted}\n\n📋 *Código PIX:*\n\`${asaasData.pixPayload}\``
-              })
-            });
+            await sendWaText(`💰 *PIX Copia e Cola*\n\n*Valor:* ${payment.valueFormatted}\n*Vencimento:* ${payment.dueDateFormatted}\n\n📋 *Código PIX:*\n\`${asaasData.pixPayload}\``);
             console.log("✅ PIX enviado como texto (fallback)");
           }
         } catch (pixError) {
           console.error("❌ Erro PIX:", pixError);
         }
       }
+
     }
 
     // Save AI response to database
