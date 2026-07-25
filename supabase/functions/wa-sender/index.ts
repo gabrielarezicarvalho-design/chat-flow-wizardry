@@ -322,6 +322,12 @@ serve(async (req) => {
                     sent_at: r.ok ? new Date().toISOString() : null,
                     error_message: r.ok ? null : JSON.stringify(r.data).slice(0, 500),
                   }).eq("campaign_id", campaignId).ilike("phone", `%${phone}%`);
+                  // Live progress: bump counters after each message
+                  await supabase.from("campaigns").update({
+                    sent_count: sent,
+                    failed_count: failed,
+                    status: "sending",
+                  }).eq("id", campaignId);
                 }
               } catch (e: any) {
                 failed++;
