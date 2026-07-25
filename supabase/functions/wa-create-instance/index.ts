@@ -24,7 +24,7 @@ function json(body: unknown, status = 200) {
 }
 
 // ---------- Evolution legacy helpers (kept for BTZAP/PROD/TESTE fallbacks) ----------
-async function configureUazapiWebhook(baseUrl: string, token: string) {
+async function configureEvolutionWebhook(baseUrl: string, token: string) {
   const url = webhookUrl();
   const body = {
     url,
@@ -132,18 +132,18 @@ serve(async (req) => {
       });
     }
 
-    // -------- Legacy Evolution paths (BTZAP / PROD / TESTE) --------
+    // -------- Legacy paths (BTZAP / PROD / TESTE) --------
     let ADMIN_TOKEN: string | undefined;
     let BASE_URL: string | undefined;
     if (envUpper === "BTZAP") {
-      ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_BTZAP");
-      BASE_URL = Deno.env.get("UZAPI_BASE_URL_BTZAP") || "https://server.btzap.com.br";
+      ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_BTZAP");
+      BASE_URL = Deno.env.get("Evolution_BASE_URL_BTZAP") || "https://server.btzap.com.br";
     } else if (envUpper === "PROD") {
-      ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_PROD");
-      BASE_URL = Deno.env.get("UZAPI_BASE_URL_PROD");
+      ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_PROD");
+      BASE_URL = Deno.env.get("Evolution_BASE_URL_PROD");
     } else {
-      ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_TESTE");
-      BASE_URL = Deno.env.get("UZAPI_BASE_URL_TESTE");
+      ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_TESTE");
+      BASE_URL = Deno.env.get("Evolution_BASE_URL_TESTE");
     }
 
     const normalizedBaseUrl = normalizeBaseUrl(BASE_URL);
@@ -162,7 +162,7 @@ serve(async (req) => {
     const token = data?.instance?.token;
     if (!instanceId || !token) return json({ error: "Instance data incomplete", details: data }, 500);
 
-    const webhookResult = await configureUazapiWebhook(normalizedBaseUrl, token);
+    const webhookResult = await configureEvolutionWebhook(normalizedBaseUrl, token);
 
     const connectRes = await fetch(`${normalizedBaseUrl}/instance/connect`, {
       method: "POST",
