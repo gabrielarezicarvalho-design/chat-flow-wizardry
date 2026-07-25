@@ -444,6 +444,8 @@ serve(async (req) => {
         console.log(`[wa-sender] Advanced campaign: ${advancedMessages.length} messages, delay ${body.delayMin}-${body.delayMax}s, immediate: ${params.sendImmediately}`);
         console.log(`[wa-sender] Full body:`, JSON.stringify(body, null, 2));
         break;
+      }
+
 
       case "menu":
         // Send interactive menu (button, list, carousel, poll) to multiple numbers
