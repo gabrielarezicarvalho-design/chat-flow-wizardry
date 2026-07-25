@@ -31,9 +31,10 @@ serve(async (req) => {
     
     const { data: campaigns, error: fetchError } = await supabase
       .from("campaigns")
-      .select("*, connections(token, base_url)")
+      .select("*, connections(token, base_url, environment, instance_name, instance_id)")
       .eq("status", "scheduled")
       .lte("scheduled_at", now);
+
     
     if (fetchError) {
       console.error("[scheduled-campaigns] Error fetching campaigns:", fetchError);
