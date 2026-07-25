@@ -1,116 +1,138 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import {
+  connectEvolutionInstance,
+  createEvolutionInstance,
+  extractInstanceApiKey,
+  extractPairingCode,
+  extractQrBase64,
+  getEvolutionApiKey,
+  normalizeEvolutionBaseUrl,
+  setEvolutionWebhook,
+  webhookUrl,
+} from "../_shared/evolution.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-async function configureWebhook(baseUrl: string, token: string) {
-  const webhookUrl = `${Deno.env.get("SUPABASE_URL") ?? ""}/functions/v1/wa-webhook-listener`;
-  console.log("🔧 Auto-configuring webhook to:", webhookUrl);
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
 
-  const allEvents = [
-    "messages", "RECEIVE_MESSAGE", "MESSAGE_STATUS",
-    "messages.upsert", "messages.update", "message", "message.any",
-    "poll", "poll.vote", "poll_vote", "pollUpdate", "polls.vote",
-    "connection", "connection.update", "qrcode", "qr",
-    "contacts.update", "contacts.upsert", "chats.update", "chats.upsert",
-    "groups.update", "groups.upsert", "group-participants.update",
-    "presence.update", "labels.edit", "labels.association", "call"
-  ];
-
-  const requestBody = {
-    url: webhookUrl,
-    webhookURL: webhookUrl,
-    webhook: webhookUrl,
+// ---------- UAZAPI legacy helpers (kept for BTZAP/PROD/TESTE fallbacks) ----------
+async function configureUazapiWebhook(baseUrl: string, token: string) {
+  const url = webhookUrl();
+  const body = {
+    url,
+    webhookURL: url,
+    webhook: url,
     enabled: true,
-    events: allEvents,
     allEvents: true,
-    on_message: true,
-    on_message_received: true,
-    on_poll: true,
-    on_poll_vote: true,
     webhookByEvents: false,
     webhookBase64: true,
-    readMessages: true,
-    rejectCall: false,
-    msgCall: "",
-    groupsIgnore: false,
-    alwaysOnline: false,
-    readStatus: true,
-    syncFullHistory: false
   };
-
   const attempts = [
     { endpoint: "/webhook", method: "POST" },
     { endpoint: "/webhook/set", method: "POST" },
     { endpoint: "/instance/webhook", method: "POST" },
-    { endpoint: "/webhook", method: "PUT" },
-    { endpoint: "/instance/webhook", method: "PUT" },
   ];
-
   for (const { endpoint, method } of attempts) {
     try {
-      const response = await fetch(`${baseUrl}${endpoint}`, {
+      const r = await fetch(`${baseUrl}${endpoint}`, {
         method,
-        headers: { "Content-Type": "application/json", "token": token },
-        body: JSON.stringify(requestBody)
+        headers: { "Content-Type": "application/json", token },
+        body: JSON.stringify(body),
       });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log(`✅ Webhook configured via ${method} ${endpoint}`);
-        return { success: true, webhookUrl, method, endpoint };
-      }
-      console.log(`❌ ${method} ${endpoint}: HTTP ${response.status}`);
-    } catch (err) {
-      console.log(`❌ ${method} ${endpoint}: ${err}`);
-    }
+      if (r.ok) return { success: true, webhookUrl: url };
+    } catch (_err) { /* ignore */ }
   }
-
-  console.log("⚠️ All webhook config attempts failed");
-  return { success: false };
+  return { success: false, webhookUrl: url };
 }
 
 function normalizeBaseUrl(value: string | undefined): string | null {
   if (!value) return null;
-
-  const trimmedValue = value.trim().replace(/\/+$/, "");
-
-  if (!trimmedValue || trimmedValue.includes("PLACEHOLDER_VALUE_TO_BE_REPLACED")) {
-    return null;
-  }
-
+  const t = value.trim().replace(/\/+$/, "");
+  if (!t || t.includes("PLACEHOLDER_VALUE_TO_BE_REPLACED")) return null;
   try {
-    const parsedUrl = new URL(trimmedValue);
-    if (!["http:", "https:"].includes(parsedUrl.protocol)) return null;
-    return parsedUrl.toString().replace(/\/+$/, "");
-  } catch (_error) {
-    return null;
-  }
-}
-
-function isConfiguredSecret(value: string | undefined): value is string {
-  return Boolean(value?.trim()) && !value!.includes("PLACEHOLDER_VALUE_TO_BE_REPLACED");
+    const u = new URL(t);
+    if (!["http:", "https:"].includes(u.protocol)) return null;
+    return u.toString().replace(/\/+$/, "");
+  } catch { return null; }
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const { name, phone, environment } = await req.json();
     console.log("📝 Creating instance:", { name, phone, environment });
 
-    if (!name) {
-      return new Response(JSON.stringify({ error: "Name is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+    if (!name) return json({ error: "Name is required" }, 400);
+
+    const envUpper = (environment ?? "EVOLUTION").toUpperCase();
+
+    // -------- EVOLUTION API (new default) --------
+    if (envUpper === "EVOLUTION") {
+      const baseUrl = normalizeEvolutionBaseUrl();
+      const apiKey = getEvolutionApiKey();
+      if (!baseUrl) return json({ error: "EVOLUTION_BASE_URL não configurada." }, 500);
+      if (!apiKey) return json({ error: "EVOLUTION_API_KEY não configurada." }, 500);
+
+      const hook = webhookUrl();
+      const createRes = await createEvolutionInstance({
+        baseUrl,
+        apiKey,
+        instanceName: name,
+        phone,
+        webhook: hook,
+      });
+      console.log("📡 Evolution create response:", createRes.status, createRes.data);
+
+      if (!createRes.ok) {
+        return json({
+          error: "Failed to create Evolution instance",
+          status: createRes.status,
+          details: createRes.data,
+        }, createRes.status || 500);
+      }
+
+      const instanceApiKey = extractInstanceApiKey(createRes.data) ?? apiKey;
+      let qrcode = extractQrBase64(createRes.data);
+      let paircode = extractPairingCode(createRes.data);
+
+      // Ensure webhook is set (some Evolution versions ignore webhook on create)
+      try { await setEvolutionWebhook({ baseUrl, apiKey: instanceApiKey, instanceName: name, url: hook }); }
+      catch (_e) { /* non-fatal */ }
+
+      if (!qrcode) {
+        const conn = await connectEvolutionInstance({ baseUrl, apiKey: instanceApiKey, instanceName: name, phone });
+        console.log("📱 Evolution connect response:", conn.status, conn.data);
+        qrcode = extractQrBase64(conn.data) ?? qrcode;
+        paircode = extractPairingCode(conn.data) ?? paircode;
+      }
+
+      const instanceId = createRes.data?.instance?.instanceId
+        ?? createRes.data?.instance?.instanceName
+        ?? name;
+
+      return json({
+        success: true,
+        instance_id: instanceId,
+        instance_name: name,
+        token: instanceApiKey,
+        base_url: baseUrl,
+        environment: "EVOLUTION",
+        qrcode,
+        paircode,
+        webhook_configured: true,
       });
     }
 
-    const envUpper = environment?.toUpperCase();
+    // -------- Legacy UAZAPI paths (BTZAP / PROD / TESTE) --------
     let ADMIN_TOKEN: string | undefined;
     let BASE_URL: string | undefined;
     if (envUpper === "BTZAP") {
@@ -125,101 +147,42 @@ serve(async (req) => {
     }
 
     const normalizedBaseUrl = normalizeBaseUrl(BASE_URL);
+    if (!ADMIN_TOKEN?.trim()) return json({ error: "Token admin UAZAPI não configurado." }, 500);
+    if (!normalizedBaseUrl) return json({ error: "URL base da UAZAPI não configurada." }, 500);
 
-    if (!isConfiguredSecret(ADMIN_TOKEN)) {
-      return new Response(JSON.stringify({ error: "Token admin da UAZAPI não configurado para este ambiente." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    if (!normalizedBaseUrl) {
-      return new Response(JSON.stringify({ error: "URL base da UAZAPI não configurada para este ambiente." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    // Create instance
     const response = await fetch(`${normalizedBaseUrl}/instance/init`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "admintoken": ADMIN_TOKEN },
-      body: JSON.stringify({ name, nameInSystem: "marketflow" })
+      headers: { "Content-Type": "application/json", admintoken: ADMIN_TOKEN },
+      body: JSON.stringify({ name, nameInSystem: "marketflow" }),
     });
-
     const data = await response.json();
-    console.log("📡 UAZAPI response:", data);
-
-    if (!response.ok) {
-      return new Response(JSON.stringify({ error: "Failed to create instance", status: response.status, details: data }), {
-        status: response.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
+    if (!response.ok) return json({ error: "Failed to create instance", details: data }, response.status);
 
     const instanceId = data?.instance?.id;
     const token = data?.instance?.token;
+    if (!instanceId || !token) return json({ error: "Instance data incomplete", details: data }, 500);
 
-    if (!instanceId || !token) {
-      return new Response(JSON.stringify({ error: "Instance data incomplete", details: data }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
+    const webhookResult = await configureUazapiWebhook(normalizedBaseUrl, token);
 
-    // Auto-configure webhook immediately after instance creation
-    const webhookResult = await configureWebhook(normalizedBaseUrl, token);
-    console.log("🔧 Webhook auto-config result:", webhookResult);
-
-    // Connect to generate QR code
-    const connectBody: any = {};
-    if (phone) connectBody.phone = phone;
-
-    const connectResponse = await fetch(`${normalizedBaseUrl}/instance/connect`, {
+    const connectRes = await fetch(`${normalizedBaseUrl}/instance/connect`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "token": token },
-      body: JSON.stringify(connectBody)
+      headers: { "Content-Type": "application/json", token },
+      body: JSON.stringify(phone ? { phone } : {}),
     });
+    const connectData = await connectRes.json();
 
-    const connectData = await connectResponse.json();
-    console.log("📱 Connect response:", connectData);
-
-    if (!connectResponse.ok) {
-      return new Response(JSON.stringify({
-        success: true,
-        instance_id: instanceId,
-        token,
-        base_url: normalizedBaseUrl,
-        qrcode: null,
-        paircode: null,
-        webhook_configured: webhookResult.success,
-        connect_error: connectData?.error || "Failed to generate QR code"
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    const qrcode = connectData?.instance?.qrcode;
-    const paircode = connectData?.instance?.paircode;
-    console.log("✅ Instance created successfully:", instanceId);
-
-    return new Response(JSON.stringify({
+    return json({
       success: true,
       instance_id: instanceId,
       token,
       base_url: normalizedBaseUrl,
-      qrcode,
-      paircode,
-      webhook_configured: webhookResult.success
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      environment: envUpper,
+      qrcode: connectData?.instance?.qrcode ?? null,
+      paircode: connectData?.instance?.paircode ?? null,
+      webhook_configured: webhookResult.success,
     });
-
   } catch (err) {
     console.error("❌ Error creating instance:", err);
-    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : 'Unknown error' }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
+    return json({ error: err instanceof Error ? err.message : "Unknown error" }, 500);
   }
 });

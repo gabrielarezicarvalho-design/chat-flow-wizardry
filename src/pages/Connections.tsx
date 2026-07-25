@@ -78,7 +78,7 @@ const Connections = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    environment: 'PROD',
+    environment: 'EVOLUTION',
     token: '',
     instance_id: ''
   });
@@ -281,7 +281,9 @@ const Connections = () => {
               body: { 
                 token: connAny.token,
                 environment: connAny.environment || 'PROD',
-                base_url: connAny.base_url
+                base_url: connAny.base_url,
+                instance_id: connAny.instance_id,
+                instance_name: connection.instance_name || connAny.instance_id
               }
             });
 
@@ -615,7 +617,7 @@ const Connections = () => {
     setFormData({
       name: '',
       phone: '',
-      environment: 'PROD',
+      environment: 'EVOLUTION',
       token: '',
       instance_id: ''
     });
@@ -835,10 +837,11 @@ const Connections = () => {
     }
   };
 
-  const checkInstanceStatus = async (connectionId: string, token: string, environment: string, baseUrl?: string) => {
+  const checkInstanceStatus = async (connectionId: string, token: string, environment: string, baseUrl?: string, instanceName?: string) => {
     try {
+      const conn = connections.find(c => c.id === connectionId) as any;
       const { data, error } = await supabase.functions.invoke('wa-status-instance', {
-        body: { token, environment, base_url: baseUrl }
+        body: { token, environment, base_url: baseUrl, instance_id: conn?.instance_id, instance_name: instanceName || conn?.instance_name || conn?.instance_id }
       });
 
       if (error) throw error;
@@ -1194,7 +1197,9 @@ const Connections = () => {
         body: {
           token: connection.token,
           environment: connection.environment || 'TESTE',
-          base_url: connection.base_url
+          base_url: connection.base_url,
+          instance_id: connection.instance_id,
+          instance_name: connection.instance_name || connection.instance_id
         }
       });
 
@@ -3118,7 +3123,20 @@ const Connections = () => {
 
                 <div>
                   <Label className="mb-3 block">Servidor</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div
+                      onClick={() => setFormData({ ...formData, environment: 'EVOLUTION' })}
+                      className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
+                        formData.environment === 'EVOLUTION'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <p className={`text-sm font-medium ${formData.environment === 'EVOLUTION' ? 'text-primary' : ''}`}>
+                        Evolution API
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Recomendado</p>
+                    </div>
                     <div
                       onClick={() => setFormData({ ...formData, environment: 'PROD' })}
                       className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${

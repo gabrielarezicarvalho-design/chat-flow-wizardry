@@ -1,137 +1,98 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import {
+  evolutionConnectionState,
+  getEvolutionApiKey,
+  normalizeEvolutionBaseUrl,
+} from "../_shared/evolution.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { token, environment, base_url } = await req.json();
+    const { token, environment, base_url, instance_name, instance_id } = await req.json();
+    const envUpper = (environment ?? "EVOLUTION").toUpperCase();
 
-    // Validação robusta do token
-    if (!token || token.trim() === "") {
-      console.error("Token ausente ou vazio");
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: "Token da instância ausente ou inválido" 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+    // -------- EVOLUTION --------
+    if (envUpper === "EVOLUTION") {
+      const baseUrl = normalizeEvolutionBaseUrl(base_url);
+      const apiKey = (token && String(token).trim()) || getEvolutionApiKey();
+      if (!baseUrl || !apiKey) {
+        return json({ success: false, connected: false, status: "unconfigured", error: "Evolution não configurado" });
+      }
+      const name = instance_name || instance_id || token;
+      if (!name) return json({ success: false, connected: false, status: "unknown", error: "instance_name obrigatório" }, 400);
+
+      const res = await evolutionConnectionState({ baseUrl, apiKey, instanceName: String(name) });
+      if (!res.ok) {
+        const isDeleted = res.status === 404;
+        return json({
+          success: false,
+          connected: false,
+          instanceDeleted: isDeleted,
+          status: isDeleted ? "deleted" : "unreachable",
+          error: "Evolution status error",
+          details: res.data,
+        });
+      }
+      const state = res.data?.instance?.state ?? res.data?.state ?? "unknown";
+      const connected = state === "open";
+      return json({
+        success: true,
+        connected,
+        status: connected ? "connected" : state,
+        message: connected ? "Instância conectada com sucesso!" : "Aguardando conexão...",
       });
     }
 
-    // Use provided base_url if available, otherwise fall back to environment-based secrets
+    // -------- Legacy UAZAPI --------
+    if (!token || String(token).trim() === "") {
+      return json({ success: false, error: "Token da instância ausente ou inválido" }, 400);
+    }
     let BASE_URL = base_url;
     if (!BASE_URL) {
-      const envUpper = environment?.toUpperCase();
-      if (envUpper === "BTZAP") {
-        BASE_URL = Deno.env.get("UZAPI_BASE_URL_BTZAP") || "https://server.btzap.com.br";
-      } else if (envUpper === "PROD") {
-        BASE_URL = Deno.env.get("UZAPI_BASE_URL_PROD");
-      } else {
-        BASE_URL = Deno.env.get("UZAPI_BASE_URL_TESTE");
-      }
+      if (envUpper === "BTZAP") BASE_URL = Deno.env.get("UZAPI_BASE_URL_BTZAP") || "https://server.btzap.com.br";
+      else if (envUpper === "PROD") BASE_URL = Deno.env.get("UZAPI_BASE_URL_PROD");
+      else BASE_URL = Deno.env.get("UZAPI_BASE_URL_TESTE");
     }
-
-    if (!BASE_URL) {
-      console.error("BASE_URL not configured for environment:", environment);
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: "BASE_URL not configured" 
-      }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    console.log(`Checking instance status from ${BASE_URL}/instance/status`);
-    console.log(`Using token: ${token.substring(0, 8)}...`);
+    if (!BASE_URL) return json({ success: false, error: "BASE_URL not configured" }, 500);
 
     const response = await fetch(`${BASE_URL}/instance/status`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "token": token
-      }
+      headers: { "Content-Type": "application/json", token },
     });
-
     const responseText = await response.text();
-    console.log("UAZAPI response status:", response.status);
-    console.log("UAZAPI raw response:", responseText);
-
-    let result;
-    try {
-      result = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error("Non-JSON response from UAZAPI (likely HTML error page). Status:", response.status);
-      // Return 200 with disconnected state so client polling doesn't blow up
-      return new Response(JSON.stringify({
-        success: false,
-        connected: false,
-        status: "unreachable",
-        error: "UAZAPI server returned non-JSON response",
-        upstreamStatus: response.status
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+    let result: any;
+    try { result = JSON.parse(responseText); } catch {
+      return json({ success: false, connected: false, status: "unreachable", error: "UAZAPI server returned non-JSON response", upstreamStatus: response.status });
     }
-
-
     if (!response.ok) {
-      console.error("UZAPI status error:", result);
-      
-      // Check if instance was deleted (500 with specific error message)
-      const errorMessage = (result?.error || '').toLowerCase();
-      const instanceDeleted = response.status === 500 && 
-        (errorMessage.includes('instance details') || 
-         errorMessage.includes('instance not found') ||
-         errorMessage.includes('not found'));
-      
-      console.log("Instance deleted check:", instanceDeleted, "- Error message:", errorMessage);
-      
-      // Return 200 with instanceDeleted flag so frontend can handle it properly
-      return new Response(JSON.stringify({
-        success: false,
-        connected: false,
-        instanceDeleted,
-        error: "Failed to fetch instance status",
-        details: result,
-        originalStatus: response.status
-      }), {
-        status: 200, // Return 200 so Supabase client doesn't throw
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+      const errorMessage = (result?.error || "").toLowerCase();
+      const instanceDeleted = response.status === 500 &&
+        (errorMessage.includes("instance details") || errorMessage.includes("instance not found") || errorMessage.includes("not found"));
+      return json({ success: false, connected: false, instanceDeleted, error: "Failed to fetch instance status", details: result, originalStatus: response.status });
     }
-
     const status = result?.instance?.status || "unknown";
     const connected = status === "connected";
-    console.log("Instance status:", status, "- Connected:", connected);
-
-    return new Response(JSON.stringify({
+    return json({
       success: true,
       connected,
       status,
-      message: connected
-        ? "Instância conectada com sucesso!"
-        : "Aguardando conexão..."
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      message: connected ? "Instância conectada com sucesso!" : "Aguardando conexão...",
     });
-
   } catch (err) {
     console.error("Error checking instance status:", err);
-    return new Response(JSON.stringify({ 
-      success: false,
-      error: err instanceof Error ? err.message : "Unknown error" 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
+    return json({ success: false, error: err instanceof Error ? err.message : "Unknown error" }, 500);
   }
 });
