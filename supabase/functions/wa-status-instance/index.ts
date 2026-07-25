@@ -31,7 +31,7 @@ serve(async (req) => {
       if (!baseUrl || !apiKey) {
         return json({ success: false, connected: false, status: "unconfigured", error: "Evolution não configurado" });
       }
-      const name = instance_name || token; // when caller passes instance name in `instance_name`
+      const name = instance_name || instance_id || token;
       if (!name) return json({ success: false, connected: false, status: "unknown", error: "instance_name obrigatório" }, 400);
 
       const res = await evolutionConnectionState({ baseUrl, apiKey, instanceName: String(name) });
