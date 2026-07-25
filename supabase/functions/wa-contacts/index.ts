@@ -187,8 +187,18 @@ serve(async (req) => {
     if (action === "list") {
       if (isEvo && evoCreds) {
         const r = await evolutionFindContacts(evoCreds);
+        const all = normalizeContactsPayload(r.data);
+        const filtered = all
+          .filter((c: any) =>
+            isIndividualJid(c.remoteJid || c.jid || c.id || c.number || ""),
+          )
+          .map((c: any) => ({
+            ...c,
+            phone: extractPhoneFromJid(c.remoteJid || c.jid || c.id || c.number || ""),
+            name: c.pushName || c.name || c.notify || c.contact_name || "",
+          }));
         return new Response(
-          JSON.stringify({ success: r.ok, contacts: normalizeContactsPayload(r.data) }),
+          JSON.stringify({ success: r.ok, contacts: filtered }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
