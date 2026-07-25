@@ -281,7 +281,9 @@ const Connections = () => {
               body: { 
                 token: connAny.token,
                 environment: connAny.environment || 'PROD',
-                base_url: connAny.base_url
+                base_url: connAny.base_url,
+                instance_id: connAny.instance_id,
+                instance_name: connection.instance_name || connAny.instance_id
               }
             });
 
