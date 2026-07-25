@@ -78,7 +78,7 @@ const Connections = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    environment: 'PROD',
+    environment: 'EVOLUTION',
     token: '',
     instance_id: ''
   });
@@ -615,7 +615,7 @@ const Connections = () => {
     setFormData({
       name: '',
       phone: '',
-      environment: 'PROD',
+      environment: 'EVOLUTION',
       token: '',
       instance_id: ''
     });
