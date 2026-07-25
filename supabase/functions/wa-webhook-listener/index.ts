@@ -2047,7 +2047,7 @@ async function executeMessageNode(
         };
       }
     } else {
-      console.error("❌ UZAPI retornou erro:", JSON.stringify(sendResult));
+      console.error("❌ Evolution retornou erro:", JSON.stringify(sendResult));
     }
   } catch (error: any) {
     console.error("❌ Erro ao enviar mensagem:", error.message);
@@ -2452,7 +2452,7 @@ serve(async (req) => {
   try {
     const payload = await req.json();
     console.log("=".repeat(80));
-    console.log("📩 WEBHOOK UZAPI → MARKETFLOW");
+    console.log("📩 WEBHOOK Evolution → MARKETFLOW");
     console.log("⏰ Timestamp:", new Date().toISOString());
     console.log("=".repeat(80));
     console.log("📦 Payload:", JSON.stringify(payload, null, 2));
@@ -2463,7 +2463,7 @@ serve(async (req) => {
     );
 
     // ========================================
-    // NORMALIZAÇÃO - FORMATO UZAPI
+    // NORMALIZAÇÃO - FORMATO Evolution
     // ========================================
     let telefone = "";
     let mensagem = "";
@@ -2539,7 +2539,7 @@ serve(async (req) => {
       console.log("📋 FORMATO: Evolution API v2 (payload.data)");
       console.log(`📱 remoteJid: ${jid}, senderPn: ${key.senderPn || d.senderPn}, messageType: ${rawMessageType} -> tipo: ${tipo}`);
     }
-    // FORMATO UZAPI: Dados dentro de payload.message
+    // FORMATO Evolution: Dados dentro de payload.message
     else if (payload.message && typeof payload.message === "object") {
       const msg = payload.message;
       // IMPORTANTE: Preferir sender_pn (número real) sobre sender (que pode ser LID do Facebook/Instagram)
@@ -2575,7 +2575,7 @@ serve(async (req) => {
       isFromMe = msg.fromMe === true;
       instanceToken = payload.token || "";
       
-      console.log("📋 FORMATO: payload.message (UZAPI padrão)");
+      console.log("📋 FORMATO: payload.message (Evolution padrão)");
       console.log(`📱 sender_pn: ${msg.sender_pn}, sender: ${msg.sender}, chatid: ${msg.chatid}`);
       console.log(`📎 messageType: ${rawMessageType}, mediaType: ${rawMediaType}, type: ${rawType} -> tipo: ${tipo}`);
     }
@@ -3973,7 +3973,7 @@ ${safeTelegramText}`;
       console.error("⚠️ Erro ao processar pesquisa de satisfação:", surveyError.message);
     }
 
-    // Campaign response tracking removed - not working with UZAPI
+    // Campaign response tracking removed - not working with Evolution
 
     // ========================================
     // VERIFICAR ESTADO PENDENTE DO FLUXO

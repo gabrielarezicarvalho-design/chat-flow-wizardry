@@ -62,9 +62,9 @@ serve(async (req) => {
     }
     let BASE_URL = base_url;
     if (!BASE_URL) {
-      if (envUpper === "BTZAP") BASE_URL = Deno.env.get("UZAPI_BASE_URL_BTZAP") || "https://server.btzap.com.br";
-      else if (envUpper === "PROD") BASE_URL = Deno.env.get("UZAPI_BASE_URL_PROD");
-      else BASE_URL = Deno.env.get("UZAPI_BASE_URL_TESTE");
+      if (envUpper === "BTZAP") BASE_URL = Deno.env.get("Evolution_BASE_URL_BTZAP") || "https://server.btzap.com.br";
+      else if (envUpper === "PROD") BASE_URL = Deno.env.get("Evolution_BASE_URL_PROD");
+      else BASE_URL = Deno.env.get("Evolution_BASE_URL_TESTE");
     }
     if (!BASE_URL) return json({ success: false, error: "BASE_URL not configured" }, 500);
 

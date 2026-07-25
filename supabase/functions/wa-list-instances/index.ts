@@ -49,14 +49,14 @@ serve(async (req) => {
       providerLabel = envUpper;
       let ADMIN_TOKEN: string | undefined;
       if (envUpper === "BTZAP") {
-        ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_BTZAP");
-        BASE_URL = Deno.env.get("UZAPI_BASE_URL_BTZAP") || "https://server.btzap.com.br";
+        ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_BTZAP");
+        BASE_URL = Deno.env.get("Evolution_BASE_URL_BTZAP") || "https://server.btzap.com.br";
       } else if (envUpper === "PROD") {
-        ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_PROD");
-        BASE_URL = Deno.env.get("UZAPI_BASE_URL_PROD") || "";
+        ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_PROD");
+        BASE_URL = Deno.env.get("Evolution_BASE_URL_PROD") || "";
       } else {
-        ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_TESTE");
-        BASE_URL = Deno.env.get("UZAPI_BASE_URL_TESTE") || "";
+        ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_TESTE");
+        BASE_URL = Deno.env.get("Evolution_BASE_URL_TESTE") || "";
       }
       if (!ADMIN_TOKEN || !BASE_URL) {
         return new Response(

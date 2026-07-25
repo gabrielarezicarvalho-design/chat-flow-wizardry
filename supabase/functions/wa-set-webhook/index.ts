@@ -161,7 +161,7 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    console.log("🔧 CONFIGURANDO WEBHOOK UZAPI → MARKETFLOW");
+    console.log("🔧 CONFIGURANDO WEBHOOK Evolution → MARKETFLOW");
     console.log("  Instance ID:", instance_id, " Base URL:", base_url);
 
     if (!instance_id || !base_url || !token) {
@@ -187,7 +187,7 @@ serve(async (req) => {
         const fullUrl = `${base_url}${endpoint}`;
         console.log(`🔄 Tentativa: ${method} ${fullUrl}`);
         
-        // Corpo da requisição para UZAPI - TODOS OS EVENTOS
+        // Corpo da requisição para Evolution - TODOS OS EVENTOS
         const allEvents = [
           // Mensagens
           "messages",
@@ -278,7 +278,7 @@ serve(async (req) => {
         };
 
         if (response.ok) {
-          // UZAPI pode retornar array
+          // Evolution pode retornar array
           const webhookData = Array.isArray(result) ? result[0] : result;
 
           console.log("=".repeat(80));

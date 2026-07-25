@@ -44,7 +44,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error(`UZAPI error: ${response.status} - ${error}`);
+      console.error(`Evolution error: ${response.status} - ${error}`);
       return new Response(
         JSON.stringify({ error: 'Failed to send message', details: error }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
