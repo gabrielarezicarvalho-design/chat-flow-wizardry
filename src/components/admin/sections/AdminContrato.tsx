@@ -120,7 +120,7 @@ export function AdminContrato() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Contrato UZAPI</h1>
+          <h1 className="text-2xl font-bold text-white">Contrato Evolution</h1>
           <p className="text-slate-400">Gerenciar conexões WhatsApp do seu pacote</p>
         </div>
         <div className="flex items-center gap-3">
@@ -269,7 +269,7 @@ export function AdminContrato() {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="bg-slate-900 border-white/10 text-white max-w-lg">
           <DialogHeader>
-            <DialogTitle>Configurar Contrato UZAPI</DialogTitle>
+            <DialogTitle>Configurar Contrato Evolution</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">

@@ -52,7 +52,7 @@ const TestWebhook = () => {
       <div>
         <h1 className="text-3xl font-bold text-foreground">Testar Webhook</h1>
         <p className="text-muted-foreground mt-1">
-          Simule o recebimento de mensagens via webhook UAZAPI
+          Simule o recebimento de mensagens via webhook Evolution
         </p>
       </div>
 

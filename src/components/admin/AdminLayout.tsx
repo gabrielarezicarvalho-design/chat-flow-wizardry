@@ -20,7 +20,7 @@ interface AdminLayoutProps {
 
 const menuItems = [
   { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", description: "Visão geral" },
-  { id: "contrato", icon: FileText, label: "Contrato UZAPI", description: "Conexões WhatsApp" },
+  { id: "contrato", icon: FileText, label: "Contrato Evolution", description: "Conexões WhatsApp" },
   { id: "empresas", icon: Building2, label: "Empresas", description: "Clientes" },
   
   { id: "usuarios", icon: Users, label: "Usuários Internos", description: "Equipe MarketFlow" },

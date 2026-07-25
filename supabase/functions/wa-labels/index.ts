@@ -96,7 +96,7 @@ serve(async (req) => {
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      // Legacy UZAPI: try multiple endpoints
+      // Legacy: try multiple endpoints
       for (const url of [`${baseUrl}/labels`, `${baseUrl}/label/list`, `${baseUrl}/misc/getLabels`]) {
         try {
           const r = await fetch(url, { headers: { Accept: "application/json", token: instanceToken } });
@@ -143,7 +143,7 @@ serve(async (req) => {
         });
       }
 
-      // Legacy UZAPI create
+      // Legacy create
       for (const ep of [
         { url: `${baseUrl}/label/create`, body: { name: labelName, color: labelColor || 1 } },
         { url: `${baseUrl}/misc/createLabel`, body: { name: labelName, labelColor: labelColor || 1 } },
@@ -257,7 +257,7 @@ serve(async (req) => {
         });
       }
 
-      // Legacy UZAPI: keep prior behaviour (name-based)
+      // Legacy: keep prior behaviour (name-based)
       const r = await fetch(`${baseUrl}/label/addChat`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json", token: instanceToken },

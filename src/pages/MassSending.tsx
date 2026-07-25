@@ -326,7 +326,7 @@ function MassSendingContent() {
     };
   }, []);
 
-  // Poll UAZAPI folder status for queued campaigns
+  // Poll Evolution folder status for queued campaigns
   useEffect(() => {
     const queuedCampaigns = campaigns.filter(c => c.status === "queued" && (c as any).folder_id);
     if (queuedCampaigns.length === 0) return;
@@ -348,7 +348,7 @@ function MassSendingContent() {
           if (data?.progress) {
             const { sent, failed, pending, total, completed, folderGone } = data.progress;
             
-            // If folder is gone (404), UAZAPI already processed all messages
+            // If folder is gone (404), Evolution already processed all messages
             // Don't overwrite sent_count with 0 - keep the existing value from the campaign
             if (folderGone) {
               const updates: any = {
@@ -692,8 +692,8 @@ function MassSendingContent() {
       
       let finalMessage = msg;
       let menuChoices: string[] = [];
-      // UZAPI menu types: buttons, list, carousel
-      let uzapiMenuType = interactiveType;
+      // Evolution menu types: buttons, list, carousel
+      let evoMenuType = interactiveType;
       
       if (useMenuEndpoint) {
         if (interactiveType === "buttons") {
@@ -725,7 +725,7 @@ function MassSendingContent() {
           addLog("info", `Preparando carrossel com ${carouselCards.length} cards`);
         } else if (interactiveType === "poll") {
           // Format for poll: ["Opção 1", "Opção 2", ...]
-          uzapiMenuType = "poll";
+          evoMenuType = "poll";
           finalMessage = pollQuestion; // Use poll question as the message text
           menuChoices = pollOptions.filter(o => o.text.trim()).map(o => o.text);
           addLog("info", `Preparando enquete com ${menuChoices.length} opções`);
@@ -793,7 +793,7 @@ function MassSendingContent() {
       if (useMenuEndpoint) {
         const isCarousel = interactiveType === "carousel";
         addLog("info", isCarousel
-          ? `Enviando menu interativo (tipo: ${uzapiMenuType})...`
+          ? `Enviando menu interativo (tipo: ${evoMenuType})...`
           : `Enviando campanha interativa em modo fila (tipo: ${interactiveType})...`
         );
 
@@ -805,7 +805,7 @@ function MassSendingContent() {
             action: "menu",
             connectionId: connId,
             numbers: nums,
-            menuType: uzapiMenuType,
+            menuType: evoMenuType,
             text: finalMessage,
             delayMin: delayInterval,
             delayMax: delayInterval + 5,
@@ -906,7 +906,7 @@ function MassSendingContent() {
             return;
           }
 
-          addLog("error", `Erro UAZAPI: ${data.error || JSON.stringify(data)}`);
+          addLog("error", `Erro Evolution: ${data.error || JSON.stringify(data)}`);
           throw new Error(data.error || "Erro ao enviar campanha");
         }
 
@@ -1000,7 +1000,7 @@ function MassSendingContent() {
           addLog("success", `Campanha finalizada: ${sentCount} enviados, ${failedCount} falhas`);
         }
       } else {
-        addLog("info", "Enviando mensagem simples via UZAPI...");
+        addLog("info", "Enviando mensagem simples via Evolution...");
         addLog("info", `ViewOnce ativo: ${viewOnce}`);
         // Use simple endpoint for regular messages
         const { data, error } = await supabase.functions.invoke("wa-sender", {
@@ -1042,7 +1042,7 @@ function MassSendingContent() {
             setSending(false);
             return;
           }
-          addLog("error", `Erro UZAPI: ${data.error}`);
+          addLog("error", `Erro Evolution: ${data.error}`);
           // Update campaign as failed
           await supabase.from("campaigns").update({
             status: "failed",
@@ -1208,14 +1208,14 @@ function MassSendingContent() {
         throw new Error("Nenhum contato na campanha");
       }
       
-      // Build messages for UZAPI
+      // Build messages for Evolution
       const campaignMessages = campaignContacts.map((contact: string) => ({
         number: contact.replace("@s.whatsapp.net", "").replace(/\D/g, ""),
         type: "text",
         text: campaign.message_content || ""
       }));
       
-      // Send via UZAPI
+      // Send via Evolution
       const response = await fetch(`${connection.base_url}/sender/advanced`, {
         method: "POST",
         headers: {
@@ -1543,7 +1543,7 @@ function MassSendingContent() {
     }
   };
 
-  // Control campaign via UZAPI (stop, continue, delete)
+  // Control campaign via Evolution (stop, continue, delete)
   const controlCampaign = async (campaignId: string, action: "stop" | "continue" | "delete") => {
     setControllingCampaign(campaignId);
     
@@ -2065,7 +2065,7 @@ function MassSendingContent() {
 
                 {/* Interactive Type Selection */}
                 <div>
-                  <Label className="text-base">Menu Interativo (UZAPI)</Label>
+                  <Label className="text-base">Menu Interativo (Evolution)</Label>
                   <p className="text-xs text-muted-foreground mb-3">Envie botões, listas ou carrossel interativo</p>
                   <div className="space-y-2">
                     {/* First row: Nenhum, Botões, Lista */}

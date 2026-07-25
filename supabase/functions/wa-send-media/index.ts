@@ -157,7 +157,7 @@ serve(async (req) => {
       });
     }
 
-    // ---------- Legacy UAZAPI branch ----------
+    // ---------- Legacy Evolution branch ----------
     if (!token || !base_url) {
       return new Response(JSON.stringify({
         success: false,
@@ -174,7 +174,7 @@ serve(async (req) => {
 
     switch (type) {
       case "text":
-        // UZAPI: POST /send/text
+        // Evolution: POST /send/text
         endpoint = `${base_url}/send/text`;
         body.text = text || caption;
         break;
@@ -183,17 +183,17 @@ serve(async (req) => {
       case "video":
       case "audio":
       case "document":
-        // UZAPI: POST /send/media
+        // Evolution: POST /send/media
         endpoint = `${base_url}/send/media`;
         body.type = type;
         body.file = file;
-        // UZAPI uses 'text' as caption for media, not 'caption'
+        // Evolution uses 'text' as caption for media, not 'caption'
         if (caption) body.text = caption;
         if (type === "document" && docName) body.docName = docName;
         break;
 
       case "button":
-        // UZAPI: POST /send/menu with type: button
+        // Evolution: POST /send/menu with type: button
         endpoint = `${base_url}/send/menu`;
         body.type = "button";
         body.text = text;
@@ -203,7 +203,7 @@ serve(async (req) => {
         break;
 
       case "list":
-        // UZAPI: POST /send/menu with type: list
+        // Evolution: POST /send/menu with type: list
         endpoint = `${base_url}/send/menu`;
         body.type = "list";
         body.text = text;
@@ -213,7 +213,7 @@ serve(async (req) => {
         break;
 
       case "poll":
-        // UZAPI: POST /send/menu with type: poll
+        // Evolution: POST /send/menu with type: poll
         endpoint = `${base_url}/send/menu`;
         body.type = "poll";
         body.text = text;
@@ -222,7 +222,7 @@ serve(async (req) => {
         break;
 
       case "carousel":
-        // UZAPI: POST /send/carousel (structured format)
+        // Evolution: POST /send/carousel (structured format)
         endpoint = `${base_url}/send/carousel`;
         body.text = text;
         body.carousel = carousel;
@@ -259,7 +259,7 @@ serve(async (req) => {
     });
 
     const responseText = await response.text();
-    console.log("[wa-send-media] UAZAPI response:", responseText);
+    console.log("[wa-send-media] Evolution response:", responseText);
 
     let result;
     try {

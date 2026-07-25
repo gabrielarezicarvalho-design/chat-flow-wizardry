@@ -71,7 +71,7 @@ export function ApiTester({ connections }: ApiTesterProps) {
   const [menuText, setMenuText] = useState("Selecione uma opção:");
   const [footerText, setFooterText] = useState("");
   const [buttonImageUrl, setButtonImageUrl] = useState("");
-  // UZAPI button format: "texto|id" or "texto|copy:codigo" or "texto|call:numero" or "texto|url"
+  // Evolution button format: "texto|id" or "texto|copy:codigo" or "texto|call:numero" or "texto|url"
   const [buttonChoices, setButtonChoices] = useState<{ label: string; action: string; type: "REPLY" | "URL" | "COPY" | "CALL" }[]>([
     { label: "Opção 1", action: "opcao_1", type: "REPLY" },
     { label: "Opção 2", action: "opcao_2", type: "REPLY" }
@@ -169,14 +169,14 @@ export function ApiTester({ connections }: ApiTesterProps) {
         case "document":
           payload.type = testAction;
           payload.media = mediaUrl;
-          payload.text = mediaCaption; // UZAPI uses 'text' for caption
+          payload.text = mediaCaption; // Evolution uses 'text' for caption
           if (testAction === "document") {
             payload.docName = docName;
           }
           break;
 
         case "button":
-          // UZAPI: type "button" with choices array
+          // Evolution: type "button" with choices array
           // Format based on type: "texto|id", "texto|copy:codigo", "texto|call:numero", "texto|https://url"
           payload.type = "button";
           payload.text = menuText;
@@ -200,7 +200,7 @@ export function ApiTester({ connections }: ApiTesterProps) {
           break;
 
         case "list":
-          // UZAPI: type "list" with choices array
+          // Evolution: type "list" with choices array
           // Format: "[Titulo Seção]", "titulo|id|descrição"
           payload.type = "list";
           payload.text = menuText;
@@ -218,7 +218,7 @@ export function ApiTester({ connections }: ApiTesterProps) {
           break;
 
         case "poll":
-          // UZAPI: type "poll" with choices array
+          // Evolution: type "poll" with choices array
           payload.type = "poll";
           payload.text = menuText;
           payload.choices = pollOptions.filter(o => o.trim());
@@ -226,7 +226,7 @@ export function ApiTester({ connections }: ApiTesterProps) {
           break;
 
         case "carousel":
-          // UZAPI: /send/carousel with carousel array
+          // Evolution: /send/carousel with carousel array
           payload.type = "carousel";
           payload.text = menuText;
           payload.carousel = carouselCards
@@ -370,7 +370,7 @@ export function ApiTester({ connections }: ApiTesterProps) {
         <div className="flex items-center gap-2 mb-5">
           <Terminal className="w-5 h-5 text-primary" />
           <h3 className="font-semibold">API Tester</h3>
-          <Badge variant="outline" className="ml-auto">UZAPI Format</Badge>
+          <Badge variant="outline" className="ml-auto">Evolution Format</Badge>
         </div>
 
         <div className="space-y-4">

@@ -74,8 +74,8 @@ serve(async (req) => {
     if (action === "refresh" && connection.token) {
       const BASE_URL = connection.base_url || 
         (connection.environment?.toUpperCase() === "PROD" 
-          ? "https://app.uazapi.com" 
-          : "https://free.uazapi.com");
+          ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+          : (Deno.env.get("EVOLUTION_BASE_URL") ?? ""));
 
       console.log(`Generating QR code from ${BASE_URL}/instance/connect`);
 

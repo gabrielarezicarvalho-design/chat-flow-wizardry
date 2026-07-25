@@ -25,7 +25,7 @@ serve(async (req) => {
       );
     }
 
-    const finalBaseUrl = baseUrl || 'https://free.uazapi.com';
+    const finalBaseUrl = baseUrl || (Deno.env.get('EVOLUTION_BASE_URL') ?? '');
     const sendUrl = `${finalBaseUrl}/instances/${instanceId}/send-text`;
 
     console.log(`Sending message to ${to} via instance ${instanceId}`);
@@ -44,7 +44,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error(`UZAPI error: ${response.status} - ${error}`);
+      console.error(`Evolution error: ${response.status} - ${error}`);
       return new Response(
         JSON.stringify({ error: 'Failed to send message', details: error }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -43,9 +43,9 @@ serve(async (req) => {
       return json({ success: true, message: "Instance disconnected successfully", data: res.data });
     }
 
-    // -------- Legacy UAZAPI --------
+    // -------- Legacy Evolution --------
     if (!token) return json({ error: "Missing instance token" }, 400);
-    const BASE_URL = base_url || "https://marketflowchat.uazapi.com";
+    const BASE_URL = base_url || (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
     const response = await fetch(`${BASE_URL}/instance/disconnect`, {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json", token },

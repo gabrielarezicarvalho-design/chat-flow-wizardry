@@ -1255,11 +1255,11 @@ ${asaasContext}`;
     let BASE_URL = connectionBaseUrl;
     if (!BASE_URL) {
       BASE_URL = connectionEnvironment === "PROD" 
-        ? "https://app.uazapi.com" 
-        : "https://free.uazapi.com";
+        ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+        : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
     }
 
-    // Detect Evolution connection to route sends to Evolution API v2 instead of UAZAPI.
+    // Detect Evolution connection to route sends to Evolution API v2 instead of Evolution.
     const evoConnLike = {
       environment: connectionEnvironment,
       base_url: connectionBaseUrl,
@@ -1271,7 +1271,7 @@ ${asaasContext}`;
     if (useEvolution && !evoCreds) {
       console.error("❌ Evolution connection sem base_url/token/instance_name — envio não vai funcionar");
     }
-    console.log("   Provider envio:", useEvolution ? "Evolution API v2" : "UAZAPI");
+    console.log("   Provider envio:", useEvolution ? "Evolution API v2" : "Evolution");
 
     // Unified WhatsApp send helpers. Return { ok, status, data }.
     const okShape = (ok: boolean, status = ok ? 200 : 500, data: any = null) => ({ ok, status, data });

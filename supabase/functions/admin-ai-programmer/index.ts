@@ -285,7 +285,7 @@ REGRAS IMPORTANTES PARA OS BLOCOS DE CORREÇÃO:
 CONHECIMENTO DA ARQUITETURA:
 - Frontend: React + TypeScript + Tailwind + Shadcn UI
 - Backend: Supabase (PostgreSQL + Edge Functions + Auth + Storage)
-- WhatsApp: UZAPI (QR Code) e Meta Business API
+- WhatsApp: Evolution API v2 e Meta Business API
 - IA: OpenAI GPT-4o ou Google Gemini (chaves por empresa na tabela settings)
 - Fluxos: Motor de execução em wa-webhook-listener que processa nós (start, message, menu, input, aiAgent, condition, forward, etc)
 - Conversas: Tabela conversations com campo attendance_type (ura/ai/agent) e flow_state (JSON com estado do fluxo)

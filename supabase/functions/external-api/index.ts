@@ -316,7 +316,7 @@ Deno.serve(async (req) => {
             responseData = { error: 'No active connection found' }
             statusCode = 404
           } else {
-            // Send via UAZAPI
+            // Send via Evolution
             const sendUrl = `${connection.base_url}/sendText`
             const sendRes = await fetch(sendUrl, {
               method: 'POST',

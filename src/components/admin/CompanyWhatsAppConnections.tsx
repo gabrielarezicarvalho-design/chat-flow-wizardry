@@ -335,7 +335,7 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
                 <div>
                   <h2 className="text-lg font-semibold text-white">WhatsApp</h2>
                   <p className="text-sm text-slate-400">
-                    Provedor: {connection.provider === "meta" ? "API Oficial Meta (Cloud API)" : "QR Code (Z-API/UAzapi)"}
+                    Provedor: {connection.provider === "meta" ? "API Oficial Meta (Cloud API)" : "Evolution API"}
                   </p>
                 </div>
               </div>
@@ -465,7 +465,7 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
                 <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${provider === "qr" ? "border-emerald-500/50 bg-emerald-500/10" : "border-white/10 bg-white/5 hover:bg-white/10"}`}>
                   <RadioGroupItem value="qr" />
                   <div>
-                    <p className="font-medium text-white">QR Code (Z-API/UAzapi)</p>
+                    <p className="font-medium text-white">Evolution API</p>
                     <p className="text-xs text-slate-400">Conexão via escaneamento de QR Code</p>
                   </div>
                 </label>

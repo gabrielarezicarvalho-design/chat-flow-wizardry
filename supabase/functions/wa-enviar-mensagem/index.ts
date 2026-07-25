@@ -22,7 +22,7 @@ serve(async (req) => {
       });
     }
 
-    const sendUrl = `${baseUrl || "https://free.uazapi.com"}/instances/${instanceId}/messages/text/${token}`;
+    const sendUrl = `${baseUrl || (Deno.env.get("EVOLUTION_BASE_URL") ?? "")}/instances/${instanceId}/messages/text/${token}`;
     
     const response = await fetch(sendUrl, {
       method: "POST",

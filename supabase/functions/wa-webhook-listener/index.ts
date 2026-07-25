@@ -308,8 +308,8 @@ async function executeInputNode(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
 
   // Send prompt message
@@ -389,8 +389,8 @@ async function executeSmartFormNode(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
 
   try {
@@ -547,8 +547,8 @@ async function executeSendFormNode(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
 
   try {
@@ -694,8 +694,8 @@ async function executeFormNode(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
 
   try {
@@ -810,8 +810,8 @@ async function handleFlowResume(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
 
   // Handle INPUT node response
@@ -1776,8 +1776,8 @@ async function executeMessageNode(
   if (!BASE_URL) {
     const environment = connection.environment || "TESTE";
     BASE_URL = environment === "PROD" 
-      ? "https://app.uazapi.com" 
-      : "https://free.uazapi.com";
+      ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+      : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
   }
   
   console.log(`🌐 BASE_URL: ${BASE_URL}`);
@@ -1815,7 +1815,7 @@ async function executeMessageNode(
         break;
 
       case "buttons":
-        // UAZAPI não suporta botões interativos - enviar como texto formatado com opções
+        // Evolution não suporta botões interativos - enviar como texto formatado com opções
         const buttonOptions = (data.buttons || []).slice(0, 10);
         if (buttonOptions.length === 0) {
           console.log("⚠️ Nenhum botão configurado, enviando como texto simples");
@@ -1840,7 +1840,7 @@ async function executeMessageNode(
         break;
 
       case "list":
-        // UAZAPI /send/menu com type="list"
+        // Evolution /send/menu com type="list"
         const listOptions = (data.listItems || []).slice(0, 10);
         if (listOptions.length === 0) {
           console.log("⚠️ Nenhum item na lista, enviando como texto simples");
@@ -1957,13 +1957,13 @@ async function executeMessageNode(
 
     // Read the response as text first, then try to parse as JSON
     const responseText = await sendResponse.text();
-    console.log("📨 Resposta UAZAPI (raw):", responseText.substring(0, 200));
+    console.log("📨 Resposta Evolution (raw):", responseText.substring(0, 200));
 
     let sendResult: any = {};
     try {
       sendResult = JSON.parse(responseText);
     } catch {
-      console.log("⚠️ Resposta UAZAPI não é JSON válido");
+      console.log("⚠️ Resposta Evolution não é JSON válido");
       sendResult = { raw: responseText };
     }
 
@@ -2047,7 +2047,7 @@ async function executeMessageNode(
         };
       }
     } else {
-      console.error("❌ UZAPI retornou erro:", JSON.stringify(sendResult));
+      console.error("❌ Evolution retornou erro:", JSON.stringify(sendResult));
     }
   } catch (error: any) {
     console.error("❌ Erro ao enviar mensagem:", error.message);
@@ -2140,8 +2140,8 @@ async function executeAiAgentNode(
     let BASE_URL = connection.base_url;
     if (!BASE_URL) {
       BASE_URL = connection.environment === "PROD" 
-        ? "https://app.uazapi.com" 
-        : "https://free.uazapi.com";
+        ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+        : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
     }
 
     // Chamar a edge function ai-assistant-chat que tem integração com Asaas
@@ -2452,7 +2452,7 @@ serve(async (req) => {
   try {
     const payload = await req.json();
     console.log("=".repeat(80));
-    console.log("📩 WEBHOOK UZAPI → MARKETFLOW");
+    console.log("📩 WEBHOOK Evolution → MARKETFLOW");
     console.log("⏰ Timestamp:", new Date().toISOString());
     console.log("=".repeat(80));
     console.log("📦 Payload:", JSON.stringify(payload, null, 2));
@@ -2463,7 +2463,7 @@ serve(async (req) => {
     );
 
     // ========================================
-    // NORMALIZAÇÃO - FORMATO UZAPI
+    // NORMALIZAÇÃO - FORMATO Evolution
     // ========================================
     let telefone = "";
     let mensagem = "";
@@ -2539,7 +2539,7 @@ serve(async (req) => {
       console.log("📋 FORMATO: Evolution API v2 (payload.data)");
       console.log(`📱 remoteJid: ${jid}, senderPn: ${key.senderPn || d.senderPn}, messageType: ${rawMessageType} -> tipo: ${tipo}`);
     }
-    // FORMATO UZAPI: Dados dentro de payload.message
+    // FORMATO Evolution: Dados dentro de payload.message
     else if (payload.message && typeof payload.message === "object") {
       const msg = payload.message;
       // IMPORTANTE: Preferir sender_pn (número real) sobre sender (que pode ser LID do Facebook/Instagram)
@@ -2548,7 +2548,7 @@ serve(async (req) => {
       // Handle content that might be an object with { text: "..." }
       mensagem = extractText(msg.content) || extractText(msg.text) || extractText(msg.body) || "";
       
-      // IMPORTANTE: UAZAPI envia tipo em vários campos diferentes
+      // IMPORTANTE: Evolution envia tipo em vários campos diferentes
       // messageType pode ser: "ImageMessage", "DocumentMessage", "AudioMessage", "VideoMessage"
       // mediaType pode ser: "image", "document", "audio", "video"
       // type pode ser: "text", "image", etc
@@ -2556,7 +2556,7 @@ serve(async (req) => {
       const rawMediaType = msg.mediaType || "";
       const rawType = msg.type || "";
       
-      // Normalizar tipo baseado nos campos do UAZAPI
+      // Normalizar tipo baseado nos campos do Evolution
       if (rawMessageType === "ImageMessage" || rawMediaType === "image" || rawType === "image") {
         tipo = "image";
       } else if (rawMessageType === "DocumentMessage" || rawMediaType === "document" || rawType === "document") {
@@ -2575,7 +2575,7 @@ serve(async (req) => {
       isFromMe = msg.fromMe === true;
       instanceToken = payload.token || "";
       
-      console.log("📋 FORMATO: payload.message (UZAPI padrão)");
+      console.log("📋 FORMATO: payload.message (Evolution padrão)");
       console.log(`📱 sender_pn: ${msg.sender_pn}, sender: ${msg.sender}, chatid: ${msg.chatid}`);
       console.log(`📎 messageType: ${rawMessageType}, mediaType: ${rawMediaType}, type: ${rawType} -> tipo: ${tipo}`);
     }
@@ -2630,7 +2630,7 @@ serve(async (req) => {
         const payloadInstanceId = payload.instance_id || payload.instanceId || payload.id || "";
         let connection = null;
         
-        // First: try by instance_id (most reliable from UAZAPI)
+        // First: try by instance_id (most reliable from Evolution)
         if (!connection && payloadInstanceId) {
           console.log("🔍 Buscando conexão pelo instance_id:", payloadInstanceId);
           const { data: connByInstance } = await supabase
@@ -2676,8 +2676,8 @@ serve(async (req) => {
         if (connection) {
           console.log("🔗 Conexão ID:", connection.id, "User ID:", connection.user_id);
           
-          // Extract label info from UAZAPI payload formats
-          // UAZAPI sends: { event: "labels", data: { labels: [...], chatId: "..." } }
+          // Extract label info from Evolution payload formats
+          // Evolution sends: { event: "labels", data: { labels: [...], chatId: "..." } }
           // Or: { event: "chat_labels", id: "...", chatId: "...", labels: [...] }
           const labelData = payload.data || payload;
           const labels = labelData.labels || payload.labels || [];
@@ -2829,7 +2829,7 @@ serve(async (req) => {
     const isPollEvent = eventType && pollEventTypes.some(t => eventType.toLowerCase().includes(t.toLowerCase()));
     const hasPollUpdates = payload.pollUpdates || payload.data?.pollUpdates || payload.message?.pollUpdates;
     
-    // UAZAPI specific: check if messageType is PollUpdateMessage
+    // Evolution specific: check if messageType is PollUpdateMessage
     const messageType = payload.message?.messageType || "";
     const isPollUpdateMessage = messageType === "PollUpdateMessage";
     const hasVoteInChat = payload.chat?.wa_lastMessageTextVote && payload.chat?.wa_lastMessageType === "PollUpdateMessage";
@@ -2841,12 +2841,12 @@ serve(async (req) => {
       console.log("📊 wa_lastMessageTextVote:", payload.chat?.wa_lastMessageTextVote);
       
       try {
-        // Extract poll vote data - UAZAPI format
+        // Extract poll vote data - Evolution format
         let votedOptions: string[] = [];
         let voterPhone = "";
         let voterName = "";
         
-        // UAZAPI specific format: vote is in chat.wa_lastMessageTextVote
+        // Evolution specific format: vote is in chat.wa_lastMessageTextVote
         if (hasVoteInChat) {
           const voteText = payload.chat.wa_lastMessageTextVote;
           if (voteText) {
@@ -2920,7 +2920,7 @@ serve(async (req) => {
           if (connection) {
             const userId = connection.user_id;
             
-            // Get contact name from leads or use UAZAPI provided name
+            // Get contact name from leads or use Evolution provided name
             let contactName = voterName;
             if (!contactName) {
               const { data: lead } = await supabase
@@ -3129,7 +3129,7 @@ serve(async (req) => {
       }
     }
 
-    // Skip non-message events (aceita eventos UAZAPI e Evolution)
+    // Skip non-message events (aceita eventos Evolution e Evolution)
     const messageEventTypes = [
       "messages", "message", "RECEIVE_MESSAGE",
       "messages.upsert", "MESSAGES_UPSERT",
@@ -3182,10 +3182,10 @@ serve(async (req) => {
       // URL can be in various places
       audioUrl = content.URL || content.url || msg.mediaUrl || msg.audio || msg.media?.url || "";
       
-      // UAZAPI pode enviar o base64 diretamente no webhook - PRIORITÁRIO
+      // Evolution pode enviar o base64 diretamente no webhook - PRIORITÁRIO
       audioBase64 = msg.base64 || msg.mediaBase64 || content.base64 || msg.media?.base64 || "";
       
-      // Media decryption keys (from UAZAPI webhook)
+      // Media decryption keys (from Evolution webhook)
       audioMediaKey = content.mediaKey || msg.mediaKey || "";
       audioFileSHA256 = content.fileSHA256 || msg.fileSHA256 || "";
       
@@ -3213,8 +3213,8 @@ serve(async (req) => {
       const msg = payload.message || payload.messages?.[0] || payload;
       const content = typeof msg.content === 'object' ? msg.content : {};
       
-      // UAZAPI: Extract image URL from various possible fields
-      // O UAZAPI pode enviar a URL em: content.URL, msg.mediaUrl, msg.base64 (inline)
+      // Evolution: Extract image URL from various possible fields
+      // O Evolution pode enviar a URL em: content.URL, msg.mediaUrl, msg.base64 (inline)
       mediaUrl = content.URL || content.url || content.imageURL || 
                  msg.mediaUrl || msg.imageUrl || msg.image || 
                  msg.media?.url || msg.base64 || "";
@@ -3446,11 +3446,11 @@ serve(async (req) => {
             audioUrl,
             audioBase64,
             userId,
-            // Pass media decryption keys for UAZAPI
+            // Pass media decryption keys for Evolution
             mediaKey: audioMediaKey,
             fileSHA256: audioFileSHA256,
             connectionToken: connection.token,
-            connectionBaseUrl: connection.base_url || (connection.environment === "PROD" ? "https://app.uazapi.com" : "https://free.uazapi.com")
+            connectionBaseUrl: connection.base_url || (connection.environment === "PROD" ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") : (Deno.env.get("EVOLUTION_BASE_URL") ?? ""))
           })
         });
         
@@ -3820,8 +3820,8 @@ ${safeTelegramText}`;
         if (!BASE_URL) {
           const environment = connection.environment || "TESTE";
           BASE_URL = environment === "PROD" 
-            ? "https://app.uazapi.com" 
-            : "https://free.uazapi.com";
+            ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") 
+            : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
         }
 
         // Se tem botão configurado, enviar como menu com botão URL
@@ -3973,7 +3973,7 @@ ${safeTelegramText}`;
       console.error("⚠️ Erro ao processar pesquisa de satisfação:", surveyError.message);
     }
 
-    // Campaign response tracking removed - not working with UZAPI
+    // Campaign response tracking removed - not working with Evolution
 
     // ========================================
     // VERIFICAR ESTADO PENDENTE DO FLUXO

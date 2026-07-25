@@ -45,12 +45,12 @@ serve(async (req) => {
       });
     }
 
-    // -------- Legacy UAZAPI --------
+    // -------- Legacy Evolution --------
     if (!token) return json({ error: "Missing instance token" }, 400);
 
     let BASE_URL = base_url;
     if (!BASE_URL) {
-      BASE_URL = envUpper === "PROD" ? "https://app.uazapi.com" : "https://free.uazapi.com";
+      BASE_URL = envUpper === "PROD" ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "") : (Deno.env.get("EVOLUTION_BASE_URL") ?? "");
     }
 
     const body = phone ? JSON.stringify({ phone }) : JSON.stringify({});
@@ -62,7 +62,7 @@ serve(async (req) => {
     const responseText = await response.text();
     let data: any;
     try { data = responseText ? JSON.parse(responseText) : {}; } catch {
-      return json({ error: "Invalid response from UZAPI", details: responseText.substring(0, 200) }, 500);
+      return json({ error: "Invalid response from Evolution", details: responseText.substring(0, 200) }, 500);
     }
     if (!response.ok) {
       return json({ error: "Failed to fetch QR code", status: response.status, details: data }, response.status);

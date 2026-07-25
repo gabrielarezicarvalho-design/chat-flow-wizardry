@@ -193,7 +193,7 @@ export function AdminIntegracoes() {
         {/* Webhooks */}
         <TabsContent value="webhooks" className="space-y-4 mt-6">
           <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm text-blue-200">
-            💡 Copie estas URLs e cadastre no painel do serviço externo (Meta Developers, UAZAPI, Asaas etc).
+            💡 Copie estas URLs e cadastre no painel do serviço externo (Meta Developers, Evolution, Asaas etc).
           </div>
           {webhooks.map((w) => (
             <div key={w.name} className="p-4 rounded-xl bg-white/5 border border-white/10">

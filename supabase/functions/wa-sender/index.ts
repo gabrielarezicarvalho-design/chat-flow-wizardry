@@ -173,7 +173,7 @@ serve(async (req) => {
         
         switch (directType) {
           case "text":
-            // UZAPI: POST /send/text
+            // Evolution: POST /send/text
             directEndpoint = `${base_url}/send/text`;
             directBody.text = params.text || "";
             if (params.linkPreview) directBody.linkPreview = true;
@@ -183,11 +183,11 @@ serve(async (req) => {
           case "video":
           case "audio":
           case "document":
-            // UZAPI: POST /send/media
+            // Evolution: POST /send/media
             directEndpoint = `${base_url}/send/media`;
             directBody.type = directType;
             directBody.file = params.media || params.file || "";
-            // UZAPI uses 'text' as caption for media
+            // Evolution uses 'text' as caption for media
             if (params.text) directBody.text = params.text;
             if (directType === "document" && params.docName) {
               directBody.docName = params.docName;
@@ -195,7 +195,7 @@ serve(async (req) => {
             break;
             
           case "button":
-            // UZAPI: POST /send/menu with type: button
+            // Evolution: POST /send/menu with type: button
             directEndpoint = `${base_url}/send/menu`;
             directBody.type = "button";
             directBody.text = params.text || "Selecione uma opção:";
@@ -205,7 +205,7 @@ serve(async (req) => {
             break;
             
           case "list":
-            // UZAPI: POST /send/menu with type: list
+            // Evolution: POST /send/menu with type: list
             directEndpoint = `${base_url}/send/menu`;
             directBody.type = "list";
             directBody.text = params.text || "Selecione uma opção:";
@@ -215,14 +215,14 @@ serve(async (req) => {
             break;
             
           case "carousel":
-            // UZAPI: POST /send/carousel (alternative format)
+            // Evolution: POST /send/carousel (alternative format)
             directEndpoint = `${base_url}/send/carousel`;
             directBody.text = params.text || "";
             directBody.carousel = params.carousel || [];
             break;
             
           case "poll":
-            // UZAPI: POST /send/menu with type: poll
+            // Evolution: POST /send/menu with type: poll
             directEndpoint = `${base_url}/send/menu`;
             directBody.type = "poll";
             directBody.text = params.text || "Votação";
@@ -381,7 +381,7 @@ serve(async (req) => {
 
 
 
-        // Use UZAPI /sender/advanced endpoint with proper message formatting
+        // Use Evolution /sender/advanced endpoint with proper message formatting
         // IMPORTANT: Delay only works when there are MULTIPLE messages in the queue
         // For single message, we use scheduled_for to add delay
         endpoint = `${base_url}/sender/advanced`;
@@ -630,7 +630,7 @@ serve(async (req) => {
                 // Use /send/menu for button, list, poll
                 menuEndpoint = `${base_url}/send/menu`;
                 
-                // UZAPI uses "button" not "buttons"
+                // Evolution uses "button" not "buttons"
                 menuBody.type = menuType === "buttons" ? "button" : menuType;
                 menuBody.choices = params.choices || [];
                 
@@ -1120,7 +1120,7 @@ serve(async (req) => {
         });
 
       case "check_folder": {
-        // Check folder status from UAZAPI sender queue
+        // Check folder status from Evolution sender queue
         const folderId = params.folderId;
         if (!folderId) {
           return new Response(JSON.stringify({ success: false, error: "Missing folderId" }), {
@@ -1143,7 +1143,7 @@ serve(async (req) => {
         let folderResult;
         try { folderResult = JSON.parse(folderText); } catch { folderResult = { raw: folderText }; }
         
-        // If UAZAPI returns 404, the folder was already processed and removed
+        // If Evolution returns 404, the folder was already processed and removed
         // This means all messages were sent - treat as completed
         if (folderResponse.status === 404 || folderResult?.code === 404) {
           console.log(`[wa-sender] Folder ${folderId} returned 404 - treating as completed (messages already processed)`);
@@ -1212,7 +1212,7 @@ serve(async (req) => {
     });
 
     const responseText = await response.text();
-    console.log("[wa-sender] UAZAPI response:", responseText);
+    console.log("[wa-sender] Evolution response:", responseText);
 
     let result;
     try {

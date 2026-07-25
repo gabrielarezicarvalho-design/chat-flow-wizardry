@@ -108,8 +108,8 @@ serve(async (req) => {
       token = connection.token;
       environment = connection.environment || environment;
       base_url = connection.base_url || (connection.environment === "PROD"
-        ? "https://app.uazapi.com"
-        : "https://free.uazapi.com");
+        ? (Deno.env.get("EVOLUTION_BASE_URL") ?? "")
+        : (Deno.env.get("EVOLUTION_BASE_URL") ?? ""));
     }
 
     const webhookUrl = `${supabaseUrl}/functions/v1/wa-webhook-listener`;
@@ -161,7 +161,7 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    console.log("🔧 CONFIGURANDO WEBHOOK UZAPI → MARKETFLOW");
+    console.log("🔧 CONFIGURANDO WEBHOOK Evolution → MARKETFLOW");
     console.log("  Instance ID:", instance_id, " Base URL:", base_url);
 
     if (!instance_id || !base_url || !token) {
@@ -187,7 +187,7 @@ serve(async (req) => {
         const fullUrl = `${base_url}${endpoint}`;
         console.log(`🔄 Tentativa: ${method} ${fullUrl}`);
         
-        // Corpo da requisição para UZAPI - TODOS OS EVENTOS
+        // Corpo da requisição para Evolution - TODOS OS EVENTOS
         const allEvents = [
           // Mensagens
           "messages",
@@ -278,7 +278,7 @@ serve(async (req) => {
         };
 
         if (response.ok) {
-          // UZAPI pode retornar array
+          // Evolution pode retornar array
           const webhookData = Array.isArray(result) ? result[0] : result;
 
           console.log("=".repeat(80));
@@ -315,7 +315,7 @@ serve(async (req) => {
         // Se recebemos 401 num endpoint válido, o token da instância está inválido/expirado.
         // Não adianta tentar os outros endpoints — parar e pedir reconexão.
         if (response.status === 401) {
-          console.log("🚫 Token UAZAPI inválido/expirado — abortando tentativas");
+          console.log("🚫 Token Evolution inválido/expirado — abortando tentativas");
           return new Response(JSON.stringify({
             success: false,
             needsReconnect: true,

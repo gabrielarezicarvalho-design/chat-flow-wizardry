@@ -45,18 +45,18 @@ serve(async (req) => {
       const arr = Array.isArray(res.data) ? res.data : res.data?.instances ?? [];
       remoteInstances = arr.map(normalizeEvolutionInstance).filter((i: any) => i.id);
     } else {
-      // Legacy UAZAPI environments
+      // Legacy Evolution environments
       providerLabel = envUpper;
       let ADMIN_TOKEN: string | undefined;
       if (envUpper === "BTZAP") {
-        ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_BTZAP");
-        BASE_URL = Deno.env.get("UZAPI_BASE_URL_BTZAP") || "https://server.btzap.com.br";
+        ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_BTZAP");
+        BASE_URL = Deno.env.get("Evolution_BASE_URL_BTZAP") || "https://server.btzap.com.br";
       } else if (envUpper === "PROD") {
-        ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_PROD");
-        BASE_URL = Deno.env.get("UZAPI_BASE_URL_PROD") || "";
+        ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_PROD");
+        BASE_URL = Deno.env.get("Evolution_BASE_URL_PROD") || "";
       } else {
-        ADMIN_TOKEN = Deno.env.get("UZAPI_ADMIN_TOKEN_TESTE");
-        BASE_URL = Deno.env.get("UZAPI_BASE_URL_TESTE") || "";
+        ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_TESTE");
+        BASE_URL = Deno.env.get("Evolution_BASE_URL_TESTE") || "";
       }
       if (!ADMIN_TOKEN || !BASE_URL) {
         return new Response(
@@ -76,7 +76,7 @@ serve(async (req) => {
       }
       if (!uazData) {
         return new Response(
-          JSON.stringify({ error: "Failed to list UAZAPI instances", status: lastStatus }),
+          JSON.stringify({ error: "Failed to list Evolution instances", status: lastStatus }),
           { status: lastStatus || 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
@@ -158,13 +158,13 @@ serve(async (req) => {
           only_in_remote: onlyInRemote.length,
           only_in_db: onlyInDb.length,
           // Backwards-compat aliases for existing UI
-          total_uazapi: remoteInstances.length,
-          only_in_uazapi: onlyInRemote.length,
+          total_remote: remoteInstances.length,
+          only_in_remote: onlyInRemote.length,
         },
         remote_instances: remoteInstances,
-        uazapi_instances: remoteInstances,
+        evolution_instances: remoteInstances,
         only_in_remote: onlyInRemote,
-        only_in_uazapi: onlyInRemote,
+        only_in_remote: onlyInRemote,
         only_in_db: onlyInDb,
         synced,
       }),
