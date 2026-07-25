@@ -51,10 +51,6 @@ serve(async (req) => {
       if (envUpper === "PROD") {
         ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_PROD");
         BASE_URL = Deno.env.get("Evolution_BASE_URL_PROD") || "";
-      } else if (envUpper === "TESTE") {
-      } else if (envUpper === "PROD") {
-        ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_PROD");
-        BASE_URL = Deno.env.get("Evolution_BASE_URL_PROD") || "";
       } else {
         ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_TESTE");
         BASE_URL = Deno.env.get("Evolution_BASE_URL_TESTE") || "";
