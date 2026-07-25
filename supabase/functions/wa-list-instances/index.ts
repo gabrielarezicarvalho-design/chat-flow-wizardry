@@ -48,10 +48,7 @@ serve(async (req) => {
       // Legacy Evolution environments
       providerLabel = envUpper;
       let ADMIN_TOKEN: string | undefined;
-      if (envUpper === "BTZAP") {
-        ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_BTZAP");
-        BASE_URL = Deno.env.get("Evolution_BASE_URL_BTZAP") || "https://server.btzap.com.br";
-      } else if (envUpper === "PROD") {
+      if (envUpper === "PROD") {
         ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_PROD");
         BASE_URL = Deno.env.get("Evolution_BASE_URL_PROD") || "";
       } else {

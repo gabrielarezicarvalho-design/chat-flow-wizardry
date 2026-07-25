@@ -642,49 +642,6 @@ const Connections = () => {
       return;
     }
 
-    // BTZAP: importa instância já criada no painel (token informado manualmente)
-    if (formData.environment === 'BTZAP') {
-      const tokenClean = formData.token.trim();
-      if (!tokenClean) {
-        toast.error("Cole o Token da Instância do painel BTZAP");
-        return;
-      }
-      if (/^https?:\/\//i.test(tokenClean) || tokenClean.includes('/')) {
-        toast.error("Valor inválido: cole apenas o TOKEN da instância (não a URL do painel).");
-        return;
-      }
-      if (tokenClean.length < 20) {
-        toast.error("Token parece curto demais. Copie o token completo do painel BTZAP.");
-        return;
-      }
-
-      setLoadingQr(true);
-      try {
-        const baseUrl = 'https://server.btzap.com.br';
-        const tempConnection = await createConnection.mutateAsync({
-          name: formData.name,
-          platform: 'whatsapp',
-          environment: 'BTZAP',
-          status: 'connecting',
-          instance_id: formData.instance_id.trim() || formData.name,
-          token: formData.token.trim(),
-          base_url: baseUrl
-        });
-
-        toast.success("Instância BTZAP importada! Verificando status...");
-        setDialogOpen(false);
-
-        // Verifica status imediatamente
-        await checkInstanceStatus(tempConnection.id, formData.token.trim(), 'BTZAP', baseUrl);
-      } catch (err: any) {
-        console.error("Erro ao importar BTZAP:", err);
-        toast.error(err.message || "Erro ao importar instância BTZAP");
-      } finally {
-        setLoadingQr(false);
-        resetForm();
-      }
-      return;
-    }
 
     // Phone is required for pairing code method
     if (connectMethod === 'paircode' && !formData.phone) {
@@ -3077,39 +3034,6 @@ const Connections = () => {
                   </div>
                 </div>
 
-
-                {formData.environment === 'BTZAP' && (
-                  <div className="space-y-3 p-4 rounded-lg border border-emerald-500/30 bg-emerald-500/5">
-                    <div className="text-xs text-emerald-200">
-                      📋 Crie a instância no painel <strong>painel.btzap.com.br</strong>, depois copie os dados abaixo:
-                    </div>
-                    <div>
-                      <Label htmlFor="btzap-instance">Nome da Instância (do painel BTZAP)</Label>
-                      <Input
-                        id="btzap-instance"
-                        value={formData.instance_id}
-                        onChange={(e) => setFormData({ ...formData, instance_id: e.target.value })}
-                        placeholder="Ex: gabriel"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="btzap-token">Token da Instância <span className="text-destructive">*</span></Label>
-                      <Input
-                        id="btzap-token"
-                        type="password"
-                        value={formData.token}
-                        onChange={(e) => setFormData({ ...formData, token: e.target.value })}
-                        placeholder="Cole o token exibido no painel"
-                        required
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Após importar, use o botão <strong>"Ler QR Code"</strong> na conexão para conectar o WhatsApp.
-                    </p>
-                  </div>
-                )}
-
-                {formData.environment !== 'BTZAP' && (
                 <div>
                   <Label className="mb-3 block">Método de Conexão</Label>
                   <div className="grid grid-cols-2 gap-3">
@@ -3151,16 +3075,15 @@ const Connections = () => {
                     </div>
                   </div>
                 </div>
-                )}
+
+
 
                 <div className="flex gap-2">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
                     Cancelar
                   </Button>
                   <Button type="submit" className="flex-1">
-                    {formData.environment === 'BTZAP'
-                      ? 'Importar Instância'
-                      : connectMethod === 'qrcode' ? 'Gerar QR Code' : 'Gerar Código'}
+                    {connectMethod === 'qrcode' ? 'Gerar QR Code' : 'Gerar Código'}
                   </Button>
                 </div>
               </form>

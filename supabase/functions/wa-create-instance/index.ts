@@ -23,7 +23,7 @@ function json(body: unknown, status = 200) {
   });
 }
 
-// ---------- Evolution legacy helpers (kept for BTZAP/PROD/TESTE fallbacks) ----------
+// ---------- Evolution legacy helpers (kept for PROD/TESTE fallbacks) ----------
 async function configureEvolutionWebhook(baseUrl: string, token: string) {
   const url = webhookUrl();
   const body = {
@@ -132,13 +132,10 @@ serve(async (req) => {
       });
     }
 
-    // -------- Legacy paths (BTZAP / PROD / TESTE) --------
+    // -------- Legacy paths (PROD / TESTE) --------
     let ADMIN_TOKEN: string | undefined;
     let BASE_URL: string | undefined;
-    if (envUpper === "BTZAP") {
-      ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_BTZAP");
-      BASE_URL = Deno.env.get("Evolution_BASE_URL_BTZAP") || "https://server.btzap.com.br";
-    } else if (envUpper === "PROD") {
+    if (envUpper === "PROD") {
       ADMIN_TOKEN = Deno.env.get("Evolution_ADMIN_TOKEN_PROD");
       BASE_URL = Deno.env.get("Evolution_BASE_URL_PROD");
     } else {
