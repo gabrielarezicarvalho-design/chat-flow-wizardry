@@ -1,5 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
+import {
+  isEvolutionConnection,
+  resolveEvolutionCreds,
+  evolutionSendText,
+  evolutionSendMedia,
+  evolutionSendAudio,
+} from "../_shared/evolution.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -547,6 +555,7 @@ serve(async (req) => {
       connectionToken,
       connectionBaseUrl,
       connectionEnvironment,
+      connectionInstanceName,
       isAudioMessage,
       respondWithAudio,
       // NEW: Support for images and documents
@@ -554,6 +563,7 @@ serve(async (req) => {
       mediaType, // "image", "video", "document", "audio"
       mediaCaption
     } = await req.json();
+
 
     console.log("🤖 AI Assistant Chat");
     console.log("   Agent ID:", agentId);
@@ -1249,6 +1259,73 @@ ${asaasContext}`;
         : "https://free.uazapi.com";
     }
 
+    // Detect Evolution connection to route sends to Evolution API v2 instead of UAZAPI.
+    const evoConnLike = {
+      environment: connectionEnvironment,
+      base_url: connectionBaseUrl,
+      token: connectionToken,
+      instance_name: connectionInstanceName,
+    };
+    const useEvolution = isEvolutionConnection(evoConnLike as any);
+    const evoCreds = useEvolution ? resolveEvolutionCreds(evoConnLike as any) : null;
+    if (useEvolution && !evoCreds) {
+      console.error("❌ Evolution connection sem base_url/token/instance_name — envio não vai funcionar");
+    }
+    console.log("   Provider envio:", useEvolution ? "Evolution API v2" : "UAZAPI");
+
+    // Unified WhatsApp send helpers. Return { ok, status, data }.
+    const okShape = (ok: boolean, status = ok ? 200 : 500, data: any = null) => ({ ok, status, data });
+    async function sendWaText(text: string) {
+      if (useEvolution && evoCreds) {
+        return await evolutionSendText({ ...evoCreds, phone: contactPhone, text });
+      }
+      const r = await fetch(`${BASE_URL}/send/text`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", token: connectionToken },
+        body: JSON.stringify({ number: contactPhone, text }),
+      });
+      return okShape(r.ok, r.status, await r.text().catch(() => null));
+    }
+    async function sendWaMedia(opts: { type: "image" | "video" | "document" | "audio"; file: string; caption?: string; filename?: string; }) {
+      if (useEvolution && evoCreds) {
+        if (opts.type === "audio") {
+          return await evolutionSendAudio({ ...evoCreds, phone: contactPhone, audio: opts.file });
+        }
+        return await evolutionSendMedia({
+          ...evoCreds,
+          phone: contactPhone,
+          mediaType: opts.type,
+          media: opts.file,
+          caption: opts.caption,
+          fileName: opts.filename,
+        });
+      }
+      const body: any = { number: contactPhone, type: opts.type, file: opts.file };
+      if (opts.caption) body.caption = opts.caption;
+      if (opts.filename) body.filename = opts.filename;
+      const r = await fetch(`${BASE_URL}/send/media`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", token: connectionToken },
+        body: JSON.stringify(body),
+      });
+      return okShape(r.ok, r.status, await r.text().catch(() => null));
+    }
+    async function sendWaInteractive(body: any) {
+      if (useEvolution) {
+        // Evolution v2 não suporta cta_copy nativamente — cair para texto com o código.
+        const fallback = `${body.header ? `*${body.header}*\n\n` : ""}${body.body || ""}${body.copy_code ? `\n\n${body.copy_code}` : ""}`;
+        return await sendWaText(fallback);
+      }
+      const r = await fetch(`${BASE_URL}/send/interactive`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", token: connectionToken },
+        body: JSON.stringify({ number: contactPhone, ...body }),
+      });
+      return okShape(r.ok, r.status, await r.text().catch(() => null));
+    }
+
+
+
     console.log("📤 Enviando via WhatsApp...");
     console.log("   Base URL:", BASE_URL);
     console.log("   Telefone:", contactPhone);
@@ -1292,26 +1369,14 @@ ${asaasContext}`;
             audioUrl = ttsData.audioUrl;
             console.log("✅ Áudio TTS gerado:", audioUrl);
             
-            // Send audio via WhatsApp using /send/media with type "audio"
-            const whatsappAudioResponse = await fetch(`${BASE_URL}/send/media`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "token": connectionToken
-              },
-              body: JSON.stringify({
-                number: contactPhone,
-                type: "audio",
-                file: audioUrl
-              })
-            });
+            // Send audio via WhatsApp
+            const whatsappAudioResponse = await sendWaMedia({ type: "audio", file: audioUrl });
 
             if (whatsappAudioResponse.ok) {
               console.log("✅ Áudio enviado via WhatsApp");
               audioSent = true;
             } else {
-              const waAudioError = await whatsappAudioResponse.text();
-              console.error("❌ Erro ao enviar áudio WhatsApp:", waAudioError);
+              console.error("❌ Erro ao enviar áudio WhatsApp:", whatsappAudioResponse.data);
             }
           }
         } else {
@@ -1324,25 +1389,14 @@ ${asaasContext}`;
 
     // Also send text response (or only text if audio failed)
     if (!audioSent || !shouldRespondWithAudio) {
-      const whatsappResponse = await fetch(`${BASE_URL}/send/text`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "token": connectionToken
-        },
-        body: JSON.stringify({
-          number: contactPhone,
-          text: finalAiResponse
-        })
-      });
-
+      const whatsappResponse = await sendWaText(finalAiResponse);
       if (!whatsappResponse.ok) {
-        const waError = await whatsappResponse.text();
-        console.error("❌ Erro WhatsApp:", waError);
+        console.error("❌ Erro WhatsApp:", whatsappResponse.data);
       } else {
         console.log("✅ Mensagem texto enviada via WhatsApp");
       }
     }
+
 
     // Send Asaas payment data via buttons and media if available
     // Usar mesma condição rigorosa
@@ -1361,40 +1415,21 @@ ${asaasContext}`;
           // A URL do Asaas já é o link da fatura - vamos usar direto
           const invoiceLink = payment.invoiceUrl;
           
-          const pdfResponse = await fetch(`${BASE_URL}/send/media`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "token": connectionToken
-            },
-            body: JSON.stringify({
-              number: contactPhone,
-              type: "document",
-              file: invoiceLink,
-              filename: `Fatura_${asaasData.customerName.replace(/\s/g, '_')}.pdf`,
-              caption: `📄 *Fatura - ${asaasData.customerName}*\n💰 Valor: ${payment.valueFormatted}\n📅 Vencimento: ${payment.dueDateFormatted}`
-            })
+          const pdfResponse = await sendWaMedia({
+            type: "document",
+            file: invoiceLink,
+            filename: `Fatura_${asaasData.customerName.replace(/\s/g, '_')}.pdf`,
+            caption: `📄 *Fatura - ${asaasData.customerName}*\n💰 Valor: ${payment.valueFormatted}\n📅 Vencimento: ${payment.dueDateFormatted}`,
           });
-          
+
           if (pdfResponse.ok) {
             console.log("✅ PDF da fatura enviado");
           } else {
-            const pdfError = await pdfResponse.text();
-            console.error("❌ Erro ao enviar PDF:", pdfError);
-            
+            console.error("❌ Erro ao enviar PDF:", pdfResponse.data);
             // Se falhar o PDF, envia como link
-            await fetch(`${BASE_URL}/send/text`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "token": connectionToken
-              },
-              body: JSON.stringify({
-                number: contactPhone,
-                text: `📄 *Sua Fatura*\n\n💰 Valor: ${payment.valueFormatted}\n📅 Vencimento: ${payment.dueDateFormatted}\n\n🔗 Link: ${invoiceLink}`
-              })
-            });
+            await sendWaText(`📄 *Sua Fatura*\n\n💰 Valor: ${payment.valueFormatted}\n📅 Vencimento: ${payment.dueDateFormatted}\n\n🔗 Link: ${invoiceLink}`);
           }
+
         } catch (pdfError) {
           console.error("❌ Erro PDF:", pdfError);
         }
@@ -1440,22 +1475,11 @@ ${asaasContext}`;
           }
           boletoText += `🔗 *Link do Boleto:* ${payment.bankSlipUrl}`;
           
-          const boletoResponse = await fetch(`${BASE_URL}/send/text`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "token": connectionToken
-            },
-            body: JSON.stringify({
-              number: contactPhone,
-              text: boletoText
-            })
-          });
-          
+          const boletoResponse = await sendWaText(boletoText);
           if (boletoResponse.ok) {
             console.log("✅ Boleto enviado");
           } else {
-            console.error("❌ Erro ao enviar boleto:", await boletoResponse.text());
+            console.error("❌ Erro ao enviar boleto:", boletoResponse.data);
           }
         } catch (boletoError) {
           console.error("❌ Erro boleto:", boletoError);
@@ -1468,47 +1492,28 @@ ${asaasContext}`;
         console.log("   PIX Payload:", asaasData.pixPayload.substring(0, 50) + "...");
         
         try {
-          const pixButtonResponse = await fetch(`${BASE_URL}/send/interactive`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "token": connectionToken
-            },
-            body: JSON.stringify({
-              number: contactPhone,
-              type: "cta_copy",
-              header: "💰 PIX Copia e Cola",
-              body: `*Valor:* ${payment.valueFormatted}\n*Vencimento:* ${payment.dueDateFormatted}\n\n_Clique no botão abaixo para copiar o código PIX:_`,
-              footer: "Código copiado automaticamente",
-              copy_code: asaasData.pixPayload,
-              button_text: "📋 Copiar código PIX"
-            })
+          const pixButtonResponse = await sendWaInteractive({
+            type: "cta_copy",
+            header: "💰 PIX Copia e Cola",
+            body: `*Valor:* ${payment.valueFormatted}\n*Vencimento:* ${payment.dueDateFormatted}\n\n_Clique no botão abaixo para copiar o código PIX:_`,
+            footer: "Código copiado automaticamente",
+            copy_code: asaasData.pixPayload,
+            button_text: "📋 Copiar código PIX",
           });
           
           if (pixButtonResponse.ok) {
             console.log("✅ PIX enviado como botão copiável");
           } else {
-            const pixError = await pixButtonResponse.text();
-            console.error("❌ Erro ao enviar PIX botão:", pixError);
-            
+            console.error("❌ Erro ao enviar PIX botão:", pixButtonResponse.data);
             // Fallback: enviar como texto
-            await fetch(`${BASE_URL}/send/text`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "token": connectionToken
-              },
-              body: JSON.stringify({
-                number: contactPhone,
-                text: `💰 *PIX Copia e Cola*\n\n*Valor:* ${payment.valueFormatted}\n*Vencimento:* ${payment.dueDateFormatted}\n\n📋 *Código PIX:*\n\`${asaasData.pixPayload}\``
-              })
-            });
+            await sendWaText(`💰 *PIX Copia e Cola*\n\n*Valor:* ${payment.valueFormatted}\n*Vencimento:* ${payment.dueDateFormatted}\n\n📋 *Código PIX:*\n\`${asaasData.pixPayload}\``);
             console.log("✅ PIX enviado como texto (fallback)");
           }
         } catch (pixError) {
           console.error("❌ Erro PIX:", pixError);
         }
       }
+
     }
 
     // Save AI response to database

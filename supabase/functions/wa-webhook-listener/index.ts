@@ -1041,8 +1041,10 @@ async function handleFlowResume(
           connectionToken: connection.token,
           connectionBaseUrl: BASE_URL,
           connectionEnvironment: connection.environment,
+          connectionInstanceName: (connection as any).instance_name,
           isAudioMessage: isAudioMessage,
           respondWithAudio: agent.voice_enabled && isAudioMessage
+
         })
       });
 
@@ -2159,6 +2161,8 @@ async function executeAiAgentNode(
         connectionToken: connection.token,
         connectionBaseUrl: BASE_URL,
         connectionEnvironment: connection.environment,
+        connectionInstanceName: (connection as any).instance_name,
+
         // Suporte a mídia
         mediaUrl: context.media?.url,
         mediaType: context.media?.type,
@@ -3333,7 +3337,7 @@ serve(async (req) => {
     if (payloadInstanceId) {
       const { data: connByInstanceId, error: err1 } = await supabase
         .from("connections")
-        .select("user_id, id, token, environment, base_url, company_id, credentials")
+        .select("user_id, id, token, environment, base_url, company_id, credentials, instance_name")
         .eq("instance_id", payloadInstanceId)
         .maybeSingle();
       
@@ -3349,7 +3353,7 @@ serve(async (req) => {
     if (!connection && payloadInstanceName) {
       const { data: connByName, error: err2 } = await supabase
         .from("connections")
-        .select("user_id, id, token, environment, base_url, company_id, credentials")
+        .select("user_id, id, token, environment, base_url, company_id, credentials, instance_name")
         .eq("instance_name", payloadInstanceName)
         .maybeSingle();
       
@@ -3365,7 +3369,7 @@ serve(async (req) => {
     if (!connection && tokenToSearch) {
       const { data: connByToken, error: err3 } = await supabase
         .from("connections")
-        .select("user_id, id, token, environment, base_url, company_id, credentials")
+        .select("user_id, id, token, environment, base_url, company_id, credentials, instance_name")
         .eq("token", tokenToSearch)
         .maybeSingle();
       
@@ -3381,7 +3385,7 @@ serve(async (req) => {
       console.log("⚠️ Tentando fallback para conexão ativa...");
       const { data: activeConns, error: err4 } = await supabase
         .from("connections")
-        .select("user_id, id, token, environment, base_url, company_id, credentials")
+        .select("user_id, id, token, environment, base_url, company_id, credentials, instance_name")
         .eq("status", "connected");
       
       if (err4) console.error("❌ Erro busca fallback:", err4.message);
@@ -4257,6 +4261,8 @@ ${safeTelegramText}`;
               connectionToken: connection.token,
               connectionBaseUrl: connection.base_url,
               connectionEnvironment: connection.environment,
+              connectionInstanceName: (connection as any).instance_name,
+
               isAudioMessage: isAudioMessage,
               respondWithAudio: isAudioMessage, // Respond with audio if user sent audio
               // NEW: Support for image and document analysis
