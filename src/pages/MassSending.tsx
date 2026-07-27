@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCloudStorage } from "@/hooks/useCloudStorage";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { uploadToCloud, uploadBlobToCloud } from "@/lib/cloud-storage";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
