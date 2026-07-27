@@ -1099,8 +1099,69 @@ export default function Landing() {
 
             </div>
           </div>
+
+          {/* TABELA COMPARATIVA */}
+          <div className="mt-16 max-w-4xl mx-auto">
+            <h3 className="text-center text-2xl font-bold text-slate-900">Compare os planos</h3>
+            <p className="mt-2 text-center text-sm text-slate-500">Veja lado a lado o que cada plano entrega.</p>
+
+            <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="text-left font-semibold text-slate-700 px-6 py-4">Recurso</th>
+                    <th className="text-center font-semibold text-slate-700 px-6 py-4">Start</th>
+                    <th className="text-center font-semibold px-6 py-4" style={{ color: "#004DFF" }}>Business</th>
+                  </tr>
+                </thead>
+                <tbody className="text-slate-700">
+                  {[
+                    ["Atendentes", "3", "10"],
+                    ["Conexões WhatsApp", "1", "3"],
+                    ["Contatos", "Ilimitados", "Ilimitados"],
+                    ["IA completa (Aurora)", true, true],
+                    ["Campanhas em massa", "Básicas", "Ilimitadas"],
+                    ["Recuperação financeira", true, true],
+                    ["Fluxos automatizados", true, true],
+                    ["Relatórios avançados", false, true],
+                    ["Voz clonada (ElevenLabs)", false, true],
+                    ["API + Webhooks", false, true],
+                    ["Suporte", "E-mail", "Prioritário"],
+                    ["Teste grátis", "3 dias", "3 dias"],
+                  ].map(([label, start, business], idx) => (
+                    <tr key={label as string} className={idx % 2 === 1 ? "bg-slate-50/50" : ""}>
+                      <td className="px-6 py-3.5 font-medium text-slate-800">{label as string}</td>
+                      <td className="px-6 py-3.5 text-center">
+                        {typeof start === "boolean" ? (
+                          start ? (
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                          ) : (
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
+                          )
+                        ) : (
+                          <span>{start}</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3.5 text-center">
+                        {typeof business === "boolean" ? (
+                          business ? (
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                          ) : (
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
+                          )
+                        ) : (
+                          <span className="font-semibold" style={{ color: "#004DFF" }}>{business}</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
+
 
       {/* VOZ CLONADA */}
       <section className="bg-gradient-to-b from-white to-slate-50 py-24">
