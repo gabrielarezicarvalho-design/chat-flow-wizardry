@@ -2640,6 +2640,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_company_cycle_start: {
+        Args: { _company_id: string }
+        Returns: string
+      }
+      get_plan_usage: { Args: { _company_id: string }; Returns: Json }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
