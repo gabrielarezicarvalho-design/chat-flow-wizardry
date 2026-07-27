@@ -2,3 +2,6 @@ project_id = "biznbcestdmjphiozdpu"
 
 [functions.landing-aurora-chat]
 verify_jwt = false
+
+[functions.platform-subscription-webhook]
+verify_jwt = false
