@@ -11,7 +11,7 @@ import {
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
-  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield
+  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
@@ -1510,7 +1510,8 @@ export default function Landing() {
               <h4 className="text-[11px] font-bold tracking-widest text-slate-900 uppercase">Legal</h4>
               <ul className="space-y-1.5 text-xs text-slate-500">
                 <li><Link to="/politica-de-privacidade" className="flex items-center gap-1.5 hover:text-primary transition-colors"><Shield className="h-3.5 w-3.5" /> Privacidade</Link></li>
-                <li><Link to="/termos-de-servico" className="flex items-center gap-1.5 hover:text-primary transition-colors"><FileText className="h-3.5 w-3.5" /> Termos</Link></li>
+                <li><Link to="/termos-de-servico" className="flex items-center gap-1.5 hover:text-primary transition-colors"><FileText className="h-3.5 w-3.5" /> Termos de Uso</Link></li>
+                <li><Link to="/politica-de-cookies" className="flex items-center gap-1.5 hover:text-primary transition-colors"><Cookie className="h-3.5 w-3.5" /> Cookies</Link></li>
               </ul>
               <p className="text-[11px] text-slate-400 pt-0.5">CNPJ - 65.146.817/0001-18</p>
             </div>
