@@ -43,7 +43,7 @@ const LandingFooter = () => {
           <div className="space-y-2">
             <h4 className="text-[11px] font-bold tracking-widest text-slate-900 uppercase">Suporte</h4>
             <ul className="space-y-1.5 text-xs text-slate-500">
-              <li><a href="#" className="flex items-center gap-1.5 hover:text-primary transition-colors"><HelpCircle className="h-3.5 w-3.5" /> Central de Ajuda</a></li>
+              <li><Link to="/central-de-ajuda" className="flex items-center gap-1.5 hover:text-primary transition-colors"><HelpCircle className="h-3.5 w-3.5" /> Central de Ajuda</Link></li>
               <li><a href="#" className="flex items-center gap-1.5 text-emerald-500 hover:text-emerald-600 transition-colors"><MessageCircle className="h-3.5 w-3.5" /> Comunidade VIP</a></li>
             </ul>
           </div>
