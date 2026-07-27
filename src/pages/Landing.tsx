@@ -801,7 +801,7 @@ export default function Landing() {
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Tudo que você precisa</span>
             <h2 className="mt-3 text-3xl md:text-5xl font-bold text-slate-900">
               Uma IA que{" "}
-              <span className="bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+              <span className="text-[#004DFF]">
                 vende sozinha
               </span>
               .
