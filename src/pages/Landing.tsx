@@ -1523,7 +1523,7 @@ export default function Landing() {
               <span style={{ color: "#004DFF" }}>clientes reais</span>
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              Números compartilhados por clientes que compraram créditos Lovable com a gente. Verificados por documentos e prints do próprio Lovable.
+              Resultados reais de empresas que automatizaram atendimento, vendas e cobrança com o CRM Next Pro. Verificados por prints e relatos dos próprios clientes.
             </p>
           </div>
 
