@@ -1511,15 +1511,91 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* DEPOIMENTO */}
-      <section id="depoimentos" className="mx-auto max-w-3xl px-6 py-24 text-center">
-        <div className="flex justify-center gap-1 mb-6">
-          {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />)}
+      {/* CASOS REAIS */}
+      <section id="depoimentos" className="bg-white py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="text-center">
+            <span className="text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
+              // Casos reais
+            </span>
+            <h2 className="mt-4 text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+              Antes e depois de{" "}
+              <span style={{ color: "#004DFF" }}>clientes reais</span>
+            </h2>
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Números compartilhados por clientes que compraram créditos Lovable com a gente. Verificados por documentos e prints do próprio Lovable.
+            </p>
+          </div>
+
+          <div className="mt-14 grid md:grid-cols-2 gap-6">
+            {cases.map((c) => (
+              <div key={c.name} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <img src={c.avatar} alt={c.name} className="h-11 w-11 rounded-full object-cover" />
+                    <div>
+                      <div className="font-semibold text-slate-900 text-sm">{c.name}</div>
+                      <div className="text-xs text-slate-500">{c.role}</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-50 text-[#004DFF] border border-blue-100">
+                    {c.plan}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-slate-50 p-4">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Antes</span>
+                    </div>
+                    <div className="space-y-2.5">
+                      {c.before.map((item) => (
+                        <div key={item.label}>
+                          <div className="text-xs text-slate-600">{item.label}</div>
+                          <div className="text-xs font-semibold text-slate-900">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-blue-50/50 p-4">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#004DFF]">Depois</span>
+                    </div>
+                    <div className="space-y-2.5">
+                      {c.after.map((item) => (
+                        <div key={item.label}>
+                          <div className="text-xs text-slate-600">{item.label}</div>
+                          <div className="text-xs font-semibold text-[#004DFF]">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#004DFF]">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                  {c.result}
+                </div>
+
+                <div className="mt-5 pt-5 border-t border-slate-100">
+                  <div className="flex gap-2">
+                    <Quote className="h-4 w-4 text-slate-300 shrink-0 mt-0.5" />
+                    <p className="text-sm text-slate-600 leading-relaxed">{c.quote}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-xs text-slate-500 inline-flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-slate-400" />
+              Métricas compartilhadas voluntariamente pelos clientes · Prints e comprovantes sob solicitação
+            </p>
+          </div>
         </div>
-        <blockquote className="text-xl md:text-2xl font-medium text-slate-800 leading-relaxed">
-          “Em 30 dias, a MarketFlow respondeu mais clientes do que minha equipe inteira em 6 meses. Triplicamos o faturamento.”
-        </blockquote>
-        <div className="mt-6 text-sm text-slate-500">Carla Mendes — CEO, Studio Bella</div>
       </section>
 
       {/* CTA FINAL */}
