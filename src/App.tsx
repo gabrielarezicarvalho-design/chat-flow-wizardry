@@ -118,6 +118,7 @@ function App() {
                     <Route path="/politica-de-privacidade" element={<Suspense fallback={<Loading />}><PrivacyPolicyPage /></Suspense>} />
                     <Route path="/termos-de-servico" element={<Suspense fallback={<Loading />}><TermsOfServicePage /></Suspense>} />
                     <Route path="/politica-de-cookies" element={<Suspense fallback={<Loading />}><CookiesPage /></Suspense>} />
+                    <Route path="/central-de-ajuda" element={<Suspense fallback={<Loading />}><HelpCenterPage /></Suspense>} />
                    <Route path="/exclusao-de-dados" element={<Suspense fallback={<Loading />}><DataDeletionPage /></Suspense>} />
                    <Route path="/checkout" element={<Suspense fallback={<Loading />}><Checkout /></Suspense>} />
                     {/* Conversations with no padding - gated by chat feature */}
