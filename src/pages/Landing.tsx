@@ -1054,18 +1054,28 @@ export default function Landing() {
 
               <ul className="mt-8 space-y-3 text-sm text-slate-700">
                 {[
-                  "3 atendentes",
-                  "1 conexão WhatsApp",
+                  "5 atendentes",
+                  "2 conexões WhatsApp",
                   "IA completa",
-                  "Campanhas em massa",
-                  "Contatos ilimitados",
+                  "100 disparos em massa/mês",
+                  "500 contatos/mês",
+                  "Histórico de atendimentos",
+                  "Relatórios",
+                  "500 vendas e cobranças/mês",
+                  "3 fluxos de IA/mês",
+                  "3 agentes de IA/mês",
+                  "4 departamentos/mês",
+                  "Segmentação de contatos",
+                  "Chat interno",
+                  "10 usuários/mês",
                 ].map((f) => (
                   <li key={f} className="flex items-center gap-2.5">
-                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">✓</span>
+                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs shrink-0">✓</span>
                     {f}
                   </li>
                 ))}
               </ul>
+
 
               <button className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition">
                 Assinar Start
