@@ -365,7 +365,7 @@ export default function Landing() {
               alt="NEXT PRO"
               className="h-8 w-8 rounded-full object-cover"
             />
-            NEXT <span className="text-[#004DFF]">PRO</span>
+            NEXT <span className="text-[#004DFF]">PRO CRM</span>
           </div>
           <div className="hidden md:flex items-center gap-4">
             <nav className="flex items-center gap-8 text-sm text-slate-600">
@@ -408,7 +408,7 @@ export default function Landing() {
                   Começar agora <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="rounded-full px-8 h-12 border-slate-300">
+              <Button size="lg" variant="outline" className="rounded-full px-8 h-12 border-slate-300 bg-white text-slate-900 hover:bg-slate-50 hover:text-slate-900">
                 <PlayCircle className="mr-2 h-4 w-4" /> Ver demonstração
               </Button>
             </div>
