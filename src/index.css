@@ -186,3 +186,7 @@ All colors MUST be HSL.
     filter: brightness(0) invert(1);
   }
 }
+
+#lovable-badge {
+  display: none !important;
+}
