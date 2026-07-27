@@ -1469,8 +1469,8 @@ export default function Landing() {
                   NEXT <span className="text-primary">PRO</span>
                 </span>
               </div>
-              <p className="text-xs text-slate-500 leading-snug max-w-sm">
-                O NEXT PRO é a ferramenta definitiva para quem deseja economizar créditos e automatizar projetos no Lovable AI com eficiência total.
+              <p className="text-xs text-slate-500 leading-snug max-w-sm whitespace-pre-line">
+                O CRM NEXT PRO é a ferramenta definitiva para quem deseja{"\u00a0"}{"\n"}executar disparos em massa, prospectar clientes e aumentar suas vendas, tudo em uma unica ferramenta.
               </p>
               <div className="flex items-center gap-1.5">
                 <a href="#" aria-label="Twitter" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
