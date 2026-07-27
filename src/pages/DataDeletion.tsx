@@ -29,8 +29,8 @@ const DataDeletion = () => {
   };
 
   if (submitted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+  return (
+      <div className="light min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-lg text-center">
           <CardContent className="pt-10 pb-10 space-y-4">
             <CheckCircle2 className="mx-auto h-16 w-16 text-green-500" />
@@ -50,7 +50,7 @@ const DataDeletion = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="light min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-destructive/10">
