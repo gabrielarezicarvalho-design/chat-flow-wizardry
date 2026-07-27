@@ -1106,19 +1106,31 @@ export default function Landing() {
 
               <ul className="mt-8 space-y-3 text-sm text-slate-700">
                 {[
-                  "10 atendentes",
-                  "3 conexões WhatsApp",
+                  "20 atendentes",
+                  "10 conexões WhatsApp",
                   "IA completa",
-                  "Campanhas ilimitadas",
+                  "Até 10.000 disparos em massa/mês",
+                  "10.000 contatos/mês",
+                  "Histórico de atendimentos",
                   "Relatórios avançados",
+                  "Vendas e cobranças ilimitadas",
+                  "Fluxos de IA ilimitados",
+                  "Agentes de IA ilimitados",
+                  "Departamentos ilimitados",
+                  "Segmentação de contatos",
+                  "Chat interno",
+                  "Prospecção Google Maps",
+                  "Prospecção Instagram e TikTok",
+                  "Espionar anúncios",
                   "Suporte prioritário",
                 ].map((f) => (
                   <li key={f} className="flex items-center gap-2.5">
-                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">✓</span>
+                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs shrink-0">✓</span>
                     {f}
                   </li>
                 ))}
               </ul>
+
 
               <button className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90" style={{ backgroundColor: "#004DFF" }}>
                 Assinar Business
