@@ -11,7 +11,7 @@ import {
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
-  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie
+  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
@@ -35,6 +35,81 @@ const segments = [
   { icon: Store, label: "Loja" },
   { icon: Wrench, label: "Oficina" },
   { icon: Utensils, label: "Restaurante" },
+];
+
+const cases = [
+  {
+    name: "Rafael Monteiro",
+    role: "Founder @ Kite Studio",
+    plan: "Plano Scale",
+    avatar: "https://i.pravatar.cc/150?u=rafael",
+    before: [
+      { label: "Deploy de MVP", value: "3 semanas" },
+      { label: "Custo mensal em IA", value: "R$ 2.400" },
+      { label: "Bugs em produção", value: "12 / sprint" },
+    ],
+    after: [
+      { label: "Deploy de MVP", value: "4 dias" },
+      { label: "Custo mensal em IA", value: "R$ 890" },
+      { label: "Bugs em produção", value: "2 / sprint" },
+    ],
+    result: "-63% no custo de IA",
+    quote: "Cortei o ciclo de entrega em 80% e ainda reduzi o custo. O time inteiro migrou pro Lovable via Next Pro.",
+  },
+  {
+    name: "Isabela Rocha",
+    role: "CTO @ Nova Labs",
+    plan: "Plano Builder",
+    avatar: "https://i.pravatar.cc/150?u=isabela",
+    before: [
+      { label: "Landing pages/mês", value: "2" },
+      { label: "Tempo por página", value: "5 dias" },
+      { label: "Retrabalho", value: "40%" },
+    ],
+    after: [
+      { label: "Landing pages/mês", value: "9" },
+      { label: "Tempo por página", value: "1 dia" },
+      { label: "Retrabalho", value: "8%" },
+    ],
+    result: "4.5x mais entregas",
+    quote: "Produzimos 4x mais landing pages sem contratar ninguém. Os créditos pagaram o investimento na primeira semana.",
+  },
+  {
+    name: "Diego Almeida",
+    role: "Indie Hacker",
+    plan: "Plano Starter",
+    avatar: "https://i.pravatar.cc/150?u=diego",
+    before: [
+      { label: "MRR", value: "R$ 0" },
+      { label: "Produtos lançados", value: "1" },
+      { label: "Tempo até validar ideia", value: "2 meses" },
+    ],
+    after: [
+      { label: "MRR", value: "R$ 6.800" },
+      { label: "Produtos lançados", value: "5" },
+      { label: "Tempo até validar ideia", value: "6 dias" },
+    ],
+    result: "R$ 0 → R$ 6.8k MRR",
+    quote: "Lancei 5 micro-SaaS em 3 meses. O que travava antes era o custo dos créditos — resolvido.",
+  },
+  {
+    name: "Larissa Pinto",
+    role: "Growth @ Fluxo",
+    plan: "Plano Scale",
+    avatar: "https://i.pravatar.cc/150?u=larissa",
+    before: [
+      { label: "A/B tests por mês", value: "3" },
+      { label: "Conversão média", value: "1.8%" },
+      { label: "Ciclo de iteração", value: "10 dias" },
+    ],
+    after: [
+      { label: "A/B tests por mês", value: "22" },
+      { label: "Conversão média", value: "4.6%" },
+      { label: "Ciclo de iteração", value: "36 horas" },
+    ],
+    result: "+155% em conversão",
+    quote: "Passei a testar tudo. Créditos baratos = liberdade pra iterar. Nossa conversão mais que dobrou.",
+  },
 ];
 
 declare global {
