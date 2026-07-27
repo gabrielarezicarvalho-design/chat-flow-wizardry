@@ -59,6 +59,31 @@ export default function Landing() {
   const [interacted, setInteracted] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadItem | null>(null);
   const [savedLeads, setSavedLeads] = useState<string[]>([]);
+  const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
+
+  const handleSubscribe = async (tier: "start" | "business") => {
+    try {
+      setSubscribing(tier);
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess?.session) {
+        window.location.href = `/auth?redirect=${encodeURIComponent(`/?subscribe=${tier}&billing=${billing}`)}`;
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke("platform-subscription-create", {
+        body: { tier, billing, backUrl: `${window.location.origin}/home?subscription=success` },
+      });
+      if (error) throw error;
+      if (data?.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        throw new Error("Sem link de checkout");
+      }
+    } catch (e) {
+      console.error(e);
+      alert(`Erro ao iniciar assinatura: ${e instanceof Error ? e.message : String(e)}`);
+      setSubscribing(null);
+    }
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recordTimerRef = useRef<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -1136,8 +1161,13 @@ export default function Landing() {
               </ul>
 
 
-              <button className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90" style={{ backgroundColor: "#004DFF" }}>
-                Assinar Business
+              <button
+                onClick={() => handleSubscribe("business")}
+                disabled={subscribing !== null}
+                className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90 disabled:opacity-60"
+                style={{ backgroundColor: "#004DFF" }}
+              >
+                {subscribing === "business" ? "Redirecionando…" : "Assinar Business"}
               </button>
 
             </div>
