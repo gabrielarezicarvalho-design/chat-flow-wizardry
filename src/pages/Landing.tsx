@@ -813,64 +813,85 @@ export default function Landing() {
             </div>
 
             {/* Transcreve áudio */}
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <Mic className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Transcreve áudio</div>
-              <div className="text-sm text-slate-500 mt-1">
-                Cliente mandou áudio? A IA escuta, entende e responde na hora.
-              </div>
-              <div className="mt-5 flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-white">
-                  <Play className="h-4 w-4 ml-0.5" />
+            <div className="group relative rounded-2xl bg-white p-6 border border-slate-200 overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_20px_50px_-15px_rgba(0,77,255,0.35)]">
+              <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-primary/30 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-12" />
+              <div className="relative">
+                <Mic className="h-6 w-6 text-primary" />
+                <div className="mt-4 font-semibold text-slate-900">Transcreve áudio</div>
+                <div className="text-sm text-slate-500 mt-1">
+                  Cliente mandou áudio? A IA escuta, entende e responde na hora.
                 </div>
-                <div className="flex-1 flex gap-0.5 h-6 items-center">
-                  {[...Array(24)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex-1 rounded-full bg-primary/70"
-                      style={{ height: `${25 + Math.abs(Math.sin(i * 0.9)) * 75}%` }}
-                    />
-                  ))}
+                <div className="mt-5 flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-white">
+                    <Play className="h-4 w-4 ml-0.5" />
+                  </div>
+                  <div className="flex-1 flex gap-0.5 h-6 items-center">
+                    {[...Array(24)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 rounded-full bg-primary/70"
+                        style={{ height: `${25 + Math.abs(Math.sin(i * 0.9)) * 75}%` }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-slate-400">0:12</span>
                 </div>
-                <span className="text-xs text-slate-400">0:12</span>
               </div>
             </div>
 
             {/* Recupera leads frios */}
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <Clock className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Recupera leads frios</div>
-              <div className="text-sm text-slate-500 mt-1">
-                Follow-up automático até o cliente responder.
+            <div className="group relative rounded-2xl bg-white p-6 border border-slate-200 overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_20px_50px_-15px_rgba(0,77,255,0.35)]">
+              <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-primary/30 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-12" />
+              <div className="relative">
+                <Clock className="h-6 w-6 text-primary" />
+                <div className="mt-4 font-semibold text-slate-900">Recupera leads frios</div>
+                <div className="text-sm text-slate-500 mt-1">
+                  Follow-up automático até o cliente responder.
+                </div>
               </div>
             </div>
 
             {/* Agenda automático */}
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <Calendar className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Agenda automático</div>
-              <div className="text-sm text-slate-500 mt-1">
-                Marca reuniões e visitas sem você abrir a agenda.
+            <div className="group relative rounded-2xl bg-white p-6 border border-slate-200 overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_20px_50px_-15px_rgba(0,77,255,0.35)]">
+              <div className="pointer-events-none absolute -top-16 -left-16 h-40 w-40 rounded-full bg-primary/30 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-12" />
+              <div className="relative">
+                <Calendar className="h-6 w-6 text-primary" />
+                <div className="mt-4 font-semibold text-slate-900">Agenda automático</div>
+                <div className="text-sm text-slate-500 mt-1">
+                  Marca reuniões e visitas sem você abrir a agenda.
+                </div>
               </div>
             </div>
 
             {/* Aviso de lead quente */}
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <TrendingUp className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Aviso de lead quente</div>
-              <div className="text-sm text-slate-500 mt-1">
-                Quando o cliente tá pronto, você recebe no WhatsApp.
+            <div className="group relative rounded-2xl bg-white p-6 border border-slate-200 overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_20px_50px_-15px_rgba(0,77,255,0.35)]">
+              <div className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-primary/30 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-12" />
+              <div className="relative">
+                <TrendingUp className="h-6 w-6 text-primary" />
+                <div className="mt-4 font-semibold text-slate-900">Aviso de lead quente</div>
+                <div className="text-sm text-slate-500 mt-1">
+                  Quando o cliente tá pronto, você recebe no WhatsApp.
+                </div>
               </div>
             </div>
 
             {/* Anti-bloqueio */}
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <ShieldCheck className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Anti-bloqueio</div>
-              <div className="text-sm text-slate-500 mt-1">
-                Disparos seguros, ritmo natural, simulação humana.
+            <div className="group relative rounded-2xl bg-white p-6 border border-slate-200 overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_20px_50px_-15px_rgba(0,77,255,0.35)]">
+              <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-primary/30 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-12" />
+              <div className="relative">
+                <ShieldCheck className="h-6 w-6 text-primary" />
+                <div className="mt-4 font-semibold text-slate-900">Anti-bloqueio</div>
+                <div className="text-sm text-slate-500 mt-1">
+                  Disparos seguros, ritmo natural, simulação humana.
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
