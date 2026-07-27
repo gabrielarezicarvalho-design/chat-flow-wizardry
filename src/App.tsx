@@ -59,6 +59,7 @@ const TikTokLeads = lazy(() => import("./pages/TikTokLeads"));
 const ImageDesigner = lazy(() => import("./pages/ImageDesigner"));
 const Vendas = lazy(() => import("./pages/Vendas"));
 const Pagamentos = lazy(() => import("./pages/Pagamentos"));
+const MyAccount = lazy(() => import("./pages/MyAccount"));
 
 const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
