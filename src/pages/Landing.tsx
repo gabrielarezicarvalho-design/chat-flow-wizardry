@@ -1,5 +1,9 @@
 import { Link } from "react-router-dom";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
+import avatarRafael from "@/assets/cases/rafael.png.asset.json";
+import avatarIsabela from "@/assets/cases/isabela.png.asset.json";
+import avatarDiego from "@/assets/cases/diego.png.asset.json";
+import avatarLarissa from "@/assets/cases/larissa.png.asset.json";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
