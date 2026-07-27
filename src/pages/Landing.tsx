@@ -1520,7 +1520,14 @@ export default function Landing() {
           <div className="mt-4 pt-3 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-2 text-[11px] tracking-widest uppercase text-slate-400">
             <div>© {new Date().getFullYear()} Next Pro — Todos os direitos reservados</div>
             <div className="flex items-center gap-1.5">
-              Feito com precisão no <span className="font-semibold text-slate-700">Brasil</span> <span aria-hidden>🇧🇷</span>
+              Feito com precisão no <span className="font-semibold text-slate-700">Brasil</span>
+              <img
+                src="https://flagcdn.com/br.svg"
+                alt="Bandeira do Brasil"
+                width={18}
+                height={13}
+                className="inline-block rounded-[2px] shadow-sm"
+              />
             </div>
           </div>
         </div>
