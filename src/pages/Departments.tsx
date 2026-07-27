@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useCompanyId } from "@/hooks/useCompanyId";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, Plus, Loader2, Clock, UserPlus } from "lucide-react";
 
@@ -43,6 +44,7 @@ const defaultBusinessHours: BusinessHours = {
 const Departments = () => {
   const { departments, isLoading, createDepartment, updateDepartment, deleteDepartment, addMember, removeMember } = useDepartments();
   const { companyId } = useCompanyId();
+  const planLimits = usePlanLimits();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState<any>(null);
@@ -67,16 +69,17 @@ const Departments = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingDepartment) {
       await updateDepartment.mutateAsync({
         id: editingDepartment.id,
         updates: formData
       });
     } else {
+      if (!planLimits.check("departments")) return;
       await createDepartment.mutateAsync(formData);
     }
-    
+
     setDialogOpen(false);
     resetForm();
   };

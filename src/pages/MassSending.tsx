@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useCloudStorage } from "@/hooks/useCloudStorage";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { uploadToCloud, uploadBlobToCloud } from "@/lib/cloud-storage";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -141,6 +142,7 @@ const EMPTY_MASS_SENDING_DATA: MassSendingData = {
 };
 
 function MassSendingContent() {
+  const planLimits = usePlanLimits();
   const { upload: uploadToCloudStorage } = useCloudStorage();
   const { user } = useAuth();
   const [connections, setConnections] = useState<Connection[]>([]);
@@ -563,7 +565,7 @@ function MassSendingContent() {
   const sendCampaign = async () => {
     setShowDebugConsole(true);
     addLog("info", "Iniciando envio de campanha...");
-    
+
     const nums = getAllContacts();
     if (nums.length === 0) {
       addLog("error", "Nenhum contato selecionado");
@@ -571,6 +573,13 @@ function MassSendingContent() {
       return;
     }
     addLog("info", `${nums.length} contatos selecionados`);
+
+    // Enforce monthly bulk-sending limit
+    if (!planLimits.check("mass_sends_month", nums.length)) {
+      addLog("error", "Limite mensal de disparos atingido para o seu plano");
+      return;
+    }
+    
     
     if (messageType === "text" && !msg && interactiveType === "none") {
       addLog("error", "Mensagem vazia");

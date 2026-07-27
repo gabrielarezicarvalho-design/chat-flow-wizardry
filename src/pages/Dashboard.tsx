@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
+import { PlanUsagePanel } from "@/components/PlanUsagePanel";
 import { ABTesting } from "@/components/mass-sending/ABTesting";
 import { useEffect } from "react";
 
@@ -303,6 +304,13 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </motion.div>
+
+      {/* Plan usage */}
+      <motion.div variants={itemVariants}>
+        <PlanUsagePanel />
+      </motion.div>
+
+
 
       {/* Main Features */}
       <motion.div variants={itemVariants}>
