@@ -117,7 +117,7 @@ const LegalPageLayout = ({
                 </p>
               </div>
             </div>
-            <a href="https://wa.me/" target="_blank" rel="noreferrer">
+            <a href="https://wa.me/message/BYSDMLHYTA6EA1" target="_blank" rel="noreferrer">
               <Button className="rounded-full bg-primary hover:bg-primary-dark px-6">
                 Falar com suporte
               </Button>
