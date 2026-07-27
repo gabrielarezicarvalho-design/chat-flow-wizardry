@@ -40,75 +40,75 @@ const segments = [
 const cases = [
   {
     name: "Rafael Monteiro",
-    role: "Founder @ Kite Studio",
-    plan: "PLANO SCALE",
+    role: "Diretor Comercial @ Kite Imóveis",
+    plan: "PLANO BUSINESS",
     avatar: "https://i.pravatar.cc/150?u=rafael",
     before: [
-      { label: "Deploy de MVP", value: "3 semanas" },
-      { label: "Custo mensal em IA", value: "R$ 2.400" },
-      { label: "Bugs em produção", value: "12 / sprint" },
+      { label: "Tempo de resposta ao lead", value: "3h em média" },
+      { label: "Atendentes necessários", value: "6 pessoas" },
+      { label: "Leads perdidos/mês", value: "480" },
     ],
     after: [
-      { label: "Deploy de MVP", value: "4 dias" },
-      { label: "Custo mensal em IA", value: "R$ 890" },
-      { label: "Bugs em produção", value: "2 / sprint" },
+      { label: "Tempo de resposta ao lead", value: "8 segundos" },
+      { label: "Atendentes necessários", value: "2 pessoas" },
+      { label: "Leads perdidos/mês", value: "35" },
     ],
-    result: "-63% no custo de IA",
-    quote: "Cortei o ciclo de entrega em 80% e ainda reduzi o custo. O time inteiro migrou pro Lovable via Next Pro.",
+    result: "-92% de leads perdidos",
+    quote: "A IA da Next Pro atende 24/7 e só me passa o lead quando está pronto pra fechar. Reduzi a equipe pela metade e vendo mais.",
   },
   {
     name: "Isabela Rocha",
-    role: "CTO @ Nova Labs",
-    plan: "PLANO BUILDER",
+    role: "CEO @ Nova Estética",
+    plan: "PLANO START",
     avatar: "https://i.pravatar.cc/150?u=isabela",
     before: [
-      { label: "Landing pages/mês", value: "2" },
-      { label: "Tempo por página", value: "5 dias" },
-      { label: "Retrabalho", value: "40%" },
+      { label: "Agendamentos/mês", value: "62" },
+      { label: "Faturamento mensal", value: "R$ 18.400" },
+      { label: "No-show", value: "31%" },
     ],
     after: [
-      { label: "Landing pages/mês", value: "9" },
-      { label: "Tempo por página", value: "1 dia" },
-      { label: "Retrabalho", value: "8%" },
+      { label: "Agendamentos/mês", value: "214" },
+      { label: "Faturamento mensal", value: "R$ 71.200" },
+      { label: "No-show", value: "9%" },
     ],
-    result: "4.5x mais entregas",
-    quote: "Produzimos 4x mais landing pages sem contratar ninguém. Os créditos pagaram o investimento na primeira semana.",
+    result: "3.8x no faturamento",
+    quote: "Coloquei o WhatsApp no automático com os fluxos da Next Pro. Meu salão triplicou de agenda em 60 dias — sem contratar ninguém.",
   },
   {
     name: "Diego Almeida",
-    role: "Indie Hacker",
-    plan: "PLANO STARTER",
+    role: "Fundador @ Loja Alma",
+    plan: "PLANO START",
     avatar: "https://i.pravatar.cc/150?u=diego",
     before: [
-      { label: "MRR", value: "R$ 0" },
-      { label: "Produtos lançados", value: "1" },
-      { label: "Tempo até validar ideia", value: "2 meses" },
+      { label: "Recuperação de carrinho", value: "R$ 0" },
+      { label: "Ticket médio", value: "R$ 89" },
+      { label: "Cobranças no atraso", value: "58%" },
     ],
     after: [
-      { label: "MRR", value: "R$ 6.800" },
-      { label: "Produtos lançados", value: "5" },
-      { label: "Tempo até validar ideia", value: "6 dias" },
+      { label: "Recuperação de carrinho", value: "R$ 24.700/mês" },
+      { label: "Ticket médio", value: "R$ 147" },
+      { label: "Cobranças no atraso", value: "11%" },
     ],
-    result: "R$ 0 → R$ 6.8k MRR",
-    quote: "Lancei 5 micro-SaaS em 3 meses. O que travava antes era o custo dos créditos — resolvido.",
+    result: "+R$ 24.7k recuperados/mês",
+    quote: "A recuperação financeira e o disparo em massa se pagaram na primeira semana. Hoje o CRM roda minha loja sozinho.",
   },
   {
     name: "Larissa Pinto",
-    role: "Growth @ Fluxo",
-    plan: "PLANO SCALE",
+    role: "Head de Growth @ Fluxo Digital",
+    plan: "PLANO BUSINESS",
     avatar: "https://i.pravatar.cc/150?u=larissa",
     before: [
-      { label: "A/B tests por mês", value: "3" },
-      { label: "Conversão média", value: "1.8%" },
-      { label: "Ciclo de iteração", value: "10 dias" },
+      { label: "Leads qualificados/mês", value: "180" },
+      { label: "Conversão em vendas", value: "1.9%" },
+      { label: "Custo por venda", value: "R$ 340" },
     ],
     after: [
-      { label: "A/B tests por mês", value: "22" },
-      { label: "Conversão média", value: "4.6%" },
-      { label: "Ciclo de iteração", value: "36 horas" },
+      { label: "Leads qualificados/mês", value: "1.240" },
+      { label: "Conversão em vendas", value: "5.4%" },
+      { label: "Custo por venda", value: "R$ 78" },
     ],
-    result: "+155% em conversão",
-    quote: "Passei a testar tudo. Créditos baratos = liberdade pra iterar. Nossa conversão mais que dobrou.",
+    result: "+184% em conversão",
+    quote: "Integrei os coletores de Instagram e TikTok com a URA + IA. Meu funil ficou 3x mais barato e a conversão explodiu.",
   },
 ];
 
@@ -1523,7 +1523,7 @@ export default function Landing() {
               <span style={{ color: "#004DFF" }}>clientes reais</span>
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              Números compartilhados por clientes que compraram créditos Lovable com a gente. Verificados por documentos e prints do próprio Lovable.
+              Resultados reais de empresas que automatizaram atendimento, vendas e cobrança com o CRM Next Pro. Verificados por prints e relatos dos próprios clientes.
             </p>
           </div>
 
