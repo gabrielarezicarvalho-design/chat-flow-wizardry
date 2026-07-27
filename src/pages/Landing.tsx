@@ -41,7 +41,7 @@ const cases = [
   {
     name: "Rafael Monteiro",
     role: "Founder @ Kite Studio",
-    plan: "Plano Scale",
+    plan: "PLANO SCALE",
     avatar: "https://i.pravatar.cc/150?u=rafael",
     before: [
       { label: "Deploy de MVP", value: "3 semanas" },
@@ -59,7 +59,7 @@ const cases = [
   {
     name: "Isabela Rocha",
     role: "CTO @ Nova Labs",
-    plan: "Plano Builder",
+    plan: "PLANO BUILDER",
     avatar: "https://i.pravatar.cc/150?u=isabela",
     before: [
       { label: "Landing pages/mês", value: "2" },
@@ -77,7 +77,7 @@ const cases = [
   {
     name: "Diego Almeida",
     role: "Indie Hacker",
-    plan: "Plano Starter",
+    plan: "PLANO STARTER",
     avatar: "https://i.pravatar.cc/150?u=diego",
     before: [
       { label: "MRR", value: "R$ 0" },
@@ -95,7 +95,7 @@ const cases = [
   {
     name: "Larissa Pinto",
     role: "Growth @ Fluxo",
-    plan: "Plano Scale",
+    plan: "PLANO SCALE",
     avatar: "https://i.pravatar.cc/150?u=larissa",
     before: [
       { label: "A/B tests por mês", value: "3" },
