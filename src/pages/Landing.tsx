@@ -1040,10 +1040,14 @@ export default function Landing() {
               <p className="mt-1 text-sm text-slate-500">Para autônomos e pequenos times.</p>
 
               <div className="mt-8 flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-slate-900">R$ 97</span>
+                <span className="text-5xl font-bold text-slate-900">
+                  R$ {billing === "monthly" ? "97" : "80,83"}
+                </span>
                 <span className="text-slate-500">/mês</span>
               </div>
-              <div className="mt-1 text-xs text-slate-500">ou R$ 80,83/mês no anual</div>
+              <div className="mt-1 text-xs text-slate-500">
+                {billing === "monthly" ? "ou R$ 80,83/mês no anual" : "cobrado R$ 970 uma vez por ano"}
+              </div>
               <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: "#004DFF" }}>
                 <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
               </div>
