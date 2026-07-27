@@ -46,6 +46,7 @@ declare global {
 export default function Landing() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [searchQuery, setSearchQuery] = useState("dentistas em São Paulo");
   const [mapLoaded, setMapLoaded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(0);
@@ -1012,12 +1013,20 @@ export default function Landing() {
             </p>
 
             <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 p-1">
-              <button className="px-5 py-2 rounded-full text-sm font-semibold text-white" style={{ backgroundColor: "#004DFF" }}>
+              <button
+                onClick={() => setBilling("monthly")}
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition ${billing === "monthly" ? "text-white" : "text-slate-600"}`}
+                style={billing === "monthly" ? { backgroundColor: "#004DFF" } : undefined}
+              >
                 Mensal
               </button>
-              <button className="px-5 py-2 rounded-full text-sm font-medium text-slate-600 flex items-center gap-2">
+              <button
+                onClick={() => setBilling("annual")}
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition flex items-center gap-2 ${billing === "annual" ? "text-white" : "text-slate-600"}`}
+                style={billing === "annual" ? { backgroundColor: "#004DFF" } : undefined}
+              >
                 Anual
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${billing === "annual" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-700"}`}>
                   -2 meses
                 </span>
               </button>
@@ -1031,10 +1040,14 @@ export default function Landing() {
               <p className="mt-1 text-sm text-slate-500">Para autônomos e pequenos times.</p>
 
               <div className="mt-8 flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-slate-900">R$ 97</span>
+                <span className="text-5xl font-bold text-slate-900">
+                  R$ {billing === "monthly" ? "97" : "80,83"}
+                </span>
                 <span className="text-slate-500">/mês</span>
               </div>
-              <div className="mt-1 text-xs text-slate-500">ou R$ 80,83/mês no anual</div>
+              <div className="mt-1 text-xs text-slate-500">
+                {billing === "monthly" ? "ou R$ 80,83/mês no anual" : "cobrado R$ 970 uma vez por ano"}
+              </div>
               <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: "#004DFF" }}>
                 <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
               </div>
@@ -1069,10 +1082,14 @@ export default function Landing() {
               <p className="mt-1 text-sm text-slate-500">Para equipes em crescimento.</p>
 
               <div className="mt-8 flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-slate-900">R$ 197</span>
+                <span className="text-5xl font-bold text-slate-900">
+                  R$ {billing === "monthly" ? "197" : "164,17"}
+                </span>
                 <span className="text-slate-500">/mês</span>
               </div>
-              <div className="mt-1 text-xs text-slate-500">ou R$ 164,17/mês no anual</div>
+              <div className="mt-1 text-xs text-slate-500">
+                {billing === "monthly" ? "ou R$ 164,17/mês no anual" : "cobrado R$ 1.970 uma vez por ano"}
+              </div>
               <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: "#004DFF" }}>
                 <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
               </div>
@@ -1116,6 +1133,12 @@ export default function Landing() {
                 </thead>
                 <tbody className="text-slate-700">
                   {[
+                    [
+                      billing === "monthly" ? "Preço mensal" : "Preço anual (por mês)",
+                      billing === "monthly" ? "R$ 97" : "R$ 80,83",
+                      billing === "monthly" ? "R$ 197" : "R$ 164,17",
+                    ],
+                    ["Economia no anual", billing === "annual" ? "R$ 194/ano" : "—", billing === "annual" ? "R$ 394/ano" : "—"],
                     ["Atendentes", "3", "10"],
                     ["Conexões WhatsApp", "1", "3"],
                     ["Contatos", "Ilimitados", "Ilimitados"],
