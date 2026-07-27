@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Shield } from "lucide-react";
 
 const PrivacyPolicy = () => {
-  const [companyName, setCompanyName] = useState("MarketFlow");
+  const [companyName, setCompanyName] = useState("CRM NEXT PRO");
 
   useEffect(() => {
     document.title = `Política de Privacidade - ${companyName}`;
