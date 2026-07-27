@@ -1103,11 +1103,10 @@ export default function Landing() {
 
 
               <button
-                onClick={() => handleSubscribe("start")}
-                disabled={subscribing !== null}
-                className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition disabled:opacity-60"
+                onClick={() => (window.location.href = `/checkout?tier=start&billing=${billing}`)}
+                className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition"
               >
-                {subscribing === "start" ? "Redirecionando…" : "Assinar Start"}
+                Assinar Start
               </button>
 
             </div>
