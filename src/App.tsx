@@ -59,6 +59,7 @@ const TikTokLeads = lazy(() => import("./pages/TikTokLeads"));
 const ImageDesigner = lazy(() => import("./pages/ImageDesigner"));
 const Vendas = lazy(() => import("./pages/Vendas"));
 const Pagamentos = lazy(() => import("./pages/Pagamentos"));
+const MyAccount = lazy(() => import("./pages/MyAccount"));
 
 const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -165,6 +166,7 @@ function App() {
                                 <Route path="/vendas" element={<Vendas />} />
                                 <Route path="/pagamentos" element={<Pagamentos />} />
                                 <Route path="/settings" element={<Settings />} />
+                                <Route path="/account" element={<MyAccount />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
                                 <Route path="*" element={<NotFound />} />
                               </Routes>

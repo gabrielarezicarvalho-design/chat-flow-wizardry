@@ -47,6 +47,7 @@ import {
   Palette,
   DollarSign,
   CreditCard,
+  Crown,
   Lock
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -106,6 +107,7 @@ const adminNavItems: NavItem[] = [
   { to: "/chatgpt-credits", icon: Bot, label: "ChatGPT", feature: "chatgpt_credits" },
   { to: "/connections", icon: LinkIcon, label: "Conexões" },
   { to: "/users", icon: UsersRound, label: "Usuários" },
+  { to: "/account", icon: Crown, label: "Minha Conta" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
 
