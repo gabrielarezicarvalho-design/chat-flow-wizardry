@@ -1077,8 +1077,12 @@ export default function Landing() {
               </ul>
 
 
-              <button className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition">
-                Assinar Start
+              <button
+                onClick={() => handleSubscribe("start")}
+                disabled={subscribing !== null}
+                className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition disabled:opacity-60"
+              >
+                {subscribing === "start" ? "Redirecionando…" : "Assinar Start"}
               </button>
 
             </div>
