@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useFlows } from "@/hooks/useFlows";
 import { useConnections } from "@/hooks/useConnections";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ const FlowsList = () => {
   const navigate = useNavigate();
   const { flows, isLoading, createFlow, deleteFlow, updateFlow } = useFlows();
   const { connections } = useConnections();
+  const planLimits = usePlanLimits();
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteFlowId, setDeleteFlowId] = useState<string | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);

@@ -141,6 +141,7 @@ const EMPTY_MASS_SENDING_DATA: MassSendingData = {
 };
 
 function MassSendingContent() {
+  const planLimits = usePlanLimits();
   const { upload: uploadToCloudStorage } = useCloudStorage();
   const { user } = useAuth();
   const [connections, setConnections] = useState<Connection[]>([]);

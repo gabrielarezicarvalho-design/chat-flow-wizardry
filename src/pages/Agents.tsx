@@ -16,6 +16,7 @@ import { useAgentDocuments } from "@/hooks/useAgentDocuments";
 import { useAgentFunctions, FUNCTION_TYPES, type FunctionVariable } from "@/hooks/useAgentFunctions";
 import { useAIProviderKeys } from "@/hooks/useAIProviderKeys";
 import { useFlows } from "@/hooks/useFlows";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -72,6 +73,7 @@ const AgentsContent = () => {
   const { agents, isLoading, updateAgent, deleteAgent, createAgent } = useAgents();
   const { isProviderAvailable, isLoading: isLoadingKeys } = useAIProviderKeys();
   const { flows } = useFlows();
+  const planLimits = usePlanLimits();
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);

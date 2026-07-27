@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useConnections } from "@/hooks/useConnections";
 import { useFlows } from "@/hooks/useFlows";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -39,6 +40,7 @@ const withTimeout = async <T,>(operation: PromiseLike<T>, timeoutMs = 30000): Pr
 };
 
 const Connections = () => {
+  const planLimits = usePlanLimits();
   const { connections, isLoading, createConnection, updateConnection, deleteConnection } = useConnections();
   const { flows } = useFlows();
   const { departments } = useDepartments();
