@@ -66,6 +66,7 @@ const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfServicePage = lazy(() => import("./pages/TermsOfService"));
+const CookiesPage = lazy(() => import("./pages/Cookies"));
 const DataDeletionPage = lazy(() => import("./pages/DataDeletion"));
 
 const queryClient = new QueryClient({
@@ -115,6 +116,7 @@ function App() {
                     {/* Public policy pages - no auth required */}
                     <Route path="/politica-de-privacidade" element={<Suspense fallback={<Loading />}><PrivacyPolicyPage /></Suspense>} />
                     <Route path="/termos-de-servico" element={<Suspense fallback={<Loading />}><TermsOfServicePage /></Suspense>} />
+                    <Route path="/politica-de-cookies" element={<Suspense fallback={<Loading />}><CookiesPage /></Suspense>} />
                    <Route path="/exclusao-de-dados" element={<Suspense fallback={<Loading />}><DataDeletionPage /></Suspense>} />
                    <Route path="/checkout" element={<Suspense fallback={<Loading />}><Checkout /></Suspense>} />
                     {/* Conversations with no padding - gated by chat feature */}
