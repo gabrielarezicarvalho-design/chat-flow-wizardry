@@ -1013,12 +1013,20 @@ export default function Landing() {
             </p>
 
             <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 p-1">
-              <button className="px-5 py-2 rounded-full text-sm font-semibold text-white" style={{ backgroundColor: "#004DFF" }}>
+              <button
+                onClick={() => setBilling("monthly")}
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition ${billing === "monthly" ? "text-white" : "text-slate-600"}`}
+                style={billing === "monthly" ? { backgroundColor: "#004DFF" } : undefined}
+              >
                 Mensal
               </button>
-              <button className="px-5 py-2 rounded-full text-sm font-medium text-slate-600 flex items-center gap-2">
+              <button
+                onClick={() => setBilling("annual")}
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition flex items-center gap-2 ${billing === "annual" ? "text-white" : "text-slate-600"}`}
+                style={billing === "annual" ? { backgroundColor: "#004DFF" } : undefined}
+              >
                 Anual
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${billing === "annual" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-700"}`}>
                   -2 meses
                 </span>
               </button>
