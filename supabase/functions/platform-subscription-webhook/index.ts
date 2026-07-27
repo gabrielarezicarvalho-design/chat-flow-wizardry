@@ -50,7 +50,7 @@ async function applyPlanToCompany(
   admin: ReturnType<typeof createClient>,
   companyId: string,
   tier: string,
-  billing?: string,
+  _billing?: string,
   active = true,
 ) {
   const features = PLAN_FEATURES[tier] || PLAN_FEATURES.start;
@@ -60,7 +60,6 @@ async function applyPlanToCompany(
     is_active: active,
     updated_at: new Date().toISOString(),
   };
-  if (billing) patch["billing_cycle"] = billing;
   const { error } = await admin.from("companies").update(patch).eq("id", companyId);
   if (error) console.error("apply plan error", error);
 }
