@@ -166,6 +166,7 @@ function App() {
                                 <Route path="/vendas" element={<Vendas />} />
                                 <Route path="/pagamentos" element={<Pagamentos />} />
                                 <Route path="/settings" element={<Settings />} />
+                                <Route path="/account" element={<MyAccount />} />
                                 <Route path="/test-webhook" element={<TestWebhook />} />
                                 <Route path="*" element={<NotFound />} />
                               </Routes>
