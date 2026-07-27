@@ -1496,15 +1496,6 @@ export default function Landing() {
               </ul>
             </div>
 
-            {/* Negócios */}
-            <div className="space-y-4">
-              <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase">Negócios</h4>
-              <ul className="space-y-3 text-sm text-slate-500">
-                <li><a href="#" className="flex items-center gap-2 hover:text-primary transition-colors"><Share2 className="h-4 w-4" /> Afiliados</a></li>
-                <li><a href="#" className="flex items-center gap-2 hover:text-primary transition-colors"><Store className="h-4 w-4" /> Revenda</a></li>
-              </ul>
-            </div>
-
             {/* Suporte */}
             <div className="space-y-4">
               <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase">Suporte</h4>
