@@ -408,8 +408,13 @@ export default function Landing() {
                   Começar agora <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="rounded-full px-8 h-12 border-slate-300 bg-white text-slate-900 hover:bg-slate-50 hover:text-slate-900">
-                <PlayCircle className="mr-2 h-4 w-4" /> Ver demonstração
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="rounded-full px-8 h-12 border-slate-300 bg-white text-slate-900 hover:bg-slate-50 hover:text-slate-900"
+                onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                <PlayCircle className="mr-2 h-4 w-4" /> Ver Preços
               </Button>
             </div>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-lg md:mx-0 mx-auto">
