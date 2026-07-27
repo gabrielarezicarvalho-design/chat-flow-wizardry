@@ -1039,10 +1039,6 @@ export default function Landing() {
                 <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
               </div>
 
-              <button className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition">
-                Assinar Start
-              </button>
-
               <ul className="mt-8 space-y-3 text-sm text-slate-700">
                 {[
                   "3 atendentes",
@@ -1057,6 +1053,11 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
+
+              <button className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition">
+                Assinar Start
+              </button>
+
             </div>
 
             {/* Business */}
@@ -1076,10 +1077,6 @@ export default function Landing() {
                 <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
               </div>
 
-              <button className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90" style={{ backgroundColor: "#004DFF" }}>
-                Assinar Business
-              </button>
-
               <ul className="mt-8 space-y-3 text-sm text-slate-700">
                 {[
                   "10 atendentes",
@@ -1095,6 +1092,11 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
+
+              <button className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90" style={{ backgroundColor: "#004DFF" }}>
+                Assinar Business
+              </button>
+
             </div>
           </div>
         </div>
