@@ -21,7 +21,7 @@ const LandingFooter = () => {
               <a href="#" aria-label="Twitter" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
                 <Twitter className="h-3 w-3" />
               </a>
-              <a href="#" aria-label="Instagram" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
+              <a href="https://www.instagram.com/nexxtpro.dev?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
                 <Instagram className="h-3 w-3" />
               </a>
               <a href="#" aria-label="Presentes" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
