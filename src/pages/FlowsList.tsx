@@ -26,6 +26,7 @@ const FlowsList = () => {
   const activeFlowsCount = flows.filter(f => f.is_active).length;
 
   const handleCreateURA = async (ura: { name: string; type: "chat" | "automation"; trigger: string }) => {
+    if (!planLimits.check("flows")) return;
     const newFlow = await createFlow.mutateAsync({
       name: ura.name,
       trigger_type: ura.trigger,

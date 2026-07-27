@@ -563,7 +563,7 @@ function MassSendingContent() {
   const sendCampaign = async () => {
     setShowDebugConsole(true);
     addLog("info", "Iniciando envio de campanha...");
-    
+
     const nums = getAllContacts();
     if (nums.length === 0) {
       addLog("error", "Nenhum contato selecionado");
@@ -571,6 +571,13 @@ function MassSendingContent() {
       return;
     }
     addLog("info", `${nums.length} contatos selecionados`);
+
+    // Enforce monthly bulk-sending limit
+    if (!planLimits.check("mass_sends_month", nums.length)) {
+      addLog("error", "Limite mensal de disparos atingido para o seu plano");
+      return;
+    }
+    
     
     if (messageType === "text" && !msg && interactiveType === "none") {
       addLog("error", "Mensagem vazia");

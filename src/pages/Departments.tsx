@@ -67,16 +67,17 @@ const Departments = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingDepartment) {
       await updateDepartment.mutateAsync({
         id: editingDepartment.id,
         updates: formData
       });
     } else {
+      if (!planLimits.check("departments")) return;
       await createDepartment.mutateAsync(formData);
     }
-    
+
     setDialogOpen(false);
     resetForm();
   };

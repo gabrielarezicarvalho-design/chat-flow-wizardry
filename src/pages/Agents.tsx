@@ -221,6 +221,8 @@ const AgentsContent = () => {
       return;
     }
 
+    if (isCreating && !planLimits.check("agents")) return;
+
     try {
       if (isCreating) {
         const result = await createAgent.mutateAsync({

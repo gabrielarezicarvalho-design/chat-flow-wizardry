@@ -642,6 +642,7 @@ const Connections = () => {
       return;
     }
 
+    if (!planLimits.check("connections")) return;
 
     // Phone is required for pairing code method
     if (connectMethod === 'paircode' && !formData.phone) {
