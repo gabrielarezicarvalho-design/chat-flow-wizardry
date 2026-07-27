@@ -119,4 +119,33 @@ All colors MUST be HSL.
   *::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--primary-dark));
   }
+
+  /* Google Maps controls — blue theme */
+  .gm-bundled-control .gmnoprint > div,
+  .gm-bundled-control button,
+  gmp-internal-camera-control,
+  gmp-internal-camera-control button {
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 6px 20px -6px rgba(0, 77, 255, 0.35), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden;
+  }
+
+  .gm-bundled-control button:hover,
+  gmp-internal-camera-control button:hover {
+    background: #004DFF !important;
+  }
+
+  .gm-bundled-control button img,
+  gmp-internal-camera-control button img,
+  gmp-internal-camera-control button svg {
+    filter: invert(21%) sepia(97%) saturate(4200%) hue-rotate(224deg) brightness(101%) contrast(105%);
+    transition: filter 0.15s ease;
+  }
+
+  .gm-bundled-control button:hover img,
+  gmp-internal-camera-control button:hover img,
+  gmp-internal-camera-control button:hover svg {
+    filter: brightness(0) invert(1);
+  }
 }
