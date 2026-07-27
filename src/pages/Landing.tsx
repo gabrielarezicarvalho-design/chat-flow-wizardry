@@ -1459,7 +1459,7 @@ export default function Landing() {
 
       {/* FOOTER */}
       <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-5">
+        <div className="mx-auto max-w-6xl px-6 py-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Brand */}
             <div className="lg:col-span-2 space-y-2">
