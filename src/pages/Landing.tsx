@@ -997,27 +997,27 @@ export default function Landing() {
       </section>
 
       {/* PLANOS */}
-      <section id="planos" className="bg-slate-950 py-24">
+      <section id="planos" className="bg-white py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
               Planos para cada fase
             </span>
-            <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight text-white">
+            <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
               Escolha o plano{" "}
               <span style={{ color: "#004DFF" }}>ideal pra você</span>
             </h2>
-            <p className="mt-4 text-slate-400 max-w-2xl mx-auto">
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
               Comece grátis por 3 dias. Sem cartão, sem fidelidade — mude de plano quando quiser.
             </p>
 
-            <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-slate-900 border border-slate-800 p-1">
+            <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 p-1">
               <button className="px-5 py-2 rounded-full text-sm font-semibold text-white" style={{ backgroundColor: "#004DFF" }}>
                 Mensal
               </button>
-              <button className="px-5 py-2 rounded-full text-sm font-medium text-slate-400 flex items-center gap-2">
+              <button className="px-5 py-2 rounded-full text-sm font-medium text-slate-600 flex items-center gap-2">
                 Anual
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
                   -2 meses
                 </span>
               </button>
@@ -1026,24 +1026,24 @@ export default function Landing() {
 
           <div className="mt-14 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {/* Start */}
-            <div className="rounded-3xl bg-slate-900/60 border border-slate-800 p-8">
-              <div className="text-xl font-bold text-white">Start</div>
-              <p className="mt-1 text-sm text-slate-400">Para autônomos e pequenos times.</p>
+            <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-8">
+              <div className="text-xl font-bold text-slate-900">Start</div>
+              <p className="mt-1 text-sm text-slate-500">Para autônomos e pequenos times.</p>
 
               <div className="mt-8 flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-white">R$ 97</span>
-                <span className="text-slate-400">/mês</span>
+                <span className="text-5xl font-bold text-slate-900">R$ 97</span>
+                <span className="text-slate-500">/mês</span>
               </div>
               <div className="mt-1 text-xs text-slate-500">ou R$ 80,83/mês no anual</div>
               <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: "#004DFF" }}>
                 <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
               </div>
 
-              <button className="mt-6 w-full rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3 transition">
+              <button className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition">
                 Assinar Start
               </button>
 
-              <ul className="mt-8 space-y-3 text-sm text-slate-300">
+              <ul className="mt-8 space-y-3 text-sm text-slate-700">
                 {[
                   "3 atendentes",
                   "1 conexão WhatsApp",
@@ -1052,7 +1052,7 @@ export default function Landing() {
                   "Contatos ilimitados",
                 ].map((f) => (
                   <li key={f} className="flex items-center gap-2.5">
-                    <span className="h-5 w-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">✓</span>
+                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">✓</span>
                     {f}
                   </li>
                 ))}
@@ -1060,16 +1060,16 @@ export default function Landing() {
             </div>
 
             {/* Business */}
-            <div className="relative rounded-3xl bg-slate-900/80 border-2 p-8" style={{ borderColor: "#004DFF", boxShadow: "0 0 60px -20px #004DFF" }}>
+            <div className="relative rounded-3xl bg-white border-2 p-8" style={{ borderColor: "#004DFF", boxShadow: "0 20px 60px -25px rgba(0, 77, 255, 0.4)" }}>
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white" style={{ backgroundColor: "#004DFF" }}>
                 Mais popular
               </div>
-              <div className="text-xl font-bold text-white">Business</div>
-              <p className="mt-1 text-sm text-slate-400">Para equipes em crescimento.</p>
+              <div className="text-xl font-bold text-slate-900">Business</div>
+              <p className="mt-1 text-sm text-slate-500">Para equipes em crescimento.</p>
 
               <div className="mt-8 flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-white">R$ 197</span>
-                <span className="text-slate-400">/mês</span>
+                <span className="text-5xl font-bold text-slate-900">R$ 197</span>
+                <span className="text-slate-500">/mês</span>
               </div>
               <div className="mt-1 text-xs text-slate-500">ou R$ 164,17/mês no anual</div>
               <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: "#004DFF" }}>
@@ -1080,7 +1080,7 @@ export default function Landing() {
                 Assinar Business
               </button>
 
-              <ul className="mt-8 space-y-3 text-sm text-slate-300">
+              <ul className="mt-8 space-y-3 text-sm text-slate-700">
                 {[
                   "10 atendentes",
                   "3 conexões WhatsApp",
@@ -1090,7 +1090,7 @@ export default function Landing() {
                   "Suporte prioritário",
                 ].map((f) => (
                   <li key={f} className="flex items-center gap-2.5">
-                    <span className="h-5 w-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">✓</span>
+                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">✓</span>
                     {f}
                   </li>
                 ))}
