@@ -11,7 +11,7 @@ import {
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
-  Scale, Activity, Sun, Wrench
+  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
@@ -1458,20 +1458,79 @@ export default function Landing() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-200">
-        <div className="mx-auto max-w-6xl px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-          <div className="flex items-center gap-2 font-bold text-slate-900">
-            <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white">
-              <Zap className="h-3.5 w-3.5" />
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="mx-auto max-w-7xl px-6 py-14">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+            {/* Brand */}
+            <div className="lg:col-span-2 space-y-5">
+              <div className="flex items-center gap-2">
+                <img src={logoAurora.url} alt="NEXT PRO" className="h-8 w-8" />
+                <span className="text-lg font-bold tracking-tight text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  NEXT <span className="text-primary">PRO</span>
+                </span>
+              </div>
+              <p className="text-sm text-slate-500 leading-relaxed max-w-sm">
+                O NEXT PRO é a ferramenta definitiva para quem deseja economizar créditos e automatizar projetos no Lovable AI com eficiência total.
+              </p>
+              <div className="flex items-center gap-3">
+                <a href="#" aria-label="Twitter" className="h-10 w-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
+                  <Twitter className="h-4 w-4" />
+                </a>
+                <a href="#" aria-label="Instagram" className="h-10 w-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
+                  <Instagram className="h-4 w-4" />
+                </a>
+                <a href="#" aria-label="Presentes" className="h-10 w-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
+                  <Gift className="h-4 w-4" />
+                </a>
+              </div>
             </div>
-            MarketFlow
+
+            {/* Produto */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase">Produto</h4>
+              <ul className="space-y-3 text-sm text-slate-500">
+                <li><a href="#recursos" className="hover:text-primary transition-colors">Funcionalidades</a></li>
+                <li><a href="#planos" className="hover:text-primary transition-colors">Preços</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Download</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">FAQ</a></li>
+              </ul>
+            </div>
+
+            {/* Negócios */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase">Negócios</h4>
+              <ul className="space-y-3 text-sm text-slate-500">
+                <li><a href="#" className="flex items-center gap-2 hover:text-primary transition-colors"><Share2 className="h-4 w-4" /> Afiliados</a></li>
+                <li><a href="#" className="flex items-center gap-2 hover:text-primary transition-colors"><Store className="h-4 w-4" /> Revenda</a></li>
+              </ul>
+            </div>
+
+            {/* Suporte */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase">Suporte</h4>
+              <ul className="space-y-3 text-sm text-slate-500">
+                <li><a href="#" className="flex items-center gap-2 hover:text-primary transition-colors"><HelpCircle className="h-4 w-4" /> Central de Ajuda</a></li>
+                <li><a href="#" className="flex items-center gap-2 text-emerald-500 hover:text-emerald-600 transition-colors"><MessageCircle className="h-4 w-4" /> Comunidade VIP</a></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase">Legal</h4>
+              <ul className="space-y-3 text-sm text-slate-500">
+                <li><Link to="/politica-de-privacidade" className="flex items-center gap-2 hover:text-primary transition-colors"><Shield className="h-4 w-4" /> Privacidade</Link></li>
+                <li><Link to="/termos-de-servico" className="flex items-center gap-2 hover:text-primary transition-colors"><FileText className="h-4 w-4" /> Termos</Link></li>
+              </ul>
+              <p className="text-xs text-slate-400 pt-2">CNPJ - 65.146.817/0001-18</p>
+            </div>
           </div>
-          <div className="flex gap-6">
-            <Link to="/politica-de-privacidade" className="hover:text-slate-900">Privacidade</Link>
-            <Link to="/termos-de-servico" className="hover:text-slate-900">Termos</Link>
-            <Link to="/auth" className="hover:text-slate-900">Entrar</Link>
+
+          <div className="mt-12 pt-6 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3 text-xs tracking-widest uppercase text-slate-400">
+            <div>© {new Date().getFullYear()} Next Pro — Todos os direitos reservados</div>
+            <div className="flex items-center gap-2">
+              Feito com precisão no <span className="font-semibold text-slate-700">Brasil</span> <span aria-hidden>🇧🇷</span>
+            </div>
           </div>
-          <div>© {new Date().getFullYear()} MarketFlow. Todos os direitos reservados.</div>
         </div>
       </footer>
 
