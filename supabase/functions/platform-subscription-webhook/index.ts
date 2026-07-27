@@ -64,6 +64,65 @@ async function applyPlanToCompany(
   if (error) console.error("apply plan error", error);
 }
 
+// Parses MP's x-signature header format: "ts=1704...,v1=abcdef..."
+function parseSignatureHeader(header: string | null): { ts?: string; v1?: string } {
+  if (!header) return {};
+  const out: Record<string, string> = {};
+  for (const part of header.split(",")) {
+    const [k, v] = part.trim().split("=");
+    if (k && v) out[k.trim()] = v.trim();
+  }
+  return out;
+}
+
+async function hmacSha256Hex(secret: string, data: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(data));
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function timingSafeEqualHex(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+async function verifyMercadoPagoSignature(
+  req: Request,
+  url: URL,
+  dataId: string | undefined,
+  secret: string,
+): Promise<{ ok: boolean; reason?: string }> {
+  const sigHeader = req.headers.get("x-signature") || req.headers.get("X-Signature");
+  const requestId = req.headers.get("x-request-id") || req.headers.get("X-Request-Id") || "";
+  const { ts, v1 } = parseSignatureHeader(sigHeader);
+  if (!ts || !v1) return { ok: false, reason: "missing x-signature parts" };
+
+  // Guard against replay: reject signatures older than 10 minutes
+  const tsNum = Number(ts);
+  if (!Number.isFinite(tsNum)) return { ok: false, reason: "invalid ts" };
+  const nowSec = Math.floor(Date.now() / 1000);
+  const tsSec = tsNum > 1e12 ? Math.floor(tsNum / 1000) : tsNum;
+  if (Math.abs(nowSec - tsSec) > 600) return { ok: false, reason: "stale timestamp" };
+
+  const id = dataId || url.searchParams.get("data.id") || url.searchParams.get("id") || "";
+  // Manifest format documented by Mercado Pago
+  const manifest = `id:${id};request-id:${requestId};ts:${ts};`;
+  const expected = await hmacSha256Hex(secret, manifest);
+  return timingSafeEqualHex(expected, v1)
+    ? { ok: true }
+    : { ok: false, reason: "signature mismatch" };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -72,6 +131,7 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
   const accessToken = Deno.env.get("MERCADOPAGO_PLATFORM_ACCESS_TOKEN");
+  const webhookSecret = Deno.env.get("MERCADOPAGO_WEBHOOK_SECRET");
 
   try {
     const url = new URL(req.url);
@@ -85,7 +145,21 @@ Deno.serve(async (req) => {
       (body as any)?.action;
     const dataId = (body as any)?.data?.id || params["data.id"] || params.id;
 
-    console.log("MP webhook", { type, dataId, params, body });
+    console.log("MP webhook", { type, dataId, params });
+
+    // Signature validation — reject if secret configured and check fails.
+    if (webhookSecret) {
+      const verdict = await verifyMercadoPagoSignature(req, url, dataId, webhookSecret);
+      if (!verdict.ok) {
+        console.warn("MP signature rejected:", verdict.reason);
+        return new Response(JSON.stringify({ error: "invalid signature" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      console.warn("MERCADOPAGO_WEBHOOK_SECRET not set — skipping signature check");
+    }
 
     if (!accessToken) throw new Error("MERCADOPAGO_PLATFORM_ACCESS_TOKEN missing");
     if (!dataId) return new Response("ok", { headers: corsHeaders });
