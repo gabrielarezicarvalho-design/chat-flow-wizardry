@@ -37,7 +37,9 @@ const SettingsSectionFallback = () => (
 const Settings = () => {
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
-  
+  const { plan } = useFeatureAccess();
+  const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("geral");
   const { stats: storageStats, isLoading: storageLoading, refetch: refetchStorage, formatBytes } = useStorageStats(activeTab === "armazenamento");
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
