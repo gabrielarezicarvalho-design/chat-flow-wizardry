@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { LifeBuoy, Search, MessageCircle, Clock, HelpCircle, ChevronDown } from "lucide-react";
-import { LandingNav } from "@/components/layout/LandingNav";
-import { LandingFooter } from "@/components/layout/LandingFooter";
+import LandingNav from "@/components/layout/LandingNav";
+import LandingFooter from "@/components/layout/LandingFooter";
 
 const FAQS: { q: string; a: string }[] = [
   { q: "Como funciona a compra na Next Pro?", a: "Escolha um plano, finalize o pagamento via Pix ou cartão e a licença é ativada automaticamente na sua conta." },
