@@ -1054,18 +1054,28 @@ export default function Landing() {
 
               <ul className="mt-8 space-y-3 text-sm text-slate-700">
                 {[
-                  "3 atendentes",
-                  "1 conexão WhatsApp",
+                  "5 atendentes",
+                  "2 conexões WhatsApp",
                   "IA completa",
-                  "Campanhas em massa",
-                  "Contatos ilimitados",
+                  "100 disparos em massa/mês",
+                  "500 contatos/mês",
+                  "Histórico de atendimentos",
+                  "Relatórios",
+                  "500 vendas e cobranças/mês",
+                  "3 fluxos de IA/mês",
+                  "3 agentes de IA/mês",
+                  "4 departamentos/mês",
+                  "Segmentação de contatos",
+                  "Chat interno",
+                  "10 usuários/mês",
                 ].map((f) => (
                   <li key={f} className="flex items-center gap-2.5">
-                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">✓</span>
+                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs shrink-0">✓</span>
                     {f}
                   </li>
                 ))}
               </ul>
+
 
               <button className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition">
                 Assinar Start
@@ -1096,19 +1106,31 @@ export default function Landing() {
 
               <ul className="mt-8 space-y-3 text-sm text-slate-700">
                 {[
-                  "10 atendentes",
-                  "3 conexões WhatsApp",
+                  "20 atendentes",
+                  "10 conexões WhatsApp",
                   "IA completa",
-                  "Campanhas ilimitadas",
+                  "Até 10.000 disparos em massa/mês",
+                  "10.000 contatos/mês",
+                  "Histórico de atendimentos",
                   "Relatórios avançados",
+                  "Vendas e cobranças ilimitadas",
+                  "Fluxos de IA ilimitados",
+                  "Agentes de IA ilimitados",
+                  "Departamentos ilimitados",
+                  "Segmentação de contatos",
+                  "Chat interno",
+                  "Prospecção Google Maps",
+                  "Prospecção Instagram e TikTok",
+                  "Espionar anúncios",
                   "Suporte prioritário",
                 ].map((f) => (
                   <li key={f} className="flex items-center gap-2.5">
-                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">✓</span>
+                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs shrink-0">✓</span>
                     {f}
                   </li>
                 ))}
               </ul>
+
 
               <button className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90" style={{ backgroundColor: "#004DFF" }}>
                 Assinar Business
@@ -1139,18 +1161,28 @@ export default function Landing() {
                       billing === "monthly" ? "R$ 99,90" : "R$ 83,25",
                     ],
                     ["Economia no anual", billing === "annual" ? "R$ 99,80/ano" : "—", billing === "annual" ? "R$ 199,80/ano" : "—"],
-                    ["Atendentes", "3", "10"],
-                    ["Conexões WhatsApp", "1", "3"],
-                    ["Contatos", "Ilimitados", "Ilimitados"],
+                    ["Atendentes", "5", "20"],
+                    ["Conexões WhatsApp", "2", "10"],
+                    ["Usuários", "10/mês", "Ilimitados"],
+                    ["Contatos", "500/mês", "10.000/mês"],
+                    ["Disparos em massa", "100/mês", "Até 10.000/mês"],
+                    ["Vendas e cobranças", "500/mês", "Ilimitadas"],
+                    ["Fluxos de IA", "3/mês", "Ilimitados"],
+                    ["Agentes de IA", "3/mês", "Ilimitados"],
+                    ["Departamentos", "4/mês", "Ilimitados"],
                     ["IA completa (Aurora)", true, true],
-                    ["Campanhas em massa", "Básicas", "Ilimitadas"],
-                    ["Recuperação financeira", true, true],
-                    ["Fluxos automatizados", true, true],
-                    ["Relatórios avançados", false, true],
+                    ["Histórico de atendimentos", true, true],
+                    ["Segmentação de contatos", true, true],
+                    ["Chat interno", true, true],
+                    ["Relatórios", "Básicos", "Avançados"],
+                    ["Prospecção Google Maps", false, true],
+                    ["Prospecção Instagram/TikTok", false, true],
+                    ["Espionar anúncios", false, true],
                     ["Voz clonada (ElevenLabs)", false, true],
                     ["API + Webhooks", false, true],
                     ["Suporte", "E-mail", "Prioritário"],
                     ["Teste grátis", "3 dias", "3 dias"],
+
                   ].map(([label, start, business], idx) => (
                     <tr key={label as string} className={idx % 2 === 1 ? "bg-slate-50/50" : ""}>
                       <td className="px-6 py-3.5 font-medium text-slate-800">{label as string}</td>
