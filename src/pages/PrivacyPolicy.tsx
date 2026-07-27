@@ -1,95 +1,81 @@
 import { useEffect } from "react";
-import { Shield } from "lucide-react";
-import LegalPageLayout from "@/components/layout/LegalPageLayout";
+import {
+  Shield,
+  Database,
+  SlidersHorizontal,
+  Lock,
+  Share2,
+  Cookie as CookieIcon,
+  Users,
+  RefreshCw,
+  FileClock,
+} from "lucide-react";
+import LegalPageLayout, { LegalSection } from "@/components/layout/LegalPageLayout";
+
+const companyName = "CRM NEXT PRO";
+
+const sections: LegalSection[] = [
+  {
+    icon: Database,
+    title: "Coleta de Dados",
+    body: `Coletamos apenas as informações necessárias para a prestação dos nossos serviços, incluindo: nome, endereço de e-mail, número de WhatsApp e dados de identificação. Essas informações são fornecidas voluntariamente pelo usuário no momento do cadastro ou compra.`,
+  },
+  {
+    icon: SlidersHorizontal,
+    title: "Uso dos Dados",
+    body: "Os dados coletados são utilizados exclusivamente para:",
+    bullets: [
+      "Processar e entregar os planos e serviços adquiridos.",
+      "Comunicação sobre pedidos, cobranças e suporte ao cliente.",
+      "Envio de atualizações e novidades sobre nossos serviços.",
+      "Cumprimento de obrigações legais e regulatórias (LGPD).",
+    ],
+  },
+  {
+    icon: Lock,
+    title: "Proteção dos Dados",
+    body: `Adotamos medidas de segurança técnicas e organizacionais adequadas para proteger seus dados pessoais contra acesso não autorizado, alteração, divulgação ou destruição, incluindo criptografia em trânsito e em repouso.`,
+  },
+  {
+    icon: Share2,
+    title: "Compartilhamento de Dados",
+    body: `Não vendemos, alugamos ou compartilhamos seus dados pessoais com terceiros, exceto quando necessário para processar pagamentos (Mercado Pago), operar integrações autorizadas por você (WhatsApp Business API, Meta) ou quando exigido por lei.`,
+  },
+  {
+    icon: CookieIcon,
+    title: "Cookies",
+    body: `Utilizamos cookies essenciais para o funcionamento da plataforma, como manutenção da sessão de login e preferências. Não utilizamos cookies de rastreamento de terceiros sem o seu consentimento.`,
+  },
+  {
+    icon: Users,
+    title: "Direitos do Usuário",
+    body: `Você tem o direito de solicitar acesso, correção, portabilidade ou exclusão dos seus dados pessoais a qualquer momento, entrando em contato com nosso suporte. Também pode revogar o consentimento quando desejar.`,
+  },
+  {
+    icon: FileClock,
+    title: "Retenção de Dados",
+    body: `Seus dados serão mantidos enquanto sua conta estiver ativa ou conforme necessário para cumprir obrigações legais. Após o encerramento, os dados são excluídos em até 30 dias, exceto quando a retenção for exigida por lei.`,
+  },
+  {
+    icon: RefreshCw,
+    title: "Alterações nesta Política",
+    body: `Esta política pode ser atualizada periodicamente. Recomendamos a revisão regular desta página para estar ciente de quaisquer alterações. Mudanças significativas serão comunicadas na plataforma.`,
+  },
+];
 
 const PrivacyPolicy = () => {
-  const companyName = "CRM NEXT PRO";
-
   useEffect(() => {
     document.title = `Política de Privacidade - ${companyName}`;
-  }, [companyName]);
+  }, []);
 
   return (
     <LegalPageLayout
-      icon={Shield}
+      badgeIcon={Shield}
+      badgeLabel="Privacidade"
       title="Política de Privacidade"
-      subtitle={companyName}
-    >
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">1. Informações Gerais</h2>
-        <p className="text-muted-foreground leading-relaxed">
-          Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais ao utilizar nossos serviços. Estamos comprometidos em proteger a privacidade dos nossos usuários e em cumprir com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
-        </p>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">2. Dados Coletados</h2>
-        <p className="text-muted-foreground leading-relaxed">Coletamos os seguintes tipos de dados:</p>
-        <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-          <li><strong>Dados de identificação:</strong> nome, e-mail, telefone e informações de perfil.</li>
-          <li><strong>Dados de uso:</strong> registros de acesso, interações com o sistema e preferências.</li>
-          <li><strong>Dados de comunicação:</strong> mensagens enviadas e recebidas através da plataforma, incluindo integrações com WhatsApp.</li>
-          <li><strong>Dados técnicos:</strong> endereço IP, tipo de navegador, sistema operacional e informações de dispositivo.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">3. Finalidade do Tratamento</h2>
-        <p className="text-muted-foreground leading-relaxed">Seus dados são utilizados para:</p>
-        <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-          <li>Fornecer e melhorar nossos serviços de automação e atendimento.</li>
-          <li>Gerenciar sua conta e autenticação.</li>
-          <li>Enviar comunicações relevantes sobre o serviço.</li>
-          <li>Cumprir obrigações legais e regulatórias.</li>
-          <li>Análise e melhoria contínua da plataforma.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">4. Compartilhamento de Dados</h2>
-        <p className="text-muted-foreground leading-relaxed">
-          Não vendemos seus dados pessoais. Podemos compartilhá-los apenas com:
-        </p>
-        <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-          <li>Provedores de serviços essenciais (hospedagem, processamento de dados).</li>
-          <li>Integrações autorizadas por você (WhatsApp Business API, Meta).</li>
-          <li>Autoridades competentes quando exigido por lei.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">5. Segurança dos Dados</h2>
-        <p className="text-muted-foreground leading-relaxed">
-          Implementamos medidas técnicas e organizacionais adequadas para proteger seus dados, incluindo criptografia, controle de acesso e monitoramento contínuo de segurança.
-        </p>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">6. Seus Direitos</h2>
-        <p className="text-muted-foreground leading-relaxed">De acordo com a LGPD, você tem direito a:</p>
-        <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-          <li>Acessar seus dados pessoais.</li>
-          <li>Corrigir dados incompletos ou desatualizados.</li>
-          <li>Solicitar a exclusão de seus dados.</li>
-          <li>Revogar o consentimento a qualquer momento.</li>
-          <li>Solicitar a portabilidade dos dados.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">7. Retenção de Dados</h2>
-        <p className="text-muted-foreground leading-relaxed">
-          Seus dados serão mantidos enquanto sua conta estiver ativa ou conforme necessário para cumprir obrigações legais. Após o encerramento da conta, os dados serão excluídos dentro de 30 dias, exceto quando a retenção for exigida por lei.
-        </p>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">8. Alterações nesta Política</h2>
-        <p className="text-muted-foreground leading-relaxed">
-          Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos sobre mudanças significativas através da plataforma ou por e-mail.
-        </p>
-      </section>
-    </LegalPageLayout>
+      subtitle={`Como coletamos, utilizamos e protegemos seus dados no ${companyName}.`}
+      sections={sections}
+    />
   );
 };
 
