@@ -306,6 +306,11 @@ const Dashboard = () => {
         </Tabs>
       </motion.div>
 
+      {/* Monthly usage counters */}
+      <motion.div variants={itemVariants}>
+        <MonthlyUsageCards />
+      </motion.div>
+
       {/* Plan usage */}
       <motion.div variants={itemVariants}>
         <PlanUsagePanel />
