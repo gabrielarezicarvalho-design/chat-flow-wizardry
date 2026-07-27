@@ -44,7 +44,7 @@ const LandingFooter = () => {
             <h4 className="text-[11px] font-bold tracking-widest text-slate-900 uppercase">Suporte</h4>
             <ul className="space-y-1.5 text-xs text-slate-500">
               <li><Link to="/central-de-ajuda" className="flex items-center gap-1.5 hover:text-primary transition-colors"><HelpCircle className="h-3.5 w-3.5" /> Central de Ajuda</Link></li>
-              <li><a href="#" className="flex items-center gap-1.5 text-emerald-500 hover:text-emerald-600 transition-colors"><MessageCircle className="h-3.5 w-3.5" /> Comunidade VIP</a></li>
+              <li><a href="https://chat.whatsapp.com/F1FmWLsCOFiLf8FYngX3ux?s=cl&p=a&ilr=0" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-emerald-500 hover:text-emerald-600 transition-colors"><MessageCircle className="h-3.5 w-3.5" /> Comunidade VIP</a></li>
             </ul>
           </div>
 
