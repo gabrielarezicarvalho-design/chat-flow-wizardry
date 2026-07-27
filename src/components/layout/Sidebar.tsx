@@ -47,6 +47,7 @@ import {
   Palette,
   DollarSign,
   CreditCard,
+  Crown,
   Lock
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
