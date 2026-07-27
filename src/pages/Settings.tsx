@@ -16,6 +16,8 @@ import {
 import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/hooks/useAuth";
 import { useStorageStats } from "@/hooks/useStorageStats";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { useNavigate } from "react-router-dom";
 
 import { toast } from "sonner";
 
