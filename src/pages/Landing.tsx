@@ -1041,12 +1041,12 @@ export default function Landing() {
 
               <div className="mt-8 flex items-baseline gap-2">
                 <span className="text-5xl font-bold text-slate-900">
-                  R$ {billing === "monthly" ? "97" : "80,83"}
+                  R$ {billing === "monthly" ? "49,90" : "41,58"}
                 </span>
                 <span className="text-slate-500">/mês</span>
               </div>
               <div className="mt-1 text-xs text-slate-500">
-                {billing === "monthly" ? "ou R$ 80,83/mês no anual" : "cobrado R$ 970 uma vez por ano"}
+                {billing === "monthly" ? "ou R$ 41,58/mês no anual" : "cobrado R$ 499 uma vez por ano"}
               </div>
               <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: "#004DFF" }}>
                 <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
@@ -1083,12 +1083,12 @@ export default function Landing() {
 
               <div className="mt-8 flex items-baseline gap-2">
                 <span className="text-5xl font-bold text-slate-900">
-                  R$ {billing === "monthly" ? "197" : "164,17"}
+                  R$ {billing === "monthly" ? "99,90" : "83,25"}
                 </span>
                 <span className="text-slate-500">/mês</span>
               </div>
               <div className="mt-1 text-xs text-slate-500">
-                {billing === "monthly" ? "ou R$ 164,17/mês no anual" : "cobrado R$ 1.970 uma vez por ano"}
+                {billing === "monthly" ? "ou R$ 83,25/mês no anual" : "cobrado R$ 999 uma vez por ano"}
               </div>
               <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: "#004DFF" }}>
                 <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
@@ -1135,10 +1135,10 @@ export default function Landing() {
                   {[
                     [
                       billing === "monthly" ? "Preço mensal" : "Preço anual (por mês)",
-                      billing === "monthly" ? "R$ 97" : "R$ 80,83",
-                      billing === "monthly" ? "R$ 197" : "R$ 164,17",
+                      billing === "monthly" ? "R$ 49,90" : "R$ 41,58",
+                      billing === "monthly" ? "R$ 99,90" : "R$ 83,25",
                     ],
-                    ["Economia no anual", billing === "annual" ? "R$ 194/ano" : "—", billing === "annual" ? "R$ 394/ano" : "—"],
+                    ["Economia no anual", billing === "annual" ? "R$ 99,80/ano" : "—", billing === "annual" ? "R$ 199,80/ano" : "—"],
                     ["Atendentes", "3", "10"],
                     ["Conexões WhatsApp", "1", "3"],
                     ["Contatos", "Ilimitados", "Ilimitados"],
