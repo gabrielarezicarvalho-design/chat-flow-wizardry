@@ -107,7 +107,7 @@ const adminNavItems: NavItem[] = [
   { to: "/chatgpt-credits", icon: Bot, label: "ChatGPT", feature: "chatgpt_credits" },
   { to: "/connections", icon: LinkIcon, label: "Conexões" },
   { to: "/users", icon: UsersRound, label: "Usuários" },
-  { to: "/account", icon: SparklesIcon, label: "Minha Conta" },
+  { to: "/account", icon: Crown, label: "Minha Conta" },
   { to: "/settings", icon: Settings, label: "Configurações" },
 ];
 
