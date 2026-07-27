@@ -1103,11 +1103,10 @@ export default function Landing() {
 
 
               <button
-                onClick={() => handleSubscribe("start")}
-                disabled={subscribing !== null}
-                className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition disabled:opacity-60"
+                onClick={() => (window.location.href = `/checkout?tier=start&billing=${billing}`)}
+                className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition"
               >
-                {subscribing === "start" ? "Redirecionando…" : "Assinar Start"}
+                Assinar Start
               </button>
 
             </div>
@@ -1162,12 +1161,11 @@ export default function Landing() {
 
 
               <button
-                onClick={() => handleSubscribe("business")}
-                disabled={subscribing !== null}
-                className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90 disabled:opacity-60"
+                onClick={() => (window.location.href = `/checkout?tier=business&billing=${billing}`)}
+                className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90"
                 style={{ backgroundColor: "#004DFF" }}
               >
-                {subscribing === "business" ? "Redirecionando…" : "Assinar Business"}
+                Assinar Business
               </button>
 
             </div>

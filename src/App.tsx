@@ -60,6 +60,7 @@ const ImageDesigner = lazy(() => import("./pages/ImageDesigner"));
 const Vendas = lazy(() => import("./pages/Vendas"));
 const Pagamentos = lazy(() => import("./pages/Pagamentos"));
 const MyAccount = lazy(() => import("./pages/MyAccount"));
+const Checkout = lazy(() => import("./pages/Checkout"));
 
 const ChatGPTCredits = lazy(() => import("./pages/ChatGPTCredits"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -114,7 +115,8 @@ function App() {
                     {/* Public policy pages - no auth required */}
                     <Route path="/politica-de-privacidade" element={<Suspense fallback={<Loading />}><PrivacyPolicyPage /></Suspense>} />
                     <Route path="/termos-de-servico" element={<Suspense fallback={<Loading />}><TermsOfServicePage /></Suspense>} />
-                    <Route path="/exclusao-de-dados" element={<Suspense fallback={<Loading />}><DataDeletionPage /></Suspense>} />
+                   <Route path="/exclusao-de-dados" element={<Suspense fallback={<Loading />}><DataDeletionPage /></Suspense>} />
+                   <Route path="/checkout" element={<Suspense fallback={<Loading />}><Checkout /></Suspense>} />
                     {/* Conversations with no padding - gated by chat feature */}
                     <Route
                       path="/conversations"
