@@ -1848,6 +1848,65 @@ export type Database = {
           },
         ]
       }
+      platform_subscriptions: {
+        Row: {
+          amount: number
+          billing: string
+          company_id: string
+          created_at: string
+          current_period_end: string | null
+          id: string
+          last_payment_at: string | null
+          mp_init_point: string | null
+          mp_preapproval_id: string | null
+          raw: Json | null
+          status: string
+          tier: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          billing: string
+          company_id: string
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          last_payment_at?: string | null
+          mp_init_point?: string | null
+          mp_preapproval_id?: string | null
+          raw?: Json | null
+          status?: string
+          tier: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          billing?: string
+          company_id?: string
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          last_payment_at?: string | null
+          mp_init_point?: string | null
+          mp_preapproval_id?: string | null
+          raw?: Json | null
+          status?: string
+          tier?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
