@@ -46,7 +46,7 @@ const cases = [
     name: "Rafael Monteiro",
     role: "Diretor Comercial @ Kite Imóveis",
     plan: "PLANO BUSINESS",
-    avatar: "https://i.pravatar.cc/150?u=rafael",
+    avatar: "${avatarRafael.url}",
     before: [
       { label: "Tempo de resposta ao lead", value: "3h em média" },
       { label: "Atendentes necessários", value: "6 pessoas" },
@@ -64,7 +64,7 @@ const cases = [
     name: "Isabela Rocha",
     role: "CEO @ Nova Estética",
     plan: "PLANO START",
-    avatar: "https://i.pravatar.cc/150?u=isabela",
+    avatar: "${avatarIsabela.url}",
     before: [
       { label: "Agendamentos/mês", value: "62" },
       { label: "Faturamento mensal", value: "R$ 18.400" },
@@ -82,7 +82,7 @@ const cases = [
     name: "Diego Almeida",
     role: "Fundador @ Loja Alma",
     plan: "PLANO START",
-    avatar: "https://i.pravatar.cc/150?u=diego",
+    avatar: "${avatarDiego.url}",
     before: [
       { label: "Recuperação de carrinho", value: "R$ 0" },
       { label: "Ticket médio", value: "R$ 89" },
@@ -100,7 +100,7 @@ const cases = [
     name: "Larissa Pinto",
     role: "Head de Growth @ Fluxo Digital",
     plan: "PLANO BUSINESS",
-    avatar: "https://i.pravatar.cc/150?u=larissa",
+    avatar: "${avatarLarissa.url}",
     before: [
       { label: "Leads qualificados/mês", value: "180" },
       { label: "Conversão em vendas", value: "1.9%" },
