@@ -16,6 +16,8 @@ import {
 import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/hooks/useAuth";
 import { useStorageStats } from "@/hooks/useStorageStats";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { useNavigate } from "react-router-dom";
 
 import { toast } from "sonner";
 
@@ -35,7 +37,9 @@ const SettingsSectionFallback = () => (
 const Settings = () => {
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
-  
+  const { plan } = useFeatureAccess();
+  const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("geral");
   const { stats: storageStats, isLoading: storageLoading, refetch: refetchStorage, formatBytes } = useStorageStats(activeTab === "armazenamento");
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
@@ -675,18 +679,36 @@ const Settings = () => {
               <div className="space-y-4">
                 <div className="p-6 border-2 border-primary rounded-lg">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-2xl font-bold">Plano Profissional</h3>
+                    <h3 className="text-2xl font-bold">
+                      {plan?.name === "Business" || plan?.id === "business"
+                        ? "Plano Business"
+                        : plan?.name === "Start" || plan?.id === "start"
+                        ? "Plano Start"
+                        : plan?.name || "Plano Livre"}
+                    </h3>
                     <Badge className="bg-primary text-white">Ativo</Badge>
                   </div>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>✓ Agentes ilimitados</li>
-                    <li>✓ Conversas ilimitadas</li>
-                    <li>✓ Fluxos de automação</li>
-                    <li>✓ Integrações avançadas</li>
-                    <li>✓ Suporte prioritário</li>
+                    {(plan?.id === "business" || plan?.name === "Business") ? (
+                      <>
+                        <li>✓ Atendentes, conexões, agentes e fluxos ilimitados</li>
+                        <li>✓ Disparos e contatos ilimitados</li>
+                        <li>✓ Vendas e cobranças ilimitadas</li>
+                        <li>✓ Prospecção (Google Maps, Instagram, TikTok, Espionar Anúncios)</li>
+                        <li>✓ Chat interno e integrações avançadas</li>
+                        <li>✓ Suporte prioritário</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>✓ 5 atendentes / 2 conexões WhatsApp</li>
+                        <li>✓ 100 disparos e 500 contatos por mês</li>
+                        <li>✓ 3 agentes de IA e 3 fluxos</li>
+                        <li>✓ Chat interno e relatórios</li>
+                      </>
+                    )}
                   </ul>
                 </div>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => navigate("/account")}>
                   Gerenciar Assinatura
                 </Button>
               </div>
