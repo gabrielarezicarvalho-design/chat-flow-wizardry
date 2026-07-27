@@ -1161,12 +1161,11 @@ export default function Landing() {
 
 
               <button
-                onClick={() => handleSubscribe("business")}
-                disabled={subscribing !== null}
-                className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90 disabled:opacity-60"
+                onClick={() => (window.location.href = `/checkout?tier=business&billing=${billing}`)}
+                className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90"
                 style={{ backgroundColor: "#004DFF" }}
               >
-                {subscribing === "business" ? "Redirecionando…" : "Assinar Business"}
+                Assinar Business
               </button>
 
             </div>
