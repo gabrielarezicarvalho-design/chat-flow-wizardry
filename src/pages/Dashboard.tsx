@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { RealTimeMetrics } from "@/components/dashboard/RealTimeMetrics";
 import { PlanUsagePanel } from "@/components/PlanUsagePanel";
+import { MonthlyUsageCards } from "@/components/MonthlyUsageCards";
 import { ABTesting } from "@/components/mass-sending/ABTesting";
 import { useEffect } from "react";
 
