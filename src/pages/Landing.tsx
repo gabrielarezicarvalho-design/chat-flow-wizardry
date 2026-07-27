@@ -1459,36 +1459,36 @@ export default function Landing() {
 
       {/* FOOTER */}
       <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-14">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+        <div className="mx-auto max-w-7xl px-6 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {/* Brand */}
-            <div className="lg:col-span-2 space-y-5">
+            <div className="lg:col-span-2 space-y-3">
               <div className="flex items-center gap-2">
-                <img src={logoAurora.url} alt="NEXT PRO" className="h-8 w-8" />
-                <span className="text-lg font-bold tracking-tight text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <img src={logoAurora.url} alt="NEXT PRO" className="h-7 w-7" />
+                <span className="text-base font-bold tracking-tight text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   NEXT <span className="text-primary">PRO</span>
                 </span>
               </div>
-              <p className="text-sm text-slate-500 leading-relaxed max-w-sm">
+              <p className="text-sm text-slate-500 leading-snug max-w-sm">
                 O NEXT PRO é a ferramenta definitiva para quem deseja economizar créditos e automatizar projetos no Lovable AI com eficiência total.
               </p>
-              <div className="flex items-center gap-3">
-                <a href="#" aria-label="Twitter" className="h-10 w-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
-                  <Twitter className="h-4 w-4" />
+              <div className="flex items-center gap-2">
+                <a href="#" aria-label="Twitter" className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
+                  <Twitter className="h-3.5 w-3.5" />
                 </a>
-                <a href="#" aria-label="Instagram" className="h-10 w-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
-                  <Instagram className="h-4 w-4" />
+                <a href="#" aria-label="Instagram" className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
+                  <Instagram className="h-3.5 w-3.5" />
                 </a>
-                <a href="#" aria-label="Presentes" className="h-10 w-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
-                  <Gift className="h-4 w-4" />
+                <a href="#" aria-label="Presentes" className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
+                  <Gift className="h-3.5 w-3.5" />
                 </a>
               </div>
             </div>
 
             {/* Produto */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase">Produto</h4>
-              <ul className="space-y-3 text-sm text-slate-500">
+              <ul className="space-y-2 text-sm text-slate-500">
                 <li><a href="#recursos" className="hover:text-primary transition-colors">Funcionalidades</a></li>
                 <li><a href="#planos" className="hover:text-primary transition-colors">Preços</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Download</a></li>
@@ -1497,26 +1497,26 @@ export default function Landing() {
             </div>
 
             {/* Suporte */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase">Suporte</h4>
-              <ul className="space-y-3 text-sm text-slate-500">
+              <ul className="space-y-2 text-sm text-slate-500">
                 <li><a href="#" className="flex items-center gap-2 hover:text-primary transition-colors"><HelpCircle className="h-4 w-4" /> Central de Ajuda</a></li>
                 <li><a href="#" className="flex items-center gap-2 text-emerald-500 hover:text-emerald-600 transition-colors"><MessageCircle className="h-4 w-4" /> Comunidade VIP</a></li>
               </ul>
             </div>
 
             {/* Legal */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h4 className="text-xs font-bold tracking-widest text-slate-900 uppercase">Legal</h4>
-              <ul className="space-y-3 text-sm text-slate-500">
+              <ul className="space-y-2 text-sm text-slate-500">
                 <li><Link to="/politica-de-privacidade" className="flex items-center gap-2 hover:text-primary transition-colors"><Shield className="h-4 w-4" /> Privacidade</Link></li>
                 <li><Link to="/termos-de-servico" className="flex items-center gap-2 hover:text-primary transition-colors"><FileText className="h-4 w-4" /> Termos</Link></li>
               </ul>
-              <p className="text-xs text-slate-400 pt-2">CNPJ - 65.146.817/0001-18</p>
+              <p className="text-xs text-slate-400 pt-1">CNPJ - 65.146.817/0001-18</p>
             </div>
           </div>
 
-          <div className="mt-12 pt-6 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3 text-xs tracking-widest uppercase text-slate-400">
+          <div className="mt-6 pt-4 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-3 text-xs tracking-widest uppercase text-slate-400">
             <div>© {new Date().getFullYear()} Next Pro — Todos os direitos reservados</div>
             <div className="flex items-center gap-2">
               Feito com precisão no <span className="font-semibold text-slate-700">Brasil</span> <span aria-hidden>🇧🇷</span>
