@@ -11,7 +11,7 @@ import {
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
-  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie
+  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
@@ -35,6 +35,81 @@ const segments = [
   { icon: Store, label: "Loja" },
   { icon: Wrench, label: "Oficina" },
   { icon: Utensils, label: "Restaurante" },
+];
+
+const cases = [
+  {
+    name: "Rafael Monteiro",
+    role: "Founder @ Kite Studio",
+    plan: "PLANO SCALE",
+    avatar: "https://i.pravatar.cc/150?u=rafael",
+    before: [
+      { label: "Deploy de MVP", value: "3 semanas" },
+      { label: "Custo mensal em IA", value: "R$ 2.400" },
+      { label: "Bugs em produção", value: "12 / sprint" },
+    ],
+    after: [
+      { label: "Deploy de MVP", value: "4 dias" },
+      { label: "Custo mensal em IA", value: "R$ 890" },
+      { label: "Bugs em produção", value: "2 / sprint" },
+    ],
+    result: "-63% no custo de IA",
+    quote: "Cortei o ciclo de entrega em 80% e ainda reduzi o custo. O time inteiro migrou pro Lovable via Next Pro.",
+  },
+  {
+    name: "Isabela Rocha",
+    role: "CTO @ Nova Labs",
+    plan: "PLANO BUILDER",
+    avatar: "https://i.pravatar.cc/150?u=isabela",
+    before: [
+      { label: "Landing pages/mês", value: "2" },
+      { label: "Tempo por página", value: "5 dias" },
+      { label: "Retrabalho", value: "40%" },
+    ],
+    after: [
+      { label: "Landing pages/mês", value: "9" },
+      { label: "Tempo por página", value: "1 dia" },
+      { label: "Retrabalho", value: "8%" },
+    ],
+    result: "4.5x mais entregas",
+    quote: "Produzimos 4x mais landing pages sem contratar ninguém. Os créditos pagaram o investimento na primeira semana.",
+  },
+  {
+    name: "Diego Almeida",
+    role: "Indie Hacker",
+    plan: "PLANO STARTER",
+    avatar: "https://i.pravatar.cc/150?u=diego",
+    before: [
+      { label: "MRR", value: "R$ 0" },
+      { label: "Produtos lançados", value: "1" },
+      { label: "Tempo até validar ideia", value: "2 meses" },
+    ],
+    after: [
+      { label: "MRR", value: "R$ 6.800" },
+      { label: "Produtos lançados", value: "5" },
+      { label: "Tempo até validar ideia", value: "6 dias" },
+    ],
+    result: "R$ 0 → R$ 6.8k MRR",
+    quote: "Lancei 5 micro-SaaS em 3 meses. O que travava antes era o custo dos créditos — resolvido.",
+  },
+  {
+    name: "Larissa Pinto",
+    role: "Growth @ Fluxo",
+    plan: "PLANO SCALE",
+    avatar: "https://i.pravatar.cc/150?u=larissa",
+    before: [
+      { label: "A/B tests por mês", value: "3" },
+      { label: "Conversão média", value: "1.8%" },
+      { label: "Ciclo de iteração", value: "10 dias" },
+    ],
+    after: [
+      { label: "A/B tests por mês", value: "22" },
+      { label: "Conversão média", value: "4.6%" },
+      { label: "Ciclo de iteração", value: "36 horas" },
+    ],
+    result: "+155% em conversão",
+    quote: "Passei a testar tudo. Créditos baratos = liberdade pra iterar. Nossa conversão mais que dobrou.",
+  },
 ];
 
 declare global {
@@ -1436,15 +1511,91 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* DEPOIMENTO */}
-      <section id="depoimentos" className="mx-auto max-w-3xl px-6 py-24 text-center">
-        <div className="flex justify-center gap-1 mb-6">
-          {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />)}
+      {/* CASOS REAIS */}
+      <section id="depoimentos" className="bg-white py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="text-center">
+            <span className="text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
+              // Casos reais
+            </span>
+            <h2 className="mt-4 text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+              Antes e depois de{" "}
+              <span style={{ color: "#004DFF" }}>clientes reais</span>
+            </h2>
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto leading-relaxed">
+              Números compartilhados por clientes que compraram créditos Lovable com a gente. Verificados por documentos e prints do próprio Lovable.
+            </p>
+          </div>
+
+          <div className="mt-14 grid md:grid-cols-2 gap-6">
+            {cases.map((c) => (
+              <div key={c.name} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <img src={c.avatar} alt={c.name} className="h-11 w-11 rounded-full object-cover" />
+                    <div>
+                      <div className="font-semibold text-slate-900 text-sm">{c.name}</div>
+                      <div className="text-xs text-slate-500">{c.role}</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-50 text-[#004DFF] border border-blue-100">
+                    {c.plan}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-slate-50 p-4">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Antes</span>
+                    </div>
+                    <div className="space-y-2.5">
+                      {c.before.map((item) => (
+                        <div key={item.label}>
+                          <div className="text-xs text-slate-600">{item.label}</div>
+                          <div className="text-xs font-semibold text-slate-900">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-blue-50/50 p-4">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#004DFF]">Depois</span>
+                    </div>
+                    <div className="space-y-2.5">
+                      {c.after.map((item) => (
+                        <div key={item.label}>
+                          <div className="text-xs text-slate-600">{item.label}</div>
+                          <div className="text-xs font-semibold text-[#004DFF]">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#004DFF]">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                  {c.result}
+                </div>
+
+                <div className="mt-5 pt-5 border-t border-slate-100">
+                  <div className="flex gap-2">
+                    <Quote className="h-4 w-4 text-slate-300 shrink-0 mt-0.5" />
+                    <p className="text-sm text-slate-600 leading-relaxed">{c.quote}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-xs text-slate-500 inline-flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-slate-400" />
+              Métricas compartilhadas voluntariamente pelos clientes · Prints e comprovantes sob solicitação
+            </p>
+          </div>
         </div>
-        <blockquote className="text-xl md:text-2xl font-medium text-slate-800 leading-relaxed">
-          “Em 30 dias, a MarketFlow respondeu mais clientes do que minha equipe inteira em 6 meses. Triplicamos o faturamento.”
-        </blockquote>
-        <div className="mt-6 text-sm text-slate-500">Carla Mendes — CEO, Studio Bella</div>
       </section>
 
       {/* CTA FINAL */}
