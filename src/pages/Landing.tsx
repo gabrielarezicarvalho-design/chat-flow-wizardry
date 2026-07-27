@@ -1133,6 +1133,12 @@ export default function Landing() {
                 </thead>
                 <tbody className="text-slate-700">
                   {[
+                    [
+                      billing === "monthly" ? "Preço mensal" : "Preço anual (por mês)",
+                      billing === "monthly" ? "R$ 97" : "R$ 80,83",
+                      billing === "monthly" ? "R$ 197" : "R$ 164,17",
+                    ],
+                    ["Economia no anual", billing === "annual" ? "R$ 194/ano" : "—", billing === "annual" ? "R$ 394/ano" : "—"],
                     ["Atendentes", "3", "10"],
                     ["Conexões WhatsApp", "1", "3"],
                     ["Contatos", "Ilimitados", "Ilimitados"],
