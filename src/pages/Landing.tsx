@@ -599,8 +599,8 @@ export default function Landing() {
               <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
               4.8★ de satisfação
             </div>
-            <div className="absolute -left-4 bottom-[12%] rounded-lg bg-[#1a1c1a]/95 px-4 py-2 text-xs font-medium text-white shadow-xl">
-              <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
+            <div className="pill-float absolute -left-4 bottom-[12%] rounded-lg bg-[#1a1c1a]/95 px-4 py-2 text-xs font-medium text-white shadow-xl">
+              <span className="pill-dot mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
               1.240 clientes voltaram
             </div>
           </div>
