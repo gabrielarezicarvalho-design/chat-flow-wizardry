@@ -124,10 +124,10 @@ declare global {
 }
 
 const ROTATING_PHRASES = [
-  "e sua\u00A0base cresce",
-  "e sua\u00A0recompra dispara",
-  "e seu\u00A0faturamento decola",
-  "e suas\u00A0vendas crescem",
+  "base cresce",
+  "recompra dispara",
+  "faturamento decola",
+  "vendas crescem",
 ];
 
 function RotatingText() {
