@@ -562,9 +562,9 @@ export default function Landing() {
               <ShieldCheck className="h-4 w-4 text-slate-500" />
               Garantia de 30 dias · Sem fidelidade
             </div>
-            <div className="hero-reveal hero-d5 mt-12 flex flex-wrap items-center gap-8 opacity-40">
+            <div className="hero-reveal hero-d5 mt-12 flex flex-wrap items-center gap-8">
               {["Kaja", "BOOBOO", "SENSE", "Tangerine"].map((b) => (
-                <span key={b} className="font-space-grotesk text-xl font-bold tracking-wide text-white">
+                <span key={b} className="font-space-grotesk text-xl font-bold tracking-wide text-white opacity-40">
                   {b}
                 </span>
               ))}
