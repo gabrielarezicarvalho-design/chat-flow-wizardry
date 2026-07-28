@@ -124,19 +124,21 @@ declare global {
 }
 
 const PHRASES = [
-  "voltam e sua base cresce",
-  "voltam e sua recompra dispara",
-  "voltam e seu faturamento decola",
-  "voltam e suas vendas crescem",
+  { prefix: "e sua", suffix: "base cresce" },
+  { prefix: "e sua", suffix: "recompra dispara" },
+  { prefix: "e seu", suffix: "faturamento decola" },
+  { prefix: "e suas", suffix: "vendas crescem" },
 ];
 
 function TypewriterText() {
   const [index, setIndex] = useState(0);
-  const [text, setText] = useState("");
+  const [count, setCount] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const phrase = PHRASES[index];
+  const full = `${phrase.prefix} ${phrase.suffix}`;
+
   useEffect(() => {
-    const full = PHRASES[index];
     const typeSpeed = 80;
     const deleteSpeed = 40;
     const pauseAfterType = 2000;
@@ -144,30 +146,47 @@ function TypewriterText() {
     let timer: ReturnType<typeof setTimeout>;
 
     if (isDeleting) {
-      if (text.length > 0) {
-        timer = setTimeout(() => setText((t) => t.slice(0, -1)), deleteSpeed);
+      if (count > 0) {
+        timer = setTimeout(() => setCount((c) => c - 1), deleteSpeed);
       } else {
         setIndex((i) => (i + 1) % PHRASES.length);
         setIsDeleting(false);
       }
     } else {
-      if (text.length < full.length) {
-        timer = setTimeout(() => setText(full.slice(0, text.length + 1)), typeSpeed);
+      if (count < full.length) {
+        timer = setTimeout(() => setCount((c) => c + 1), typeSpeed);
       } else {
         timer = setTimeout(() => setIsDeleting(true), pauseAfterType);
       }
     }
 
     return () => clearTimeout(timer);
-  }, [index, text, isDeleting]);
+  }, [index, count, isDeleting, full.length]);
+
+  const typed = full.slice(0, count);
+  const prefixTyped = typed.slice(0, phrase.prefix.length);
+  const suffixTyped = typed.length > phrase.prefix.length + 1 ? typed.slice(phrase.prefix.length + 1) : "";
+  const onSuffix = typed.length > phrase.prefix.length;
+
+  const cursor = (
+    <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-[#4d8bff] align-middle" />
+  );
 
   return (
-    <span className="block text-[#4d8bff]">
-      <span className="whitespace-nowrap">{text}</span>
-      <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-[#4d8bff] align-middle" />
-    </span>
+    <>
+      <span className="block">
+        <span className="text-white">voltam</span>{" "}
+        <span className="whitespace-nowrap text-[#4d8bff]">{prefixTyped}</span>
+        {!onSuffix && cursor}
+      </span>
+      <span className="block whitespace-nowrap text-[#4d8bff]">
+        {suffixTyped}
+        {onSuffix && cursor}
+      </span>
+    </>
   );
 }
+
 
 
 
