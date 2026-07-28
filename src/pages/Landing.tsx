@@ -124,20 +124,19 @@ declare global {
 }
 
 const PHRASES = [
-  { prefix: "e sua", suffix: "base cresce" },
-  { prefix: "e sua", suffix: "recompra dispara" },
-  { prefix: "e seu", suffix: "faturamento decola" },
-  { prefix: "e suas", suffix: "vendas crescem" },
+  "voltam e sua base cresce",
+  "voltam e sua recompra dispara",
+  "voltam e seu faturamento decola",
+  "voltam e suas vendas crescem",
 ];
 
 function TypewriterText() {
   const [index, setIndex] = useState(0);
-  const [prefix, setPrefix] = useState("");
-  const [suffix, setSuffix] = useState("");
+  const [text, setText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const { prefix: fullPrefix, suffix: fullSuffix } = PHRASES[index];
+    const full = PHRASES[index];
     const typeSpeed = 80;
     const deleteSpeed = 40;
     const pauseAfterType = 2000;
@@ -145,35 +144,26 @@ function TypewriterText() {
     let timer: ReturnType<typeof setTimeout>;
 
     if (isDeleting) {
-      if (suffix.length > 0) {
-        timer = setTimeout(() => setSuffix((s) => s.slice(0, -1)), deleteSpeed);
-      } else if (prefix.length > 0) {
-        timer = setTimeout(() => setPrefix((p) => p.slice(0, -1)), deleteSpeed);
+      if (text.length > 0) {
+        timer = setTimeout(() => setText((t) => t.slice(0, -1)), deleteSpeed);
       } else {
         setIndex((i) => (i + 1) % PHRASES.length);
         setIsDeleting(false);
       }
     } else {
-      if (prefix.length < fullPrefix.length) {
-        timer = setTimeout(() => setPrefix(fullPrefix.slice(0, prefix.length + 1)), typeSpeed);
-      } else if (suffix.length < fullSuffix.length) {
-        timer = setTimeout(() => setSuffix(fullSuffix.slice(0, suffix.length + 1)), typeSpeed);
+      if (text.length < full.length) {
+        timer = setTimeout(() => setText(full.slice(0, text.length + 1)), typeSpeed);
       } else {
         timer = setTimeout(() => setIsDeleting(true), pauseAfterType);
       }
     }
 
     return () => clearTimeout(timer);
-  }, [index, prefix, suffix, isDeleting]);
-
-  const { prefix: fullPrefix } = PHRASES[index];
-  const showBreak = prefix.length === fullPrefix.length && (suffix.length > 0 || !isDeleting);
+  }, [index, text, isDeleting]);
 
   return (
-    <span className="text-[#4d8bff]">
-      <span className="whitespace-nowrap">{prefix}</span>
-      {showBreak && <br />}
-      <span className="whitespace-nowrap">{suffix}</span>
+    <span className="block text-[#4d8bff]">
+      <span className="whitespace-nowrap">{text}</span>
       <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-[#4d8bff] align-middle" />
     </span>
   );
