@@ -530,7 +530,7 @@ export default function Landing() {
               </Button>
             </Link>
             <Link to="/auth">
-              <Button className="rounded-lg bg-[#004DFF] px-6 text-white hover:bg-[#0040d6]">
+              <Button className="btn-shine rounded-lg bg-[#004DFF] px-6 text-white hover:bg-[#0040d6]">
                 Testar grátis
               </Button>
             </Link>
