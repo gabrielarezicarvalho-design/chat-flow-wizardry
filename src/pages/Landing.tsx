@@ -507,7 +507,7 @@ export default function Landing() {
       <header className="sticky top-0 z-40 bg-[#0b0d0b]/95 backdrop-blur">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-10">
-            <div className="flex items-center gap-2 font-bold text-6xl font-space-grotesk text-white">
+            <div className="flex items-center gap-2 font-bold text-lg font-space-grotesk text-white">
               <img
                 src={logoAurora.url}
                 alt="NEXT PRO"
@@ -515,7 +515,7 @@ export default function Landing() {
               />
               NEXT <span className="text-[#004DFF]">PRO CRM</span>
             </div>
-            <nav className="hidden lg:flex items-center gap-8 text-6xl text-slate-200">
+            <nav className="hidden lg:flex items-center gap-8 text-sm text-slate-200">
               <a href="#recursos" className="hover:text-white">Funcionalidades</a>
               <a href="#planos" className="hover:text-white">Planos</a>
               <a href="#depoimentos" className="hover:text-white">Cases</a>
@@ -543,33 +543,33 @@ export default function Landing() {
         <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
           <div>
-            <h1 className="font-space-grotesk text-[clamp(1.75rem,5vw,3rem)] font-bold leading-[1.05] tracking-tight text-white">
+            <h1 className="font-space-grotesk text-[clamp(1.5rem,5vw,2.75rem)] font-bold leading-[1.05] tracking-tight text-white">
               <span className="block">Seus clientes</span>
               <TypewriterText />
             </h1>
-            <p className="mt-8 max-w-lg text-6xl leading-relaxed text-slate-400">
+            <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-400">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
               automações. Impulsione as vendas do seu negócio em até 20% com a NEXT PRO.
             </p>
             <div className="mt-10">
               <Link to="/auth">
-                <Button size="lg" className="h-14 rounded-xl bg-[#004DFF] px-9 text-6xl font-semibold text-white hover:bg-[#0040d6]">
+                <Button size="lg" className="h-14 rounded-xl bg-[#004DFF] px-9 text-base font-semibold text-white hover:bg-[#0040d6]">
                   Testar grátis <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <div className="mt-5 flex items-center gap-2 text-6xl text-slate-400">
+            <div className="mt-5 flex items-center gap-2 text-sm text-slate-400">
               <ShieldCheck className="h-4 w-4 text-slate-500" />
               Garantia de 30 dias · Sem fidelidade
             </div>
             <div className="mt-12 flex flex-wrap items-center gap-8 opacity-40">
               {["Kaja", "BOOBOO", "SENSE", "Tangerine"].map((b) => (
-                <span key={b} className="font-space-grotesk text-6xl font-bold tracking-wide text-white">
+                <span key={b} className="font-space-grotesk text-lg font-bold tracking-wide text-white">
                   {b}
                 </span>
               ))}
             </div>
-            <p className="mt-6 text-6xl text-slate-400">
+            <p className="mt-6 text-sm text-slate-400">
               <span className="font-semibold text-white">+200 empresas</span> já vendem mais com a NEXT PRO.
             </p>
           </div>
@@ -615,21 +615,21 @@ export default function Landing() {
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               Prospecção · Atendimento · Cobrança
             </div>
-            <h2 className="mt-5 text-6xl md:text-6xl font-bold tracking-tight leading-[1.05]">
+            <h2 className="mt-5 text-4xl md:text-5xl font-bold tracking-tight leading-[1.05]">
               Encontra clientes.
               <br />
               <span className="text-[#004DFF]">Vende sozinho.</span>
               <br />
               No seu WhatsApp.
             </h2>
-            <p className="mt-6 max-w-xl text-6xl text-slate-600 md:mx-0 mx-auto">
+            <p className="mt-6 max-w-xl text-lg text-slate-600 md:mx-0 mx-auto">
               Converse agora com a Aurora AI e veja como ela atende, qualifica e vende
               pelo WhatsApp — 24 horas por dia.
             </p>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-lg md:mx-0 mx-auto">
               {stats.slice(0, 3).map((s) => (
                 <div key={s.label} className="text-center md:text-left">
-                  <div className="text-6xl md:text-6xl font-bold text-[#004DFF]">
+                  <div className="text-2xl md:text-3xl font-bold text-[#004DFF]">
                     {s.value}
                   </div>
                   <div className="text-[11px] uppercase tracking-wider text-slate-500 mt-1">{s.label}</div>
@@ -649,7 +649,7 @@ export default function Landing() {
                     <Bot className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="text-6xl font-semibold text-slate-900">Aurora AI</div>
+                    <div className="text-sm font-semibold text-slate-900">Aurora AI</div>
                     <div className="flex items-center gap-1.5 text-[11px] text-emerald-500">
                       <span className="relative flex h-1.5 w-1.5">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -685,7 +685,7 @@ export default function Landing() {
                     return (
                       <div
                         key={msg.id}
-                        className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-6xl text-slate-700 animate-fade-in"
+                        className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-sm text-slate-700 animate-fade-in"
                         style={{ animationDelay: `${idx * 50}ms` }}
                       >
                         {msg.content}
@@ -695,7 +695,7 @@ export default function Landing() {
                   return (
                     <div
                       key={msg.id}
-                      className="ml-auto max-w-[80%] rounded-2xl bg-primary px-4 py-3 text-6xl text-white shadow-md animate-fade-in"
+                      className="ml-auto max-w-[80%] rounded-2xl bg-primary px-4 py-3 text-sm text-white shadow-md animate-fade-in"
                       style={{ animationDelay: `${idx * 50}ms` }}
                     >
                       <div className="text-[11px] font-semibold opacity-90 mb-1">✦ Aurora AI</div>
@@ -708,19 +708,19 @@ export default function Landing() {
                   const isAI = m.id.startsWith("ai-");
                   if (m.kind === "text") {
                     return isAI ? (
-                      <div key={m.id} className="ml-auto max-w-[80%] rounded-2xl bg-primary px-4 py-3 text-6xl text-white shadow-md animate-fade-in">
+                      <div key={m.id} className="ml-auto max-w-[80%] rounded-2xl bg-primary px-4 py-3 text-sm text-white shadow-md animate-fade-in">
                         <div className="text-[11px] font-semibold opacity-90 mb-1">✦ Aurora AI</div>
                         {m.content}
                       </div>
                     ) : (
-                      <div key={m.id} className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-6xl text-slate-700 animate-fade-in">
+                      <div key={m.id} className="max-w-[75%] rounded-2xl bg-slate-100 px-4 py-2 text-sm text-slate-700 animate-fade-in">
                         {m.content}
                       </div>
                     );
                   }
                   if (m.kind === "file") {
                     return (
-                      <div key={m.id} className="max-w-[75%] rounded-2xl bg-slate-100 p-2 text-6xl text-slate-700 animate-fade-in">
+                      <div key={m.id} className="max-w-[75%] rounded-2xl bg-slate-100 p-2 text-sm text-slate-700 animate-fade-in">
                         {m.previewUrl ? (
                           <img src={m.previewUrl} alt={m.fileName} className="rounded-lg max-h-32 object-cover" />
                         ) : (
@@ -736,7 +736,7 @@ export default function Landing() {
                   const dur = Math.max(1, Math.round(m.duration ?? 1));
                   const durationLabel = `${Math.floor(dur / 60)}:${String(dur % 60).padStart(2, "0")}`;
                   return (
-                    <div key={m.id} className={`${isAI ? "ml-auto bg-primary text-white" : "bg-slate-100 text-slate-700"} max-w-[75%] rounded-2xl px-3 py-2 text-6xl flex items-center gap-2 animate-fade-in`}>
+                    <div key={m.id} className={`${isAI ? "ml-auto bg-primary text-white" : "bg-slate-100 text-slate-700"} max-w-[75%] rounded-2xl px-3 py-2 text-sm flex items-center gap-2 animate-fade-in`}>
                       <button
                         type="button"
                         onClick={() => { if (m.audioUrl) new Audio(m.audioUrl).play().catch(() => {}); }}
@@ -755,7 +755,7 @@ export default function Landing() {
                 })}
 
                 {showTyping && (
-                  <div className="max-w-[55%] rounded-2xl bg-slate-100 px-4 py-3 text-6xl text-slate-700 animate-fade-in">
+                  <div className="max-w-[55%] rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-700 animate-fade-in">
                     <div className="flex items-center gap-1">
                       <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0ms]" />
                       <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:150ms]" />
@@ -773,7 +773,7 @@ export default function Landing() {
                       key={e}
                       type="button"
                       onClick={() => insertEmoji(e)}
-                      className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-slate-200 text-6xl"
+                      className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-slate-200 text-base"
                     >
                       {e}
                     </button>
@@ -787,7 +787,7 @@ export default function Landing() {
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
                     <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
                   </span>
-                  <span className="flex-1 text-6xl font-medium">Gravando… 0:{String(recordSeconds).padStart(2, "0")}</span>
+                  <span className="flex-1 text-sm font-medium">Gravando… 0:{String(recordSeconds).padStart(2, "0")}</span>
                   <button
                     type="button"
                     onClick={() => stopRecording(false)}
@@ -837,7 +837,7 @@ export default function Landing() {
                     onKeyDown={(e) => { if (e.key === "Enter") sendText(); }}
                     onFocus={stopDemo}
                     placeholder="Digite uma mensagem"
-                    className="flex-1 bg-transparent text-6xl text-slate-700 placeholder:text-slate-400 outline-none min-w-0"
+                    className="flex-1 bg-transparent text-sm text-slate-700 placeholder:text-slate-400 outline-none min-w-0"
                   />
                   {inputValue.trim() ? (
                     <button
@@ -870,7 +870,7 @@ export default function Landing() {
           <div className="mx-auto max-w-6xl px-6 py-5 flex flex-wrap items-center justify-center gap-x-12 gap-y-2">
             <span className="text-xs uppercase tracking-[0.25em] text-slate-400">Usado por times no</span>
             {["Rio de Janeiro", "São Paulo", "Distrito Federal", "Mato Grosso", "Santa Catarina", "Rio Grande do Sul"].map((c) => (
-              <span key={c} className="text-6xl text-slate-600">
+              <span key={c} className="text-sm text-slate-600">
                 {c}
               </span>
             ))}
@@ -882,7 +882,7 @@ export default function Landing() {
       <section id="recursos" className="mx-auto max-w-6xl px-6 py-24">
         <div className="text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prospecção automática</span>
-          <h2 className="mt-4 text-6xl md:text-6xl font-bold tracking-tight text-slate-900">
+          <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
             Encontre clientes{" "}
             <span className="text-[#004DFF]">automaticamente.</span>
           </h2>
@@ -981,7 +981,7 @@ export default function Landing() {
                     <step.icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-900 text-6xl">{step.title}</div>
+                    <div className="font-semibold text-slate-900 text-sm">{step.title}</div>
                     <div className="text-xs text-slate-500 mt-0.5">{step.desc}</div>
                   </div>
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />
@@ -1001,7 +1001,7 @@ export default function Landing() {
           ].map((f) => (
             <div key={f.title} className="rounded-2xl border border-slate-200 bg-white p-5 hover:border-primary/40 hover:shadow-sm transition">
               <f.icon className="h-5 w-5 text-primary" />
-              <div className="mt-3 font-semibold text-slate-900 text-6xl">{f.title}</div>
+              <div className="mt-3 font-semibold text-slate-900 text-sm">{f.title}</div>
               <div className="text-xs text-slate-500 mt-1 leading-relaxed">{f.desc}</div>
             </div>
           ))}
@@ -1014,7 +1014,7 @@ export default function Landing() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Tudo que você precisa</span>
-            <h2 className="mt-3 text-6xl md:text-6xl font-bold text-slate-900">
+            <h2 className="mt-3 text-3xl md:text-5xl font-bold text-slate-900">
               Uma IA que{" "}
               <span className="text-[#004DFF]">
                 vende sozinha
@@ -1031,22 +1031,22 @@ export default function Landing() {
             <div className="md:col-span-2 md:row-span-2 rounded-2xl bg-white p-6 border border-slate-200">
               <MessageCircle className="h-6 w-6 text-primary" />
               <div className="mt-4 font-semibold text-slate-900">Atende como um humano</div>
-              <div className="text-6xl text-slate-500 mt-1">
+              <div className="text-sm text-slate-500 mt-1">
                 Responde texto e áudio, entende contexto, lembra do cliente. Conversa de verdade.
               </div>
 
               <div className="mt-8 space-y-3">
-                <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-6xl text-slate-800">
+                <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-sm text-slate-800">
                   Oi, vi o anúncio. Tem disponível?
                 </div>
-                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-6xl text-white">
+                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-sm text-white">
                   <div className="text-[10px] font-semibold opacity-80 mb-0.5">✦ IA Next Pro</div>
                   Tenho sim! Pra quando você precisa? Posso já reservar 😊
                 </div>
-                <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-6xl text-slate-800">
+                <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-sm text-slate-800">
                   Pode ser amanhã 14h?
                 </div>
-                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-6xl text-white">
+                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-sm text-white">
                   <div className="text-[10px] font-semibold opacity-80 mb-0.5">✦ IA Next Pro</div>
                   Agendado! Te mando um lembrete 1h antes ✅
                 </div>
@@ -1057,7 +1057,7 @@ export default function Landing() {
             <div className="rounded-2xl bg-white p-6 border border-slate-200">
               <Mic className="h-6 w-6 text-primary" />
               <div className="mt-4 font-semibold text-slate-900">Transcreve áudio</div>
-              <div className="text-6xl text-slate-500 mt-1">
+              <div className="text-sm text-slate-500 mt-1">
                 Cliente mandou áudio? A IA escuta, entende e responde na hora.
               </div>
               <div className="mt-5 flex items-center gap-3">
@@ -1081,7 +1081,7 @@ export default function Landing() {
             <div className="rounded-2xl bg-white p-6 border border-slate-200">
               <Clock className="h-6 w-6 text-primary" />
               <div className="mt-4 font-semibold text-slate-900">Recupera leads frios</div>
-              <div className="text-6xl text-slate-500 mt-1">
+              <div className="text-sm text-slate-500 mt-1">
                 Follow-up automático até o cliente responder.
               </div>
             </div>
@@ -1090,7 +1090,7 @@ export default function Landing() {
             <div className="rounded-2xl bg-white p-6 border border-slate-200">
               <Calendar className="h-6 w-6 text-primary" />
               <div className="mt-4 font-semibold text-slate-900">Agenda automático</div>
-              <div className="text-6xl text-slate-500 mt-1">
+              <div className="text-sm text-slate-500 mt-1">
                 Marca reuniões e visitas sem você abrir a agenda.
               </div>
             </div>
@@ -1099,7 +1099,7 @@ export default function Landing() {
             <div className="rounded-2xl bg-white p-6 border border-slate-200">
               <TrendingUp className="h-6 w-6 text-primary" />
               <div className="mt-4 font-semibold text-slate-900">Aviso de lead quente</div>
-              <div className="text-6xl text-slate-500 mt-1">
+              <div className="text-sm text-slate-500 mt-1">
                 Quando o cliente tá pronto, você recebe no WhatsApp.
               </div>
             </div>
@@ -1108,7 +1108,7 @@ export default function Landing() {
             <div className="rounded-2xl bg-white p-6 border border-slate-200">
               <ShieldCheck className="h-6 w-6 text-primary" />
               <div className="mt-4 font-semibold text-slate-900">Anti-bloqueio</div>
-              <div className="text-6xl text-slate-500 mt-1">
+              <div className="text-sm text-slate-500 mt-1">
                 Disparos seguros, ritmo natural, simulação humana.
               </div>
             </div>
@@ -1120,7 +1120,7 @@ export default function Landing() {
       <section id="pagamentos" className="mx-auto max-w-6xl px-6 py-24">
         <div className="text-center">
           <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Recuperação financeira</span>
-          <h2 className="mt-3 text-6xl md:text-6xl font-bold tracking-tight">
+          <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">
             Receba pagamentos{" "}
             <span style={{ color: "#004DFF" }}>sem levantar um dedo</span>
             <span className="text-slate-900">.</span>
@@ -1146,14 +1146,14 @@ export default function Landing() {
               </div>
             </div>
             <div className="flex-1 p-5 space-y-3 bg-white">
-              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-6xl">
+              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-sm">
                 <div className="text-[10px] opacity-90 font-semibold mb-1">✦ IA Next Pro</div>
                 Olá 👋 Seu pagamento vence hoje. Segue novamente o link para pagamento.
               </div>
-              <div className="max-w-[60%] rounded-2xl rounded-tl-sm bg-slate-100 text-slate-800 px-4 py-2 text-6xl">
+              <div className="max-w-[60%] rounded-2xl rounded-tl-sm bg-slate-100 text-slate-800 px-4 py-2 text-sm">
                 Pode mandar
               </div>
-              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-6xl space-y-2">
+              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-sm space-y-2">
                 <div className="text-[10px] opacity-90 font-semibold">✦ IA Next Pro</div>
                 <div className="font-semibold">Aqui está 👇</div>
                 <div className="rounded-lg bg-emerald-600/40 px-2 py-1.5 text-xs">
@@ -1180,11 +1180,11 @@ export default function Landing() {
                 { icon: "📈", title: "Cliente pagou", sub: "Confirmação automática", dot: "bg-emerald-500" },
               ].map((s) => (
                 <li key={s.title} className="flex items-center gap-4">
-                  <div className={`h-11 w-11 rounded-xl flex items-center justify-center text-6xl ${s.highlight ? "bg-violet-500 text-white" : "bg-slate-100"}`}>
+                  <div className={`h-11 w-11 rounded-xl flex items-center justify-center text-lg ${s.highlight ? "bg-violet-500 text-white" : "bg-slate-100"}`}>
                     {s.icon}
                   </div>
                   <div className="flex-1">
-                    <div className="font-semibold text-6xl text-slate-900">{s.title}</div>
+                    <div className="font-semibold text-sm text-slate-900">{s.title}</div>
                     <div className="text-xs text-slate-500">{s.sub}</div>
                   </div>
                   <span className={`h-2 w-2 rounded-full ${s.dot}`} />
@@ -1206,13 +1206,13 @@ export default function Landing() {
                 <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
                   {m.icon}
                 </div>
-                <span className="text-6xl">{m.label}</span>
+                <span className="text-sm">{m.label}</span>
               </div>
             ))}
           </div>
           <div className="rounded-3xl bg-emerald-50 border border-emerald-100 p-8 flex flex-col justify-center">
-            <div className="text-6xl font-bold text-emerald-600">+40%</div>
-            <p className="mt-2 text-6xl text-slate-600">
+            <div className="text-4xl font-bold text-emerald-600">+40%</div>
+            <p className="mt-2 text-sm text-slate-600">
               de clientes inadimplentes pagam com follow-up automático
             </p>
           </div>
@@ -1230,7 +1230,7 @@ export default function Landing() {
               <div className="h-9 w-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 mb-3">
                 {f.icon}
               </div>
-              <div className="font-semibold text-6xl text-slate-900">{f.title}</div>
+              <div className="font-semibold text-sm text-slate-900">{f.title}</div>
               <div className="text-xs text-slate-500 mt-1">{f.sub}</div>
             </div>
           ))}
@@ -1244,7 +1244,7 @@ export default function Landing() {
             <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
               Planos para cada fase
             </span>
-            <h2 className="mt-3 text-6xl md:text-6xl font-bold tracking-tight text-slate-900">
+            <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
               Escolha o plano{" "}
               <span style={{ color: "#004DFF" }}>ideal pra você</span>
             </h2>
@@ -1255,14 +1255,14 @@ export default function Landing() {
             <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 p-1">
               <button
                 onClick={() => setBilling("monthly")}
-                className={`px-5 py-2 rounded-full text-6xl font-semibold transition ${billing === "monthly" ? "text-white" : "text-slate-600"}`}
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition ${billing === "monthly" ? "text-white" : "text-slate-600"}`}
                 style={billing === "monthly" ? { backgroundColor: "#004DFF" } : undefined}
               >
                 Mensal
               </button>
               <button
                 onClick={() => setBilling("annual")}
-                className={`px-5 py-2 rounded-full text-6xl font-semibold transition flex items-center gap-2 ${billing === "annual" ? "text-white" : "text-slate-600"}`}
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition flex items-center gap-2 ${billing === "annual" ? "text-white" : "text-slate-600"}`}
                 style={billing === "annual" ? { backgroundColor: "#004DFF" } : undefined}
               >
                 Anual
@@ -1276,11 +1276,11 @@ export default function Landing() {
           <div className="mt-14 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {/* Start */}
             <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-8">
-              <div className="text-6xl font-bold text-slate-900">Start</div>
-              <p className="mt-1 text-6xl text-slate-500">Para autônomos e pequenos times.</p>
+              <div className="text-xl font-bold text-slate-900">Start</div>
+              <p className="mt-1 text-sm text-slate-500">Para autônomos e pequenos times.</p>
 
               <div className="mt-8 flex items-baseline gap-2">
-                <span className="text-6xl font-bold text-slate-900">
+                <span className="text-5xl font-bold text-slate-900">
                   R$ {billing === "monthly" ? "49,90" : "41,58"}
                 </span>
                 <span className="text-slate-500">/mês</span>
@@ -1292,7 +1292,7 @@ export default function Landing() {
                 <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
               </div>
 
-              <ul className="mt-8 space-y-3 text-6xl text-slate-700">
+              <ul className="mt-8 space-y-3 text-sm text-slate-700">
                 {[
                   "5 atendentes",
                   "2 conexões WhatsApp",
@@ -1331,11 +1331,11 @@ export default function Landing() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white" style={{ backgroundColor: "#004DFF" }}>
                 Mais popular
               </div>
-              <div className="text-6xl font-bold text-slate-900">Business</div>
-              <p className="mt-1 text-6xl text-slate-500">Para equipes em crescimento.</p>
+              <div className="text-xl font-bold text-slate-900">Business</div>
+              <p className="mt-1 text-sm text-slate-500">Para equipes em crescimento.</p>
 
               <div className="mt-8 flex items-baseline gap-2">
-                <span className="text-6xl font-bold text-slate-900">
+                <span className="text-5xl font-bold text-slate-900">
                   R$ {billing === "monthly" ? "99,90" : "83,25"}
                 </span>
                 <span className="text-slate-500">/mês</span>
@@ -1347,7 +1347,7 @@ export default function Landing() {
                 <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
               </div>
 
-              <ul className="mt-8 space-y-3 text-6xl text-slate-700">
+              <ul className="mt-8 space-y-3 text-sm text-slate-700">
                 {[
                   "20 atendentes",
                   "10 conexões WhatsApp",
@@ -1388,11 +1388,11 @@ export default function Landing() {
 
           {/* TABELA COMPARATIVA */}
           <div className="mt-16 max-w-4xl mx-auto">
-            <h3 className="text-center text-6xl font-bold text-slate-900">Compare os planos</h3>
-            <p className="mt-2 text-center text-6xl text-slate-500">Veja lado a lado o que cada plano entrega.</p>
+            <h3 className="text-center text-2xl font-bold text-slate-900">Compare os planos</h3>
+            <p className="mt-2 text-center text-sm text-slate-500">Veja lado a lado o que cada plano entrega.</p>
 
             <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <table className="w-full text-6xl">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
                     <th className="text-left font-semibold text-slate-700 px-6 py-4">Recurso</th>
@@ -1473,14 +1473,14 @@ export default function Landing() {
               <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
               Tecnologia exclusiva
             </span>
-            <h2 className="mt-5 text-6xl md:text-6xl font-bold tracking-tight leading-[1.1]">
+            <h2 className="mt-5 text-4xl md:text-5xl font-bold tracking-tight leading-[1.1]">
               Sua <span style={{ color: "#004DFF" }}>voz clonada</span>,<br />
               respondendo por você.
             </h2>
-            <p className="mt-5 text-slate-600 text-6xl leading-relaxed">
+            <p className="mt-5 text-slate-600 text-base leading-relaxed">
               Grave 60 segundos da sua voz. A IA clona e envia áudios automáticos no WhatsApp — tão naturais que o cliente jura que é você.
             </p>
-            <ul className="mt-6 space-y-3 text-6xl text-slate-700">
+            <ul className="mt-6 space-y-3 text-sm text-slate-700">
               {["Áudios ultra naturais em português", "Atendimento humanizado em escala", "Mais retenção, mais conversão", "Cliente sente que está falando com gente"].map((i) => (
                 <li key={i} className="flex items-center gap-3">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-300">
@@ -1536,7 +1536,7 @@ export default function Landing() {
                 { v: "pt-BR", l: "nativo" },
               ].map((s) => (
                 <div key={s.l} className="text-center">
-                  <div className="text-6xl font-bold" style={{ color: "#004DFF" }}>{s.v}</div>
+                  <div className="text-xl font-bold" style={{ color: "#004DFF" }}>{s.v}</div>
                   <div className="text-xs text-slate-500 mt-0.5">{s.l}</div>
                 </div>
               ))}
@@ -1551,7 +1551,7 @@ export default function Landing() {
           <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
             Pra qualquer negócio
           </span>
-          <h2 className="mt-4 text-6xl md:text-6xl font-bold font-space-grotesk">
+          <h2 className="mt-4 text-3xl md:text-5xl font-bold font-space-grotesk">
             Funciona pro{" "}
             <span style={{ color: "#004DFF" }}>seu segmento.</span>
           </h2>
@@ -1564,7 +1564,7 @@ export default function Landing() {
           {segments.map((s) => (
             <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center hover:border-primary/40 hover:shadow-sm transition-all">
               <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
-              <div className="mt-4 text-6xl font-medium text-slate-700">{s.label}</div>
+              <div className="mt-4 text-sm font-medium text-slate-700">{s.label}</div>
             </div>
           ))}
         </div>
@@ -1578,7 +1578,7 @@ export default function Landing() {
               <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
               Tudo em um único painel
             </span>
-            <h2 className="mt-4 text-6xl md:text-6xl font-bold">
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold">
               Sua central comercial <span style={{ color: "#004DFF" }}>completa.</span>
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
@@ -1630,11 +1630,11 @@ export default function Landing() {
                   <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                     <group.icon className="h-5 w-5" style={{ color: "#004DFF" }} />
                   </div>
-                  <div className="font-semibold text-6xl">{group.title}</div>
+                  <div className="font-semibold text-lg">{group.title}</div>
                 </div>
                 <div className="grid grid-cols-2 gap-2.5">
                   {group.items.map((it) => (
-                    <div key={it.l} className="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-6xl text-slate-700">
+                    <div key={it.l} className="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700">
                       <it.i className="h-4 w-4 text-slate-500 flex-shrink-0" />
                       <span className="truncate">{it.l}</span>
                     </div>
@@ -1653,7 +1653,7 @@ export default function Landing() {
             <span className="text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
               // Casos reais
             </span>
-            <h2 className="mt-4 text-6xl md:text-6xl font-bold tracking-tight text-slate-900">
+            <h2 className="mt-4 text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
               Antes e depois de{" "}
               <span style={{ color: "#004DFF" }}>clientes reais</span>
             </h2>
@@ -1669,7 +1669,7 @@ export default function Landing() {
                   <div className="flex items-center gap-3">
                     <img src={c.avatar} alt={c.name} className="h-11 w-11 rounded-full object-cover" />
                     <div>
-                      <div className="font-semibold text-slate-900 text-6xl">{c.name}</div>
+                      <div className="font-semibold text-slate-900 text-sm">{c.name}</div>
                       <div className="text-xs text-slate-500">{c.role}</div>
                     </div>
                   </div>
@@ -1717,7 +1717,7 @@ export default function Landing() {
                 <div className="mt-5 pt-5 border-t border-slate-100">
                   <div className="flex gap-2">
                     <Quote className="h-4 w-4 text-slate-300 shrink-0 mt-0.5" />
-                    <p className="text-6xl text-slate-600 leading-relaxed">{c.quote}</p>
+                    <p className="text-sm text-slate-600 leading-relaxed">{c.quote}</p>
                   </div>
                 </div>
               </div>
@@ -1736,7 +1736,7 @@ export default function Landing() {
       {/* CTA FINAL */}
       <section className="mx-auto max-w-5xl px-6 pb-24">
         <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
-          <h2 className="text-6xl md:text-6xl font-bold">Quero vender no automático.</h2>
+          <h2 className="text-3xl md:text-5xl font-bold">Quero vender no automático.</h2>
           <p className="mt-4 opacity-90 max-w-xl mx-auto">
             Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
           </p>
@@ -1756,7 +1756,7 @@ export default function Landing() {
             <div className="lg:col-span-2 space-y-2">
               <div className="flex items-center gap-2">
                 <img src={logoAurora.url} alt="NEXT PRO" className="h-6 w-6" />
-                <span className="text-6xl font-bold tracking-tight text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <span className="text-sm font-bold tracking-tight text-slate-900" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   NEXT <span className="text-primary">PRO</span>
                 </span>
               </div>
@@ -1832,12 +1832,12 @@ export default function Landing() {
                 <Building2 className="h-5 w-5" />
               </div>
               <div>
-                <DialogTitle className="text-6xl">{selectedLead?.name}</DialogTitle>
+                <DialogTitle className="text-base">{selectedLead?.name}</DialogTitle>
                 <DialogDescription className="text-xs">Lead capturado automaticamente</DialogDescription>
               </div>
             </div>
           </DialogHeader>
-          <div className="space-y-2 text-6xl">
+          <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
               <PhoneCall className="h-4 w-4 text-slate-500" />
               <span className="font-medium text-slate-900">{selectedLead?.phone}</span>
