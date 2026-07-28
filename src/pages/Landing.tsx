@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
+import heroWoman from "@/assets/hero-woman.jpg";
 import avatarRafael from "@/assets/cases/rafael.png.asset.json";
 import avatarIsabela from "@/assets/cases/isabela.png.asset.json";
 import avatarDiego from "@/assets/cases/diego.png.asset.json";
@@ -436,66 +437,131 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* NAV */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2 font-bold text-lg font-space-grotesk">
-            <img
-              src={logoAurora.url}
-              alt="NEXT PRO"
-              className="h-8 w-8 rounded-full object-cover"
-            />
-            NEXT <span className="text-[#004DFF]">PRO CRM</span>
-          </div>
-          <div className="hidden md:flex items-center gap-4">
-            <nav className="flex items-center gap-8 text-sm text-slate-600">
-              <a href="#recursos" className="hover:text-slate-900">Recursos</a>
-              <a href="#ia" className="hover:text-slate-900">IA</a>
-              <a href="#pagamentos" className="hover:text-slate-900">Pagamentos</a>
-              <a href="#segmentos" className="hover:text-slate-900">Segmentos</a>
-              <a href="#depoimentos" className="hover:text-slate-900">Clientes</a>
+      <header className="sticky top-0 z-40 bg-[#0b0d0b]/95 backdrop-blur">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
+          <div className="flex items-center gap-10">
+            <div className="flex items-center gap-2 font-bold text-lg font-space-grotesk text-white">
+              <img
+                src={logoAurora.url}
+                alt="NEXT PRO"
+                className="h-8 w-8 rounded-full object-cover"
+              />
+              NEXT <span className="text-[#004DFF]">PRO CRM</span>
+            </div>
+            <nav className="hidden lg:flex items-center gap-8 text-sm text-slate-200">
+              <a href="#recursos" className="hover:text-white">Funcionalidades</a>
+              <a href="#planos" className="hover:text-white">Planos</a>
+              <a href="#depoimentos" className="hover:text-white">Cases</a>
+              <a href="#pagamentos" className="hover:text-white">Integrações</a>
+              <a href="#segmentos" className="hover:text-white">Parceiros</a>
             </nav>
+          </div>
+          <div className="hidden md:flex items-center gap-3">
             <Link to="/auth">
-              <Button className="bg-primary hover:bg-primary-dark rounded-full px-5">Entrar</Button>
+              <Button variant="outline" className="rounded-lg border-slate-600 bg-transparent px-6 text-white hover:bg-white/10 hover:text-white">
+                Login
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button className="rounded-lg bg-[#004DFF] px-6 text-white hover:bg-[#0040d6]">
+                Testar grátis
+              </Button>
             </Link>
           </div>
         </div>
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-white to-white">
+      <section className="relative overflow-hidden bg-[#0b0d0b]">
+        <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 md:grid-cols-2">
+          <div>
+            <h1 className="font-space-grotesk text-5xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
+              Seus clientes
+              <br />
+              voltam <span className="text-[#4d8bff]">e sua</span>
+              <br />
+              <span className="text-[#4d8bff]">base cresce</span>
+            </h1>
+            <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-400">
+              Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
+              automações. Impulsione as vendas do seu negócio em até 20% com a NEXT PRO.
+            </p>
+            <div className="mt-10">
+              <Link to="/auth">
+                <Button size="lg" className="h-14 rounded-xl bg-[#004DFF] px-9 text-base font-semibold text-white hover:bg-[#0040d6]">
+                  Testar grátis <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+            <div className="mt-5 flex items-center gap-2 text-sm text-slate-400">
+              <ShieldCheck className="h-4 w-4 text-slate-500" />
+              Garantia de 30 dias · Sem fidelidade
+            </div>
+            <div className="mt-12 flex flex-wrap items-center gap-8 opacity-40">
+              {["Kaja", "BOOBOO", "SENSE", "Tangerine"].map((b) => (
+                <span key={b} className="font-space-grotesk text-lg font-bold tracking-wide text-white">
+                  {b}
+                </span>
+              ))}
+            </div>
+            <p className="mt-6 text-sm text-slate-400">
+              <span className="font-semibold text-white">+200 empresas</span> já vendem mais com a NEXT PRO.
+            </p>
+          </div>
+
+          {/* Composição circular */}
+          <div className="relative mx-auto w-full max-w-[520px]">
+            <div className="relative aspect-square rounded-full border-2 border-dashed border-[#004DFF]/50 p-6">
+              <div className="h-full w-full overflow-hidden rounded-full">
+                <img
+                  src={heroWoman}
+                  alt="Empreendedora usando a NEXT PRO"
+                  width={1024}
+                  height={1024}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </div>
+            <div className="absolute right-0 top-[22%] rounded-lg bg-[#1a1c1a]/95 px-4 py-2 text-xs font-medium text-white shadow-xl">
+              <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
+              +36% recompra
+            </div>
+            <div className="absolute -right-4 top-[47%] rounded-lg bg-[#1a1c1a]/95 px-4 py-2 text-xs font-medium text-white shadow-xl">
+              <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
+              R$ 82k recuperados
+            </div>
+            <div className="absolute -left-2 top-[62%] rounded-lg bg-[#1a1c1a]/95 px-4 py-2 text-xs font-medium text-white shadow-xl">
+              <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
+              4.8★ de satisfação
+            </div>
+            <div className="absolute -left-4 bottom-[12%] rounded-lg bg-[#1a1c1a]/95 px-4 py-2 text-xs font-medium text-white shadow-xl">
+              <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
+              1.240 clientes voltaram
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* DEMO AURORA */}
+      <section className="bg-gradient-to-b from-white to-slate-50">
         <div className="mx-auto max-w-6xl px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
           <div className="text-center md:text-left">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary-dark">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               Prospecção · Atendimento · Cobrança
             </div>
-            <h1 className="mt-5 text-4xl md:text-6xl font-bold tracking-tight leading-[1.05]">
+            <h2 className="mt-5 text-4xl md:text-5xl font-bold tracking-tight leading-[1.05]">
               Encontra clientes.
               <br />
-              <span className="text-[#004DFF]">
-                Vende sozinho.
-              </span>
+              <span className="text-[#004DFF]">Vende sozinho.</span>
               <br />
               No seu WhatsApp.
-            </h1>
+            </h2>
             <p className="mt-6 max-w-xl text-lg text-slate-600 md:mx-0 mx-auto">
-              Uma plataforma completa que prospecta, atende, vende e cobra automaticamente pelo WhatsApp — com IA treinada pro seu negócio.
+              Converse agora com a Aurora AI e veja como ela atende, qualifica e vende
+              pelo WhatsApp — 24 horas por dia.
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center md:justify-start justify-center gap-3">
-              <Link to="/auth">
-                <Button size="lg" className="bg-primary hover:bg-primary-dark rounded-full px-8 h-12">
-                  Começar agora <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="rounded-full px-8 h-12 border-slate-300 bg-white text-slate-900 hover:bg-slate-50 hover:text-slate-900"
-                onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                <CreditCard className="mr-2 h-4 w-4" /> Ver Preços
-              </Button>
-            </div>
             <div className="mt-10 grid grid-cols-3 gap-6 max-w-lg md:mx-0 mx-auto">
               {stats.slice(0, 3).map((s) => (
                 <div key={s.label} className="text-center md:text-left">
@@ -512,6 +578,7 @@ export default function Landing() {
           <div className="relative mx-auto w-full max-w-sm">
             <div className="absolute -inset-6 bg-gradient-to-tr from-primary/20 to-primary/10 blur-3xl opacity-60 rounded-full" />
             <div className="relative rounded-3xl bg-white shadow-2xl p-6 text-left">
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white">
