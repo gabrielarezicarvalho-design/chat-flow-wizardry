@@ -543,7 +543,7 @@ export default function Landing() {
         <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
           <div>
-            <h1 className="font-space-grotesk text-[clamp(1.75rem,5vw,3rem)] font-bold leading-[1.05] tracking-tight text-white">
+            <h1 className="font-space-grotesk text-[clamp(2rem,5.6vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-white">
               <span className="block">Seus clientes</span>
               <TypewriterText />
             </h1>
