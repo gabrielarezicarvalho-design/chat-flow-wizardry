@@ -57,11 +57,9 @@ const FlowForm = () => {
     try {
       console.log('🔄 Loading form:', formId);
       
-      const { data, error: fetchError } = await supabase
-        .from('flow_forms' as any)
-        .select('*')
-        .eq('id', formId)
-        .maybeSingle();
+      const { data, error: fetchError } = await supabase.functions.invoke('public-flow-form', {
+        body: { action: 'get', formId },
+      });
 
       if (fetchError) {
         console.error('❌ Fetch error:', fetchError);
@@ -70,13 +68,14 @@ const FlowForm = () => {
         return;
       }
 
-      if (!data) {
+      if (!data?.form) {
         setError('Formulário não encontrado');
         setLoading(false);
         return;
       }
 
-      const formData = data as unknown as FlowForm;
+      const formData = data.form as FlowForm;
+      
       
       // Check if expired
       const expiresAt = new Date(formData.expires_at);

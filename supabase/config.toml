@@ -5,3 +5,7 @@ verify_jwt = false
 
 [functions.platform-subscription-webhook]
 verify_jwt = false
+
+[functions.public-flow-form]
+verify_jwt = false
+
