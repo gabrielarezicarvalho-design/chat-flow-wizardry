@@ -124,34 +124,54 @@ declare global {
 }
 
 const ROTATING_PHRASES = [
-  "base cresce",
-  "recompra dispara",
-  "faturamento decola",
-  "vendas crescem",
+  "e sua base cresce",
+  "e sua recompra dispara",
+  "e seu faturamento decola",
+  "e suas vendas crescem",
 ];
 
-function RotatingText() {
+function TypewriterText() {
   const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [display, setDisplay] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
+    const phrase = ROTATING_PHRASES[index];
+    const typeSpeed = isDeleting ? 40 : 80;
+    const pauseAfterType = 2000;
+    const pauseAfterDelete = 300;
+
+    let timer: ReturnType<typeof setTimeout>;
+
+    if (isDeleting) {
+      if (display === "") {
+        setIsDeleting(false);
         setIndex((prev) => (prev + 1) % ROTATING_PHRASES.length);
-        setVisible(true);
-      }, 500);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+        timer = setTimeout(() => {}, pauseAfterDelete);
+      } else {
+        timer = setTimeout(() => {
+          setDisplay((prev) => prev.slice(0, -1));
+        }, typeSpeed);
+      }
+    } else {
+      if (display === phrase) {
+        timer = setTimeout(() => {
+          setIsDeleting(true);
+        }, pauseAfterType);
+      } else {
+        timer = setTimeout(() => {
+          setDisplay((prev) => phrase.slice(0, prev.length + 1));
+        }, typeSpeed);
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [display, isDeleting, index]);
 
   return (
-    <span
-      className={`inline-block text-[#4d8bff] transition-opacity duration-500 ${
-        visible ? "opacity-100" : "opacity-0"
-      }`}
-    >
-      {ROTATING_PHRASES[index]}
+    <span className="inline-block text-[#4d8bff]">
+      {display}
+      <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-[#4d8bff] align-middle" />
     </span>
   );
 }
