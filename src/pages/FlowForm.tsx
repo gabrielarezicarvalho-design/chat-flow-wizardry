@@ -57,11 +57,9 @@ const FlowForm = () => {
     try {
       console.log('🔄 Loading form:', formId);
       
-      const { data, error: fetchError } = await supabase
-        .from('flow_forms' as any)
-        .select('*')
-        .eq('id', formId)
-        .maybeSingle();
+      const { data, error: fetchError } = await supabase.functions.invoke('public-flow-form', {
+        body: { action: 'get', formId },
+      });
 
       if (fetchError) {
         console.error('❌ Fetch error:', fetchError);
@@ -70,13 +68,14 @@ const FlowForm = () => {
         return;
       }
 
-      if (!data) {
+      if (!data?.form) {
         setError('Formulário não encontrado');
         setLoading(false);
         return;
       }
 
-      const formData = data as unknown as FlowForm;
+      const formData = data.form as FlowForm;
+      
       
       // Check if expired
       const expiresAt = new Date(formData.expires_at);
@@ -136,30 +135,28 @@ const FlowForm = () => {
     setSubmitting(true);
 
     try {
-      // Save response
-      const { error: responseError } = await supabase
-        .from('leads_forms_responses' as any)
-        .insert({
-          form_id: formId,
-          connection_id: form?.connection_id,
-          phone: phone.replace(/\D/g, ''),
-          name: name.trim(),
-          address: address.trim(),
-          answers: answers,
-        });
+      // Save response (server-side validated)
+      const { data: submitData, error: responseError } = await supabase.functions.invoke(
+        'public-flow-form',
+        {
+          body: {
+            action: 'submit',
+            formId,
+            phone: phone.replace(/\D/g, ''),
+            name: name.trim(),
+            address: address.trim(),
+            answers,
+          },
+        }
+      );
 
-      if (responseError) {
+      if (responseError || !submitData?.success) {
         console.error('❌ Response error:', responseError);
         toast.error('Erro ao enviar dados');
         setSubmitting(false);
         return;
       }
 
-      // Mark form as answered
-      await supabase
-        .from('flow_forms' as any)
-        .update({ answered: true })
-        .eq('id', formId);
 
       // Send WhatsApp confirmation
       try {
