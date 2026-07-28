@@ -123,6 +123,39 @@ declare global {
   }
 }
 
+const ROTATING_PHRASES = [
+  "e sua base cresce",
+  "e sua recompra dispara",
+  "e seu faturamento decola",
+  "e suas vendas crescem",
+];
+
+function RotatingText() {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % ROTATING_PHRASES.length);
+        setVisible(true);
+      }, 500);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span
+      className={`inline-block text-[#4d8bff] transition-opacity duration-500 ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      {ROTATING_PHRASES[index]}
+    </span>
+  );
+}
+
 export default function Landing() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -479,9 +512,9 @@ export default function Landing() {
             <h1 className="font-space-grotesk text-5xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
               Seus clientes
               <br />
-              voltam <span className="text-[#4d8bff]">e sua</span>
+              voltam
               <br />
-              <span className="text-[#4d8bff]">base cresce</span>
+              <RotatingText />
             </h1>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-400">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
