@@ -532,11 +532,11 @@ export default function Landing() {
       {/* HERO */}
       <section className="relative overflow-hidden bg-[#0b0d0b]">
         <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 md:grid-cols-2">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
           <div>
-            <h1 className="font-space-grotesk text-5xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
-              <span className="block">Seus clientes voltam e sua, e seu, e suas,</span>
-              <span className="block"><TypewriterText /></span>
+            <h1 className="font-space-grotesk text-[clamp(1.5rem,5vw,2.75rem)] font-bold leading-[1.05] tracking-tight text-white">
+              <span className="whitespace-nowrap">Seus clientes voltam&nbsp;</span>
+              <TypewriterText />
             </h1>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-400">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
