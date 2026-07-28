@@ -61,7 +61,7 @@ export const FlowCanvas = ({ onSave, selectedNodeType, onNodeAdded }: FlowCanvas
     // Add node on click
     canvas.on('mouse:down', (options) => {
       if (selectedNodeType && !isPanning && options.target === null) {
-        const pointer = canvas.getPointer(options.e);
+        const pointer = canvas.getScenePoint(options.e);
         addNode(selectedNodeType, pointer.x, pointer.y);
         onNodeAdded();
       }
