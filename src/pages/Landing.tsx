@@ -530,7 +530,7 @@ export default function Landing() {
               </Button>
             </Link>
             <Link to="/auth">
-              <Button className="btn-shine rounded-lg bg-[#004DFF] px-6 text-white hover:bg-[#0040d6]">
+              <Button className="btn-shine btn-jump rounded-lg bg-[#004DFF] px-6 text-white hover:bg-[#0040d6]">
                 Testar grátis
               </Button>
             </Link>
@@ -553,7 +553,7 @@ export default function Landing() {
             </p>
             <div className="mt-10">
               <Link to="/auth">
-                <Button size="lg" className="btn-shine h-14 rounded-xl bg-[#004DFF] px-9 text-lg font-semibold text-white hover:bg-[#0040d6]">
+                <Button size="lg" className="btn-shine btn-jump h-14 rounded-xl bg-[#004DFF] px-9 text-lg font-semibold text-white hover:bg-[#0040d6]">
                   Testar grátis <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
