@@ -139,7 +139,6 @@ function TypewriterText() {
     const phrase = ROTATING_PHRASES[index];
     const typeSpeed = isDeleting ? 40 : 80;
     const pauseAfterType = 2000;
-    const pauseAfterDelete = 300;
 
     let timer: ReturnType<typeof setTimeout>;
 
@@ -147,7 +146,6 @@ function TypewriterText() {
       if (display === "") {
         setIsDeleting(false);
         setIndex((prev) => (prev + 1) % ROTATING_PHRASES.length);
-        timer = setTimeout(() => {}, pauseAfterDelete);
       } else {
         timer = setTimeout(() => {
           setDisplay((prev) => prev.slice(0, -1));
