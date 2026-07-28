@@ -513,7 +513,7 @@ export default function Landing() {
                 alt="NEXT PRO"
                 className="h-8 w-8 rounded-full object-cover"
               />
-              NEXT <span className="text-[#004DFF]">PRO CRM</span>
+              NEXT <span className="text-[#004DFF]">PRO</span>
             </div>
             <nav className="hidden lg:flex items-center gap-8 text-base text-slate-200">
               <a href="#recursos" className="hover:text-white">Funcionalidades</a>
