@@ -123,11 +123,11 @@ declare global {
   }
 }
 
-const ROTATING_PHRASES = [
-  "e sua base cresce",
-  "e sua recompra dispara",
-  "e seu faturamento decola",
-  "e suas vendas crescem",
+const TYPING_PHRASES = [
+  "base cresce",
+  "recompra dispara",
+  "faturamento decola",
+  "vendas crescem",
 ];
 
 function TypewriterText() {
@@ -136,7 +136,7 @@ function TypewriterText() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const phrase = ROTATING_PHRASES[index];
+    const phrase = TYPING_PHRASES[index];
     const typeSpeed = isDeleting ? 40 : 80;
     const pauseAfterType = 2000;
 
@@ -145,7 +145,7 @@ function TypewriterText() {
     if (isDeleting) {
       if (display === "") {
         setIsDeleting(false);
-        setIndex((prev) => (prev + 1) % ROTATING_PHRASES.length);
+        setIndex((prev) => (prev + 1) % TYPING_PHRASES.length);
       } else {
         timer = setTimeout(() => {
           setDisplay((prev) => prev.slice(0, -1));
@@ -167,12 +167,13 @@ function TypewriterText() {
   }, [display, isDeleting, index]);
 
   return (
-    <span className="inline-block text-[#4d8bff]">
+    <span className="text-[#4d8bff] whitespace-nowrap">
       {display}
       <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-[#4d8bff] align-middle" />
     </span>
   );
 }
+
 
 export default function Landing() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -528,9 +529,8 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 md:grid-cols-2">
           <div>
             <h1 className="font-space-grotesk text-5xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
-              Seus clientes voltam
-              <br />
-              <TypewriterText />
+              <span className="block">Seus clientes voltam e sua, e seu, e suas,</span>
+              <span className="block"><TypewriterText /></span>
             </h1>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-400">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
