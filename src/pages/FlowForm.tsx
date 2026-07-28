@@ -135,30 +135,28 @@ const FlowForm = () => {
     setSubmitting(true);
 
     try {
-      // Save response
-      const { error: responseError } = await supabase
-        .from('leads_forms_responses' as any)
-        .insert({
-          form_id: formId,
-          connection_id: form?.connection_id,
-          phone: phone.replace(/\D/g, ''),
-          name: name.trim(),
-          address: address.trim(),
-          answers: answers,
-        });
+      // Save response (server-side validated)
+      const { data: submitData, error: responseError } = await supabase.functions.invoke(
+        'public-flow-form',
+        {
+          body: {
+            action: 'submit',
+            formId,
+            phone: phone.replace(/\D/g, ''),
+            name: name.trim(),
+            address: address.trim(),
+            answers,
+          },
+        }
+      );
 
-      if (responseError) {
+      if (responseError || !submitData?.success) {
         console.error('❌ Response error:', responseError);
         toast.error('Erro ao enviar dados');
         setSubmitting(false);
         return;
       }
 
-      // Mark form as answered
-      await supabase
-        .from('flow_forms' as any)
-        .update({ answered: true })
-        .eq('id', formId);
 
       // Send WhatsApp confirmation
       try {
