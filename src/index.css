@@ -236,3 +236,29 @@ All colors MUST be HSL.
   box-shadow: 0 4px 10px -6px hsl(var(--primary) / 0.5);
   transition-duration: 0.08s;
 }
+
+/* Pílulas flutuantes do hero */
+@keyframes pill-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pill-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.7); opacity: 1; }
+  70% { box-shadow: 0 0 0 6px hsl(var(--primary) / 0); opacity: 0.85; }
+}
+
+.pill-float {
+  animation: pill-float 4s ease-in-out infinite;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pill-float:hover {
+  animation-play-state: paused;
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 16px 32px -12px hsl(var(--primary) / 0.7);
+}
+
+.pill-dot {
+  animation: pill-dot-pulse 2s ease-out infinite;
+}
