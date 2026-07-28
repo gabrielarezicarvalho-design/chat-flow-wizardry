@@ -529,9 +529,8 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 md:grid-cols-2">
           <div>
             <h1 className="font-space-grotesk text-5xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
-              Seus clientes voltam
-              <br />
-              <TypewriterText />
+              <span className="block">Seus clientes voltam e sua, e seu, e suas,</span>
+              <span className="block"><TypewriterText /></span>
             </h1>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-400">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
