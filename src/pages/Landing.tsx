@@ -543,39 +543,39 @@ export default function Landing() {
         <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
           <div>
-            <h1 className="font-space-grotesk text-[clamp(2rem,5.6vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-white">
+            <h1 className="hero-reveal hero-d1 font-space-grotesk text-[clamp(2rem,5.6vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-white">
               <span className="block">Seus clientes</span>
               <TypewriterText />
             </h1>
-            <p className="mt-8 max-w-lg text-xl leading-relaxed text-slate-400">
+            <p className="hero-reveal hero-d2 mt-8 max-w-lg text-xl leading-relaxed text-slate-400">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
               automações. Impulsione as vendas do seu negócio em até 20% com a NEXT PRO.
             </p>
-            <div className="mt-10">
+            <div className="hero-reveal hero-d3 mt-10">
               <Link to="/auth">
                 <Button size="lg" className="btn-shine btn-press h-14 rounded-xl bg-[#004DFF] px-9 text-lg font-semibold text-white hover:bg-[#0040d6]">
                   Testar grátis <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <div className="mt-5 flex items-center gap-2 text-base text-slate-400">
+            <div className="hero-reveal hero-d4 mt-5 flex items-center gap-2 text-base text-slate-400">
               <ShieldCheck className="h-4 w-4 text-slate-500" />
               Garantia de 30 dias · Sem fidelidade
             </div>
-            <div className="mt-12 flex flex-wrap items-center gap-8 opacity-40">
+            <div className="hero-reveal hero-d5 mt-12 flex flex-wrap items-center gap-8 opacity-40">
               {["Kaja", "BOOBOO", "SENSE", "Tangerine"].map((b) => (
                 <span key={b} className="font-space-grotesk text-xl font-bold tracking-wide text-white">
                   {b}
                 </span>
               ))}
             </div>
-            <p className="mt-6 text-base text-slate-400">
+            <p className="hero-reveal hero-d6 mt-6 text-base text-slate-400">
               <span className="font-semibold text-white">+200 empresas</span> já vendem mais com a NEXT PRO.
             </p>
           </div>
 
           {/* Composição circular */}
-          <div className="relative mx-auto w-full max-w-[520px]">
+          <div className="hero-reveal-right hero-d3 relative mx-auto w-full max-w-[520px]">
             <div className="relative aspect-square rounded-full border-2 border-dashed border-[#004DFF]/50 p-6">
               <div className="h-full w-full overflow-hidden rounded-full">
                 <img
