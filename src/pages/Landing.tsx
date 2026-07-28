@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
+import heroWoman from "@/assets/hero-woman.jpg";
 import avatarRafael from "@/assets/cases/rafael.png.asset.json";
 import avatarIsabela from "@/assets/cases/isabela.png.asset.json";
 import avatarDiego from "@/assets/cases/diego.png.asset.json";
