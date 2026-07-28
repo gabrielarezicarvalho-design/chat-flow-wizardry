@@ -124,10 +124,10 @@ declare global {
 }
 
 const ROTATING_PHRASES = [
-  "e sua\u00A0base cresce",
-  "e sua\u00A0recompra dispara",
-  "e seu\u00A0faturamento decola",
-  "e suas\u00A0vendas crescem",
+  "base cresce",
+  "recompra dispara",
+  "faturamento decola",
+  "vendas crescem",
 ];
 
 function RotatingText() {
@@ -510,9 +510,9 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 md:grid-cols-2">
           <div>
             <h1 className="font-space-grotesk text-5xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
-              Seus clientes
+              Seus clientes voltam e sua
               <br />
-              voltam&nbsp;<RotatingText />
+              <RotatingText />
             </h1>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-400">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
