@@ -479,9 +479,9 @@ export default function Landing() {
             <h1 className="font-space-grotesk text-5xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
               Seus clientes
               <br />
-              voltam <span className="text-[#4d8bff]">e sua</span>
+              voltam
               <br />
-              <span className="text-[#4d8bff]">base cresce</span>
+              <RotatingText />
             </h1>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-400">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
