@@ -123,56 +123,62 @@ declare global {
   }
 }
 
-const TYPING_PHRASES = [
-  "base cresce",
-  "recompra dispara",
-  "faturamento decola",
-  "vendas crescem",
+const PHRASES = [
+  { prefix: "e sua", suffix: "base cresce" },
+  { prefix: "e sua", suffix: "recompra dispara" },
+  { prefix: "e seu", suffix: "faturamento decola" },
+  { prefix: "e suas", suffix: "vendas crescem" },
 ];
 
 function TypewriterText() {
   const [index, setIndex] = useState(0);
-  const [display, setDisplay] = useState("");
+  const [prefix, setPrefix] = useState("");
+  const [suffix, setSuffix] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const phrase = TYPING_PHRASES[index];
-    const typeSpeed = isDeleting ? 40 : 80;
+    const { prefix: fullPrefix, suffix: fullSuffix } = PHRASES[index];
+    const typeSpeed = 80;
+    const deleteSpeed = 40;
     const pauseAfterType = 2000;
 
     let timer: ReturnType<typeof setTimeout>;
 
     if (isDeleting) {
-      if (display === "") {
-        setIsDeleting(false);
-        setIndex((prev) => (prev + 1) % TYPING_PHRASES.length);
+      if (suffix.length > 0) {
+        timer = setTimeout(() => setSuffix((s) => s.slice(0, -1)), deleteSpeed);
+      } else if (prefix.length > 0) {
+        timer = setTimeout(() => setPrefix((p) => p.slice(0, -1)), deleteSpeed);
       } else {
-        timer = setTimeout(() => {
-          setDisplay((prev) => prev.slice(0, -1));
-        }, typeSpeed);
+        setIndex((i) => (i + 1) % PHRASES.length);
+        setIsDeleting(false);
       }
     } else {
-      if (display === phrase) {
-        timer = setTimeout(() => {
-          setIsDeleting(true);
-        }, pauseAfterType);
+      if (prefix.length < fullPrefix.length) {
+        timer = setTimeout(() => setPrefix(fullPrefix.slice(0, prefix.length + 1)), typeSpeed);
+      } else if (suffix.length < fullSuffix.length) {
+        timer = setTimeout(() => setSuffix(fullSuffix.slice(0, suffix.length + 1)), typeSpeed);
       } else {
-        timer = setTimeout(() => {
-          setDisplay((prev) => phrase.slice(0, prev.length + 1));
-        }, typeSpeed);
+        timer = setTimeout(() => setIsDeleting(true), pauseAfterType);
       }
     }
 
     return () => clearTimeout(timer);
-  }, [display, isDeleting, index]);
+  }, [index, prefix, suffix, isDeleting]);
+
+  const { prefix: fullPrefix } = PHRASES[index];
+  const showBreak = prefix.length === fullPrefix.length && (suffix.length > 0 || !isDeleting);
 
   return (
-    <span className="text-[#4d8bff] whitespace-nowrap">
-      {display}
+    <span className="text-[#4d8bff]">
+      <span className="whitespace-nowrap">{prefix}</span>
+      {showBreak && <br />}
+      <span className="whitespace-nowrap">{suffix}</span>
       <span className="ml-0.5 inline-block h-[1em] w-[2px] animate-pulse bg-[#4d8bff] align-middle" />
     </span>
   );
 }
+
 
 
 export default function Landing() {
@@ -526,11 +532,11 @@ export default function Landing() {
       {/* HERO */}
       <section className="relative overflow-hidden bg-[#0b0d0b]">
         <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 md:grid-cols-2">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
           <div>
-            <h1 className="font-space-grotesk text-5xl font-bold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl">
-              <span className="block">Seus clientes voltam e sua, e seu, e suas,</span>
-              <span className="block"><TypewriterText /></span>
+            <h1 className="font-space-grotesk text-[clamp(1.5rem,5vw,2.75rem)] font-bold leading-[1.05] tracking-tight text-white">
+              <span className="whitespace-nowrap">Seus clientes voltam&nbsp;</span>
+              <TypewriterText />
             </h1>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-400">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
