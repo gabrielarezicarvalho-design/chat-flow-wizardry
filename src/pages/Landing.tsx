@@ -525,7 +525,7 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
           <div>
             <h1 className="font-space-grotesk text-[clamp(1.5rem,5vw,2.75rem)] font-bold leading-[1.05] tracking-tight text-white">
-              <span className="whitespace-nowrap">Seus clientes voltam&nbsp;</span>
+              <span className="block">Seus clientes</span>
               <TypewriterText />
             </h1>
             <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-400">
