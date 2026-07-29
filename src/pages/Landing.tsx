@@ -1462,7 +1462,7 @@ export default function Landing() {
                 price: billing === "monthly" ? "49,90" : "41,58",
                 tagline: "Para lojas em crescimento",
                 highlights: [
-                  { strong: "500 vendas", pre: "até ", post: "/mês" },
+                  { strong: "150 vendas", pre: "até ", post: "/mês" },
                   { strong: "10.000", pre: "", post: " créditos de mensagem" },
                 ],
                 chips: ["5 atendentes", "2 conexões WhatsApp", "IA completa", "Chat interno"],
