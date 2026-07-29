@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireActivePlan } from "../_shared/planGuard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,6 +23,9 @@ function render(tpl: string, vars: Record<string, string>) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+
+  const blocked = await requireActivePlan(req, corsHeaders);
+  if (blocked) return blocked;
   try {
     const { cobrancaId, connectionId: overrideConnId } = await req.json();
     if (!cobrancaId) throw new Error("cobrancaId obrigatório");

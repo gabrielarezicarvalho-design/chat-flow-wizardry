@@ -1,5 +1,6 @@
 // Facebook Ad Library scraper via Apify
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { requireActivePlan } from "../_shared/planGuard.ts";
 
 const APIFY_TOKEN = Deno.env.get("APIFY_TOKEN");
 const ACTOR = "apify~facebook-ads-scraper";
@@ -233,6 +234,9 @@ function normalize(rawItem: unknown) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+
+  const blocked = await requireActivePlan(req, corsHeaders);
+  if (blocked) return blocked;
   try {
     if (!APIFY_TOKEN) {
       return new Response(
