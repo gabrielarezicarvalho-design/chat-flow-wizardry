@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { usePlanConfigs } from "@/hooks/usePlanConfigs";
 
 const EVENT = "open-upgrade-dialog";
 
@@ -59,10 +60,12 @@ export default function UpgradeDialog() {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<string | undefined>();
   const [billing, setBilling] = useState<Billing>("monthly");
+  const { plans: planConfigs } = usePlanConfigs();
 
   useEffect(() => {
     const handler = (e: Event) => {
       setReason((e as CustomEvent).detail?.reason);
+      setBilling("monthly");
       setOpen(true);
     };
     window.addEventListener(EVENT, handler);
@@ -109,7 +112,10 @@ export default function UpgradeDialog() {
         <div className="grid gap-4 sm:grid-cols-2 items-start">
           {PLANS.map((p) => {
             const Icon = p.icon;
-            const price = billing === "annual" ? p.annual : p.monthly;
+            const cfg = planConfigs.find((c) => c.slug === p.tier);
+            const monthly = cfg?.price_monthly ?? p.monthly;
+            const annual = cfg?.price_annual ?? p.annual;
+            const price = billing === "annual" ? annual : monthly;
             return (
               <div
                 key={p.tier}
@@ -120,7 +126,7 @@ export default function UpgradeDialog() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 font-semibold">
                     <Icon className="h-4 w-4 text-[#004DFF]" />
-                    {p.name}
+                    {cfg?.name || p.name}
                   </div>
                   {p.popular && (
                     <Badge className="bg-[#004DFF] hover:bg-[#004DFF]">
@@ -150,7 +156,7 @@ export default function UpgradeDialog() {
                   variant={p.popular ? "default" : "outline"}
                   onClick={() => go(p.tier)}
                 >
-                  Assinar {p.name}
+                  Assinar {cfg?.name || p.name}
                 </Button>
               </div>
             );
