@@ -385,6 +385,65 @@ function RotatingBrands() {
   );
 }
 
+const PLAN_FEATURES: Record<string, string[]> = {
+  start: [
+    "5 atendentes",
+    "2 conexões WhatsApp",
+    "IA completa",
+    "Chat interno",
+    "CRM com funil de vendas",
+    "Automação de fluxos",
+    "Disparos em massa",
+    "Agendamentos",
+    "Prospecção Google Maps",
+    "Cobranças recorrentes",
+    "Relatórios essenciais",
+    "Suporte por WhatsApp",
+  ],
+  business: [
+    "20 atendentes",
+    "Clientes ilimitados",
+    "Prospecção completa",
+    "Suporte prioritário",
+    "Conexões WhatsApp ilimitadas",
+    "Agentes de IA avançados",
+    "Voz clonada com IA",
+    "Leads Instagram e TikTok",
+    "Espionagem de anúncios",
+    "Recuperação financeira",
+    "API e webhooks",
+    "Relatórios avançados",
+  ],
+};
+
+function RotatingChips({ tier }: { tier: string }) {
+  const features = PLAN_FEATURES[tier] ?? [];
+  const pages = Math.max(1, Math.ceil(features.length / 4));
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    if (pages <= 1) return;
+    const interval = setInterval(() => setPage((p) => (p + 1) % pages), 4000);
+    return () => clearInterval(interval);
+  }, [pages]);
+
+  const current = features.slice(page * 4, page * 4 + 4);
+
+  return (
+    <>
+      {current.map((c) => (
+        <span
+          key={`${page}-${c}`}
+          className="brand-fade-in flex items-center gap-1.5 text-sm text-slate-600"
+        >
+          <CheckCircle2 className="h-4 w-4 text-slate-400" />
+          {c}
+        </span>
+      ))}
+    </>
+  );
+}
+
 
 
 
