@@ -373,6 +373,7 @@ export default function Landing() {
   const [selectedLead, setSelectedLead] = useState<LeadItem | null>(null);
   const [savedLeads, setSavedLeads] = useState<string[]>([]);
   const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
+  const [scrolled, setScrolled] = useState(false);
 
   const handleSubscribe = async (tier: "start" | "business") => {
     try {
