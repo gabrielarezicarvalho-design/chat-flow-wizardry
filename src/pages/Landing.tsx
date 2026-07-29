@@ -1636,7 +1636,7 @@ export default function Landing() {
                   className="mt-5 w-full rounded-xl py-4 text-lg font-bold text-white transition hover:opacity-90"
                   style={{ backgroundColor: "#004DFF" }}
                 >
-                  Assinar {p.name}
+                  {p.tier === "basic" ? "Testar grátis" : `Assinar ${p.name}`}
                 </button>
 
                 <div className="mt-5 flex flex-col items-center">
