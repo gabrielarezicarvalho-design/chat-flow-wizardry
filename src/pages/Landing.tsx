@@ -511,6 +511,7 @@ function HeroChatCard() {
   ]);
   const [typing, setTyping] = useState(false);
   const [asked, setAsked] = useState<string[]>([]);
+  const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const timersRef = useRef<number[]>([]);
 
