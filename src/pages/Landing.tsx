@@ -511,6 +511,7 @@ function HeroChatCard() {
   ]);
   const [typing, setTyping] = useState(false);
   const [asked, setAsked] = useState<string[]>([]);
+  const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const timersRef = useRef<number[]>([]);
 
@@ -543,6 +544,61 @@ function HeroChatCard() {
     }, 1100);
     timersRef.current.push(t);
   };
+
+  const sendFree = async () => {
+    const text = draft.trim();
+    if (!text || typing) return;
+    setDraft("");
+    setMessages((m) => [...m, { from: "user", text }]);
+    setTyping(true);
+
+    const seg = HERO_SEGMENTS[segment];
+    const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const n = norm(text);
+    const local = seg.qa.find((item) => {
+      const words = norm(item.q).split(/\W+/).filter((w) => w.length > 4);
+      return words.some((w) => n.includes(w));
+    });
+
+    if (local) {
+      const t = window.setTimeout(() => {
+        setTyping(false);
+        setAsked((a) => [...a, local.q]);
+        setMessages((m) => [...m, { from: "ai", text: local.a }]);
+      }, 900);
+      timersRef.current.push(t);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke("landing-aurora-chat", {
+        body: {
+          message: text,
+          history: messages.slice(-6).map((m) => ({ role: m.from === "user" ? "user" : "assistant", content: m.text })),
+          context: `Você é o agente de IA de uma empresa do segmento "${seg.name}". Responda em português, curto (até 2 frases), simpático e comercial.`,
+        },
+      });
+      const reply = (data as any)?.reply || (data as any)?.text;
+      setTyping(false);
+      setMessages((m) => [
+        ...m,
+        {
+          from: "ai",
+          text:
+            !error && reply
+              ? reply
+              : "Consigo te ajudar com isso! 😊 Me conta um pouco mais — ou clique numa das perguntas sugeridas.",
+        },
+      ]);
+    } catch {
+      setTyping(false);
+      setMessages((m) => [
+        ...m,
+        { from: "ai", text: "Consigo te ajudar com isso! 😊 Me conta um pouco mais sobre o que você precisa." },
+      ]);
+    }
+  };
+
 
   const seg = HERO_SEGMENTS[segment];
   const remaining = seg.qa.filter((item) => !asked.includes(item.q));
@@ -633,9 +689,36 @@ function HeroChatCard() {
           )}
         </div>
 
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/60 px-4 py-3 text-sm text-slate-500">
-          <Check className="h-4 w-4" /> Toque numa pergunta e veja a venda acontecer
-        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            sendFree();
+          }}
+          className="mt-3 flex items-center gap-3 rounded-full bg-[#EEF1F6] px-4 py-3"
+        >
+          <button type="button" onClick={() => setDraft((d) => d + " ")} className="text-slate-500 transition hover:text-[#004DFF]" aria-label="Anexar">
+            <Plus className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => setDraft((d) => d + "😊")} className="text-slate-500 transition hover:text-[#004DFF]" aria-label="Emoji">
+            <Smile className="h-5 w-5" />
+          </button>
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Digite uma mensagem"
+            className="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+          />
+          {draft.trim() ? (
+            <button type="submit" disabled={typing} className="text-[#004DFF] disabled:opacity-50" aria-label="Enviar">
+              <ArrowRight className="h-5 w-5" />
+            </button>
+          ) : (
+            <span className="text-slate-500" aria-hidden>
+              <Mic className="h-5 w-5" />
+            </span>
+          )}
+        </form>
+
       </div>
     </div>
   );
