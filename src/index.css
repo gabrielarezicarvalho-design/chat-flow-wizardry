@@ -284,6 +284,25 @@ All colors MUST be HSL.
   animation: hero-reveal-right 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+@keyframes brand-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.brand-fade-in {
+  animation: brand-fade-in 0.5s ease-out forwards;
+}
+
+
 .hero-d1 { animation-delay: 0.05s; }
 .hero-d2 { animation-delay: 0.2s; }
 .hero-d3 { animation-delay: 0.35s; }
@@ -297,4 +316,19 @@ All colors MUST be HSL.
     animation: none;
     opacity: 1;
   }
+}
+
+.chip-marquee {
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.chip-marquee-track {
+  animation: chip-marquee-scroll linear infinite;
+}
+.chip-marquee:hover .chip-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes chip-marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
