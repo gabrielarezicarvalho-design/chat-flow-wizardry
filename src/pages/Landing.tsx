@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import imgPadaria from "@/assets/biz/padaria.jpg";
 import imgOficina from "@/assets/biz/oficina.jpg";
-import imgSalao from "@/assets/biz/salao.jpg";
+import imgSalao from "@/assets/biz/salao.jpg.asset.json";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
 import avatarRafael from "@/assets/cases/rafael.png.asset.json";
@@ -505,7 +505,7 @@ const MERCADO_CARDS = [
     className: "lg:col-span-2 h-[240px]",
   },
   {
-    img: imgSalao,
+    img: imgSalao.url,
     title: "Salão independente",
     desc: "agenda andando sem parar o atendimento",
     className: "lg:row-span-2 h-[560px]",
