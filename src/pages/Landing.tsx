@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import imgPadaria from "@/assets/biz/padaria.jpg";
-import imgOficina from "@/assets/biz/oficina.jpg";
+import imgOficina from "@/assets/biz/oficina.jpg.asset.json";
 import imgSalao from "@/assets/biz/salao.jpg.asset.json";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
