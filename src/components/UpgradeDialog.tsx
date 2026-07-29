@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePlanConfigs } from "@/hooks/usePlanConfigs";
-import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { usePlanLimits, TRIAL_DAYS } from "@/hooks/usePlanLimits";
 import { Progress } from "@/components/ui/progress";
 
 const EVENT = "open-upgrade-dialog";
@@ -63,7 +63,7 @@ export default function UpgradeDialog() {
   const [reason, setReason] = useState<string | undefined>();
   const [billing, setBilling] = useState<Billing>("monthly");
   const { plans: planConfigs } = usePlanConfigs();
-  const { plan: currentPlan, usage, getStatus } = usePlanLimits();
+  const { plan: currentPlan, usage, getStatus, trialEndsAt, trialExpired, trialDaysLeft } = usePlanLimits();
   const sends = getStatus("mass_sends_month");
   const remaining = sends.unlimited
     ? null
@@ -104,6 +104,20 @@ export default function UpgradeDialog() {
               "Seu plano atual atingiu o limite. Escolha um plano e continue usando sem interrupções."}
           </DialogDescription>
         </DialogHeader>
+
+        {trialEndsAt && (
+          <div
+            className={`rounded-xl border p-3 text-sm ${
+              trialExpired
+                ? "border-destructive/40 bg-destructive/5 text-destructive"
+                : "border-amber-300/60 bg-amber-50 text-amber-800"
+            }`}
+          >
+            {trialExpired
+              ? `Seu teste grátis de ${TRIAL_DAYS} dias terminou e todas as funcionalidades estão bloqueadas.`
+              : `Teste grátis de ${TRIAL_DAYS} dias — resta${trialDaysLeft === 1 ? "" : "m"} ${trialDaysLeft} dia${trialDaysLeft === 1 ? "" : "s"} (até ${trialEndsAt.toLocaleDateString("pt-BR")}).`}
+          </div>
+        )}
 
         <div className="rounded-xl border bg-muted/30 p-4 space-y-2">
           <div className="flex items-center justify-between text-sm">
