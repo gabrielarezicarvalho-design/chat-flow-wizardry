@@ -404,6 +404,15 @@ export default function Landing() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const conversationRef = useRef<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const sweepY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  const sweepOpacity = useTransform(scrollYProgress, [0, 0.15, 0.5, 0.85, 1], [0, 1, 1, 0.8, 0]);
+  const heroDim = useTransform(scrollYProgress, [0, 0.6], [0, 0.45]);
 
   const chatMessages = [
     { id: 1, sender: "client", content: "Vi sua mensagem, do que se trata?", delay: 0 },
