@@ -1669,81 +1669,94 @@ export default function Landing() {
           </div>
 
 
-          {/* TABELA COMPARATIVA */}
-          <div className="mt-16 max-w-3xl mx-auto">
-            <h3 className="text-center text-3xl font-bold text-slate-900">Compare os planos</h3>
-            <p className="mt-2 text-center text-base text-slate-500">Veja lado a lado o que cada plano entrega.</p>
-
-            <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <table className="w-full text-base">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="text-left font-semibold text-slate-700 px-6 py-4">Recurso</th>
-                    <th className="text-center font-semibold text-slate-700 px-6 py-4">Start</th>
-                    <th className="text-center font-semibold px-6 py-4" style={{ color: "#004DFF" }}>Business</th>
-                  </tr>
-                </thead>
-                <tbody className="text-slate-700">
-                  {[
-                    [
-                      billing === "monthly" ? "Preço mensal" : "Preço anual (por mês)",
-                      billing === "monthly" ? "R$ 49,90" : "R$ 41,58",
-                      billing === "monthly" ? "R$ 99,90" : "R$ 83,25",
-                    ],
-                    [billing === "annual" ? "Cobrança anual" : "", billing === "annual" ? "R$ 499,00 cobrado por ano" : "—", billing === "annual" ? "R$ 999,00 cobrado por ano" : "—"],
-                    ["Atendentes", "5", "20"],
-                    ["Conexões WhatsApp", "2", "10"],
-                    ["Usuários", "10/mês", "Ilimitados"],
-                    ["Contatos", "500/mês", "10.000/mês"],
-                    ["Disparos em massa", "100/mês", "Até 10.000/mês"],
-                    ["Vendas e cobranças", "500/mês", "Ilimitadas"],
-                    ["Fluxos de IA", "3/mês", "Ilimitados"],
-                    ["Agentes de IA", "3/mês", "Ilimitados"],
-                    ["Departamentos", "4/mês", "Ilimitados"],
-                    ["IA completa (Aurora)", true, true],
-                    ["Histórico de atendimentos", true, true],
-                    ["Segmentação de contatos", true, true],
-                    ["Chat interno", true, true],
-                    ["Relatórios", "Básicos", "Avançados"],
-                    ["Prospecção Google Maps", false, true],
-                    ["Prospecção Instagram/TikTok", false, true],
-                    ["Espionar anúncios", false, true],
-                    ["Voz clonada (ElevenLabs)", false, true],
-                    ["API + Webhooks", false, true],
-                    ["Suporte", "E-mail", "Prioritário"],
-                    ["Teste grátis", "2 dias", "2 dias"],
-
-                  ].map(([label, start, business], idx) => (
-                    <tr key={label as string} className={idx % 2 === 1 ? "bg-slate-50/50" : ""}>
-                      <td className="px-6 py-3.5 font-medium text-slate-800">{label as string}</td>
-                      <td className="px-6 py-3.5 text-center">
-                        {typeof start === "boolean" ? (
-                          start ? (
-                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
-                          ) : (
-                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
-                          )
-                        ) : (
-                          <span>{start}</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-3.5 text-center">
-                        {typeof business === "boolean" ? (
-                          business ? (
-                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
-                          ) : (
-                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
-                          )
-                        ) : (
-                          <span className="font-semibold" style={{ color: "#004DFF" }}>{business}</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          {/* BOTÃO COMPARAR PLANOS */}
+          <div className="mt-12 flex justify-center">
+            <button
+              onClick={() => setShowCompareTable((s) => !s)}
+              className="group inline-flex items-center gap-3 rounded-xl bg-slate-100 px-5 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-200"
+            >
+              Compare os planos
+              <ChevronUp className={`h-4 w-4 transition-transform duration-200 ${showCompareTable ? "" : "rotate-180"}`} />
+            </button>
           </div>
+
+          {/* TABELA COMPARATIVA */}
+          {showCompareTable && (
+            <div className="mt-8 max-w-3xl mx-auto animate-fade-in">
+              <h3 className="text-center text-3xl font-bold text-slate-900">Resumo de recursos e limites</h3>
+              <p className="mt-2 text-center text-base text-slate-500">Veja lado a lado o que cada plano entrega.</p>
+
+              <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <table className="w-full text-base">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="text-left font-semibold text-slate-700 px-6 py-4">Recurso</th>
+                      <th className="text-center font-semibold text-slate-700 px-6 py-4">Start</th>
+                      <th className="text-center font-semibold px-6 py-4" style={{ color: "#004DFF" }}>Business</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-slate-700">
+                    {[
+                      [
+                        billing === "monthly" ? "Preço mensal" : "Preço anual (por mês)",
+                        billing === "monthly" ? "R$ 49,90" : "R$ 41,58",
+                        billing === "monthly" ? "R$ 99,90" : "R$ 83,25",
+                      ],
+                      [billing === "annual" ? "Cobrança anual" : "", billing === "annual" ? "R$ 499,00 cobrado por ano" : "—", billing === "annual" ? "R$ 999,00 cobrado por ano" : "—"],
+                      ["Atendentes", "5", "20"],
+                      ["Conexões WhatsApp", "2", "10"],
+                      ["Usuários", "10/mês", "Ilimitados"],
+                      ["Contatos", "500/mês", "10.000/mês"],
+                      ["Disparos em massa", "100/mês", "Até 10.000/mês"],
+                      ["Vendas e cobranças", "500/mês", "Ilimitadas"],
+                      ["Fluxos de IA", "3/mês", "Ilimitados"],
+                      ["Agentes de IA", "3/mês", "Ilimitados"],
+                      ["Departamentos", "4/mês", "Ilimitados"],
+                      ["IA completa (Aurora)", true, true],
+                      ["Histórico de atendimentos", true, true],
+                      ["Segmentação de contatos", true, true],
+                      ["Chat interno", true, true],
+                      ["Relatórios", "Básicos", "Avançados"],
+                      ["Prospecção Google Maps", false, true],
+                      ["Prospecção Instagram/TikTok", false, true],
+                      ["Espionar anúncios", false, true],
+                      ["Voz clonada (ElevenLabs)", false, true],
+                      ["API + Webhooks", false, true],
+                      ["Suporte", "E-mail", "Prioritário"],
+                      ["Teste grátis", "2 dias", "2 dias"],
+
+                    ].map(([label, start, business], idx) => (
+                      <tr key={label as string} className={idx % 2 === 1 ? "bg-slate-50/50" : ""}>
+                        <td className="px-6 py-3.5 font-medium text-slate-800">{label as string}</td>
+                        <td className="px-6 py-3.5 text-center">
+                          {typeof start === "boolean" ? (
+                            start ? (
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                            ) : (
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
+                            )
+                          ) : (
+                            <span>{start}</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-3.5 text-center">
+                          {typeof business === "boolean" ? (
+                            business ? (
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                            ) : (
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
+                            )
+                          ) : (
+                            <span className="font-semibold" style={{ color: "#004DFF" }}>{business}</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
