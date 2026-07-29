@@ -418,31 +418,30 @@ const PLAN_FEATURES: Record<string, string[]> = {
 
 function RotatingChips({ tier }: { tier: string }) {
   const features = PLAN_FEATURES[tier] ?? [];
-  const pages = Math.max(1, Math.ceil(features.length / 4));
-  const [page, setPage] = useState(0);
+  if (features.length === 0) return null;
 
-  useEffect(() => {
-    if (pages <= 1) return;
-    const interval = setInterval(() => setPage((p) => (p + 1) % pages), 4000);
-    return () => clearInterval(interval);
-  }, [pages]);
-
-  const current = features.slice(page * 4, page * 4 + 4);
+  const loop = [...features, ...features];
 
   return (
-    <>
-      {current.map((c) => (
-        <span
-          key={`${page}-${c}`}
-          className="brand-fade-in flex items-center gap-1.5 text-sm text-slate-600"
-        >
-          <CheckCircle2 className="h-4 w-4 text-slate-400" />
-          {c}
-        </span>
-      ))}
-    </>
+    <div className="chip-marquee w-full overflow-hidden">
+      <div
+        className="chip-marquee-track flex w-max items-center gap-5"
+        style={{ animationDuration: `${features.length * 3.5}s` }}
+      >
+        {loop.map((c, i) => (
+          <span
+            key={`${i}-${c}`}
+            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm text-slate-600"
+          >
+            <CheckCircle2 className="h-4 w-4 text-slate-400" />
+            {c}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
+
 
 
 
