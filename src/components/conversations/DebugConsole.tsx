@@ -296,7 +296,7 @@ export const DebugConsole = () => {
         <div className="flex items-center gap-2">
           <GripHorizontal className="w-4 h-4 text-[#00d4ff]" />
           <Terminal className="w-4 h-4 text-[#00d4ff]" />
-          <span className="text-xs font-mono text-[#00d4ff] font-bold">MARKETFLOW DEBUG CONSOLE</span>
+          <span className="text-xs font-mono text-[#00d4ff] font-bold">NEXTPRO DEBUG CONSOLE</span>
           <span className="text-[10px] text-gray-500 bg-gray-800 px-2 py-0.5 rounded">Shift+8</span>
         </div>
         <div className="flex gap-1">

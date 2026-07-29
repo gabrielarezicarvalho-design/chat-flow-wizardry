@@ -146,7 +146,7 @@ const AgentDashboard = () => {
       { text: "A vida é curta demais para ser pequena.", author: "Benjamin Disraeli" },
       { text: "O sucesso é a soma de pequenos esforços repetidos dia após dia.", author: "Robert Collier" },
       { text: "A única forma de fazer um excelente trabalho é amar o que você faz.", author: "Steve Jobs" },
-      { text: "Cada cliente é uma oportunidade de fazer a diferença.", author: "MarketFlow" },
+      { text: "Cada cliente é uma oportunidade de fazer a diferença.", author: "Next Pro" },
     ];
     setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
   }, []);

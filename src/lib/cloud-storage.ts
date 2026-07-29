@@ -1,7 +1,7 @@
 import { getSubdomainSlug } from './subdomain';
 
 /**
- * Storage backend: VPS Storage API (Node/Express em /var/www/marketflow/storage-api).
+ * Storage backend: VPS Storage API (Node/Express em /var/www/nextpro/storage-api).
  * Endpoints proxied pelo Nginx em /api/storage/*.
  */
 
@@ -13,7 +13,7 @@ function getStorageBase(): string {
   // Em produção (subdomínio do domínio principal da VPS) usa mesma origem
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
-    if (host.endsWith('yakuzacreditos.shop') || host.endsWith('marketflowchat.com.br')) {
+    if (host.endsWith('yakuzacreditos.shop') || host.endsWith('nextprochat.com.br')) {
       return `${window.location.protocol}//${host}`;
     }
   }

@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
     const { secret_key, email, password, username, full_name, company_id, is_company_admin } = await req.json();
     
     // Simple secret to prevent unauthorized access
-    if (secret_key !== "MARKETFLOW_ADMIN_SETUP_2026") {
+    if (secret_key !== "NEXTPRO_ADMIN_SETUP_2026") {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -33,8 +33,8 @@ Deno.serve(async (req) => {
 
     // Use custom email if provided, otherwise use internal domain format
     const userUsername = username || "admin";
-    const userEmail = email || `${userUsername}@internal.marketflow.local`;
-    const userPassword = password || "@marketflow2026#";
+    const userEmail = email || `${userUsername}@internal.nextpro.local`;
+    const userPassword = password || "@nextpro2026#";
     const userFullName = full_name || userUsername;
 
     // Check if user already exists by email

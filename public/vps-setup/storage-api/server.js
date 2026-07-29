@@ -1,6 +1,6 @@
 // =============================================================
 // Storage API — Node.js / Express
-// Roda na VPS em: /var/www/marketflow/storage-api/server.js
+// Roda na VPS em: /var/www/nextpro/storage-api/server.js
 // Endpoints: upload, download, list, delete, health
 // Isolamento por empresa via header X-Company ou path param
 // =============================================================
@@ -13,7 +13,7 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.STORAGE_PORT || 3500;
-const STORAGE_ROOT = process.env.STORAGE_ROOT || '/var/www/marketflow/storage';
+const STORAGE_ROOT = process.env.STORAGE_ROOT || '/var/www/nextpro/storage';
 
 // ── CORS ────────────────────────────────────────────────────
 app.use(cors({

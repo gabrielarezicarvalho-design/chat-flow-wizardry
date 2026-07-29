@@ -52,7 +52,7 @@ serve(async (req) => {
     }
 
     // Fetch company branding
-    let companyName = "MarketFlow";
+    let companyName = "Next Pro";
     let logoUrl = null;
     let primaryColor = "#10b981";
     

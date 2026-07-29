@@ -20,13 +20,13 @@ AS $$
     WHERE id = check_user_id 
     AND is_company_admin = true
   )
-  -- OU verificar email do MarketFlow
+  -- OU verificar email do Next Pro
   OR EXISTS (
     SELECT 1 FROM auth.users 
     WHERE id = check_user_id 
     AND (
-      email ILIKE '%@marketflow%' 
-      OR email ILIKE '%@internal.marketflow%'
+      email ILIKE '%@nextpro%' 
+      OR email ILIKE '%@internal.nextpro%'
     )
   );
 $$;

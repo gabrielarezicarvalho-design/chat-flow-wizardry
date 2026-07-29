@@ -1,5 +1,5 @@
 {
-  "name": "marketflow-storage-api",
+  "name": "nextpro-storage-api",
   "version": "1.0.0",
   "description": "API de armazenamento de arquivos por empresa (multi-tenant)",
   "main": "server.js",

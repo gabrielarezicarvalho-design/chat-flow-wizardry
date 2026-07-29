@@ -458,7 +458,7 @@ async function executeSmartFormNode(
     }
 
     // Generate public URL - ALWAYS use fixed domain
-    const FIXED_FORM_BASE_URL = "https://ia.marketflowchat.com.br";
+    const FIXED_FORM_BASE_URL = "https://ia.nextprochat.com.br";
     const formUrl = `${FIXED_FORM_BASE_URL}/f/${uniqueToken}`;
 
     console.log("✅ Link do formulário gerado:", formUrl);
@@ -2452,7 +2452,7 @@ serve(async (req) => {
   try {
     const payload = await req.json();
     console.log("=".repeat(80));
-    console.log("📩 WEBHOOK Evolution → MARKETFLOW");
+    console.log("📩 WEBHOOK Evolution → NEXTPRO");
     console.log("⏰ Timestamp:", new Date().toISOString());
     console.log("=".repeat(80));
     console.log("📦 Payload:", JSON.stringify(payload, null, 2));

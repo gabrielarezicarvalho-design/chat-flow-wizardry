@@ -31,7 +31,7 @@ serve(async (req) => {
         return `${url.protocol}//${url.host}`;
       } catch {}
     }
-    return 'https://marketflow.app';
+    return 'https://nextpro.app';
   };
 
   try {
@@ -100,7 +100,7 @@ serve(async (req) => {
     const adminUserId = stateData.adminUserId;
     const returnUrl = stateData.returnUrl;
     
-    console.log('📝 Processing OAuth callback for MarketFlow admin:', adminUserId);
+    console.log('📝 Processing OAuth callback for Next Pro admin:', adminUserId);
 
     const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
     const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
@@ -140,7 +140,7 @@ serve(async (req) => {
     // Calculate expires_at
     const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
 
-    // Create main backup folder in Drive for MarketFlow
+    // Create main backup folder in Drive for Next Pro
     const folderResponse = await fetch(
       'https://www.googleapis.com/drive/v3/files',
       {
@@ -150,14 +150,14 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: 'MarketFlow - Backups Centralizados',
+          name: 'Next Pro - Backups Centralizados',
           mimeType: 'application/vnd.google-apps.folder',
         }),
       }
     );
 
     const folder = await folderResponse.json();
-    console.log('📁 Created MarketFlow backup folder:', folder.id);
+    console.log('📁 Created Next Pro backup folder:', folder.id);
 
     // Save tokens to google_drive_tokens (admin's centralized tokens)
     const { error: saveError } = await supabase
@@ -176,7 +176,7 @@ serve(async (req) => {
       throw saveError;
     }
 
-    console.log('✅ Google Drive connected successfully for MarketFlow admin:', adminUserId);
+    console.log('✅ Google Drive connected successfully for Next Pro admin:', adminUserId);
 
     // Redirect back to the app with success parameter
     const finalUrl = returnUrl || `${getAppUrl()}/admin`;

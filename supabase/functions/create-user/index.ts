@@ -98,7 +98,7 @@ serve(async (req) => {
     // If username already looks like an email, use it directly; otherwise build a synthetic one
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username);
     const safeLocal = username.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const email = isEmail ? username : `${safeLocal}@internal.marketflow.app`;
+    const email = isEmail ? username : `${safeLocal}@internal.nextpro.app`;
 
     // Check if username already exists in profiles
     let { data: existingProfile } = await supabaseAdmin

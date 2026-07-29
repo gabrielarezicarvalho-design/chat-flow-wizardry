@@ -10,8 +10,8 @@ import { GoogleDriveBackup } from "@/components/settings/GoogleDriveBackup";
 
 export function AdminConfiguracoes() {
   const [settings, setSettings] = useState({
-    platformName: "MarketFlow",
-    supportEmail: "suporte@marketflow.com.br",
+    platformName: "Next Pro",
+    supportEmail: "suporte@nextpro.com.br",
     defaultSLA: "24",
     maintenanceMode: false,
     defaultWelcomeMessage: "Olá! Seja bem-vindo ao nosso atendimento.",

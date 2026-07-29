@@ -144,8 +144,8 @@ serve(async (req) => {
       );
     }
 
-    // Generate public URL - using fixed MarketFlowChat domain
-    const baseUrl = 'https://ia.marketflowchat.com.br';
+    // Generate public URL - using fixed Next ProChat domain
+    const baseUrl = 'https://ia.nextprochat.com.br';
     const formUrl = `${baseUrl}/f/${uniqueToken}`;
 
     console.log("✅ Form link generated:", formUrl);

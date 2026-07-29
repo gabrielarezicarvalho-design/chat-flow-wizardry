@@ -14,7 +14,7 @@ AS $$
   OR EXISTS (
     SELECT 1 FROM auth.users 
     WHERE id = check_user_id 
-    AND (email ILIKE '%@marketflow%' OR raw_user_meta_data->>'role' = 'admin')
+    AND (email ILIKE '%@nextpro%' OR raw_user_meta_data->>'role' = 'admin')
   );
 $$;
 

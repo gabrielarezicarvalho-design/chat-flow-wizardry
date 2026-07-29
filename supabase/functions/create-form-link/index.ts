@@ -55,8 +55,8 @@ serve(async (req) => {
 
     console.log('✅ Form created:', formData.id);
 
-    // Generate URL - use MarketFlowChat domain with fixed path
-    const baseUrl = 'https://ia.marketflowchat.com.br';
+    // Generate URL - use Next ProChat domain with fixed path
+    const baseUrl = 'https://ia.nextprochat.com.br';
     const formUrl = `${baseUrl}/formulario/${formData.id}`;
 
     return new Response(

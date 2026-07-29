@@ -69,7 +69,7 @@ return { dentroHorario, horaAtual: \`\${hour}:\${minute}\` };`
         data: { 
           label: 'Boas-vindas',
           messageType: 'text',
-          content: `Olá! 👋 Seja bem-vindo ao atendimento da *MarketFlow*.
+          content: `Olá! 👋 Seja bem-vindo ao atendimento da *Next Pro*.
 
 Como posso te ajudar hoje?
 

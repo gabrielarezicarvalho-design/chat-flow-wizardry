@@ -163,7 +163,7 @@ export default function Users() {
       if (profilesError) throw profilesError;
 
       const filteredProfiles = (profiles || []).filter(profile => {
-        const isMainAdmin = profile.username === null && profile.full_name?.includes('MarketFlow');
+        const isMainAdmin = profile.username === null && profile.full_name?.includes('Next Pro');
         return !isMainAdmin;
       });
 

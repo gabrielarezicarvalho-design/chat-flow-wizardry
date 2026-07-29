@@ -110,7 +110,7 @@ export function AdminDashboard() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400">Visão geral da plataforma MarketFlow</p>
+          <p className="text-slate-400">Visão geral da plataforma Next Pro</p>
         </div>
         <Button 
           variant="outline" 

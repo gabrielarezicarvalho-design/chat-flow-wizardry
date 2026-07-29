@@ -125,7 +125,7 @@ const AdminLogin = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@marketflow.com.br"
+                placeholder="admin@nextpro.com.br"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -184,7 +184,7 @@ const AdminLogin = () => {
         </div>
 
         <p className="text-center text-slate-600 text-sm mt-6">
-          © 2025 MarketFlow. Todos os direitos reservados.
+          © 2025 Next Pro. Todos os direitos reservados.
         </p>
       </div>
     </div>

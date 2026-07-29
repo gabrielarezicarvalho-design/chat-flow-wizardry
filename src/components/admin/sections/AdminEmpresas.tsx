@@ -145,7 +145,7 @@ export function AdminEmpresas() {
 
         const { data: adminResult, error: adminError } = await supabase.functions.invoke('create-admin-user', {
           body: {
-            secret_key: "MARKETFLOW_ADMIN_SETUP_2026",
+            secret_key: "NEXTPRO_ADMIN_SETUP_2026",
             username: form.admin_username,
             password: form.admin_password,
             full_name: form.admin_full_name || form.admin_username,
@@ -408,11 +408,11 @@ export function AdminEmpresas() {
                   placeholder="empresa-xyz" 
                 />
                 <span className="px-3 py-2 bg-white/10 border border-white/10 border-l-0 rounded-r-md text-xs text-slate-400 whitespace-nowrap">
-                  .marketflowchat.com.br
+                  .nextprochat.com.br
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                URL de acesso: <span className="text-cyan-400">{form.slug || 'empresa'}.marketflowchat.com.br</span>
+                URL de acesso: <span className="text-cyan-400">{form.slug || 'empresa'}.nextprochat.com.br</span>
               </p>
             </div>
 

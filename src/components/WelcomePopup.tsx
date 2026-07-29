@@ -15,13 +15,13 @@ export const WelcomePopup = () => {
     if (!user) return;
 
     // Check if user has permanently disabled the popup
-    const permanentDisableKey = `marketflow_welcome_disabled_${user.id}`;
+    const permanentDisableKey = `nextpro_welcome_disabled_${user.id}`;
     const isPermanentlyDisabled = localStorage.getItem(permanentDisableKey) === "true";
     
     if (isPermanentlyDisabled) return;
 
     // Check if user has seen welcome popup in this session
-    const sessionKey = `marketflow_welcome_${user.id}`;
+    const sessionKey = `nextpro_welcome_${user.id}`;
     const hasSeenInSession = sessionStorage.getItem(sessionKey);
     
     if (!hasSeenInSession) {
@@ -32,14 +32,14 @@ export const WelcomePopup = () => {
 
   const handleClose = () => {
     if (user) {
-      sessionStorage.setItem(`marketflow_welcome_${user.id}`, "true");
+      sessionStorage.setItem(`nextpro_welcome_${user.id}`, "true");
     }
     setIsOpen(false);
   };
 
   const handleDisableForever = () => {
     if (user) {
-      localStorage.setItem(`marketflow_welcome_disabled_${user.id}`, "true");
+      localStorage.setItem(`nextpro_welcome_disabled_${user.id}`, "true");
       toast.success("Popup desativado permanentemente");
     }
     setIsOpen(false);
@@ -108,7 +108,7 @@ export const WelcomePopup = () => {
                   transition={{ delay: 0.3 }}
                   className="text-3xl font-bold mb-2"
                 >
-                  Bem-vindo ao MarketFlow! 🎉
+                  Bem-vindo ao Next Pro! 🎉
                 </motion.h2>
 
                 <motion.div

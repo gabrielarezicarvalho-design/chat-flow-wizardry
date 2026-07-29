@@ -386,7 +386,7 @@ const ChatHistory = () => {
         doc.setFontSize(7);
         doc.setTextColor(148, 163, 184);
         doc.text(
-          `Página ${doc.getCurrentPageInfo().pageNumber} • MarketFlow`,
+          `Página ${doc.getCurrentPageInfo().pageNumber} • Next Pro`,
           doc.internal.pageSize.width / 2,
           pageHeight - 8,
           { align: "center" }
