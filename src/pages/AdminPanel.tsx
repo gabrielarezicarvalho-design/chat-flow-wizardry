@@ -11,6 +11,7 @@ import { AdminArmazenamento } from "@/components/admin/sections/AdminArmazenamen
 import { AdminIA } from "@/components/admin/sections/AdminIA";
 import { AdminProgramador } from "@/components/admin/sections/AdminProgramador";
 import { AdminRelatorios } from "@/components/admin/sections/AdminRelatorios";
+import { AdminPlanos } from "@/components/admin/sections/AdminPlanos";
 import { AdminFaturamento } from "@/components/admin/sections/AdminFaturamento";
 import { AdminSeguranca } from "@/components/admin/sections/AdminSeguranca";
 import { AdminConfiguracoes } from "@/components/admin/sections/AdminConfiguracoes";
@@ -54,6 +55,8 @@ export default function AdminPanel() {
         return <AdminMetricas />;
       case "relatorios":
         return <AdminRelatorios />;
+      case "planos":
+        return <AdminPlanos />;
       case "faturamento":
         return <AdminFaturamento />;
       case "seguranca":

@@ -10,6 +10,7 @@ import {
   PlanLimits,
   RESOURCE_LABELS,
 } from "@/lib/planLimits";
+import { normalizeLimits } from "@/hooks/usePlanConfigs";
 
 interface UsageData {
   cycle_start?: string;
@@ -45,6 +46,16 @@ export function usePlanLimits() {
     enabled: !!user?.id,
     staleTime: 60_000,
     queryFn: async () => {
+      // Limites configurados no painel (fallback: valores estáticos)
+      const resolveLimits = async (slug: string): Promise<PlanLimits> => {
+        const { data: row } = await supabase
+          .from("plan_limits")
+          .select("limits")
+          .eq("slug", slug)
+          .maybeSingle();
+        return row?.limits ? normalizeLimits(row.limits, slug) : getPlanLimits(slug);
+      };
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("company_id")
@@ -54,7 +65,7 @@ export function usePlanLimits() {
       if (!profile?.company_id) {
         return {
           plan: "start",
-          limits: getPlanLimits("start"),
+          limits: await resolveLimits("start"),
           usage: {} as UsageData,
         };
       }
@@ -73,7 +84,7 @@ export function usePlanLimits() {
 
       return {
         plan: planSlug,
-        limits: getPlanLimits(planSlug),
+        limits: await resolveLimits(planSlug),
         usage: (usage as UsageData) || {},
       };
     },
