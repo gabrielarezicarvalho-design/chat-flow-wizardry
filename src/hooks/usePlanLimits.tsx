@@ -104,15 +104,29 @@ export function usePlanLimits() {
 
   const check = useCallback(
     (resource: LimitResource, increment = 1): boolean => {
-      const st = getStatus(resource, increment - 1);
+      const st = getStatus(resource);
+      if (st.unlimited) return true;
+
+      // Bloqueia se já atingiu o limite
       if (st.blocked) {
         toast.error(
-          `Limite atingido: ${st.label} (${st.current}/${st.max}). Faça upgrade para o plano Business.`,
-          { duration: 6000 }
+          `Limite do plano ${plan} atingido: ${st.label} (${st.current}/${st.max}). Faça upgrade para continuar.`,
+          { duration: 8000 }
         );
         return false;
       }
+
+      // Bloqueia se esta ação ultrapassaria o limite
       const after = getStatus(resource, increment);
+      if (after.current > (st.max as number)) {
+        const restante = Math.max(0, (st.max as number) - st.current);
+        toast.error(
+          `Esta ação excede o limite do plano ${plan}: ${st.label} (${st.current}/${st.max}). Você ainda pode usar ${restante}. Faça upgrade para liberar mais.`,
+          { duration: 8000 }
+        );
+        return false;
+      }
+
       if (after.warning) {
         toast.warning(
           `Atenção: ${st.label} em ${Math.round(after.percent)}% (${after.current}/${after.max}).`
@@ -120,8 +134,9 @@ export function usePlanLimits() {
       }
       return true;
     },
-    [getStatus]
+    [getStatus, plan]
   );
+
 
   const allStatuses = useCallback((): LimitStatus[] => {
     return (Object.keys(RESOURCE_LABELS) as LimitResource[]).map((r) =>
