@@ -71,9 +71,9 @@ async function scrapeProfiles(usernames: string[]) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-
   const blocked = await requireActivePlan(req, corsHeaders);
   if (blocked) return blocked;
+
   try {
     if (!APIFY_TOKEN) {
       return new Response(

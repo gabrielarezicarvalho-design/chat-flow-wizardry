@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { requireActivePlan } from "../_shared/planGuard.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,10 +9,10 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
 
   const blocked = await requireActivePlan(req, corsHeaders);
   if (blocked) return blocked;
-  }
 
   try {
     const { instanceId, token, baseUrl, phone, message } = await req.json();

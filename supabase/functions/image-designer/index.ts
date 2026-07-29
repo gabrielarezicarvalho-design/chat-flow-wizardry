@@ -1,6 +1,6 @@
+import { requireActivePlan } from "../_shared/planGuard.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { requireActivePlan } from "../_shared/planGuard.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -231,9 +231,9 @@ async function fetchImageAsBase64(url: string): Promise<{ b64: string; mime: str
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-
   const blocked = await requireActivePlan(req, corsHeaders);
   if (blocked) return blocked;
+
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {

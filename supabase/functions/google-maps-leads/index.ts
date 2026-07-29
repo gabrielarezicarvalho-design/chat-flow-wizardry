@@ -1,5 +1,5 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { requireActivePlan } from "../_shared/planGuard.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,9 +11,9 @@ const GATEWAY = "https://connector-gateway.lovable.dev/google_maps";
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-
   const blocked = await requireActivePlan(req, corsHeaders);
   if (blocked) return blocked;
+
   try {
     const { query, city, limit = 100 } = await req.json();
     if (!query || !city) throw new Error("query and city required");
