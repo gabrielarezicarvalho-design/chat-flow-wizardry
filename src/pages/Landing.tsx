@@ -1617,7 +1617,7 @@ export default function Landing() {
 
 
       {/* VOZ CLONADA */}
-      <section className="bg-gradient-to-b from-white to-slate-50 py-24">
+      <section className="dark-band bg-[#0b0d0b] pt-24 pb-32">
         <div className="mx-auto max-w-6xl px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-medium text-slate-700 shadow-sm">
