@@ -1527,8 +1527,20 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="mt-14 grid md:grid-cols-2 gap-6 max-w-3xl mx-auto items-start">
+          <div className="mt-14 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
             {[
+              {
+                tier: "basic",
+                name: "Basic",
+                price: "0",
+                tagline: "Teste grátis com tudo liberado",
+                highlights: [
+                  { strong: "20 disparos", pre: "até ", post: " no total" },
+                  { strong: "Todas", pre: "", post: " as funcionalidades (limitadas)" },
+                ],
+                chips: ["1 atendente", "1 conexão WhatsApp", "IA completa (limitada)", "Chat interno"],
+                featured: false,
+              },
               {
                 tier: "start",
                 name: "Start",
