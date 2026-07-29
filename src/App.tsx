@@ -100,6 +100,7 @@ function App() {
               <AuthProvider>
                 {/* WelcomePopup removed */}
                 <MultiSessionAlert />
+                <UpgradeDialog />
                 <Suspense fallback={<Loading />}>
                   <Routes>
                     <Route path="/" element={<Landing />} />
