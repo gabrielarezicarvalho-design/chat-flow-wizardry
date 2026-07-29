@@ -797,11 +797,12 @@ export default function Landing() {
               </div>
 
               <nav className="hidden lg:flex items-center gap-8 text-[15px] text-slate-600">
-                <FeaturesPopover />
-                <a href="#planos" className="hover:text-slate-900">Preços</a>
+                <FeaturesPopover label="Inteligência" />
                 <a href="#depoimentos" className="hover:text-slate-900">Como Funciona</a>
-                <a href="#pagamentos" className="hover:text-slate-900">Integrações</a>
+                <a href="#planos" className="hover:text-slate-900">Preços</a>
+                <a href="#pagamentos" className="hover:text-slate-900">Blog</a>
               </nav>
+
             </div>
             <div className="hidden md:flex items-center gap-4">
               <span className="hidden lg:flex items-center gap-1.5 text-sm text-slate-500">
