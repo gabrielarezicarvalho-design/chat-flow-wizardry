@@ -511,7 +511,7 @@ const MERCADO_CARDS = [
     className: "lg:row-span-2 h-[560px]",
   },
   {
-    img: imgOficina,
+    img: imgOficina.url,
     title: "Oficina local",
     desc: "orçamento respondido no meio do serviço",
     className: "lg:col-span-2 h-[300px]",
