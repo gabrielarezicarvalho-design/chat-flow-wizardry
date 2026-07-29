@@ -1900,7 +1900,7 @@ export default function Landing() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-200 bg-white">
+      <footer className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Brand */}
