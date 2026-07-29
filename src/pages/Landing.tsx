@@ -386,6 +386,20 @@ function RotatingBrands() {
 }
 
 const PLAN_FEATURES: Record<string, string[]> = {
+  basic: [
+    "1 atendente",
+    "1 conexão WhatsApp",
+    "IA completa (limitada)",
+    "Chat interno",
+    "CRM com funil de vendas",
+    "Automação de fluxos (limitada)",
+    "20 disparos no total",
+    "Agendamentos",
+    "Prospecção Google Maps (limitada)",
+    "Cobranças recorrentes",
+    "Relatórios essenciais",
+    "Suporte por WhatsApp",
+  ],
   start: [
     "5 atendentes",
     "2 conexões WhatsApp",
@@ -1513,8 +1527,20 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="mt-14 grid md:grid-cols-2 gap-6 max-w-3xl mx-auto items-start">
+          <div className="mt-14 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
             {[
+              {
+                tier: "basic",
+                name: "Basic",
+                price: "0",
+                tagline: "Teste grátis com tudo liberado",
+                highlights: [
+                  { strong: "20 disparos", pre: "até ", post: " no total" },
+                  { strong: "Todas", pre: "", post: " as funcionalidades (limitadas)" },
+                ],
+                chips: ["1 atendente", "1 conexão WhatsApp", "IA completa (limitada)", "Chat interno"],
+                featured: false,
+              },
               {
                 tier: "start",
                 name: "Start",
@@ -1554,8 +1580,14 @@ export default function Landing() {
                 <div className="mt-1 flex items-baseline justify-between gap-3">
                   <div className="text-3xl font-bold tracking-tight text-slate-900">{p.name}</div>
                   <div className="flex items-baseline">
-                    <span className="text-3xl font-bold tracking-tight text-slate-900">R${p.price}</span>
-                    <span className="ml-1 text-sm text-slate-400">/mês</span>
+                    {p.tier === "basic" ? (
+                      <span className="text-3xl font-bold tracking-tight" style={{ color: "#004DFF" }}>Grátis</span>
+                    ) : (
+                      <>
+                        <span className="text-3xl font-bold tracking-tight text-slate-900">R${p.price}</span>
+                        <span className="ml-1 text-sm text-slate-400">/mês</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -1604,7 +1636,7 @@ export default function Landing() {
                   className="mt-5 w-full rounded-xl py-4 text-lg font-bold text-white transition hover:opacity-90"
                   style={{ backgroundColor: "#004DFF" }}
                 >
-                  Assinar {p.name}
+                  {p.tier === "basic" ? "Testar grátis" : `Assinar ${p.name}`}
                 </button>
 
                 <div className="mt-5 flex flex-col items-center">
