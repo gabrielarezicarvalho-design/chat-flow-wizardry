@@ -533,7 +533,10 @@ function MercadoSection() {
               O mercado acontece enquanto você trabalha
             </span>
             <h2 className="mt-6 text-[clamp(2.4rem,5vw,4rem)] font-medium leading-[1.05] tracking-tight">
-              Por trás de cada WhatsApp, tem alguém fazendo o negócio acontecer.
+              <span className="block">Por trás de cada</span>
+              <span className="block">WhatsApp, tem</span>
+              <span className="block">alguém fazendo o</span>
+              <span className="block">negócio acontecer.</span>
             </h2>
           </div>
 
