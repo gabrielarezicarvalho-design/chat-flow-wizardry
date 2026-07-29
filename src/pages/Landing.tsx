@@ -738,7 +738,7 @@ export default function Landing() {
 
         <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
-          <div>
+          <motion.div style={{ y: heroContentY, opacity: heroContentOpacity }}>
             <h1 className="hero-reveal hero-d1 font-space-grotesk text-[clamp(2rem,5.6vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-white">
               <span className="block">Seus clientes</span>
               <TypewriterText />
@@ -768,10 +768,13 @@ export default function Landing() {
             <p className="hero-reveal hero-d6 mt-6 text-base text-slate-400">
               <span className="font-semibold text-white">+20 empresas</span> já vendem mais com a NEXT PRO.
             </p>
-          </div>
+          </motion.div>
 
           {/* Composição circular */}
-          <div className="hero-reveal-right hero-d3 relative mx-auto w-full max-w-[520px]">
+          <motion.div
+            style={{ y: heroImageY, scale: heroImageScale, opacity: heroContentOpacity }}
+            className="hero-reveal-right hero-d3 relative mx-auto w-full max-w-[520px]"
+          >
             <div className="relative aspect-square rounded-full border-2 border-dashed border-[#004DFF]/50 p-6">
               <div className="h-full w-full overflow-hidden rounded-full">
                 <img
@@ -784,7 +787,7 @@ export default function Landing() {
               </div>
             </div>
             <RotatingMetrics />
-          </div>
+          </motion.div>
         </div>
       </section>
 
