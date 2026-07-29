@@ -831,26 +831,26 @@ export default function Landing() {
             </div>
 
             <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.2rem,5.2vw,3.6rem)] font-bold leading-[1.05] tracking-tight text-white">
-              <span className="block">Seus clientes</span>
-              <TypewriterText />
+              Sua IA vende, atende e <span className="text-[#4d8bff]">organiza seus clientes</span> no automático.
             </h1>
 
             <p className="hero-reveal hero-d2 mt-6 max-w-lg text-lg leading-relaxed text-white/80">
-              Transformamos compras únicas em clientes fiéis com CRM, automações e
-              prospecção. Impulsione as vendas da sua loja física e e-commerce em até 20% com a Next Pro.
+              Enquanto você trabalha, ela responde cada cliente em segundos, fecha a
+              venda e organiza tudo no CRM. 7 dias grátis, sem cartão.
             </p>
 
             <div className="hero-reveal hero-d3 mt-8 flex items-baseline gap-2 text-white">
               <span className="text-sm text-white/70">a partir de</span>
-              <span className="font-space-grotesk text-4xl font-bold">R$ 49,90</span>
+              <span className="font-space-grotesk text-4xl font-bold">R$ 29,90</span>
               <span className="text-white/70">/mês</span>
             </div>
 
             <div className="hero-reveal hero-d4 mt-8 flex flex-wrap items-center gap-4">
               <Link to="/auth">
                 <Button size="lg" className="btn-shine btn-press h-14 rounded-full bg-[#004DFF] px-8 text-lg font-semibold text-white hover:bg-[#0040d6]">
-                  Testar 2 dias grátis <ArrowRight className="ml-2 h-4 w-4" />
+                  Testar 7 dias grátis <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
+
               </Link>
               <a href="https://wa.me/message/BYSDMLHYTA6EA1" target="_blank" rel="noreferrer">
                 <Button size="lg" variant="outline" className="h-14 rounded-full border-white/40 bg-white/10 px-8 text-lg font-semibold text-white backdrop-blur hover:bg-white/20 hover:text-white">
