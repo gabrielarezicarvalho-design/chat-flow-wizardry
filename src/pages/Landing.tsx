@@ -8,6 +8,7 @@ import avatarLarissa from "@/assets/cases/larissa.png.asset.json";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import {
   MessageCircle, Bot, CreditCard, Mic, Users, TrendingUp,
@@ -16,7 +17,7 @@ import {
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
-  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote
+  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
