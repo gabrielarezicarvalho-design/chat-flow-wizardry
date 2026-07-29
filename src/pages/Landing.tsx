@@ -880,7 +880,7 @@ export default function Landing() {
 
           {/* Card de chat */}
           <div className="hero-reveal-right hero-d3 mx-auto w-full max-w-[720px] rounded-3xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl">
-            <div className="flex h-[clamp(520px,72vh,680px)] flex-col rounded-2xl bg-white p-5 shadow-2xl">
+            <div className="flex h-[clamp(440px,56vh,520px)] flex-col rounded-2xl bg-white p-5 shadow-2xl">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#4d8bff] to-[#004DFF]" />
