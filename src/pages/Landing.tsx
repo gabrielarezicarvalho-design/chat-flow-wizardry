@@ -374,6 +374,26 @@ export default function Landing() {
   const [selectedLead, setSelectedLead] = useState<LeadItem | null>(null);
   const [savedLeads, setSavedLeads] = useState<string[]>([]);
   const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
+  const [activeSection, setActiveSection] = useState("");
+
+  useEffect(() => {
+    const sections = ["recursos", "planos", "depoimentos", "pagamentos", "segmentos"];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: 0 }
+    );
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const handleSubscribe = async (tier: "start" | "business") => {
     try {
@@ -413,6 +433,10 @@ export default function Landing() {
   const sweepY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
   const sweepOpacity = useTransform(scrollYProgress, [0, 0.15, 0.5, 0.85, 1], [0, 1, 1, 0.8, 0]);
   const heroDim = useTransform(scrollYProgress, [0, 0.6], [0, 0.45]);
+  const heroImageY = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
+  const heroImageScale = useTransform(scrollYProgress, [0, 1], [1, 0.88]);
+  const heroContentY = useTransform(scrollYProgress, [0, 1], ["0%", "-8%"]);
+  const heroContentOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
 
   const chatMessages = [
     { id: 1, sender: "client", content: "Vi sua mensagem, do que se trata?", delay: 0 },
@@ -693,10 +717,30 @@ export default function Landing() {
             </div>
             <nav className="hidden lg:flex items-center gap-8 text-base text-slate-200">
               <FeaturesPopover />
-              <a href="#planos" className="hover:text-white">Planos</a>
-              <a href="#depoimentos" className="hover:text-white">Cases</a>
-              <a href="#pagamentos" className="hover:text-white">Integrações</a>
-              <a href="#segmentos" className="hover:text-white">Parceiros</a>
+              <a
+                href="#planos"
+                className={`transition-colors hover:text-white ${activeSection === "planos" ? "text-white" : ""}`}
+              >
+                Planos
+              </a>
+              <a
+                href="#depoimentos"
+                className={`transition-colors hover:text-white ${activeSection === "depoimentos" ? "text-white" : ""}`}
+              >
+                Cases
+              </a>
+              <a
+                href="#pagamentos"
+                className={`transition-colors hover:text-white ${activeSection === "pagamentos" ? "text-white" : ""}`}
+              >
+                Integrações
+              </a>
+              <a
+                href="#segmentos"
+                className={`transition-colors hover:text-white ${activeSection === "segmentos" ? "text-white" : ""}`}
+              >
+                Parceiros
+              </a>
             </nav>
           </div>
           <div className="hidden md:flex items-center gap-3">
@@ -734,7 +778,7 @@ export default function Landing() {
 
         <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
-          <div>
+          <motion.div style={{ y: heroContentY, opacity: heroContentOpacity }}>
             <h1 className="hero-reveal hero-d1 font-space-grotesk text-[clamp(2rem,5.6vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-white">
               <span className="block">Seus clientes</span>
               <TypewriterText />
@@ -764,10 +808,13 @@ export default function Landing() {
             <p className="hero-reveal hero-d6 mt-6 text-base text-slate-400">
               <span className="font-semibold text-white">+20 empresas</span> já vendem mais com a NEXT PRO.
             </p>
-          </div>
+          </motion.div>
 
           {/* Composição circular */}
-          <div className="hero-reveal-right hero-d3 relative mx-auto w-full max-w-[520px]">
+          <motion.div
+            style={{ y: heroImageY, scale: heroImageScale, opacity: heroContentOpacity }}
+            className="hero-reveal-right hero-d3 relative mx-auto w-full max-w-[520px]"
+          >
             <div className="relative aspect-square rounded-full border-2 border-dashed border-[#004DFF]/50 p-6">
               <div className="h-full w-full overflow-hidden rounded-full">
                 <img
@@ -780,12 +827,12 @@ export default function Landing() {
               </div>
             </div>
             <RotatingMetrics />
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* DEMO AURORA */}
-      <section className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white">
+      <section className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white shadow-[0_-20px_60px_-10px_rgba(0,0,0,0.45)]">
         <div className="mx-auto max-w-6xl px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
           <div className="text-center md:text-left">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary-dark">
