@@ -633,9 +633,36 @@ function HeroChatCard() {
           )}
         </div>
 
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/60 px-4 py-3 text-sm text-slate-500">
-          <Check className="h-4 w-4" /> Toque numa pergunta e veja a venda acontecer
-        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            sendFree();
+          }}
+          className="mt-3 flex items-center gap-3 rounded-full bg-[#EEF1F6] px-4 py-3"
+        >
+          <button type="button" onClick={() => setDraft((d) => d + " ")} className="text-slate-500 transition hover:text-[#004DFF]" aria-label="Anexar">
+            <Plus className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => setDraft((d) => d + "😊")} className="text-slate-500 transition hover:text-[#004DFF]" aria-label="Emoji">
+            <Smile className="h-5 w-5" />
+          </button>
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Digite uma mensagem"
+            className="flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+          />
+          {draft.trim() ? (
+            <button type="submit" disabled={typing} className="text-[#004DFF] disabled:opacity-50" aria-label="Enviar">
+              <ArrowRight className="h-5 w-5" />
+            </button>
+          ) : (
+            <span className="text-slate-500" aria-hidden>
+              <Mic className="h-5 w-5" />
+            </span>
+          )}
+        </form>
+
       </div>
     </div>
   );
