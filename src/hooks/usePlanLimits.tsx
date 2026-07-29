@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { openUpgradeDialog } from "@/components/UpgradeDialog";
 import {
   getPlanLimits,
   LimitResource,
@@ -110,8 +111,17 @@ export function usePlanLimits() {
       // Bloqueia se já atingiu o limite
       if (st.blocked) {
         toast.error(
-          `Limite do plano ${plan} atingido: ${st.label} (${st.current}/${st.max}). Faça upgrade para continuar.`,
-          { duration: 8000 }
+          `Limite do plano ${plan} atingido: ${st.label} (${st.current}/${st.max}).`,
+          {
+            duration: 10000,
+            action: {
+              label: "Fazer upgrade",
+              onClick: () =>
+                openUpgradeDialog(
+                  `Você atingiu o limite de ${st.label.toLowerCase()} (${st.current}/${st.max}) do plano ${plan}. Escolha um plano maior para continuar.`
+                ),
+            },
+          }
         );
         return false;
       }
@@ -121,8 +131,17 @@ export function usePlanLimits() {
       if (after.current > (st.max as number)) {
         const restante = Math.max(0, (st.max as number) - st.current);
         toast.error(
-          `Esta ação excede o limite do plano ${plan}: ${st.label} (${st.current}/${st.max}). Você ainda pode usar ${restante}. Faça upgrade para liberar mais.`,
-          { duration: 8000 }
+          `Esta ação excede o limite do plano ${plan}: ${st.label} (${st.current}/${st.max}). Você ainda pode usar ${restante}.`,
+          {
+            duration: 10000,
+            action: {
+              label: "Fazer upgrade",
+              onClick: () =>
+                openUpgradeDialog(
+                  `Esta ação excede o limite de ${st.label.toLowerCase()} do plano ${plan}. Faça upgrade para liberar mais.`
+                ),
+            },
+          }
         );
         return false;
       }

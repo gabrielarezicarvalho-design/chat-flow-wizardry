@@ -1,0 +1,166 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Check, Crown, Rocket, Sparkles } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+const EVENT = "open-upgrade-dialog";
+
+export function openUpgradeDialog(reason?: string) {
+  window.dispatchEvent(new CustomEvent(EVENT, { detail: { reason } }));
+}
+
+type Billing = "monthly" | "annual";
+
+const PLANS = [
+  {
+    tier: "start" as const,
+    name: "Start",
+    monthly: 49.9,
+    annual: 41.58,
+    icon: Rocket,
+    highlight: "150 vendas e 100 disparos por mês",
+    features: [
+      "5 atendentes e 2 conexões WhatsApp",
+      "100 disparos em massa/mês",
+      "IA completa, fluxos e departamentos",
+      "Relatórios e histórico de atendimentos",
+    ],
+  },
+  {
+    tier: "business" as const,
+    name: "Business",
+    monthly: 99.9,
+    annual: 83.25,
+    icon: Crown,
+    popular: true,
+    highlight: "10.000 disparos/mês e recursos ilimitados",
+    features: [
+      "20 atendentes e 10 conexões WhatsApp",
+      "Vendas, cobranças, fluxos e agentes ilimitados",
+      "Prospecção Google Maps, Instagram e TikTok",
+      "Espionar anúncios + suporte prioritário",
+    ],
+  },
+];
+
+const brl = (n: number) =>
+  n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+export default function UpgradeDialog() {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState<string | undefined>();
+  const [billing, setBilling] = useState<Billing>("monthly");
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setReason((e as CustomEvent).detail?.reason);
+      setOpen(true);
+    };
+    window.addEventListener(EVENT, handler);
+    return () => window.removeEventListener(EVENT, handler);
+  }, []);
+
+  const go = (tier: string) => {
+    setOpen(false);
+    navigate(`/checkout?tier=${tier}&billing=${billing}`);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-[#004DFF]" />
+            Libere mais recursos com um upgrade
+          </DialogTitle>
+          <DialogDescription>
+            {reason ||
+              "Seu plano atual atingiu o limite. Escolha um plano e continue usando sem interrupções."}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex justify-center">
+          <div className="inline-flex rounded-lg border p-1 bg-muted/40">
+            {(["monthly", "annual"] as Billing[]).map((b) => (
+              <button
+                key={b}
+                onClick={() => setBilling(b)}
+                className={`px-4 py-1.5 text-sm rounded-md transition-colors ${
+                  billing === b
+                    ? "bg-[#004DFF] text-white"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {b === "monthly" ? "Mensal" : "Anual (-17%)"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 items-start">
+          {PLANS.map((p) => {
+            const Icon = p.icon;
+            const price = billing === "annual" ? p.annual : p.monthly;
+            return (
+              <div
+                key={p.tier}
+                className={`rounded-xl border p-5 space-y-4 ${
+                  p.popular ? "border-[#004DFF] shadow-md" : ""
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-semibold">
+                    <Icon className="h-4 w-4 text-[#004DFF]" />
+                    {p.name}
+                  </div>
+                  {p.popular && (
+                    <Badge className="bg-[#004DFF] hover:bg-[#004DFF]">
+                      Mais escolhido
+                    </Badge>
+                  )}
+                </div>
+                <div>
+                  <div className="text-2xl font-bold">{brl(price)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    por mês{billing === "annual" ? " • cobrado anualmente" : ""}
+                  </div>
+                </div>
+                <div className="rounded-lg bg-[#004DFF]/5 text-[#004DFF] text-xs font-medium px-3 py-2">
+                  {p.highlight}
+                </div>
+                <ul className="space-y-2 text-sm">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex gap-2">
+                      <Check className="h-4 w-4 text-[#004DFF] shrink-0 mt-0.5" />
+                      <span className="text-muted-foreground">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className="w-full rounded-xl"
+                  variant={p.popular ? "default" : "outline"}
+                  onClick={() => go(p.tier)}
+                >
+                  Assinar {p.name}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground">
+          Upgrade imediato — seus limites são liberados assim que o pagamento é confirmado.
+        </p>
+      </DialogContent>
+    </Dialog>
+  );
+}

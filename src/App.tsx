@@ -12,6 +12,7 @@ import { MainLayout } from "./components/layout/MainLayout";
 import { Loading } from "./components/ui/loading";
 import { WelcomePopup } from "./components/WelcomePopup";
 import { MultiSessionAlert } from "./components/MultiSessionAlert";
+import UpgradeDialog from "./components/UpgradeDialog";
 import { FeatureGate } from "./components/FeatureGate";
 
 // Eager load main pages for better UX
@@ -99,6 +100,7 @@ function App() {
               <AuthProvider>
                 {/* WelcomePopup removed */}
                 <MultiSessionAlert />
+                <UpgradeDialog />
                 <Suspense fallback={<Loading />}>
                   <Routes>
                     <Route path="/" element={<Landing />} />
