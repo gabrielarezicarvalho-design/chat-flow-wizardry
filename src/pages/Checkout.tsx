@@ -233,12 +233,12 @@ export default function Checkout() {
                     </div>
                     <div>
                       <div className="text-sm font-bold text-slate-900">{plan.name.toUpperCase()}</div>
-                      <div className="text-xs text-slate-500">
-                        {billingLabel}
-                        {billing === "annual" && (
-                          <span className="ml-1 font-medium text-slate-700">— {brl(total)} cobrado por ano</span>
-                        )}
-                      </div>
+                      <div className="text-xs text-slate-500">{billingLabel}</div>
+                      {billing === "annual" && (
+                        <div className="text-xs font-medium text-slate-700">
+                          {brl(total)} cobrado por ano
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-sm font-bold text-slate-900">{brl(total)}</div>
@@ -274,12 +274,12 @@ export default function Checkout() {
                     <div>
                       <div className="text-xs text-slate-500">Você está levando</div>
                       <div className="text-lg font-bold text-slate-900">{plan.name.toUpperCase()}</div>
-                      <div className="text-xs text-slate-500">
-                        {billingLabel}
-                        {billing === "annual" && (
-                          <span className="ml-1 font-medium text-slate-700">— {brl(total)} cobrado por ano</span>
-                        )}
-                      </div>
+                      <div className="text-xs text-slate-500">{billingLabel}</div>
+                      {billing === "annual" && (
+                        <div className="text-xs font-medium text-slate-700">
+                          {brl(total)} cobrado por ano
+                        </div>
+                      )}
                     </div>
                     <div className="text-right">
                       <div className="text-xs text-slate-500">Total</div>
