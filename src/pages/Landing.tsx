@@ -790,11 +790,12 @@ export default function Landing() {
         <header className="relative z-40 px-4 pt-4">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between rounded-2xl border border-white/40 bg-white/80 px-6 shadow-lg backdrop-blur-xl">
             <div className="flex items-center gap-10">
-              <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-slate-900">
-                <img src={logoAurora.url} alt="NEXT PRO" className="h-8 w-8 rounded-full object-cover" />
-                NEXT <span className="text-[#004DFF]">PRO</span>
-                <span className="ml-1 rounded-md bg-[#004DFF]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#004DFF]">Beta</span>
+              <div className="flex items-center gap-2 whitespace-nowrap font-bold text-xl font-space-grotesk text-slate-900">
+                <img src={logoAurora.url} alt="NEXT PRO" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+                <span>NEXT <span className="text-[#004DFF]">PRO</span></span>
+                <span className="rounded-md bg-[#004DFF]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#004DFF]">Beta</span>
               </div>
+
               <nav className="hidden lg:flex items-center gap-8 text-[15px] text-slate-600">
                 <FeaturesPopover />
                 <a href="#planos" className="hover:text-slate-900">Preços</a>
