@@ -717,10 +717,30 @@ export default function Landing() {
             </div>
             <nav className="hidden lg:flex items-center gap-8 text-base text-slate-200">
               <FeaturesPopover />
-              <a href="#planos" className="hover:text-white">Planos</a>
-              <a href="#depoimentos" className="hover:text-white">Cases</a>
-              <a href="#pagamentos" className="hover:text-white">Integrações</a>
-              <a href="#segmentos" className="hover:text-white">Parceiros</a>
+              <a
+                href="#planos"
+                className={`transition-colors hover:text-white ${activeSection === "planos" ? "text-white" : ""}`}
+              >
+                Planos
+              </a>
+              <a
+                href="#depoimentos"
+                className={`transition-colors hover:text-white ${activeSection === "depoimentos" ? "text-white" : ""}`}
+              >
+                Cases
+              </a>
+              <a
+                href="#pagamentos"
+                className={`transition-colors hover:text-white ${activeSection === "pagamentos" ? "text-white" : ""}`}
+              >
+                Integrações
+              </a>
+              <a
+                href="#segmentos"
+                className={`transition-colors hover:text-white ${activeSection === "segmentos" ? "text-white" : ""}`}
+              >
+                Parceiros
+              </a>
             </nav>
           </div>
           <div className="hidden md:flex items-center gap-3">
