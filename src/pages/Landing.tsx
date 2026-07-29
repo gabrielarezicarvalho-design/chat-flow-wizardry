@@ -350,6 +350,9 @@ function RotatingMetrics() {
         </div>
       ))}
     </>
+  );
+}
+
 const BRAND_SETS = [
   ["Vizze", "VivaMais", "Med Prime", "Arami"],
   ["Belleza", "Oficina 7", "SolarTech", "Nutrir"],
