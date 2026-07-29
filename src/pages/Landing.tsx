@@ -1161,7 +1161,7 @@ export default function Landing() {
 
 
       {/* IA */}
-      <section id="ia" className="bg-slate-50 py-24">
+      <section id="ia" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Tudo que você precisa</span>
