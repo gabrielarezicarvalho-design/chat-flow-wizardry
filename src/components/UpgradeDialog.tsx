@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePlanConfigs } from "@/hooks/usePlanConfigs";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { Progress } from "@/components/ui/progress";
 
 const EVENT = "open-upgrade-dialog";
 
@@ -61,6 +63,18 @@ export default function UpgradeDialog() {
   const [reason, setReason] = useState<string | undefined>();
   const [billing, setBilling] = useState<Billing>("monthly");
   const { plans: planConfigs } = usePlanConfigs();
+  const { plan: currentPlan, usage, getStatus } = usePlanLimits();
+  const sends = getStatus("mass_sends_month");
+  const remaining = sends.unlimited
+    ? null
+    : Math.max(0, (sends.max as number) - sends.current);
+  const resetAt = usage?.cycle_end
+    ? new Date(usage.cycle_end).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -90,6 +104,33 @@ export default function UpgradeDialog() {
               "Seu plano atual atingiu o limite. Escolha um plano e continue usando sem interrupções."}
           </DialogDescription>
         </DialogHeader>
+
+        <div className="rounded-xl border bg-muted/30 p-4 space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium">
+              Disparos no plano {currentPlan}
+            </span>
+            <span className="text-muted-foreground">
+              {sends.unlimited
+                ? "Ilimitados"
+                : `${sends.current}/${sends.max} usados`}
+            </span>
+          </div>
+          {!sends.unlimited && (
+            <>
+              <Progress value={sends.percent} className="h-2" />
+              <p className="text-xs text-muted-foreground">
+                Você ainda tem{" "}
+                <span className="font-semibold text-foreground">
+                  {remaining} disparo{remaining === 1 ? "" : "s"}
+                </span>{" "}
+                {resetAt
+                  ? `— o limite reinicia em ${resetAt} (próximo ciclo de cobrança).`
+                  : "no ciclo atual."}
+              </p>
+            </>
+          )}
+        </div>
 
         <div className="flex justify-center">
           <div className="inline-flex rounded-lg border p-1 bg-muted/40">
