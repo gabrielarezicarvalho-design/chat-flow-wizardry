@@ -878,14 +878,6 @@ export default function Landing() {
   const [showCompareTable, setShowCompareTable] = useState(false);
   const [searchQuery, setSearchQuery] = useState("dentistas em São Paulo");
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(0);
-  const [showTyping, setShowTyping] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [showEmoji, setShowEmoji] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordSeconds, setRecordSeconds] = useState(0);
-  const [userMessages, setUserMessages] = useState<Array<{ id: string; kind: "text" | "audio" | "file"; content: string; fileName?: string; previewUrl?: string; duration?: number; audioUrl?: string }>>([]);
-  const [interacted, setInteracted] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadItem | null>(null);
   const [savedLeads, setSavedLeads] = useState<string[]>([]);
   const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
