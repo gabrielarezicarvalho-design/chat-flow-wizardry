@@ -1462,7 +1462,7 @@ export default function Landing() {
                 price: billing === "monthly" ? "49,90" : "41,58",
                 tagline: "Para quem está começando",
                 highlights: [
-                  { strong: "100 disparos", pre: "até ", post: "/dia" },
+                  { strong: "100 disparos", pre: "até ", post: "/mês" },
                   { strong: "1.000", pre: "", post: " créditos de mensagem" },
                 ],
                 chips: ["5 atendentes", "2 conexões WhatsApp", "IA completa", "Chat interno"],
@@ -1474,7 +1474,7 @@ export default function Landing() {
                 price: billing === "monthly" ? "99,90" : "83,25",
                 tagline: "Para operações de alto volume",
                 highlights: [
-                  { strong: "10.000 disparos", pre: "até ", post: "/dia" },
+                  { strong: "10.000 disparos", pre: "até ", post: "/mês" },
                   { strong: "50.000", pre: "", post: " créditos de mensagem" },
                 ],
                 chips: ["20 atendentes", "Clientes ilimitados", "Prospecção completa", "Suporte prioritário"],
