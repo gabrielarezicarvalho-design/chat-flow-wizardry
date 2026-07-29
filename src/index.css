@@ -284,6 +284,25 @@ All colors MUST be HSL.
   animation: hero-reveal-right 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+@keyframes brand-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.brand-fade-in {
+  animation: brand-fade-in 0.5s ease-out forwards;
+}
+
+
 .hero-d1 { animation-delay: 0.05s; }
 .hero-d2 { animation-delay: 0.2s; }
 .hero-d3 { animation-delay: 0.35s; }
