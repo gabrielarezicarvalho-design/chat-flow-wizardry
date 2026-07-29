@@ -141,6 +141,11 @@ export default function MyAccount() {
                 /{billing === "annual" ? "ano" : "mês"}
               </span>
             </div>
+            {billing === "annual" && (
+              <div className="text-xs text-muted-foreground mt-0.5">
+                cobrado por ano
+              </div>
+            )}
           </div>
           <div className="rounded-lg border p-3">
             <div className="text-xs text-muted-foreground flex items-center gap-1.5">

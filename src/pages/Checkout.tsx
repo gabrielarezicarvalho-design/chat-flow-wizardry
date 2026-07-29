@@ -234,6 +234,11 @@ export default function Checkout() {
                     <div>
                       <div className="text-sm font-bold text-slate-900">{plan.name.toUpperCase()}</div>
                       <div className="text-xs text-slate-500">{billingLabel}</div>
+                      {billing === "annual" && (
+                        <div className="text-xs font-medium text-slate-700">
+                          {brl(total)} cobrado por ano
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-sm font-bold text-slate-900">{brl(total)}</div>
@@ -270,6 +275,11 @@ export default function Checkout() {
                       <div className="text-xs text-slate-500">Você está levando</div>
                       <div className="text-lg font-bold text-slate-900">{plan.name.toUpperCase()}</div>
                       <div className="text-xs text-slate-500">{billingLabel}</div>
+                      {billing === "annual" && (
+                        <div className="text-xs font-medium text-slate-700">
+                          {brl(total)} cobrado por ano
+                        </div>
+                      )}
                     </div>
                     <div className="text-right">
                       <div className="text-xs text-slate-500">Total</div>
@@ -429,7 +439,9 @@ export default function Checkout() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500">Detalhes</span>
-                      <span className="font-semibold text-slate-900">{billingLabel}</span>
+                      <span className="font-semibold text-slate-900">
+                        {billing === "annual" ? `${brl(total)} cobrado por ano` : billingLabel}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                       <span className="text-slate-900 font-semibold">Total</span>

@@ -1544,7 +1544,9 @@ export default function Landing() {
               {
                 tier: "start",
                 name: "Start",
-                price: billing === "monthly" ? "49,90" : "41,58",
+                monthlyPrice: "49,90",
+                annualPrice: "41,58",
+                annualTotal: "499,00",
                 tagline: "Para quem está começando",
                 highlights: [
                   { strong: "100 disparos", pre: "até ", post: "/mês" },
@@ -1556,7 +1558,9 @@ export default function Landing() {
               {
                 tier: "business",
                 name: "Business",
-                price: billing === "monthly" ? "99,90" : "83,25",
+                monthlyPrice: "99,90",
+                annualPrice: "83,25",
+                annualTotal: "999,00",
                 tagline: "Para operações de alto volume",
                 highlights: [
                   { strong: "10.000 disparos", pre: "até ", post: "/mês" },
@@ -1579,13 +1583,20 @@ export default function Landing() {
 
                 <div className="mt-1 flex items-baseline justify-between gap-3">
                   <div className="text-3xl font-bold tracking-tight text-slate-900">{p.name}</div>
-                  <div className="flex items-baseline">
+                  <div className="text-right">
                     {p.tier === "basic" ? (
                       <span className="text-3xl font-bold tracking-tight" style={{ color: "#004DFF" }}>Grátis</span>
                     ) : (
                       <>
-                        <span className="text-3xl font-bold tracking-tight text-slate-900">R${p.price}</span>
-                        <span className="ml-1 text-sm text-slate-400">/mês</span>
+                        <div className="flex items-baseline justify-end">
+                          <span className="text-3xl font-bold tracking-tight text-slate-900">R${billing === "annual" ? p.annualPrice : p.monthlyPrice}</span>
+                          <span className="ml-1 text-sm text-slate-400">/mês</span>
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {billing === "annual"
+                            ? `R$ ${p.annualTotal} cobrado por ano`
+                            : "cobrado por mês"}
+                        </div>
                       </>
                     )}
                   </div>
@@ -1678,7 +1689,7 @@ export default function Landing() {
                       billing === "monthly" ? "R$ 49,90" : "R$ 41,58",
                       billing === "monthly" ? "R$ 99,90" : "R$ 83,25",
                     ],
-                    ["Economia no anual", billing === "annual" ? "R$ 99,80/ano" : "—", billing === "annual" ? "R$ 199,80/ano" : "—"],
+                    [billing === "annual" ? "Cobrança anual" : "", billing === "annual" ? "R$ 499,00 cobrado por ano" : "—", billing === "annual" ? "R$ 999,00 cobrado por ano" : "—"],
                     ["Atendentes", "5", "20"],
                     ["Conexões WhatsApp", "2", "10"],
                     ["Usuários", "10/mês", "Ilimitados"],
