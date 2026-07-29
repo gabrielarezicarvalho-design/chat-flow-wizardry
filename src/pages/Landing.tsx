@@ -913,10 +913,8 @@ export default function Landing() {
                 <Check className="h-4 w-4" /> Toque numa pergunta e veja a venda acontecer
               </div>
             </div>
-
-            </div>
-
           </div>
+
         </div>
       </section>
 
