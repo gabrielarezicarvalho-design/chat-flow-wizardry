@@ -453,6 +453,7 @@ export default function Landing() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
+  const [expandedTier, setExpandedTier] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("dentistas em São Paulo");
   const [mapLoaded, setMapLoaded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(0);
@@ -1577,13 +1578,31 @@ export default function Landing() {
                   </div>
                 </div>
 
-                <p className="mt-7 text-center text-sm font-semibold" style={{ color: "#004DFF" }}>
-                  *Todas Funcionalidades Inclusas
-                </p>
+                <button
+                  onClick={() => setExpandedTier(expandedTier === p.tier ? null : p.tier)}
+                  className="mt-7 w-full flex items-center justify-center gap-2 text-sm font-semibold transition hover:opacity-80"
+                  style={{ color: "#004DFF" }}
+                >
+                  {expandedTier === p.tier ? "Ocultar funcionalidades" : "Ver todas as funcionalidades"}
+                  <ChevronRight className={`h-4 w-4 transition-transform ${expandedTier === p.tier ? "rotate-90" : ""}`} />
+                </button>
+
+                {expandedTier === p.tier && (
+                  <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 animate-fade-in">
+                    <ul className="space-y-3">
+                      {PLAN_FEATURES[p.tier].map((feature) => (
+                        <li key={feature} className="flex items-start gap-3 text-sm text-slate-700">
+                          <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: "#004DFF" }} />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <button
                   onClick={() => (window.location.href = `/checkout?tier=${p.tier}&billing=${billing}`)}
-                  className="mt-3 w-full rounded-full py-4 text-lg font-bold text-white transition hover:opacity-90"
+                  className="mt-5 w-full rounded-full py-4 text-lg font-bold text-white transition hover:opacity-90"
                   style={{ backgroundColor: "#004DFF" }}
                 >
                   Testar grátis
