@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import imgPadaria from "@/assets/biz/padaria.jpg";
-import imgOficina from "@/assets/biz/oficina.jpg";
+import imgOficina from "@/assets/biz/oficina.jpg.asset.json";
 import imgSalao from "@/assets/biz/salao.jpg.asset.json";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
@@ -511,7 +511,7 @@ const MERCADO_CARDS = [
     className: "lg:row-span-2 h-[560px]",
   },
   {
-    img: imgOficina,
+    img: imgOficina.url,
     title: "Oficina local",
     desc: "orçamento respondido no meio do serviço",
     className: "lg:col-span-2 h-[300px]",
