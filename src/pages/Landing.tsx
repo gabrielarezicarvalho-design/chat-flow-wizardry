@@ -458,9 +458,188 @@ function RotatingChips({ tier }: { tier: string }) {
   );
 }
 
+type HeroQA = { q: string; a: string };
 
+const HERO_SEGMENTS: { name: string; greeting: string; qa: HeroQA[] }[] = [
+  {
+    name: "Clínica",
+    greeting: "Oi! 😄 Sou o agente da clínica. Como posso ajudar você hoje?",
+    qa: [
+      { q: "Tem horário amanhã à tarde?", a: "Tenho sim! 🗓️ Amanhã às 14h30, 16h ou 17h15. Qual fica melhor pra você?" },
+      { q: "Vocês atendem convênio?", a: "Atendemos os principais convênios e também particular com desconto à vista. Qual é o seu plano?" },
+      { q: "Quanto custa a consulta?", a: "A avaliação particular fica R$ 180 e já inclui o plano de tratamento. Posso reservar um horário?" },
+      { q: "Onde vocês ficam?", a: "Estamos na Av. Paulista, 1200 — 5º andar, com estacionamento no prédio. Te envio a localização no WhatsApp? 📍" },
+      { q: "Pode remarcar meu horário?", a: "Claro! Já localizei seu agendamento. Prefere quinta às 10h ou sexta às 15h?" },
+    ],
+  },
+  {
+    name: "Imobiliária",
+    greeting: "Olá! 🏡 Posso te ajudar a encontrar o imóvel ideal. O que procura?",
+    qa: [
+      { q: "Tem apartamento de 2 quartos?", a: "Tenho 7 opções de 2 quartos entre R$ 320 mil e R$ 480 mil. Prefere pronto pra morar ou na planta?" },
+      { q: "Aceitam financiamento?", a: "Sim! Trabalhamos com Caixa e Itaú, com entrada a partir de 10%. Quer uma simulação agora?" },
+      { q: "Posso agendar uma visita?", a: "Posso agendar hoje mesmo 😊 Tenho horários às 15h e às 18h. Qual prefere?" },
+      { q: "Qual o valor do condomínio?", a: "O condomínio fica em R$ 420 com água inclusa e IPTU de R$ 110/mês." },
+    ],
+  },
+  {
+    name: "Loja",
+    greeting: "Oi! 🛍️ Bem-vindo(a). Posso te ajudar com pedidos, trocas e entregas.",
+    qa: [
+      { q: "Esse produto tem em estoque?", a: "Tem sim! Restam 4 unidades no tamanho M e 2 no G. Quer que eu separe o seu?" },
+      { q: "Qual o prazo de entrega?", a: "Para o seu CEP a entrega sai em 2 a 4 dias úteis, com frete grátis acima de R$ 199. 🚚" },
+      { q: "Aceitam parcelamento?", a: "Sim, em até 12x no cartão ou 10% de desconto no Pix. Como prefere pagar?" },
+      { q: "Como faço uma troca?", a: "Você tem 30 dias para trocar. Só me passar o número do pedido que eu já gero a etiqueta. 📦" },
+    ],
+  },
+  {
+    name: "Serviços",
+    greeting: "Olá! 👋 Sou o agente da equipe. Me conta o que você precisa?",
+    qa: [
+      { q: "Fazem orçamento sem custo?", a: "Fazemos! O orçamento é gratuito e sai em até 1 hora. Pode me descrever o serviço?" },
+      { q: "Atendem no fim de semana?", a: "Sim, sábado das 8h às 14h e domingo com plantão para urgências." },
+      { q: "Quanto tempo demora?", a: "Na média o serviço leva 2 a 3 horas e já sai com garantia de 90 dias. ✅" },
+      { q: "Atendem minha região?", a: "Atendemos toda a região metropolitana sem taxa extra. Qual é o seu bairro?" },
+    ],
+  },
+];
 
+function HeroChatCard() {
+  const [segment, setSegment] = useState(0);
+  const [messages, setMessages] = useState<{ from: "ai" | "user"; text: string }[]>([
+    { from: "ai", text: HERO_SEGMENTS[0].greeting },
+  ]);
+  const [typing, setTyping] = useState(false);
+  const [asked, setAsked] = useState<string[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const timersRef = useRef<number[]>([]);
 
+  useEffect(() => {
+    return () => timersRef.current.forEach((t) => window.clearTimeout(t));
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, typing]);
+
+  const selectSegment = (i: number) => {
+    timersRef.current.forEach((t) => window.clearTimeout(t));
+    timersRef.current = [];
+    setSegment(i);
+    setAsked([]);
+    setTyping(false);
+    setMessages([{ from: "ai", text: HERO_SEGMENTS[i].greeting }]);
+  };
+
+  const ask = (item: HeroQA) => {
+    if (typing) return;
+    setMessages((m) => [...m, { from: "user", text: item.q }]);
+    setAsked((a) => [...a, item.q]);
+    setTyping(true);
+    const t = window.setTimeout(() => {
+      setTyping(false);
+      setMessages((m) => [...m, { from: "ai", text: item.a }]);
+    }, 1100);
+    timersRef.current.push(t);
+  };
+
+  const seg = HERO_SEGMENTS[segment];
+  const remaining = seg.qa.filter((item) => !asked.includes(item.q));
+  const suggestions = remaining.length ? remaining.slice(0, 2) : [];
+
+  return (
+    <div className="hero-reveal-right hero-d3 w-full max-w-[460px] self-end ml-auto">
+      <div className="flex h-[clamp(440px,56vh,520px)] flex-col rounded-[32px] bg-[#E8E5E2] p-5 shadow-2xl">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#60A5FA] via-[#3B82F6] to-[#004DFF] shadow-md shadow-[#3B82F6]/30" />
+            <div>
+              <p className="font-semibold text-slate-900">Seu agente de IA</p>
+              <p className="flex items-center gap-1.5 text-xs text-slate-500">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" /> online agora
+              </p>
+            </div>
+          </div>
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Teste você mesmo</span>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          {HERO_SEGMENTS.map((c, i) => (
+            <button
+              key={c.name}
+              type="button"
+              onClick={() => selectSegment(i)}
+              className={`rounded-full border px-3 py-1 text-sm transition ${
+                i === segment
+                  ? "border-[#004DFF]/40 bg-[#004DFF]/15 text-[#004DFF]"
+                  : "border-slate-300/60 bg-white/60 text-slate-600 hover:bg-white"
+              }`}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+
+        <div ref={scrollRef} className="mt-4 flex-1 space-y-2 overflow-y-auto pr-1">
+          {messages.map((m, i) => (
+            <div key={i} className={m.from === "user" ? "flex justify-end" : "flex justify-start"}>
+              <div
+                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
+                  m.from === "user"
+                    ? "rounded-tr-sm bg-[#004DFF] text-white"
+                    : "rounded-tl-sm bg-[#004DFF]/20 text-slate-800"
+                }`}
+              >
+                {m.text}
+              </div>
+            </div>
+          ))}
+          {typing && (
+            <div className="flex justify-start">
+              <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-[#004DFF]/20 px-4 py-3">
+                {[0, 1, 2].map((d) => (
+                  <span
+                    key={d}
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-600"
+                    style={{ animationDelay: `${d * 0.15}s` }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {suggestions.map((item) => (
+            <button
+              key={item.q}
+              type="button"
+              disabled={typing}
+              onClick={() => ask(item)}
+              className="rounded-full border border-slate-300/60 bg-white/70 px-3 py-1.5 text-sm text-slate-600 transition hover:border-[#004DFF]/40 hover:bg-white hover:text-[#004DFF] disabled:opacity-50"
+            >
+              {item.q}
+            </button>
+          ))}
+          {!suggestions.length && (
+            <button
+              type="button"
+              onClick={() => selectSegment(segment)}
+              className="rounded-full border border-slate-300/60 bg-white/70 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-white"
+            >
+              Recomeçar conversa
+            </button>
+          )}
+        </div>
+
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/60 px-4 py-3 text-sm text-slate-500">
+          <Check className="h-4 w-4" /> Toque numa pergunta e veja a venda acontecer
+        </div>
+      </div>
+    </div>
+  );
+}
 
 
 export default function Landing() {
