@@ -353,6 +353,40 @@ function RotatingMetrics() {
   );
 }
 
+const BRAND_SETS = [
+  ["Vizze", "VivaMais", "Med Prime", "Arami"],
+  ["Belleza", "Oficina 7", "SolarTech", "Nutrir"],
+  ["ConstruPro", "PetVet", "Pizzaria Fogo", "Elegance"],
+  ["Conecta", "MoveUp", "ClinicaMais", "Casa Forte"],
+  ["FitPro", "AgroBem", "TechMais", "Maré Alta"],
+];
+
+function RotatingBrands() {
+  const [setIndex, setSetIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSetIndex((i) => (i + 1) % BRAND_SETS.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <>
+      {BRAND_SETS[setIndex].map((b) => (
+        <span
+          key={`${setIndex}-${b}`}
+          className="brand-fade-in font-space-grotesk text-xl font-bold tracking-wide text-slate-400"
+        >
+          {b}
+        </span>
+      ))}
+    </>
+  );
+}
+
+
+
 
 
 export default function Landing() {
@@ -729,11 +763,7 @@ export default function Landing() {
               Garantia de 30 dias · Sem fidelidade
             </div>
             <div className="hero-reveal hero-d5 mt-12 flex flex-wrap items-center gap-8">
-              {["Kaja", "BOOBOO", "SENSE", "Tangerine"].map((b) => (
-                <span key={b} className="font-space-grotesk text-xl font-bold tracking-wide text-slate-400">
-                  {b}
-                </span>
-              ))}
+              <RotatingBrands />
             </div>
             <p className="hero-reveal hero-d6 mt-6 text-base text-slate-500">
               <span className="font-semibold text-slate-900">+20 empresas</span> já vendem mais com a NEXT PRO.
