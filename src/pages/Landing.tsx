@@ -499,7 +499,7 @@ function IdealParaMarquee() {
 
 const MERCADO_CARDS = [
   {
-    img: imgPadaria,
+    img: imgPadaria.url,
     title: "Padaria de bairro",
     desc: "pedido novo enquanto o balcão está cheio",
     className: "lg:col-span-2 h-[240px]",
