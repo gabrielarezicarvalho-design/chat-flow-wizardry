@@ -798,7 +798,7 @@ export default function Landing() {
 
         {/* NAV flutuante */}
         <header className="relative z-40 px-4 pt-4">
-          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between rounded-2xl border border-white/40 bg-white/80 px-6 shadow-lg backdrop-blur-xl">
+          <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between rounded-2xl border border-white/40 bg-white/80 px-6 shadow-lg backdrop-blur-xl">
             <div className="flex items-center gap-10">
               <div className="flex items-center gap-2 whitespace-nowrap font-bold text-xl font-space-grotesk text-slate-900">
                 <img src={logoAurora.url} alt="NEXT PRO" className="h-8 w-8 shrink-0 rounded-full object-cover" />
