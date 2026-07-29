@@ -234,6 +234,11 @@ export default function Checkout() {
                     <div>
                       <div className="text-sm font-bold text-slate-900">{plan.name.toUpperCase()}</div>
                       <div className="text-xs text-slate-500">{billingLabel}</div>
+                      {billing === "annual" && (
+                        <div className="text-xs font-medium text-slate-700">
+                          {brl(total)} cobrado por ano
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-sm font-bold text-slate-900">{brl(total)}</div>
