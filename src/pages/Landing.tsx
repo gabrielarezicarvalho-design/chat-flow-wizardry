@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import imgPadaria from "@/assets/biz/padaria.jpg";
+import imgOficina from "@/assets/biz/oficina.jpg";
+import imgSalao from "@/assets/biz/salao.jpg";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
 import avatarRafael from "@/assets/cases/rafael.png.asset.json";
@@ -493,6 +496,107 @@ function IdealParaMarquee() {
     </section>
   );
 }
+
+const MERCADO_CARDS = [
+  {
+    img: imgPadaria,
+    title: "Padaria de bairro",
+    desc: "pedido novo enquanto o balcão está cheio",
+    className: "lg:col-span-2 h-[240px]",
+  },
+  {
+    img: imgSalao,
+    title: "Salão independente",
+    desc: "agenda andando sem parar o atendimento",
+    className: "lg:row-span-2 h-[560px]",
+  },
+  {
+    img: imgOficina,
+    title: "Oficina local",
+    desc: "orçamento respondido no meio do serviço",
+    className: "lg:col-span-2 h-[300px]",
+  },
+];
+
+function MercadoSection() {
+  return (
+    <section className="relative overflow-hidden bg-[#04102e] text-white">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "radial-gradient(1200px 600px at 20% 0%, rgba(0,77,255,0.35), transparent 60%)" }}
+      />
+      <div className="relative mx-auto max-w-[1240px] px-6 py-24">
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+          <div>
+            <span className="flex items-center gap-2 text-sm font-semibold text-[#4d8bff]">
+              <span className="h-2 w-2 rounded-full bg-[#004DFF]" />
+              O mercado acontece enquanto você trabalha
+            </span>
+            <h2 className="mt-6 text-[clamp(2.4rem,5vw,4rem)] font-medium leading-[1.05] tracking-tight">
+              Por trás de cada WhatsApp, tem alguém fazendo o negócio acontecer.
+            </h2>
+          </div>
+
+          <div className="lg:pt-24">
+            <p className="text-lg leading-relaxed text-white/70">
+              O cliente chama quando a mão está na massa, o salão está cheio ou o próximo
+              serviço já começou. A oportunidade não deveria depender de alguém parar tudo
+              para responder.
+            </p>
+            <div className="mt-8 border-t border-white/15 pt-6">
+              <div className="flex items-start gap-3 text-sm text-white/70">
+                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#4d8bff]" />
+                <span>
+                  A Next Pro mantém a conversa andando — com o jeito e as regras do seu negócio.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-16 grid gap-5 lg:grid-cols-3">
+          {MERCADO_CARDS.map((c) => (
+            <div
+              key={c.title}
+              className={`group relative overflow-hidden rounded-2xl ${c.className}`}
+            >
+              <img
+                src={c.img}
+                alt={c.title}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#04102e]/95 via-[#04102e]/30 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6">
+                <div>
+                  <p className="text-2xl font-medium">{c.title}</p>
+                  <p className="mt-1 max-w-[260px] text-sm text-white/70">{c.desc}</p>
+                </div>
+                <span className="shrink-0 rounded-full bg-[#004DFF] px-4 py-1.5 text-xs font-semibold text-white">
+                  IA atendendo
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-16 grid gap-10 border-t border-white/15 pt-10 md:grid-cols-3">
+          {[
+            { v: "99%", d: "dos smartphones brasileiros têm WhatsApp" },
+            { v: "8 em 10", d: "consumidores já conversam com empresas por lá" },
+            { v: "5 min", d: "é a janela em que o interesse ainda está quente" },
+          ].map((s) => (
+            <div key={s.v}>
+              <p className="text-4xl font-medium text-[#4d8bff]">{s.v}</p>
+              <p className="mt-3 max-w-[260px] text-sm leading-relaxed text-white/70">{s.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 type HeroQA = { q: string; a: string };
 
@@ -1194,6 +1298,10 @@ export default function Landing() {
 
       {/* IDEAL PARA — carrossel */}
       <IdealParaMarquee />
+
+      {/* POR TRÁS DE CADA WHATSAPP */}
+      <MercadoSection />
+
 
       {/* DEMO AURORA */}
 
