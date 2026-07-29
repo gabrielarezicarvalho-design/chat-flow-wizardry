@@ -1815,7 +1815,8 @@ export default function Landing() {
             ].map((p) => (
               <div
                 key={p.tier}
-                className="relative rounded-[28px] bg-slate-50 p-7 text-left"
+                className="relative min-w-0 w-full overflow-hidden rounded-[28px] bg-slate-50 p-5 sm:p-7 text-left"
+
                 style={
                   p.featured
                     ? { border: "1.5px solid #004DFF", boxShadow: "0 20px 60px -25px rgba(0,77,255,0.45)" }
