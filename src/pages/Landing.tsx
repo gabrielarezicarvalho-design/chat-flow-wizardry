@@ -186,11 +186,63 @@ function TypewriterText() {
     </>
   );
 }
+const METRIC_VARIANTS = [
+  ["4.8★ de satisfação", "+36% recompra", "R$ 82k recuperados", "1.240 clientes voltaram"],
+  ["4.9★ de satisfação", "+52% recompra", "R$ 120k recuperados", "2.300 clientes voltaram"],
+  ["3x mais produtivo", "-40% de no-shows", "+18% de conversão", "R$ 1M+ em vendas"],
+  ["98% de leitura", "+65% de retenção", "R$ 250k recuperados", "5.000 clientes ativos"],
+];
 
+function RotatingMetrics() {
+  const [variantIndex, setVariantIndex] = useState(0);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(media.matches);
+    const listener = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    const interval = setInterval(() => {
+      setVariantIndex((i) => (i + 1) % METRIC_VARIANTS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [prefersReducedMotion]);
+
+  const metrics = METRIC_VARIANTS[variantIndex];
+  const positions = [
+    { className: "right-0 top-[22%]", delay: "0.4s" },
+    { className: "-right-4 top-[47%]", delay: "1.1s" },
+    { className: "-left-2 top-[62%]", delay: "1.8s" },
+    { className: "-left-4 bottom-[12%]", delay: "0s" },
+  ];
+
+  return (
+    <>
+      {metrics.map((text, i) => (
+        <div
+          key={i}
+          className={`pill-float absolute ${positions[i].className} rounded-lg bg-[#1a1c1a]/95 px-4 py-2 text-xs font-medium text-white shadow-xl whitespace-nowrap`}
+          style={{ animationDelay: positions[i].delay }}
+        >
+          <span className="pill-dot mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
+          <span key={`${i}-${variantIndex}`} className="animate-fade-in">
+            {text}
+          </span>
+        </div>
+      ))}
+    </>
+  );
+}
 
 
 
 export default function Landing() {
+
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
