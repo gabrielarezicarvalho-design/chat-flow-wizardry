@@ -600,8 +600,300 @@ function MercadoSection() {
   );
 }
 
+function CheckList({ items }: { items: string[] }) {
+  return (
+    <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2">
+      {items.map((i) => (
+        <span key={i} className="flex items-center gap-2 text-sm text-slate-700">
+          <Check className="h-4 w-4 text-[#004DFF]" strokeWidth={3} />
+          {i}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 type HeroQA = { q: string; a: string };
+
+function FluxoCompletoSection() {
+  return (
+    <section className="bg-[#f4f1ec]">
+      <div className="mx-auto max-w-6xl px-6 py-24">
+        {/* Cabeçalho */}
+        <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-16 items-end">
+          <div>
+            <span className="flex items-center gap-2 text-sm font-semibold text-[#004DFF]">
+              <span className="h-2 w-2 rounded-full bg-[#004DFF]" />
+              Tudo funciona junto
+            </span>
+            <h2 className="mt-5 font-space-grotesk text-4xl md:text-5xl lg:text-[3.4rem] leading-[1.08] tracking-tight text-slate-900">
+              <span className="block">Da primeira mensagem</span>
+              <span className="block">ao pagamento.</span>
+              <span className="block">Sem trocar de tela.</span>
+            </h2>
+          </div>
+          <p className="text-slate-500 leading-relaxed lg:pb-3">
+            Um único fluxo para atender, vender, organizar e trazer o cliente de volta — com a IA
+            cuidando do trabalho repetitivo.
+          </p>
+        </div>
+
+        {/* Cards */}
+        <div className="mt-14 grid lg:grid-cols-2 gap-6">
+          {/* 1 — Atendimento */}
+          <div className="rounded-3xl bg-white/70 border border-slate-200/70 p-5">
+            <div className="rounded-2xl bg-white border border-slate-200/80 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#004DFF] text-[10px] font-bold text-white">A</span>
+                  <span className="text-xs font-semibold text-slate-900">Conversas</span>
+                </div>
+                <span className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" /> IA online
+                </span>
+              </div>
+              <div className="grid grid-cols-[40%_60%] min-h-[300px]">
+                <div className="border-r border-slate-100 p-3 space-y-2">
+                  <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-2 py-1.5 text-[10px] text-slate-400">
+                    <Search className="h-3 w-3" /> Buscar conversa
+                  </div>
+                  {[
+                    { n: "Marina Costa", m: "Quero agendar para amanhã", t: "10:42", active: true },
+                    { n: "Rafael Lima", m: "Pode me enviar o orçamento?", t: "10:31" },
+                    { n: "Ana Souza", m: "Obrigada pelo atendimento!", t: "09:58" },
+                  ].map((c) => (
+                    <div
+                      key={c.n}
+                      className={`flex items-start gap-2 rounded-xl px-2 py-2 ${c.active ? "bg-[#004DFF]/10" : ""}`}
+                    >
+                      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${c.active ? "bg-[#004DFF] text-white" : "bg-slate-100 text-slate-500"}`}>
+                        {c.n.split(" ").map((p) => p[0]).join("")}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="truncate text-[10px] font-semibold text-slate-900">{c.n}</span>
+                          <span className="text-[9px] text-slate-400">{c.t}</span>
+                        </div>
+                        <div className="truncate text-[9px] text-slate-500">{c.m}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col p-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="text-[11px] font-semibold text-slate-900">Marina Costa</div>
+                      <div className="text-[9px] font-medium text-[#004DFF]">Lead qualificado · agora</div>
+                    </div>
+                    <span className="rounded-full bg-[#004DFF]/10 px-2 py-0.5 text-[9px] font-medium text-[#004DFF]">IA atendendo</span>
+                  </div>
+                  <div className="mt-4 flex-1 space-y-2">
+                    <div className="w-fit max-w-[85%] rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] text-slate-700">
+                      Oi! Tem horário amanhã depois das 14h?
+                    </div>
+                    <div className="ml-auto w-fit max-w-[85%] rounded-xl bg-[#004DFF] px-3 py-2 text-[10px] text-white">
+                      Temos às 14h30 e 16h. Qual funciona melhor?
+                      <div className="mt-0.5 text-right text-[8px] text-white/70">10:42 ✓✓</div>
+                    </div>
+                    <div className="w-fit max-w-[85%] rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] text-slate-700">
+                      14h30, por favor 😊
+                    </div>
+                    <div className="ml-auto w-fit rounded-full bg-[#004DFF]/10 px-2.5 py-1 text-[9px] font-medium text-[#004DFF]">
+                      Agendamento criado
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between rounded-full border border-slate-200 px-3 py-2 text-[10px] text-slate-400">
+                    Digite uma mensagem...
+                    <Send className="h-3 w-3 text-slate-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="px-1 pt-6">
+              <span className="text-sm font-semibold text-[#004DFF]">Atendimento</span>
+              <h3 className="mt-2 font-space-grotesk text-2xl md:text-[1.75rem] leading-snug text-slate-900">
+                Responda, qualifique e venda — até dormindo.
+              </h3>
+              <p className="mt-3 text-sm text-slate-500 leading-relaxed">
+                A IA atende na hora, consulta sua base e entrega a conversa pronta para você assumir.
+              </p>
+              <CheckList items={["24h online", "Handoff humano", "Histórico completo"]} />
+            </div>
+          </div>
+
+          {/* 2 — Agenda + pagamentos */}
+          <div className="rounded-3xl bg-white/70 border border-slate-200/70 p-5">
+            <div className="rounded-2xl bg-white border border-slate-200/80 p-4 min-h-[344px]">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-xs font-semibold text-slate-900">Agenda</div>
+                  <div className="text-[10px] text-slate-400">Junho de 2026</div>
+                </div>
+                <Calendar className="h-4 w-4 text-[#004DFF]" />
+              </div>
+              <div className="mt-4 grid grid-cols-5 gap-2">
+                {[
+                  { d: "SEG", n: "08" },
+                  { d: "TER", n: "09", active: true },
+                  { d: "QUA", n: "10" },
+                  { d: "QUI", n: "11" },
+                  { d: "SEX", n: "12" },
+                ].map((day) => (
+                  <div
+                    key={day.d}
+                    className={`rounded-xl border px-2 py-2 text-center ${day.active ? "border-[#004DFF] bg-[#004DFF] text-white" : "border-slate-200 text-slate-500"}`}
+                  >
+                    <div className="text-[8px] font-medium tracking-wide">{day.d}</div>
+                    <div className={`text-sm font-semibold ${day.active ? "text-white" : "text-slate-900"}`}>{day.n}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-3">
+                  <Clock className="h-4 w-4 text-slate-400" />
+                  <div className="flex-1">
+                    <div className="text-[11px] font-semibold text-slate-900">Marina Costa</div>
+                    <div className="text-[9px] text-slate-500">14h30 · Avaliação</div>
+                  </div>
+                  <span className="text-[9px] font-medium text-[#004DFF]">Confirmado</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-3">
+                  <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">PIX</span>
+                  <div className="flex-1">
+                    <div className="text-[11px] font-semibold text-slate-900">Sinal recebido</div>
+                    <div className="text-[9px] text-slate-500">Marina · agora</div>
+                  </div>
+                  <span className="text-[10px] font-semibold text-[#004DFF]">+ R$ 80</span>
+                </div>
+              </div>
+            </div>
+            <div className="px-1 pt-6">
+              <span className="text-sm font-semibold text-[#004DFF]">Agenda + pagamentos</span>
+              <h3 className="mt-2 font-space-grotesk text-2xl md:text-[1.75rem] leading-snug text-slate-900">
+                Horário marcado. Lembrete enviado. PIX recebido.
+              </h3>
+              <p className="mt-3 text-sm text-slate-500 leading-relaxed">
+                O cliente resolve tudo na conversa, sem formulário, ligação ou troca de aplicativo.
+              </p>
+              <CheckList items={["Menos faltas", "Google Calendar", "Cobrança automática"]} />
+            </div>
+          </div>
+
+          {/* 3 — CRM automático */}
+          <div className="rounded-3xl bg-white/70 border border-slate-200/70 p-5">
+            <div className="rounded-2xl bg-white border border-slate-200/80 p-4 min-h-[300px]">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-xs font-semibold text-slate-900">Pipeline de vendas</div>
+                  <div className="text-[10px] text-slate-400">Atualizado pelas conversas</div>
+                </div>
+                <span className="rounded-full bg-[#004DFF]/10 px-2 py-0.5 text-[9px] font-medium text-[#004DFF]">25 oportunidades</span>
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {[
+                  { t: "Novos", n: 8, dot: "bg-[#004DFF]", vals: ["R$ 890", "R$ 450", "R$ 1.200"] },
+                  { t: "Qualificados", n: 5, dot: "bg-amber-400", vals: ["R$ 890", "R$ 450", "R$ 1.200"] },
+                  { t: "Fechados", n: 12, dot: "bg-emerald-500", vals: ["R$ 890", "R$ 450"] },
+                ].map((col) => (
+                  <div key={col.t} className="rounded-xl bg-slate-50 p-2">
+                    <div className="flex items-center justify-between px-1 pb-2">
+                      <span className="text-[9px] font-semibold text-slate-700">{col.t}</span>
+                      <span className="text-[9px] text-slate-400">{col.n}</span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {col.vals.map((v, i) => (
+                        <div key={i} className="rounded-lg border border-slate-200 bg-white p-2">
+                          <span className={`block h-1.5 w-1.5 rounded-full ${col.dot}`} />
+                          <div className="mt-1.5 flex items-center justify-between">
+                            <span className="text-[8px] text-slate-500">WhatsApp</span>
+                            <span className="text-[8px] font-semibold text-slate-900">{v}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="px-1 pt-6">
+              <span className="text-sm font-semibold text-[#004DFF]">CRM automático</span>
+              <h3 className="mt-2 font-space-grotesk text-2xl md:text-[1.75rem] leading-snug text-slate-900">
+                Cada conversa já nasce com um próximo passo.
+              </h3>
+              <p className="mt-3 text-sm text-slate-500 leading-relaxed">
+                Leads, tags, histórico e oportunidades se organizam enquanto o atendimento acontece.
+              </p>
+              <CheckList items={["Pipeline visual", "Tags automáticas", "Sem planilhas"]} />
+            </div>
+          </div>
+
+          {/* 4 — Crescimento */}
+          <div className="rounded-3xl bg-white/70 border border-slate-200/70 p-5">
+            <div className="grid grid-cols-[1.6fr_1fr] gap-3 min-h-[300px]">
+              <div className="rounded-2xl bg-white border border-slate-200/80 p-4 flex flex-col">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-xs font-semibold text-slate-900">Campanha de reativação</div>
+                    <div className="text-[10px] text-slate-400">Clientes sem contato há 30 dias</div>
+                  </div>
+                  <TrendingUp className="h-4 w-4 text-[#004DFF]" />
+                </div>
+                <div className="mt-5 flex flex-1 items-end gap-2">
+                  {[100, 82, 60, 46, 34, 22, 14].map((h, i) => (
+                    <div key={i} className="flex-1 rounded-t-md bg-[#004DFF]" style={{ height: `${h}%` }} />
+                  ))}
+                </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-[9px] text-slate-400">Conversões</span>
+                  <span className="text-sm font-bold text-slate-900">+26 vendas</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                {[
+                  { icon: FileText, t: "Base consultada", d: "Resposta com fonte" },
+                  { icon: MessageSquare, t: "1.240 envios", d: "Segmentados" },
+                ].map((c) => (
+                  <div key={c.t} className="flex flex-1 items-center gap-2 rounded-2xl bg-white border border-slate-200/80 p-3">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#004DFF]/10 text-[#004DFF]">
+                      <c.icon className="h-3.5 w-3.5" />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-[10px] font-semibold text-slate-900 leading-tight">{c.t}</div>
+                      <div className="text-[9px] text-slate-400">{c.d}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="px-1 pt-6">
+              <span className="text-sm font-semibold text-[#004DFF]">Crescimento</span>
+              <h3 className="mt-2 font-space-grotesk text-2xl md:text-[1.75rem] leading-snug text-slate-900">
+                Sua base volta a conversar — e a comprar.
+              </h3>
+              <p className="mt-3 text-sm text-slate-500 leading-relaxed">
+                Segmente campanhas, reative contatos e acompanhe o que realmente virou receita.
+              </p>
+              <CheckList items={["Campanhas", "Prospecção", "Métricas de receita"]} />
+            </div>
+          </div>
+        </div>
+
+        {/* Rodapé da seção */}
+        <div className="mt-14 border-t border-slate-300/60 pt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+          <span className="text-sm font-bold text-slate-900">E ainda vem com</span>
+          {["Orçamentos", "Campanhas", "Prospecção", "Base de conhecimento", "Múltiplos agentes", "API + webhooks"].map((t) => (
+            <span key={t} className="flex items-center gap-2 text-sm text-slate-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
+              {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
 
 
 const HERO_SEGMENTS: { name: string; greeting: string; qa: HeroQA[] }[] = [
@@ -1210,6 +1502,9 @@ export default function Landing() {
         </div>
       </section>
 
+
+      {/* DA PRIMEIRA MENSAGEM AO PAGAMENTO */}
+      <FluxoCompletoSection />
 
       {/* IA */}
       <section id="ia" className="bg-slate-50 py-24">
