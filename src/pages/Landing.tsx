@@ -1460,7 +1460,7 @@ export default function Landing() {
                 tier: "start",
                 name: "Start",
                 price: billing === "monthly" ? "49,90" : "41,58",
-                tagline: "Para lojas em crescimento",
+                tagline: "Para quem está começando",
                 highlights: [
                   { strong: "150 vendas", pre: "até ", post: "/mês" },
                   { strong: "10.000", pre: "", post: " créditos de mensagem" },
