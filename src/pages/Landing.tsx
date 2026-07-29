@@ -678,7 +678,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* NAV */}
-      <header className={`sticky top-0 z-40 backdrop-blur transition-colors duration-300 ${scrolled ? "bg-[#0b0d0b]/95" : "bg-transparent"}`}>
+      <header className={`sticky top-0 z-40 transition-colors duration-300 ${scrolled ? "bg-[#0b0d0b]" : "bg-transparent backdrop-blur"}`}>
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-10">
             <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-white">
