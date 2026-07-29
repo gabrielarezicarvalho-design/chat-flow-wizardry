@@ -852,7 +852,7 @@ export default function Landing() {
 
             <p className="hero-reveal hero-d2 mt-6 max-w-xl text-xl leading-relaxed text-white/80">
               <span className="block lg:whitespace-nowrap">Enquanto você trabalha, ela responde cada cliente em</span>
-              <span className="block lg:whitespace-nowrap">segundos, fecha a venda e organiza tudo no CRM. 7 dias</span>
+              <span className="block lg:whitespace-nowrap">segundos, fecha a venda e organiza tudo no CRM. 2 dias</span>
               <span className="block lg:whitespace-nowrap">grátis, sem cartão.</span>
             </p>
 
@@ -865,7 +865,7 @@ export default function Landing() {
             <div className="hero-reveal hero-d4 mt-8 flex flex-wrap items-center gap-4">
               <Link to="/auth">
                 <Button size="lg" className="btn-shine btn-press h-14 rounded-full bg-[#004DFF] px-8 text-lg font-semibold text-white hover:bg-[#0040d6]">
-                  Testar 7 dias grátis <ArrowRight className="ml-2 h-4 w-4" />
+                  Testar 2 dias grátis <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
 
               </Link>
