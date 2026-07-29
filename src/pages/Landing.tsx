@@ -886,51 +886,8 @@ export default function Landing() {
           </div>
 
           {/* Card de chat */}
-          <div className="hero-reveal-right hero-d3 w-full max-w-[460px] self-end ml-auto">
-            <div className="flex h-[clamp(440px,56vh,520px)] flex-col rounded-[32px] bg-[#E8E5E2] p-5 shadow-2xl">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#60A5FA] via-[#3B82F6] to-[#004DFF] shadow-md shadow-[#3B82F6]/30" />
-                  <div>
-                    <p className="font-semibold text-slate-900">Seu agente de IA</p>
-                    <p className="flex items-center gap-1.5 text-xs text-slate-500">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" /> online agora
-                    </p>
-                  </div>
-                </div>
-                <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Teste você mesmo</span>
-              </div>
+          <HeroChatCard />
 
-              <div className="mt-5 flex flex-wrap gap-2">
-                {["Clínica", "Imobiliária", "Loja", "Serviços"].map((c, i) => (
-                  <span
-                    key={c}
-                    className={`rounded-full border px-3 py-1 text-sm ${i === 0 ? "border-[#004DFF]/40 bg-[#004DFF]/15 text-[#004DFF]" : "border-slate-300/60 bg-white/60 text-slate-600"}`}
-                  >
-                    {c}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-4 flex-1">
-                <div className="inline-block max-w-[85%] rounded-2xl rounded-tl-sm bg-[#004DFF]/20 px-4 py-3 text-slate-800">
-                  Oi! 😄 Como posso ajudar você hoje?
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {["Tem horário amanhã à tarde?", "Vocês atendem convênio?"].map((q) => (
-                  <span key={q} className="rounded-full border border-slate-300/60 bg-white/70 px-3 py-1.5 text-sm text-slate-600">
-                    {q}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/60 px-4 py-3 text-sm text-slate-500">
-                <Check className="h-4 w-4" /> Toque numa pergunta e veja a venda acontecer
-              </div>
-            </div>
-          </div>
 
           </div>
         </div>
