@@ -541,16 +541,18 @@ function MercadoSection() {
           </div>
 
           <div className="lg:pt-24">
-            <p className="text-lg leading-relaxed text-white/70">
-              O cliente chama quando a mão está na massa, o salão está cheio ou o próximo
-              serviço já começou. A oportunidade não deveria depender de alguém parar tudo
-              para responder.
+            <p className="max-w-[30ch] text-lg leading-relaxed text-white/80">
+              <span className="block">O cliente chama quando a mão está na massa, o salão</span>
+              <span className="block">está cheio ou o próximo serviço já começou. A</span>
+              <span className="block">oportunidade não deveria depender de alguém parar</span>
+              <span className="block">tudo para responder.</span>
             </p>
             <div className="mt-8 border-t border-white/15 pt-6">
               <div className="flex items-start gap-3 text-sm text-white/70">
                 <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#4d8bff]" />
                 <span>
-                  A Next Pro mantém a conversa andando — com o jeito e as regras do seu negócio.
+                  <span className="block">A Next Pro mantém a conversa andando — com o jeito e as</span>
+                  <span className="block">regras do seu negócio.</span>
                 </span>
               </div>
             </div>
