@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Infinity as InfinityIcon, Crown, Calendar, CreditCard, ArrowUpRight, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { openUpgradeDialog } from "@/components/UpgradeDialog";
 
 const CATEGORIES: { title: string; items: LimitResource[] }[] = [
   {
@@ -201,9 +202,21 @@ export default function MyAccount() {
                 />
               )}
               {!s.unlimited && remaining === 0 && (
-                <p className="text-xs text-destructive">
-                  Você atingiu o limite de disparos. Faça upgrade para continuar enviando.
-                </p>
+                <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
+                  <p className="text-xs text-destructive">
+                    Você atingiu o limite de disparos. Faça upgrade para continuar enviando.
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      openUpgradeDialog(
+                        "Seus disparos acabaram. Escolha Start ou Business para voltar a enviar agora mesmo."
+                      )
+                    }
+                  >
+                    Fazer upgrade
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -267,7 +280,7 @@ export default function MyAccount() {
                 Faça upgrade para o plano Business com IA, disparos e departamentos ilimitados.
               </p>
             </div>
-            <Button onClick={() => navigate("/")}>Fazer upgrade</Button>
+            <Button onClick={() => openUpgradeDialog()}>Fazer upgrade</Button>
           </CardContent>
         </Card>
       )}
