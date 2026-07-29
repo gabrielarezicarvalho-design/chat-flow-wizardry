@@ -1155,8 +1155,11 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* IDEAL PARA — carrossel */}
+      <IdealParaMarquee />
 
       {/* DEMO AURORA */}
+
       <section className="bg-gradient-to-b from-white to-slate-50">
         <div className="mx-auto max-w-6xl px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
           <div className="text-center md:text-left">
