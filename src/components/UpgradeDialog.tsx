@@ -190,14 +190,12 @@ export default function UpgradeDialog() {
                   )}
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{brl(price)}</div>
-                  {billing === "annual" ? (
-                    <div className="text-xs text-muted-foreground">
-                      {brl(price * 12)} cobrado por ano
-                    </div>
-                  ) : (
-                    <div className="text-xs text-muted-foreground">por mês</div>
-                  )}
+                  <div className="text-2xl font-bold inline-flex items-baseline gap-1">
+                    {brl(price)}
+                    <span className="text-xs text-muted-foreground font-normal">
+                      /mês {billing === "annual" ? `— ${brl(price * 12)} cobrado por ano` : ""}
+                    </span>
+                  </div>
                 </div>
                 <div className="rounded-lg bg-[#004DFF]/5 text-[#004DFF] text-xs font-medium px-3 py-2">
                   {p.highlight}
