@@ -373,6 +373,7 @@ export default function Landing() {
   const [selectedLead, setSelectedLead] = useState<LeadItem | null>(null);
   const [savedLeads, setSavedLeads] = useState<string[]>([]);
   const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
+  const [scrolled, setScrolled] = useState(false);
 
   const handleSubscribe = async (tier: "start" | "business") => {
     try {
@@ -448,6 +449,13 @@ export default function Landing() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [visibleCount, userMessages, showTyping]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     const key = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
@@ -670,7 +678,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* NAV */}
-      <header className="sticky top-0 z-40 bg-[#0b0d0b]/95 backdrop-blur">
+      <header className={`sticky top-0 z-40 backdrop-blur transition-colors duration-300 ${scrolled ? "bg-[#0b0d0b]/95" : "bg-transparent"}`}>
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-10">
             <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-white">
