@@ -386,6 +386,20 @@ function RotatingBrands() {
 }
 
 const PLAN_FEATURES: Record<string, string[]> = {
+  basic: [
+    "1 atendente",
+    "1 conexão WhatsApp",
+    "IA completa (limitada)",
+    "Chat interno",
+    "CRM com funil de vendas",
+    "Automação de fluxos (limitada)",
+    "20 disparos no total",
+    "Agendamentos",
+    "Prospecção Google Maps (limitada)",
+    "Cobranças recorrentes",
+    "Relatórios essenciais",
+    "Suporte por WhatsApp",
+  ],
   start: [
     "5 atendentes",
     "2 conexões WhatsApp",
