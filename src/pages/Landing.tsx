@@ -783,18 +783,19 @@ export default function Landing() {
         {/* Fundo */}
         <div className="absolute inset-0">
           <img src={heroWoman} alt="Empreendedora usando a NEXT PRO" className="h-full w-full object-cover object-center" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/65 to-slate-950/35" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/20" />
         </div>
 
         {/* NAV flutuante */}
         <header className="relative z-40 px-4 pt-4">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between rounded-2xl border border-white/40 bg-white/80 px-6 shadow-lg backdrop-blur-xl">
             <div className="flex items-center gap-10">
-              <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-slate-900">
-                <img src={logoAurora.url} alt="NEXT PRO" className="h-8 w-8 rounded-full object-cover" />
-                NEXT <span className="text-[#004DFF]">PRO</span>
-                <span className="ml-1 rounded-md bg-[#004DFF]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#004DFF]">Beta</span>
+              <div className="flex items-center gap-2 whitespace-nowrap font-bold text-xl font-space-grotesk text-slate-900">
+                <img src={logoAurora.url} alt="NEXT PRO" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+                <span>NEXT <span className="text-[#004DFF]">PRO</span></span>
+                <span className="rounded-md bg-[#004DFF]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#004DFF]">Beta</span>
               </div>
+
               <nav className="hidden lg:flex items-center gap-8 text-[15px] text-slate-600">
                 <FeaturesPopover />
                 <a href="#planos" className="hover:text-slate-900">Preços</a>
@@ -867,7 +868,7 @@ export default function Landing() {
 
           {/* Card de chat */}
           <div className="hero-reveal-right hero-d3 mx-auto w-full max-w-[520px] rounded-3xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl">
-            <div className="flex h-[480px] flex-col rounded-2xl bg-white p-5 shadow-2xl">
+            <div className="flex flex-col rounded-2xl bg-white p-5 shadow-2xl">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#4d8bff] to-[#004DFF]" />
@@ -892,13 +893,23 @@ export default function Landing() {
                 ))}
               </div>
 
-              <div className="mt-4 flex-1">
-                <div className="inline-block max-w-[85%] rounded-2xl rounded-tl-sm bg-[#004DFF]/10 px-4 py-3 text-slate-800">
+              <div className="mt-4 space-y-3">
+                <div className="inline-block max-w-[85%] rounded-2xl rounded-tl-sm bg-slate-100 px-4 py-3 text-slate-800">
                   Oi! 😄 Como posso ajudar você hoje?
+                </div>
+                <div className="flex justify-end">
+                  <div className="inline-block max-w-[85%] rounded-2xl rounded-br-sm bg-[#004DFF] px-4 py-3 text-white">
+                    Quero agendar uma avaliação
+                  </div>
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-2xl rounded-tl-sm bg-slate-100 px-4 py-3">
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0ms]" />
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:150ms]" />
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:300ms]" />
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="mt-5 flex flex-wrap gap-2">
                 {["Tem horário amanhã à tarde?", "Vocês atendem convênio?"].map((q) => (
                   <span key={q} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
                     {q}
@@ -906,10 +917,14 @@ export default function Landing() {
                 ))}
               </div>
 
-              <div className="mt-3 flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-400">
-                <Check className="h-4 w-4" /> Toque numa pergunta e veja a venda acontecer
+              <div className="mt-4 flex items-center gap-3 rounded-full bg-slate-100 px-4 py-3 text-sm text-slate-400">
+                <span className="flex-1">Digite sua mensagem…</span>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#004DFF] text-white">
+                  <ArrowRight className="h-4 w-4" />
+                </span>
               </div>
             </div>
+
           </div>
         </div>
       </section>
