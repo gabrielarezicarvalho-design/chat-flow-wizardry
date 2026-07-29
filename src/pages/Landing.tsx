@@ -102,23 +102,23 @@ function FeaturesPopover() {
       <PopoverContent
         align="start"
         sideOffset={12}
-        className="w-[760px] max-w-[95vw] overflow-hidden border border-[#2a2d2a] bg-[#141614] p-0 text-white shadow-2xl shadow-black/70"
+        className="w-[720px] max-w-[95vw] overflow-hidden border border-[#2a2d2a] bg-[#141614] p-0 text-white shadow-2xl shadow-black/70"
       >
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Grid de funcionalidades */}
-          <div className="grid grid-cols-2 gap-4 p-6">
+          <div className="grid grid-cols-2 gap-3 p-5">
             {FEATURES.map((feature) => (
               <a
                 key={feature.title}
                 href={feature.href}
-                className="group flex flex-col gap-3 rounded-xl bg-[#1c1e1c] p-4 transition-all hover:bg-[#252825] hover:ring-1 hover:ring-[#3a3d3a]"
+                className="group flex flex-col gap-2 rounded-xl bg-[#1c1e1c] p-3 transition-all hover:bg-[#252825] hover:ring-1 hover:ring-[#3a3d3a]"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#252825] text-[#a3e635] ring-1 ring-[#333633] transition-colors group-hover:bg-[#2f322f] group-hover:ring-[#a3e635]/30">
-                    <feature.icon className="h-5 w-5" />
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#252825] text-[#a3e635] ring-1 ring-[#333633] transition-colors group-hover:bg-[#2f322f] group-hover:ring-[#a3e635]/30">
+                    <feature.icon className="h-4 w-4" />
                   </div>
                   <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <span className="text-sm font-semibold text-white">{feature.title}</span>
                       {feature.badge && (
                         <span className="rounded-full bg-[#a3e635]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#a3e635]">
@@ -128,26 +128,26 @@ function FeaturesPopover() {
                     </div>
                   </div>
                 </div>
-                <p className="text-xs leading-relaxed text-slate-400">{feature.description}</p>
+                <p className="text-[11px] leading-snug text-slate-400">{feature.description}</p>
               </a>
             ))}
           </div>
 
           {/* Destaque lateral */}
-          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#1c2416] to-[#141614] p-6">
+          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#1c2416] to-[#141614] p-5">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(163,230,53,0.12),transparent_60%)]" />
             <div className="relative z-10">
-              <div className="mb-4 flex items-center gap-2">
+              <div className="mb-3 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-[#a3e635]" />
                 <span className="text-xs font-bold uppercase tracking-wider text-[#a3e635]">NOVIDADE</span>
               </div>
-              <h3 className="mb-3 text-xl font-bold text-white">Voz clonada com IA chegou.</h3>
-              <p className="text-sm leading-relaxed text-slate-300">
+              <h3 className="mb-2 text-lg font-bold text-white">Voz clonada com IA chegou.</h3>
+              <p className="text-xs leading-relaxed text-slate-300">
                 Gere áudios com a sua voz clonada pelo ElevenLabs e envie respostas de áudio para seus clientes no WhatsApp automaticamente.
               </p>
             </div>
-            <a href="#ia" className="relative z-10 mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#a3e635] transition-opacity hover:opacity-80">
-              Ver como funciona <ArrowRight className="h-4 w-4" />
+            <a href="#ia" className="relative z-10 mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[#a3e635] transition-opacity hover:opacity-80">
+              Ver como funciona <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
         </div>
