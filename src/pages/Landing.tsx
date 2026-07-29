@@ -532,7 +532,7 @@ function MercadoSection() {
               <span className="h-2 w-2 rounded-full bg-[#004DFF]" />
               O mercado acontece enquanto você trabalha
             </span>
-            <h2 className="mt-6 text-[clamp(2.4rem,5vw,4rem)] font-medium leading-[1.05] tracking-tight">
+            <h2 className="mt-6 text-[clamp(2.4rem,5vw,4rem)] font-light leading-[1.05] tracking-tight">
               <span className="block">Por trás de cada</span>
               <span className="block">WhatsApp, tem</span>
               <span className="block">alguém fazendo o</span>
