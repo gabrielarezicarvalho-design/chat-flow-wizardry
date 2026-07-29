@@ -1268,7 +1268,8 @@ export default function Landing() {
       </section>
 
       {/* PAGAMENTOS */}
-      <section id="pagamentos" className="mx-auto max-w-6xl px-6 py-24">
+      <section id="pagamentos" className="dark-band bg-[#0b0d0b] pt-24 pb-32">
+        <div className="mx-auto max-w-6xl px-6">
         <div className="text-center">
           <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Recuperação financeira</span>
           <h2 className="mt-3 text-4xl md:text-6xl font-bold tracking-tight">
