@@ -28,6 +28,18 @@ export interface PlanLimits {
 }
 
 export const PLAN_LIMITS: Record<string, PlanLimits> = {
+  basic: {
+    attendants: 1,
+    connections: 1,
+    agents: 1,
+    flows: 1,
+    departments: 1,
+    users: 2,
+    mass_sends_month: 20,
+    contacts_month: 50,
+    sales_month: 50,
+    cobrancas_month: 50,
+  },
   start: {
     attendants: 5,
     connections: 2,
