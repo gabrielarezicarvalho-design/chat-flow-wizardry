@@ -840,18 +840,18 @@ export default function Landing() {
               CRM nº 1 com IA para vender no WhatsApp
             </div>
 
-            <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.2rem,5.2vw,3.6rem)] font-bold leading-[1.05] tracking-tight text-white">
+            <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.8rem,6.5vw,4.5rem)] font-bold leading-[1.05] tracking-tight text-white">
               Sua IA vende, atende e <span className="text-[#4d8bff]">organiza seus clientes</span> no automático.
             </h1>
 
-            <p className="hero-reveal hero-d2 mt-6 max-w-lg text-lg leading-relaxed text-white/80">
+            <p className="hero-reveal hero-d2 mt-6 max-w-xl text-xl leading-relaxed text-white/80">
               Enquanto você trabalha, ela responde cada cliente em segundos, fecha a
               venda e organiza tudo no CRM. 7 dias grátis, sem cartão.
             </p>
 
             <div className="hero-reveal hero-d3 mt-8 flex items-baseline gap-2 text-white">
               <span className="text-sm text-white/70">a partir de</span>
-              <span className="font-space-grotesk text-4xl font-bold">R$ 29,90</span>
+              <span className="font-space-grotesk text-5xl font-bold">R$ 29,90</span>
               <span className="text-white/70">/mês</span>
             </div>
 
@@ -880,7 +880,7 @@ export default function Landing() {
 
           {/* Card de chat */}
           <div className="hero-reveal-right hero-d3 mx-auto w-full max-w-[720px] rounded-3xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl">
-            <div className="flex h-[480px] flex-col rounded-2xl bg-white p-5 shadow-2xl">
+            <div className="flex h-[clamp(520px,72vh,680px)] flex-col rounded-2xl bg-white p-5 shadow-2xl">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#4d8bff] to-[#004DFF]" />
