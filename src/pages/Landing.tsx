@@ -1533,10 +1533,10 @@ export default function Landing() {
                 tier: "basic",
                 name: "Basic",
                 price: "0",
-                tagline: "Teste grátis com tudo liberado",
+                tagline: "Teste grátis: 20 disparos para explorar",
                 highlights: [
                   { strong: "20 disparos", pre: "até ", post: " no total" },
-                  { strong: "Todas", pre: "", post: " as funcionalidades (limitadas)" },
+                  { strong: "Bloqueio automático", pre: "", post: " ao atingir o limite" },
                 ],
                 chips: ["1 atendente", "1 conexão WhatsApp", "IA completa (limitada)", "Chat interno"],
                 featured: false,
