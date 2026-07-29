@@ -175,7 +175,7 @@ function TypewriterText() {
   return (
     <>
       <span className="block">
-        <span className="text-white">voltam</span>{" "}
+        <span className="text-slate-900">voltam</span>{" "}
         <span className="whitespace-nowrap text-[#4d8bff]">{prefixTyped}</span>
         {!onSuffix && cursor}
       </span>
