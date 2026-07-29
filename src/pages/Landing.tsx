@@ -1609,11 +1609,7 @@ export default function Landing() {
                   </div>
                 </div>
 
-                {p.tier === "basic" && (
-                  <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-                    <span className="font-semibold">Após os 20 disparos:</span> envio de campanhas, automações de fluxo, prospecção Google Maps, respostas automáticas da IA e cobranças recorrentes são pausadas. O chat interno e o CRM continuam funcionando para você não perder seus contatos.
-                  </div>
-                )}
+
 
                 <button
                   onClick={() => setExpandedTier(expandedTier === p.tier ? null : p.tier)}
