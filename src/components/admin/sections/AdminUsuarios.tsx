@@ -156,7 +156,7 @@ export function AdminUsuarios() {
       case "admin":
         return <Badge className="bg-red-500/20 text-red-400">Admin Master</Badge>;
       case "moderator":
-        return <Badge className="bg-purple-500/20 text-purple-400">Admin MarketFlow</Badge>;
+        return <Badge className="bg-purple-500/20 text-purple-400">Admin Next Pro</Badge>;
       default:
         return <Badge className="bg-slate-500/20 text-slate-400">{role}</Badge>;
     }
@@ -209,7 +209,7 @@ export function AdminUsuarios() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="admin">Admin Master</SelectItem>
-            <SelectItem value="moderator">Admin MarketFlow</SelectItem>
+            <SelectItem value="moderator">Admin Next Pro</SelectItem>
           </SelectContent>
         </Select>
 
@@ -231,7 +231,7 @@ export function AdminUsuarios() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Usuários Internos</h1>
-          <p className="text-slate-400">Equipe MarketFlow (Admins e Moderadores)</p>
+          <p className="text-slate-400">Equipe Next Pro (Admins e Moderadores)</p>
         </div>
         <Button 
           onClick={() => setShowDialog(true)}
@@ -251,7 +251,7 @@ export function AdminUsuarios() {
         </div>
         <div className="flex items-center gap-2">
           <UserCog className="h-4 w-4 text-purple-400" />
-          <span className="text-sm text-slate-300">Admin MarketFlow</span>
+          <span className="text-sm text-slate-300">Admin Next Pro</span>
           <span className="text-xs text-slate-500">= Suporte e onboarding</span>
         </div>
       </div>
@@ -291,17 +291,17 @@ export function AdminUsuarios() {
             </div>
           </div>
 
-          {/* Admin MarketFlow Section */}
+          {/* Admin Next Pro Section */}
           <div>
             <div className="flex items-center gap-2 mb-4">
               <UserCog className="h-5 w-5 text-purple-400" />
-              <h2 className="text-lg font-semibold text-white">Admin MarketFlow</h2>
+              <h2 className="text-lg font-semibold text-white">Admin Next Pro</h2>
               <Badge className="bg-purple-500/20 text-purple-400">{filteredModerators.length}</Badge>
             </div>
             <div className="space-y-3">
               {filteredModerators.length === 0 ? (
                 <div className="p-6 text-center text-slate-500 bg-white/5 rounded-xl border border-white/10">
-                  Nenhum Admin MarketFlow encontrado
+                  Nenhum Admin Next Pro encontrado
                 </div>
               ) : (
                 filteredModerators.map(renderUserCard)
@@ -332,7 +332,7 @@ export function AdminUsuarios() {
                 type="email"
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
-                placeholder="usuario@marketflow.com.br"
+                placeholder="usuario@nextpro.com.br"
                 className="bg-white/5 border-white/10"
               />
             </div>
@@ -362,7 +362,7 @@ export function AdminUsuarios() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Admin Master (Controle total)</SelectItem>
-                  <SelectItem value="moderator">Admin MarketFlow (Suporte)</SelectItem>
+                  <SelectItem value="moderator">Admin Next Pro (Suporte)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

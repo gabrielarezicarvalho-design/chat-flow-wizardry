@@ -223,7 +223,7 @@ serve(async (req) => {
             .eq("id", 1)
             .maybeSingle();
 
-          const verifyToken = appSettings?.whatsapp_verify_token || "marketflow_webhook_verify";
+          const verifyToken = appSettings?.whatsapp_verify_token || "nextpro_webhook_verify";
 
           const appWebhookResp = await fetch(
             `https://graph.facebook.com/v21.0/${META_APP_ID}/subscriptions`,
@@ -297,7 +297,7 @@ function generateHTML(type: "success" | "error", message: string): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MarketFlow - Conexão Meta</title>
+  <title>Next Pro - Conexão Meta</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #0f172a; color: white; }
     .card { text-align: center; padding: 3rem; border-radius: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); max-width: 400px; }

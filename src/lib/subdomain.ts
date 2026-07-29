@@ -1,11 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
 
-const MAIN_DOMAIN = 'marketflowchat.com.br';
+const MAIN_DOMAIN = 'nextprochat.com.br';
 const DEV_HOSTS = ['localhost', '127.0.0.1', 'preview--', 'lovable.app'];
 
 /**
  * Extracts the company slug from the current hostname.
- * e.g. empresa1.marketflowchat.com.br → "empresa1"
+ * e.g. empresa1.nextprochat.com.br → "empresa1"
  * Returns null if on main domain, dev, or preview environments.
  */
 export function getSubdomainSlug(): string | null {

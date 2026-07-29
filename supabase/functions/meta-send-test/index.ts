@@ -78,7 +78,7 @@ serve(async (req) => {
         messaging_product: "whatsapp",
         to: formattedTo,
         type: "text",
-        text: { body: message || "Mensagem de teste do MarketFlow 🚀" },
+        text: { body: message || "Mensagem de teste do Next Pro 🚀" },
       };
     }
 

@@ -683,7 +683,7 @@ const executeSmartFormNode = async (
   nodeId: string
 ): Promise<{ vars: Record<string, any> }> => {
   const formName = data.formName || 'Formulário';
-  const formLink = `https://ia.marketflowchat.com.br/formulario/test-${Date.now()}`;
+  const formLink = `https://ia.nextprochat.com.br/formulario/test-${Date.now()}`;
   
   const message = data.messageBeforeLink || 
     `☐ *Fora do Horário*\n\nOlá! Estamos fora do horário comercial. Preencha o formulário abaixo!\n\n👇 Clique no link abaixo para preencher:\n${formLink}\n\n⏳ Responderemos assim que possível!`;
@@ -699,7 +699,7 @@ const executeSendFormNode = async (
   log: (nodeId: string, nodeType: string, status: ExecutionLog['status'], message: string) => void,
   nodeId: string
 ): Promise<{ vars: Record<string, any> }> => {
-  const formLink = `https://ia.marketflowchat.com.br/formulario/form-${Date.now()}`;
+  const formLink = `https://ia.nextprochat.com.br/formulario/form-${Date.now()}`;
   
   log(nodeId, 'sendForm', 'running', `MSG:📝 Preencha o formulário:\n${formLink}`);
   

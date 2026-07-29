@@ -124,7 +124,7 @@ const PublicForm = () => {
   return (
     <>
       <Helmet>
-        <title>{form?.name || 'Formulário'} | MarketFlow</title>
+        <title>{form?.name || 'Formulário'} | Next Pro</title>
         <meta name="description" content={form?.welcome_message || 'Preencha o formulário'} />
         <meta property="og:type" content="website" />
         <meta property="og:title" content={form?.name || 'Formulário de Contato'} />

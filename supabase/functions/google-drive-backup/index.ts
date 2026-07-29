@@ -154,7 +154,7 @@ async function generateConversationPDF(conversation: any, messages: any[], lead:
   // ===== HEADER =====
   drawRoundedRect(0, pageHeight - 80, pageWidth, 80, primaryColor);
   
-  page.drawText('MarketFlow', {
+  page.drawText('Next Pro', {
     x: margin,
     y: pageHeight - 35,
     size: 20,
@@ -302,7 +302,7 @@ async function generateConversationPDF(conversation: any, messages: any[], lead:
       addNewPage();
       // Draw page header
       drawRoundedRect(0, pageHeight - 40, pageWidth, 40, primaryColor);
-      page.drawText(`MarketFlow - ${conversation.protocol_number || 'Backup'}`, {
+      page.drawText(`Next Pro - ${conversation.protocol_number || 'Backup'}`, {
         x: margin,
         y: pageHeight - 27,
         size: 12,
@@ -464,7 +464,7 @@ async function generateConversationPDF(conversation: any, messages: any[], lead:
     color: rgb(0.95, 0.95, 0.95),
   });
   
-  lastPage.drawText(`Backup gerado em ${formatDate(new Date().toISOString())} | MarketFlow`, {
+  lastPage.drawText(`Backup gerado em ${formatDate(new Date().toISOString())} | Next Pro`, {
     x: margin,
     y: 12,
     size: 9,
@@ -516,7 +516,7 @@ serve(async (req) => {
         .eq('id', userId)
         .single();
       
-      const companyName = sanitizeText((profile?.companies as any)?.name || 'MarketFlow');
+      const companyName = sanitizeText((profile?.companies as any)?.name || 'Next Pro');
       
       // Create folder structure
       const companyFolderId = await getOrCreateFolder(accessToken, tokenData.folder_id, companyName);
@@ -712,7 +712,7 @@ serve(async (req) => {
           .eq('id', userId)
           .single();
         
-        const companyName = sanitizeText((profile?.companies as any)?.name || 'MarketFlow');
+        const companyName = sanitizeText((profile?.companies as any)?.name || 'Next Pro');
         
         // Create folder structure: Company > Year > Month > Protocol.pdf
         const companyFolderId = await getOrCreateFolder(accessToken, tokenData.folder_id, companyName);

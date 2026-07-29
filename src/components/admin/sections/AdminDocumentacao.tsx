@@ -651,7 +651,7 @@ function IntegrationGuide() {
             Guia Completo de Integração
           </CardTitle>
           <CardDescription className="text-slate-400">
-            Copie e cole o código abaixo no seu sistema para integrar com o MarketFlow. 
+            Copie e cole o código abaixo no seu sistema para integrar com o Next Pro. 
             Este guia cobre: conexão WhatsApp via Meta Embedded Signup, envio de mensagens, 
             recebimento de webhooks e gerenciamento de conversas.
           </CardDescription>
@@ -700,8 +700,8 @@ MARKETFLOW_API_KEY=mk_live_sua_chave_aqui
             </TabsList>
 
             <TabsContent value="typescript" className="mt-3">
-              <CodeBlock code={`// services/marketflow.ts
-class MarketFlowService {
+              <CodeBlock code={`// services/nextpro.ts
+class NextProService {
   private baseUrl: string;
   private apiKey: string;
 
@@ -814,15 +814,15 @@ class MarketFlowService {
   }
 }
 
-export const marketflow = new MarketFlowService();`} />
+export const nextpro = new NextProService();`} />
             </TabsContent>
 
             <TabsContent value="python" className="mt-3">
-              <CodeBlock code={`# services/marketflow.py
+              <CodeBlock code={`# services/nextpro.py
 import os
 import requests
 
-class MarketFlowService:
+class NextProService:
     def __init__(self):
         self.base_url = os.environ["MARKETFLOW_API_URL"]
         self.api_key = os.environ["MARKETFLOW_API_KEY"]
@@ -883,13 +883,13 @@ class MarketFlowService:
             "webhook_events": events,
         })
 
-marketflow = MarketFlowService()`} />
+nextpro = NextProService()`} />
             </TabsContent>
 
             <TabsContent value="php" className="mt-3">
               <CodeBlock code={`<?php
-// services/MarketFlowService.php
-class MarketFlowService {
+// services/NextProService.php
+class NextProService {
     private string $baseUrl;
     private string $apiKey;
 
@@ -968,7 +968,7 @@ class MarketFlowService {
             Depois, use este código JavaScript para abrir o popup e enviar o callback:
           </p>
           <CodeBlock code={`// embedded-signup.js
-// Passo 1: Buscar config do MarketFlow
+// Passo 1: Buscar config do Next Pro
 async function startWhatsAppSignup() {
   const res = await fetch(MARKETFLOW_API_URL + '/connections/start-signup', {
     method: 'POST',
@@ -1005,7 +1005,7 @@ async function startWhatsAppSignup() {
   });
 }
 
-// Passo 4: Capturar os dados e enviar para o MarketFlow
+// Passo 4: Capturar os dados e enviar para o Next Pro
 window.addEventListener('message', async (event) => {
   if (event.origin !== 'https://www.facebook.com' && 
       event.origin !== 'https://web.facebook.com') return;
@@ -1015,7 +1015,7 @@ window.addEventListener('message', async (event) => {
     if (data.type === 'WA_EMBEDDED_SIGNUP') {
       const { phone_number_id, waba_id } = data.data;
       
-      // Enviar callback para o MarketFlow
+      // Enviar callback para o Next Pro
       const res = await fetch(MARKETFLOW_API_URL + '/connections/callback', {
         method: 'POST',
         headers: {
@@ -1070,7 +1070,7 @@ function handleFacebookCallback(code, callbackUrl) {
         <CardContent>
           <CodeBlock code={`// components/ConnectWhatsApp.tsx
 import { useState } from 'react';
-import { marketflow } from '../services/marketflow';
+import { nextpro } from '../services/nextpro';
 
 declare const FB: any;
 
@@ -1084,7 +1084,7 @@ export function ConnectWhatsApp({ onConnected }: { onConnected: (conn: any) => v
     
     try {
       // 1. Buscar config
-      const config = await marketflow.startEmbeddedSignup();
+      const config = await nextpro.startEmbeddedSignup();
       
       // 2. Init Facebook SDK
       FB.init({ appId: config.meta_app_id, version: 'v22.0' });
@@ -1114,7 +1114,7 @@ export function ConnectWhatsApp({ onConnected }: { onConnected: (conn: any) => v
           if (data.type === 'WA_EMBEDDED_SIGNUP') {
             window.removeEventListener('message', handler);
             
-            const result = await marketflow.handleSignupCallback({
+            const result = await nextpro.handleSignupCallback({
               waba_id: data.data.waba_id,
               phone_number_id: data.data.phone_number_id,
               code: (window as any)._fb_code,
@@ -1172,7 +1172,7 @@ export function ConnectWhatsApp({ onConnected }: { onConnected: (conn: any) => v
 import express from 'express';
 const router = express.Router();
 
-router.post('/marketflow/webhook', (req, res) => {
+router.post('/nextpro/webhook', (req, res) => {
   const { event, timestamp, data } = req.body;
 
   switch (event) {
@@ -1211,7 +1211,7 @@ from fastapi import APIRouter, Request
 
 router = APIRouter()
 
-@router.post("/marketflow/webhook")
+@router.post("/nextpro/webhook")
 async def handle_webhook(request: Request):
     body = await request.json()
     event = body.get("event")
@@ -1231,7 +1231,7 @@ async def handle_webhook(request: Request):
             <TabsContent value="laravel" className="mt-3">
               <CodeBlock code={`<?php
 // routes/api.php
-Route::post('/marketflow/webhook', function (Request $request) {
+Route::post('/nextpro/webhook', function (Request $request) {
     $event = $request->input('event');
     $data = $request->input('data');
 
@@ -1254,7 +1254,7 @@ Route::post('/marketflow/webhook', function (Request $request) {
   -H "X-Api-Key: sua_api_key" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "webhook_url": "https://seusite.com/api/marketflow/webhook",
+    "webhook_url": "https://seusite.com/api/nextpro/webhook",
     "webhook_events": ["message.received", "message.sent", "connection.status"]
   }'`} />
         </CardContent>
@@ -1275,24 +1275,24 @@ Route::post('/marketflow/webhook', function (Request $request) {
           <div className="bg-slate-950 border border-white/10 rounded-lg p-6 space-y-4 font-mono text-sm">
             <div className="space-y-2 text-slate-300">
               <p className="text-emerald-400 font-bold">═══ CONEXÃO WHATSAPP ═══</p>
-              <p>1. Seu Sistema  →  POST /connections/start-signup  →  MarketFlow</p>
-              <p>2. MarketFlow   →  Retorna meta_app_id + config_id  →  Seu Sistema</p>
+              <p>1. Seu Sistema  →  POST /connections/start-signup  →  Next Pro</p>
+              <p>2. Next Pro   →  Retorna meta_app_id + config_id  →  Seu Sistema</p>
               <p>3. Seu Sistema  →  FB.login() com config_id         →  Facebook Popup</p>
               <p>4. Facebook     →  postMessage (waba_id, phone_id)  →  Seu Sistema</p>
-              <p>5. Seu Sistema  →  POST /connections/callback        →  MarketFlow</p>
-              <p>6. MarketFlow   →  Salva conexão + retorna dados    →  Seu Sistema ✅</p>
+              <p>5. Seu Sistema  →  POST /connections/callback        →  Next Pro</p>
+              <p>6. Next Pro   →  Salva conexão + retorna dados    →  Seu Sistema ✅</p>
             </div>
             <div className="border-t border-white/10 pt-4 space-y-2 text-slate-300">
               <p className="text-blue-400 font-bold">═══ ENVIO DE MENSAGENS ═══</p>
-              <p>1. Seu Sistema  →  POST /messages/send              →  MarketFlow</p>
-              <p>2. MarketFlow   →  Envia via Evolution/Meta             →  WhatsApp</p>
+              <p>1. Seu Sistema  →  POST /messages/send              →  Next Pro</p>
+              <p>2. Next Pro   →  Envia via Evolution/Meta             →  WhatsApp</p>
               <p>3. WhatsApp     →  Entrega ao contato               →  📱 Cliente</p>
             </div>
             <div className="border-t border-white/10 pt-4 space-y-2 text-slate-300">
               <p className="text-amber-400 font-bold">═══ RECEBIMENTO (WEBHOOK) ═══</p>
               <p>1. 📱 Cliente   →  Envia mensagem no WhatsApp       →  WhatsApp</p>
-              <p>2. WhatsApp     →  Webhook                          →  MarketFlow</p>
-              <p>3. MarketFlow   →  POST para sua webhook_url        →  Seu Sistema ✅</p>
+              <p>2. WhatsApp     →  Webhook                          →  Next Pro</p>
+              <p>3. Next Pro   →  POST para sua webhook_url        →  Seu Sistema ✅</p>
             </div>
           </div>
         </CardContent>
@@ -1312,7 +1312,7 @@ Route::post('/marketflow/webhook', function (Request $request) {
         <CardContent className="space-y-4">
           <CodeBlock code={`// Exemplo 1: Enviar mensagem quando novo pedido é criado
 async function onNewOrder(order) {
-  await marketflow.sendMessage(
+  await nextpro.sendMessage(
     order.customerPhone,
     \`🛒 Pedido #\${order.id} confirmado!\\n\\n\` +
     \`Total: R$ \${order.total}\\n\` +
@@ -1322,7 +1322,7 @@ async function onNewOrder(order) {
 }
 
 // Exemplo 2: Responder automaticamente via webhook
-app.post('/marketflow/webhook', async (req, res) => {
+app.post('/nextpro/webhook', async (req, res) => {
   const { event, data } = req.body;
   
   if (event === 'message.received') {
@@ -1331,7 +1331,7 @@ app.post('/marketflow/webhook', async (req, res) => {
     if (message.includes('status') || message.includes('pedido')) {
       const order = await db.findOrderByPhone(data.from);
       if (order) {
-        await marketflow.sendMessage(
+        await nextpro.sendMessage(
           data.from,
           \`📦 Seu pedido #\${order.id} está: \${order.status}\\n\` +
           \`Atualizado em: \${order.updatedAt}\`
@@ -1345,7 +1345,7 @@ app.post('/marketflow/webhook', async (req, res) => {
 
 // Exemplo 3: Enviar template de boas-vindas para novo cliente
 async function onNewCustomer(customer) {
-  await marketflow.sendTemplate(
+  await nextpro.sendTemplate(
     customer.phone,
     'welcome_message',
     {

@@ -18,7 +18,7 @@ const DemoChatAnimation = () => {
     delay: 0
   }, {
     type: "sent",
-    text: "Olá! Sou a assistente virtual da MarketFlow 🤖",
+    text: "Olá! Sou a assistente virtual da Next Pro 🤖",
     delay: 1.5,
     isBot: true
   }, {
@@ -75,7 +75,7 @@ const DemoChatAnimation = () => {
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
-              <div className="text-white font-semibold">MarketFlow IA</div>
+              <div className="text-white font-semibold">Next Pro IA</div>
               <div className="text-blue-200 text-xs flex items-center gap-1">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                 Online agora
@@ -225,7 +225,7 @@ const BetaLanding = () => {
   const testimonials = [{
     name: "Carlos Silva",
     company: "TechStore",
-    text: "Reduzimos 70% do tempo de resposta com o MarketFlow",
+    text: "Reduzimos 70% do tempo de resposta com o Next Pro",
     rating: 5
   }, {
     name: "Ana Beatriz",
@@ -629,11 +629,11 @@ const BetaLanding = () => {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
-              <span className="text-lg font-semibold text-white">MarketFlow</span>
+              <span className="text-lg font-semibold text-white">Next Pro</span>
               <span className="text-lg font-light text-blue-400">Chat</span>
             </div>
             <p className="text-blue-300/50 text-sm">
-              © 2024 MarketFlow Chat. Todos os direitos reservados.
+              © 2024 Next Pro. Todos os direitos reservados.
             </p>
           </div>
         </footer>

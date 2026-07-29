@@ -23,7 +23,7 @@ const menuItems = [
   { id: "contrato", icon: FileText, label: "Contrato Evolution", description: "Conexões WhatsApp" },
   { id: "empresas", icon: Building2, label: "Empresas", description: "Clientes" },
   
-  { id: "usuarios", icon: Users, label: "Usuários Internos", description: "Equipe MarketFlow" },
+  { id: "usuarios", icon: Users, label: "Usuários Internos", description: "Equipe Next Pro" },
   { id: "agentes", icon: Bot, label: "Agentes", description: "Global" },
   { id: "integracoes", icon: Plug, label: "Integrações", description: "APIs & Webhooks" },
   { id: "whatsapp-meta", icon: Menu, label: "WhatsApp Meta API", description: "Config Global", parent: "integracoes" },

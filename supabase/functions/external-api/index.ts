@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
   // Public endpoint: API docs
   if (resource === '' || resource === 'docs') {
     return new Response(JSON.stringify({
-      name: 'MarketFlow External API',
+      name: 'Next Pro External API',
       version: 'v1',
       endpoints: {
         'GET /v1/connections': 'List WhatsApp connections',
@@ -460,7 +460,7 @@ Deno.serve(async (req) => {
           const testPayload = {
             event: 'test',
             timestamp: new Date().toISOString(),
-            data: { message: 'This is a test webhook from MarketFlow' }
+            data: { message: 'This is a test webhook from Next Pro' }
           }
 
           try {

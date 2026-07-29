@@ -154,7 +154,7 @@ serve(async (req) => {
     const response = await fetch(`${normalizedBaseUrl}/instance/init`, {
       method: "POST",
       headers: { "Content-Type": "application/json", admintoken: ADMIN_TOKEN },
-      body: JSON.stringify({ name, nameInSystem: "marketflow" }),
+      body: JSON.stringify({ name, nameInSystem: "nextpro" }),
     });
     const data = await response.json();
     if (!response.ok) return json({ error: "Failed to create instance", details: data }, response.status);

@@ -408,11 +408,11 @@ export function AdminEmpresas() {
                   placeholder="empresa-xyz" 
                 />
                 <span className="px-3 py-2 bg-white/10 border border-white/10 border-l-0 rounded-r-md text-xs text-slate-400 whitespace-nowrap">
-                  .marketflowchat.com.br
+                  .nextprochat.com.br
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                URL de acesso: <span className="text-cyan-400">{form.slug || 'empresa'}.marketflowchat.com.br</span>
+                URL de acesso: <span className="text-cyan-400">{form.slug || 'empresa'}.nextprochat.com.br</span>
               </p>
             </div>
 

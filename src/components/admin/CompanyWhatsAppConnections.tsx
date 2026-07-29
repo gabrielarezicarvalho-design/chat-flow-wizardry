@@ -185,7 +185,7 @@ export function CompanyWhatsAppConnections({ companyId, companyName, onBack }: P
     try {
       const fnName = connection?.provider === "meta" ? "whatsapp-send" : "qr-send";
       const { data, error } = await supabase.functions.invoke(fnName, {
-        body: { company_id: companyId, to: testPhone, text: "Teste MarketFlow ✅" },
+        body: { company_id: companyId, to: testPhone, text: "Teste Next Pro ✅" },
       });
 
       if (error) throw error;

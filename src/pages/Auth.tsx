@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Send, Users, CheckCircle, Zap, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import robotImage from '@/assets/marketflow-robot.png';
+import robotImage from '@/assets/nextpro-robot.png';
 
 interface CampaignStats {
   totalCampaigns: number;

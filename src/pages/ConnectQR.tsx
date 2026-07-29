@@ -16,7 +16,7 @@ const ConnectQR = () => {
   const [pairCode, setPairCode] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
   const [connectionName, setConnectionName] = useState("");
-  const [companyName, setCompanyName] = useState("MarketFlow");
+  const [companyName, setCompanyName] = useState("Next Pro");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState("#10b981");
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +57,7 @@ const ConnectQR = () => {
       setQrCode(data?.qrcode || null);
       setPairCode(data?.paircode || null);
       setConnectionName(data?.name || "");
-      setCompanyName(data?.companyName || "MarketFlow");
+      setCompanyName(data?.companyName || "Next Pro");
       setLogoUrl(data?.logoUrl || null);
       setPrimaryColor(data?.primaryColor || "#10b981");
     } catch (err: any) {

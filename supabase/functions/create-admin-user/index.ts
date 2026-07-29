@@ -33,8 +33,8 @@ Deno.serve(async (req) => {
 
     // Use custom email if provided, otherwise use internal domain format
     const userUsername = username || "admin";
-    const userEmail = email || `${userUsername}@internal.marketflow.local`;
-    const userPassword = password || "@marketflow2026#";
+    const userEmail = email || `${userUsername}@internal.nextpro.local`;
+    const userPassword = password || "@nextpro2026#";
     const userFullName = full_name || userUsername;
 
     // Check if user already exists by email

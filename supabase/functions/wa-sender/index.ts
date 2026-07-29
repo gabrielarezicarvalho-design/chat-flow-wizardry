@@ -471,7 +471,7 @@ serve(async (req) => {
         body = {
           delayMin: requestedDelayMin,
           delayMax: requestedDelayMax,
-          info: params.info || "Campanha via MarketFlow",
+          info: params.info || "Campanha via Next Pro",
           messages: advancedMessages
         };
         

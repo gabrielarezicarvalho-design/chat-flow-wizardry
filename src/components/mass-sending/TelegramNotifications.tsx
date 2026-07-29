@@ -156,7 +156,7 @@ export function TelegramNotifications({ connections }: TelegramNotificationsProp
       const { data, error } = await supabase.functions.invoke("telegram-send", {
         body: {
           chat_id: config.telegram_chat_id,
-          message: "🔔 *Teste MarketFlow*\n\n✅ Notificações configuradas com sucesso!\n\nVocê receberá alertas de:\n📢 Início de campanhas\n💬 Respostas de leads",
+          message: "🔔 *Teste Next Pro*\n\n✅ Notificações configuradas com sucesso!\n\nVocê receberá alertas de:\n📢 Início de campanhas\n💬 Respostas de leads",
         },
       });
 

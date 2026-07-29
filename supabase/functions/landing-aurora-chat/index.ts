@@ -1,9 +1,9 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
-const SYSTEM_PROMPT = `Você é a Aurora AI, consultora comercial inteligente da MarketFlow. Responda como uma pessoa brasileira, acolhedora, clara e segura, usando o contexto da conversa.
+const SYSTEM_PROMPT = `Você é a Aurora AI, consultora comercial inteligente da Next Pro. Responda como uma pessoa brasileira, acolhedora, clara e segura, usando o contexto da conversa.
 
-Sobre a MarketFlow:
+Sobre a Next Pro:
 - É uma plataforma de prospecção, atendimento, vendas e cobrança automatizada pelo WhatsApp com inteligência artificial.
 - Capta e organiza leads de fontes como Google Maps, Instagram, TikTok e pesquisa de anúncios.
 - Centraliza conversas, contatos, funil/CRM, formulários e acompanhamento comercial.

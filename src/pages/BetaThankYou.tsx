@@ -25,8 +25,8 @@ const BetaThankYou = () => {
   const [queuePosition, setQueuePosition] = useState(0);
   
   const email = location.state?.email || "";
-  const shareUrl = "https://ia.marketflowchat.com.br/testar-beta";
-  const shareText = "Acabei de me inscrever no beta do MarketFlow Chat! 🚀 Automatize seu WhatsApp com IA. Inscreva-se também:";
+  const shareUrl = "https://ia.nextprochat.com.br/testar-beta";
+  const shareText = "Acabei de me inscrever no beta do Next Pro! 🚀 Automatize seu WhatsApp com IA. Inscreva-se também:";
 
   useEffect(() => {
     // Simular posição na fila baseada em timestamp
@@ -79,8 +79,8 @@ const BetaThankYou = () => {
   return (
     <>
       <Helmet>
-        <title>Inscrição Confirmada | MarketFlow Chat Beta</title>
-        <meta name="description" content="Sua inscrição no beta do MarketFlow Chat foi confirmada!" />
+        <title>Inscrição Confirmada | Next Pro Beta</title>
+        <meta name="description" content="Sua inscrição no beta do Next Pro foi confirmada!" />
         <meta name="robots" content="noindex" />
       </Helmet>
 

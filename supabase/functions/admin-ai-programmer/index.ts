@@ -232,7 +232,7 @@ ${msgs?.map(m => `[${m.sender_type}] ${m.content?.substring(0, 200)}`).join("\n"
       }
     }
 
-    const systemPrompt = `Você é o PROGRAMADOR IA do sistema MarketFlow Chat - uma plataforma de atendimento via WhatsApp com agentes IA, fluxos automatizados (URA) e gestão de conversas.
+    const systemPrompt = `Você é o PROGRAMADOR IA do sistema Next Pro - uma plataforma de atendimento via WhatsApp com agentes IA, fluxos automatizados (URA) e gestão de conversas.
 
 SUA FUNÇÃO:
 Você é um engenheiro de software sênior que diagnostica problemas no sistema E APLICA CORREÇÕES AUTOMATICAMENTE.

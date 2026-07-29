@@ -64,8 +64,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // If it doesn't look like an email, try to find the user by username
       if (!usernameOrEmail.includes('@')) {
-        // First try with internal.marketflow.local domain
-        const internalEmail = `${usernameOrEmail}@internal.marketflow.local`;
+        // First try with internal.nextpro.local domain
+        const internalEmail = `${usernameOrEmail}@internal.nextpro.local`;
         
         const { error: internalError } = await supabase.auth.signInWithPassword({
           email: internalEmail,
@@ -91,8 +91,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (profile) {
           const patterns = [
-            `${usernameOrEmail}@marketflow.com.br`,
-            `${usernameOrEmail}@internal.marketflow.local`,
+            `${usernameOrEmail}@nextpro.com.br`,
+            `${usernameOrEmail}@internal.nextpro.local`,
           ];
           
           for (const testEmail of patterns) {
