@@ -892,7 +892,7 @@ export default function Landing() {
                 <div className="flex items-center gap-3">
                   <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#60A5FA] via-[#3B82F6] to-[#004DFF] shadow-md shadow-[#3B82F6]/30" />
                   <div>
-                    <p className="font-semibold text-slate-900">Seu colaborador de IA</p>
+                    <p className="font-semibold text-slate-900">Seu agente de IA</p>
                     <p className="flex items-center gap-1.5 text-xs text-slate-500">
                       <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" /> online agora
                     </p>
