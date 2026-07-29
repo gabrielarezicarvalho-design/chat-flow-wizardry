@@ -759,7 +759,7 @@ export default function Landing() {
       </section>
 
       {/* DEMO AURORA */}
-      <section className="bg-gradient-to-b from-white to-slate-50">
+      <section className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white">
         <div className="mx-auto max-w-6xl px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
           <div className="text-center md:text-left">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary-dark">
