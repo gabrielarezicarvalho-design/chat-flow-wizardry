@@ -413,6 +413,10 @@ export default function Landing() {
   const sweepY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
   const sweepOpacity = useTransform(scrollYProgress, [0, 0.15, 0.5, 0.85, 1], [0, 1, 1, 0.8, 0]);
   const heroDim = useTransform(scrollYProgress, [0, 0.6], [0, 0.45]);
+  const heroImageY = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
+  const heroImageScale = useTransform(scrollYProgress, [0, 1], [1, 0.88]);
+  const heroContentY = useTransform(scrollYProgress, [0, 1], ["0%", "-8%"]);
+  const heroContentOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
 
   const chatMessages = [
     { id: 1, sender: "client", content: "Vi sua mensagem, do que se trata?", delay: 0 },
