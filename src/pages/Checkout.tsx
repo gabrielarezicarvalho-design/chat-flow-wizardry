@@ -439,7 +439,9 @@ export default function Checkout() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-slate-500">Detalhes</span>
-                      <span className="font-semibold text-slate-900">{billingLabel}</span>
+                      <span className="font-semibold text-slate-900">
+                        {billing === "annual" ? `${brl(total)} cobrado por ano` : billingLabel}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                       <span className="text-slate-900 font-semibold">Total</span>
