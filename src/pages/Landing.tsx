@@ -17,7 +17,8 @@ import {
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
-  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight, ChevronUp, CheckCircle2
+  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight, ChevronUp, CheckCircle2,
+  Trophy, Globe, Mail
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
@@ -289,7 +290,7 @@ function TypewriterText() {
   return (
     <>
       <span className="block">
-        <span className="text-slate-900">voltam</span>{" "}
+        <span className="text-white">voltam</span>{" "}
         <span className="whitespace-nowrap text-[#4d8bff]">{prefixTyped}</span>
         {!onSuffix && cursor}
       </span>
@@ -777,90 +778,142 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      {/* NAV */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-10">
-            <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-slate-900">
-              <img
-                src={logoAurora.url}
-                alt="NEXT PRO"
-                className="h-8 w-8 rounded-full object-cover"
-              />
-              NEXT <span className="text-[#004DFF]">PRO</span>
-            </div>
-            <nav className="hidden lg:flex items-center gap-8 text-base text-slate-600">
-              <FeaturesPopover />
-              <a href="#planos" className="hover:text-slate-900">Planos</a>
-              <a href="#depoimentos" className="hover:text-slate-900">Cases</a>
-              <a href="#pagamentos" className="hover:text-slate-900">Integrações</a>
-              <a href="#segmentos" className="hover:text-slate-900">Parceiros</a>
-            </nav>
-          </div>
-          <div className="hidden md:flex items-center gap-3">
-            <Link to="/auth">
-              <Button variant="outline" className="rounded-lg border-slate-200 bg-white px-6 text-slate-700 hover:bg-slate-50 hover:text-slate-900">
-                Login
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button className="btn-shine btn-press rounded-lg bg-[#004DFF] px-6 text-white hover:bg-[#0040d6]">
-                Testar grátis
-              </Button>
-            </Link>
-          </div>
+      {/* HERO com nav flutuante sobre a foto */}
+      <section className="relative overflow-hidden">
+        {/* Fundo */}
+        <div className="absolute inset-0">
+          <img src={heroWoman} alt="Empreendedora usando a NEXT PRO" className="h-full w-full object-cover object-center" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/65 to-slate-950/35" />
         </div>
-      </header>
 
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-white">
-        <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/10 blur-[140px]" />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
-          <div>
-            <h1 className="hero-reveal hero-d1 font-space-grotesk text-[clamp(2rem,5.6vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-slate-900">
-              <span className="block">Seus clientes</span>
-              <TypewriterText />
-            </h1>
-            <p className="hero-reveal hero-d2 mt-8 max-w-lg text-xl leading-relaxed text-slate-600">
-              Transformamos compras únicas em clientes fiéis com CRM, automações e
-              prospecção. Impulsione as vendas da sua loja física e e-commerce em até 20% com a Next Pro.
-            </p>
-            <div className="hero-reveal hero-d3 mt-10">
+        {/* NAV flutuante */}
+        <header className="relative z-40 px-4 pt-4">
+          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between rounded-2xl border border-white/40 bg-white/80 px-6 shadow-lg backdrop-blur-xl">
+            <div className="flex items-center gap-10">
+              <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-slate-900">
+                <img src={logoAurora.url} alt="NEXT PRO" className="h-8 w-8 rounded-full object-cover" />
+                NEXT <span className="text-[#004DFF]">PRO</span>
+                <span className="ml-1 rounded-md bg-[#004DFF]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#004DFF]">Beta</span>
+              </div>
+              <nav className="hidden lg:flex items-center gap-8 text-[15px] text-slate-600">
+                <FeaturesPopover />
+                <a href="#planos" className="hover:text-slate-900">Preços</a>
+                <a href="#depoimentos" className="hover:text-slate-900">Como Funciona</a>
+                <a href="#pagamentos" className="hover:text-slate-900">Integrações</a>
+              </nav>
+            </div>
+            <div className="hidden md:flex items-center gap-4">
+              <span className="hidden lg:flex items-center gap-1.5 text-sm text-slate-500">
+                <Globe className="h-4 w-4" /> PT
+              </span>
+              <Sun className="hidden lg:block h-4 w-4 text-slate-500" />
+              <Link to="/auth" className="text-[15px] font-medium text-slate-700 hover:text-slate-900">
+                Entrar
+              </Link>
               <Link to="/auth">
-                <Button size="lg" className="btn-shine btn-press h-14 rounded-xl bg-[#004DFF] px-9 text-lg font-semibold text-white hover:bg-[#0040d6]">
-                  Testar grátis <ArrowRight className="ml-2 h-4 w-4" />
+                <Button className="btn-shine btn-press rounded-full bg-[#004DFF] px-6 text-white hover:bg-[#0040d6]">
+                  Começar grátis <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <div className="hero-reveal hero-d4 mt-5 flex items-center gap-2 text-base text-slate-500">
-              <ShieldCheck className="h-4 w-4 text-slate-500" />
-              Garantia de 30 dias · Sem fidelidade
+          </div>
+        </header>
+
+        {/* Conteúdo */}
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-20 lg:grid-cols-2">
+          <div>
+            <div className="hero-reveal inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur">
+              <Trophy className="h-4 w-4 text-amber-300" />
+              CRM nº 1 com IA para vender no WhatsApp
             </div>
-            <div className="hero-reveal hero-d5 mt-12 flex flex-wrap items-center gap-8">
-              <RotatingBrands />
-            </div>
-            <p className="hero-reveal hero-d6 mt-6 text-base text-slate-500">
-              <span className="font-semibold text-slate-900">+20 empresas</span> já vendem mais com a NEXT PRO.
+
+            <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.2rem,5.2vw,3.6rem)] font-bold leading-[1.05] tracking-tight text-white">
+              <span className="block">Seus clientes</span>
+              <TypewriterText />
+            </h1>
+
+            <p className="hero-reveal hero-d2 mt-6 max-w-lg text-lg leading-relaxed text-white/80">
+              Transformamos compras únicas em clientes fiéis com CRM, automações e
+              prospecção. Impulsione as vendas da sua loja física e e-commerce em até 20% com a Next Pro.
             </p>
+
+            <div className="hero-reveal hero-d3 mt-8 flex items-baseline gap-2 text-white">
+              <span className="text-sm text-white/70">a partir de</span>
+              <span className="font-space-grotesk text-4xl font-bold">R$ 49,90</span>
+              <span className="text-white/70">/mês</span>
+            </div>
+
+            <div className="hero-reveal hero-d4 mt-8 flex flex-wrap items-center gap-4">
+              <Link to="/auth">
+                <Button size="lg" className="btn-shine btn-press h-14 rounded-full bg-[#004DFF] px-8 text-lg font-semibold text-white hover:bg-[#0040d6]">
+                  Testar 2 dias grátis <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <a href="https://wa.me/message/BYSDMLHYTA6EA1" target="_blank" rel="noreferrer">
+                <Button size="lg" variant="outline" className="h-14 rounded-full border-white/40 bg-white/10 px-8 text-lg font-semibold text-white backdrop-blur hover:bg-white/20 hover:text-white">
+                  <Mail className="mr-2 h-4 w-4" /> Fale com a gente
+                </Button>
+              </a>
+            </div>
+
+            <div className="hero-reveal hero-d5 mt-6 flex flex-wrap items-center gap-6 text-sm text-white/80">
+              {["Sem cartão", "5 min pra configurar", "Cancele quando quiser"].map((t) => (
+                <span key={t} className="inline-flex items-center gap-2">
+                  <Check className="h-4 w-4 text-[#4d8bff]" /> {t}
+                </span>
+              ))}
+            </div>
           </div>
 
-          {/* Composição circular */}
-          <div className="hero-reveal-right hero-d3 relative mx-auto w-full max-w-[520px]">
-            <div className="relative aspect-square rounded-full border-2 border-dashed border-[#004DFF]/50 p-6">
-              <div className="h-full w-full overflow-hidden rounded-full">
-                <img
-                  src={heroWoman}
-                  alt="Empreendedora usando a NEXT PRO"
-                  width={1024}
-                  height={1024}
-                  className="h-full w-full object-cover"
-                />
+          {/* Card de chat */}
+          <div className="hero-reveal-right hero-d3 mx-auto w-full max-w-[520px] rounded-3xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl">
+            <div className="flex h-[480px] flex-col rounded-2xl bg-white p-5 shadow-2xl">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#4d8bff] to-[#004DFF]" />
+                  <div>
+                    <p className="font-semibold text-slate-900">Aurora AI</p>
+                    <p className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> online agora
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Teste você mesmo</span>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                {["Clínica", "Imobiliária", "Loja", "Serviços"].map((c, i) => (
+                  <span
+                    key={c}
+                    className={`rounded-full border px-3 py-1 text-sm ${i === 0 ? "border-[#004DFF]/30 bg-[#004DFF]/10 text-[#004DFF]" : "border-slate-200 bg-white text-slate-600"}`}
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-4 flex-1">
+                <div className="inline-block max-w-[85%] rounded-2xl rounded-tl-sm bg-[#004DFF]/10 px-4 py-3 text-slate-800">
+                  Oi! 😄 Como posso ajudar você hoje?
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {["Tem horário amanhã à tarde?", "Vocês atendem convênio?"].map((q) => (
+                  <span key={q} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                    {q}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-3 flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-400">
+                <Check className="h-4 w-4" /> Toque numa pergunta e veja a venda acontecer
               </div>
             </div>
-            <RotatingMetrics />
           </div>
         </div>
       </section>
+
 
       {/* DEMO AURORA */}
       <section className="bg-gradient-to-b from-white to-slate-50">
