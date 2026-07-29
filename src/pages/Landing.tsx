@@ -544,6 +544,61 @@ function HeroChatCard() {
     timersRef.current.push(t);
   };
 
+  const sendFree = async () => {
+    const text = draft.trim();
+    if (!text || typing) return;
+    setDraft("");
+    setMessages((m) => [...m, { from: "user", text }]);
+    setTyping(true);
+
+    const seg = HERO_SEGMENTS[segment];
+    const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const n = norm(text);
+    const local = seg.qa.find((item) => {
+      const words = norm(item.q).split(/\W+/).filter((w) => w.length > 4);
+      return words.some((w) => n.includes(w));
+    });
+
+    if (local) {
+      const t = window.setTimeout(() => {
+        setTyping(false);
+        setAsked((a) => [...a, local.q]);
+        setMessages((m) => [...m, { from: "ai", text: local.a }]);
+      }, 900);
+      timersRef.current.push(t);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke("landing-aurora-chat", {
+        body: {
+          message: text,
+          history: messages.slice(-6).map((m) => ({ role: m.from === "user" ? "user" : "assistant", content: m.text })),
+          context: `Você é o agente de IA de uma empresa do segmento "${seg.name}". Responda em português, curto (até 2 frases), simpático e comercial.`,
+        },
+      });
+      const reply = (data as any)?.reply || (data as any)?.text;
+      setTyping(false);
+      setMessages((m) => [
+        ...m,
+        {
+          from: "ai",
+          text:
+            !error && reply
+              ? reply
+              : "Consigo te ajudar com isso! 😊 Me conta um pouco mais — ou clique numa das perguntas sugeridas.",
+        },
+      ]);
+    } catch {
+      setTyping(false);
+      setMessages((m) => [
+        ...m,
+        { from: "ai", text: "Consigo te ajudar com isso! 😊 Me conta um pouco mais sobre o que você precisa." },
+      ]);
+    }
+  };
+
+
   const seg = HERO_SEGMENTS[segment];
   const remaining = seg.qa.filter((item) => !asked.includes(item.q));
   const suggestions = remaining.length ? remaining.slice(0, 2) : [];
