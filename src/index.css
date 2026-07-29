@@ -317,3 +317,18 @@ All colors MUST be HSL.
     opacity: 1;
   }
 }
+
+.chip-marquee {
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.chip-marquee-track {
+  animation: chip-marquee-scroll linear infinite;
+}
+.chip-marquee:hover .chip-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes chip-marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
