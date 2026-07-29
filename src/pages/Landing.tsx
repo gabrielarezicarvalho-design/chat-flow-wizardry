@@ -89,12 +89,13 @@ const FEATURES = [
   },
 ];
 
-function FeaturesPopover() {
+function FeaturesPopover({ label = "Funcionalidades" }: { label?: string }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <button className="group flex items-center gap-1 text-base text-slate-600 transition-colors hover:text-slate-900">
-          Funcionalidades
+          {label}
+
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-70 transition-transform group-data-[state=open]:rotate-180">
             <polyline points="6 9 12 15 18 9" />
           </svg>
@@ -797,11 +798,12 @@ export default function Landing() {
               </div>
 
               <nav className="hidden lg:flex items-center gap-8 text-[15px] text-slate-600">
-                <FeaturesPopover />
-                <a href="#planos" className="hover:text-slate-900">Preços</a>
+                <FeaturesPopover label="Inteligência" />
                 <a href="#depoimentos" className="hover:text-slate-900">Como Funciona</a>
-                <a href="#pagamentos" className="hover:text-slate-900">Integrações</a>
+                <a href="#planos" className="hover:text-slate-900">Preços</a>
+                <a href="#pagamentos" className="hover:text-slate-900">Blog</a>
               </nav>
+
             </div>
             <div className="hidden md:flex items-center gap-4">
               <span className="hidden lg:flex items-center gap-1.5 text-sm text-slate-500">
@@ -829,26 +831,26 @@ export default function Landing() {
             </div>
 
             <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.2rem,5.2vw,3.6rem)] font-bold leading-[1.05] tracking-tight text-white">
-              <span className="block">Seus clientes</span>
-              <TypewriterText />
+              Sua IA vende, atende e <span className="text-[#4d8bff]">organiza seus clientes</span> no automático.
             </h1>
 
             <p className="hero-reveal hero-d2 mt-6 max-w-lg text-lg leading-relaxed text-white/80">
-              Transformamos compras únicas em clientes fiéis com CRM, automações e
-              prospecção. Impulsione as vendas da sua loja física e e-commerce em até 20% com a Next Pro.
+              Enquanto você trabalha, ela responde cada cliente em segundos, fecha a
+              venda e organiza tudo no CRM. 7 dias grátis, sem cartão.
             </p>
 
             <div className="hero-reveal hero-d3 mt-8 flex items-baseline gap-2 text-white">
               <span className="text-sm text-white/70">a partir de</span>
-              <span className="font-space-grotesk text-4xl font-bold">R$ 49,90</span>
+              <span className="font-space-grotesk text-4xl font-bold">R$ 29,90</span>
               <span className="text-white/70">/mês</span>
             </div>
 
             <div className="hero-reveal hero-d4 mt-8 flex flex-wrap items-center gap-4">
               <Link to="/auth">
                 <Button size="lg" className="btn-shine btn-press h-14 rounded-full bg-[#004DFF] px-8 text-lg font-semibold text-white hover:bg-[#0040d6]">
-                  Testar 2 dias grátis <ArrowRight className="ml-2 h-4 w-4" />
+                  Testar 7 dias grátis <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
+
               </Link>
               <a href="https://wa.me/message/BYSDMLHYTA6EA1" target="_blank" rel="noreferrer">
                 <Button size="lg" variant="outline" className="h-14 rounded-full border-white/40 bg-white/10 px-8 text-lg font-semibold text-white backdrop-blur hover:bg-white/20 hover:text-white">
@@ -868,12 +870,12 @@ export default function Landing() {
 
           {/* Card de chat */}
           <div className="hero-reveal-right hero-d3 mx-auto w-full max-w-[520px] rounded-3xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl">
-            <div className="flex flex-col rounded-2xl bg-white p-5 shadow-2xl">
+            <div className="flex h-[480px] flex-col rounded-2xl bg-white p-5 shadow-2xl">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#4d8bff] to-[#004DFF]" />
                   <div>
-                    <p className="font-semibold text-slate-900">Aurora AI</p>
+                    <p className="font-semibold text-slate-900">Seu colaborador de IA</p>
                     <p className="flex items-center gap-1.5 text-xs text-slate-500">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> online agora
                     </p>
@@ -893,23 +895,13 @@ export default function Landing() {
                 ))}
               </div>
 
-              <div className="mt-4 space-y-3">
-                <div className="inline-block max-w-[85%] rounded-2xl rounded-tl-sm bg-slate-100 px-4 py-3 text-slate-800">
+              <div className="mt-4 flex-1">
+                <div className="inline-block max-w-[85%] rounded-2xl rounded-tl-sm bg-[#004DFF]/10 px-4 py-3 text-slate-800">
                   Oi! 😄 Como posso ajudar você hoje?
-                </div>
-                <div className="flex justify-end">
-                  <div className="inline-block max-w-[85%] rounded-2xl rounded-br-sm bg-[#004DFF] px-4 py-3 text-white">
-                    Quero agendar uma avaliação
-                  </div>
-                </div>
-                <div className="inline-flex items-center gap-1.5 rounded-2xl rounded-tl-sm bg-slate-100 px-4 py-3">
-                  <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:0ms]" />
-                  <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:150ms]" />
-                  <span className="h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:300ms]" />
                 </div>
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
                 {["Tem horário amanhã à tarde?", "Vocês atendem convênio?"].map((q) => (
                   <span key={q} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
                     {q}
@@ -917,15 +909,12 @@ export default function Landing() {
                 ))}
               </div>
 
-              <div className="mt-4 flex items-center gap-3 rounded-full bg-slate-100 px-4 py-3 text-sm text-slate-400">
-                <span className="flex-1">Digite sua mensagem…</span>
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#004DFF] text-white">
-                  <ArrowRight className="h-4 w-4" />
-                </span>
+              <div className="mt-3 flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-400">
+                <Check className="h-4 w-4" /> Toque numa pergunta e veja a venda acontecer
               </div>
             </div>
-
           </div>
+
         </div>
       </section>
 
