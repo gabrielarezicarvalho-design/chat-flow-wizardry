@@ -613,6 +613,8 @@ function CheckList({ items }: { items: string[] }) {
   );
 }
 
+type HeroQA = { q: string; a: string };
+
 function FluxoCompletoSection() {
   return (
     <section className="bg-[#f4f1ec]">
