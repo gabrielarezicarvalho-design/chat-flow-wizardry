@@ -298,3 +298,44 @@ All colors MUST be HSL.
     opacity: 1;
   }
 }
+
+/* ===== Bandas alternadas escuro/claro da landing ===== */
+.dark-band {
+  color: #ffffff;
+}
+.dark-band h1,
+.dark-band h2,
+.dark-band h3,
+.dark-band .text-slate-900,
+.dark-band .text-slate-800,
+.dark-band .text-slate-700 {
+  color: #ffffff;
+}
+.dark-band .text-slate-600,
+.dark-band .text-slate-500,
+.dark-band .text-slate-400 {
+  color: #9ca7b4;
+}
+.dark-band .border-slate-200,
+.dark-band .border-slate-100 {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Restaura o contraste dentro de cards claros que ficam sobre banda escura */
+.dark-band .bg-white h1,
+.dark-band .bg-white h2,
+.dark-band .bg-white h3,
+.dark-band .bg-white .text-slate-900,
+.dark-band .bg-white .text-slate-800,
+.dark-band .bg-white .text-slate-700 {
+  color: #0f172a;
+}
+.dark-band .bg-white .text-slate-600,
+.dark-band .bg-white .text-slate-500,
+.dark-band .bg-white .text-slate-400 {
+  color: #64748b;
+}
+.dark-band .bg-white .border-slate-200,
+.dark-band .bg-white .border-slate-100 {
+  border-color: #e2e8f0;
+}

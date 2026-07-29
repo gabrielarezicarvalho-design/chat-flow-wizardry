@@ -759,7 +759,7 @@ export default function Landing() {
       </section>
 
       {/* DEMO AURORA */}
-      <section className="bg-gradient-to-b from-white to-slate-50">
+      <section className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white">
         <div className="mx-auto max-w-6xl px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
           <div className="text-center md:text-left">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary-dark">
@@ -1030,7 +1030,8 @@ export default function Landing() {
       </section>
 
       {/* PROSPECÇÃO */}
-      <section id="recursos" className="mx-auto max-w-6xl px-6 py-24">
+      <section id="recursos" className="dark-band bg-[#0b0d0b] pt-24 pb-32">
+        <div className="mx-auto max-w-6xl px-6">
         <div className="text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prospecção automática</span>
           <h2 className="mt-4 text-5xl md:text-6xl font-bold tracking-tight text-slate-900">
@@ -1157,11 +1158,12 @@ export default function Landing() {
             </div>
           ))}
         </div>
+        </div>
       </section>
 
 
       {/* IA */}
-      <section id="ia" className="bg-slate-50 py-24">
+      <section id="ia" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Tudo que você precisa</span>
@@ -1268,7 +1270,8 @@ export default function Landing() {
       </section>
 
       {/* PAGAMENTOS */}
-      <section id="pagamentos" className="mx-auto max-w-6xl px-6 py-24">
+      <section id="pagamentos" className="dark-band bg-[#0b0d0b] pt-24 pb-32">
+        <div className="mx-auto max-w-6xl px-6">
         <div className="text-center">
           <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Recuperação financeira</span>
           <h2 className="mt-3 text-4xl md:text-6xl font-bold tracking-tight">
@@ -1386,10 +1389,11 @@ export default function Landing() {
             </div>
           ))}
         </div>
+        </div>
       </section>
 
       {/* PLANOS */}
-      <section id="planos" className="bg-white py-24">
+      <section id="planos" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
@@ -1617,7 +1621,7 @@ export default function Landing() {
 
 
       {/* VOZ CLONADA */}
-      <section className="bg-gradient-to-b from-white to-slate-50 py-24">
+      <section className="dark-band bg-[#0b0d0b] pt-24 pb-32">
         <div className="mx-auto max-w-6xl px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-medium text-slate-700 shadow-sm">
@@ -1697,32 +1701,34 @@ export default function Landing() {
       </section>
 
       {/* SEGMENTOS */}
-      <section id="segmentos" className="mx-auto max-w-5xl px-6 py-24">
-        <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
-            Pra qualquer negócio
-          </span>
-          <h2 className="mt-4 text-4xl md:text-6xl font-bold font-space-grotesk">
-            Funciona pro{" "}
-            <span style={{ color: "#004DFF" }}>seu segmento.</span>
-          </h2>
-          <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
-          </p>
-        </div>
+      <section id="segmentos" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="text-center">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
+              Pra qualquer negócio
+            </span>
+            <h2 className="mt-4 text-4xl md:text-6xl font-bold font-space-grotesk">
+              Funciona pro{" "}
+              <span style={{ color: "#004DFF" }}>seu segmento.</span>
+            </h2>
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
+              A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
+            </p>
+          </div>
 
-        <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-5">
-          {segments.map((s) => (
-            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center hover:border-primary/40 hover:shadow-sm transition-all">
-              <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
-              <div className="mt-4 text-base font-medium text-slate-700">{s.label}</div>
-            </div>
-          ))}
+          <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-5">
+            {segments.map((s) => (
+              <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center hover:border-primary/40 hover:shadow-sm transition-all">
+                <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
+                <div className="mt-4 text-base font-medium text-slate-700">{s.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* CENTRAL COMPLETA */}
-      <section className="bg-slate-50 py-24">
+      <section className="dark-band bg-[#0b0d0b] pt-24 pb-32">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
@@ -1798,7 +1804,7 @@ export default function Landing() {
       </section>
 
       {/* CASOS REAIS */}
-      <section id="depoimentos" className="bg-white py-24">
+      <section id="depoimentos" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
@@ -1885,22 +1891,24 @@ export default function Landing() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
-          <h2 className="text-4xl md:text-6xl font-bold">Quero vender no automático.</h2>
-          <p className="mt-4 opacity-90 max-w-xl mx-auto">
-            Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
-          </p>
-          <Link to="/auth">
-            <Button size="lg" className="mt-8 bg-white text-primary-dark hover:bg-slate-100 rounded-full px-8 h-12 font-semibold">
-              Começar Teste Grátis <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+      <section className="dark-band bg-[#0b0d0b] pt-24 pb-32">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
+            <h2 className="text-4xl md:text-6xl font-bold">Quero vender no automático.</h2>
+            <p className="mt-4 opacity-90 max-w-xl mx-auto">
+              Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
+            </p>
+            <Link to="/auth">
+              <Button size="lg" className="mt-8 bg-white text-primary-dark hover:bg-slate-100 rounded-full px-8 h-12 font-semibold">
+                Começar Teste Grátis <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-200 bg-white">
+      <footer className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Brand */}
