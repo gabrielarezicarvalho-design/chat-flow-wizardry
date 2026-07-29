@@ -1592,7 +1592,7 @@ export default function Landing() {
                           <span className="text-3xl font-bold tracking-tight text-slate-900">R${billing === "annual" ? p.annualPrice : p.monthlyPrice}</span>
                           <span className="ml-1 text-sm text-slate-400">/mês</span>
                         </div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-slate-500 whitespace-nowrap">
                           {billing === "annual"
                             ? `R$ ${p.annualTotal} cobrado por ano`
                             : "cobrado por mês"}
