@@ -340,7 +340,7 @@ function RotatingMetrics() {
       {metrics.map((text, i) => (
         <div
           key={i}
-          className={`pill-float absolute ${positions[i].className} rounded-lg bg-[#1a1c1a]/95 px-4 py-2 text-xs font-medium text-white shadow-xl whitespace-nowrap`}
+          className={`pill-float absolute ${positions[i].className} rounded-lg border border-slate-200/60 bg-white/95 px-4 py-2 text-xs font-medium text-slate-900 shadow-xl whitespace-nowrap backdrop-blur-sm`}
           style={{ animationDelay: positions[i].delay }}
         >
           <span className="pill-dot mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
