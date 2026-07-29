@@ -705,15 +705,15 @@ export default function Landing() {
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-[#0b0d0b]">
-        <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
+      <section className="relative overflow-hidden bg-white">
+        <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/10 blur-[140px]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
           <div>
-            <h1 className="hero-reveal hero-d1 font-space-grotesk text-[clamp(2rem,5.6vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-white">
+            <h1 className="hero-reveal hero-d1 font-space-grotesk text-[clamp(2rem,5.6vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-slate-900">
               <span className="block">Seus clientes</span>
               <TypewriterText />
             </h1>
-            <p className="hero-reveal hero-d2 mt-8 max-w-lg text-xl leading-relaxed text-slate-400">
+            <p className="hero-reveal hero-d2 mt-8 max-w-lg text-xl leading-relaxed text-slate-600">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
               automações. Impulsione as vendas do seu negócio em até 20% com a NEXT PRO.
             </p>
@@ -724,19 +724,19 @@ export default function Landing() {
                 </Button>
               </Link>
             </div>
-            <div className="hero-reveal hero-d4 mt-5 flex items-center gap-2 text-base text-slate-400">
+            <div className="hero-reveal hero-d4 mt-5 flex items-center gap-2 text-base text-slate-500">
               <ShieldCheck className="h-4 w-4 text-slate-500" />
               Garantia de 30 dias · Sem fidelidade
             </div>
             <div className="hero-reveal hero-d5 mt-12 flex flex-wrap items-center gap-8">
               {["Kaja", "BOOBOO", "SENSE", "Tangerine"].map((b) => (
-                <span key={b} className="font-space-grotesk text-xl font-bold tracking-wide text-white opacity-40">
+                <span key={b} className="font-space-grotesk text-xl font-bold tracking-wide text-slate-400">
                   {b}
                 </span>
               ))}
             </div>
-            <p className="hero-reveal hero-d6 mt-6 text-base text-slate-400">
-              <span className="font-semibold text-white">+20 empresas</span> já vendem mais com a NEXT PRO.
+            <p className="hero-reveal hero-d6 mt-6 text-base text-slate-500">
+              <span className="font-semibold text-slate-900">+20 empresas</span> já vendem mais com a NEXT PRO.
             </p>
           </div>
 
