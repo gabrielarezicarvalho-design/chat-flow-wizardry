@@ -114,14 +114,14 @@ function FeaturesPopover() {
                 className="group flex flex-col gap-2 rounded-xl bg-[#1c1e1c] p-3 transition-all hover:bg-[#252825] hover:ring-1 hover:ring-[#3a3d3a]"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#252825] text-[#a3e635] ring-1 ring-[#333633] transition-colors group-hover:bg-[#2f322f] group-hover:ring-[#a3e635]/30">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#252825] text-[#004DFF] ring-1 ring-[#333633] transition-colors group-hover:bg-[#2f322f] group-hover:ring-[#004DFF]/30">
                     <feature.icon className="h-4 w-4" />
                   </div>
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm font-semibold text-white">{feature.title}</span>
                       {feature.badge && (
-                        <span className="rounded-full bg-[#a3e635]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#a3e635]">
+                        <span className="rounded-full bg-[#004DFF]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#004DFF]">
                           {feature.badge}
                         </span>
                       )}
@@ -134,19 +134,19 @@ function FeaturesPopover() {
           </div>
 
           {/* Destaque lateral */}
-          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#1c2416] to-[#141614] p-5">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(163,230,53,0.12),transparent_60%)]" />
+          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#0c1429] to-[#141614] p-5">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,77,255,0.12),transparent_60%)]" />
             <div className="relative z-10">
               <div className="mb-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#a3e635]" />
-                <span className="text-xs font-bold uppercase tracking-wider text-[#a3e635]">NOVIDADE</span>
+                <Sparkles className="h-4 w-4 text-[#004DFF]" />
+                <span className="text-xs font-bold uppercase tracking-wider text-[#004DFF]">NOVIDADE</span>
               </div>
               <h3 className="mb-2 text-lg font-bold text-white">Voz clonada com IA chegou.</h3>
               <p className="text-xs leading-relaxed text-slate-300">
                 Gere áudios com a sua voz clonada pelo ElevenLabs e envie respostas de áudio para seus clientes no WhatsApp automaticamente.
               </p>
             </div>
-            <a href="#ia" className="relative z-10 mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[#a3e635] transition-opacity hover:opacity-80">
+            <a href="#ia" className="relative z-10 mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[#004DFF] transition-opacity hover:opacity-80">
               Ver como funciona <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
