@@ -46,8 +46,8 @@ const segments = [
 const FEATURES = [
   {
     icon: Bot,
-    title: "Aurora IA no WhatsApp",
-    description: "Atenda 24/7 com IA treinada no seu negócio. Transferência para humano quando precisar.",
+    title: "Aurora IA",
+    description: "IA no WhatsApp 24/7, treinada no seu negócio. Transfere para humano quando precisar.",
     badge: "NOVO",
     href: "#ia",
   },
