@@ -89,12 +89,13 @@ const FEATURES = [
   },
 ];
 
-function FeaturesPopover() {
+function FeaturesPopover({ label = "Funcionalidades" }: { label?: string }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <button className="group flex items-center gap-1 text-base text-slate-600 transition-colors hover:text-slate-900">
-          Funcionalidades
+          {label}
+
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-70 transition-transform group-data-[state=open]:rotate-180">
             <polyline points="6 9 12 15 18 9" />
           </svg>
