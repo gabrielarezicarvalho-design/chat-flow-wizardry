@@ -350,8 +350,39 @@ function RotatingMetrics() {
         </div>
       ))}
     </>
+const BRAND_SETS = [
+  ["Vizze", "VivaMais", "Med Prime", "Arami"],
+  ["Belleza", "Oficina 7", "SolarTech", "Nutrir"],
+  ["ConstruPro", "PetVet", "Pizzaria Fogo", "Elegance"],
+  ["Conecta", "MoveUp", "ClinicaMais", "Casa Forte"],
+  ["FitPro", "AgroBem", "TechMais", "Maré Alta"],
+];
+
+function RotatingBrands() {
+  const [setIndex, setSetIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSetIndex((i) => (i + 1) % BRAND_SETS.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <>
+      {BRAND_SETS[setIndex].map((b) => (
+        <span
+          key={`${setIndex}-${b}`}
+          className="brand-fade-in font-space-grotesk text-xl font-bold tracking-wide text-slate-400"
+        >
+          {b}
+        </span>
+      ))}
+    </>
   );
 }
+
+
 
 
 
