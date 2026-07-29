@@ -166,6 +166,51 @@ export default function MyAccount() {
         </CardContent>
       </Card>
 
+      {/* Disparos restantes */}
+      {(() => {
+        const s = getStatus("mass_sends_month");
+        const remaining = s.unlimited ? null : Math.max(0, (s.max ?? 0) - s.current);
+        return (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Send className="h-4 w-4" /> Disparos restantes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex items-end justify-between">
+                <div className="text-3xl font-bold tracking-tight">
+                  {isLoading ? "…" : s.unlimited ? <InfinityIcon className="h-7 w-7" /> : remaining?.toLocaleString("pt-BR")}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {s.unlimited
+                    ? "Disparos ilimitados no seu plano"
+                    : `${s.current.toLocaleString("pt-BR")} de ${s.max?.toLocaleString("pt-BR")} usados no plano ${tier}`}
+                </div>
+              </div>
+              {!s.unlimited && (
+                <Progress
+                  value={s.percent}
+                  className={
+                    s.blocked
+                      ? "[&>div]:bg-destructive h-2"
+                      : s.warning
+                      ? "[&>div]:bg-amber-500 h-2"
+                      : "h-2"
+                  }
+                />
+              )}
+              {!s.unlimited && remaining === 0 && (
+                <p className="text-xs text-destructive">
+                  Você atingiu o limite de disparos. Faça upgrade para continuar enviando.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
+
+
       {/* Limits */}
       {CATEGORIES.map((cat) => (
         <Card key={cat.title}>
