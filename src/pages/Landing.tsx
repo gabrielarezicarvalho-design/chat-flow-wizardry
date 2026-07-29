@@ -1195,6 +1195,10 @@ export default function Landing() {
       {/* IDEAL PARA — carrossel */}
       <IdealParaMarquee />
 
+      {/* POR TRÁS DE CADA WHATSAPP */}
+      <MercadoSection />
+
+
       {/* DEMO AURORA */}
 
       <section className="bg-gradient-to-b from-white to-slate-50">
