@@ -1580,8 +1580,14 @@ export default function Landing() {
                 <div className="mt-1 flex items-baseline justify-between gap-3">
                   <div className="text-3xl font-bold tracking-tight text-slate-900">{p.name}</div>
                   <div className="flex items-baseline">
-                    <span className="text-3xl font-bold tracking-tight text-slate-900">R${p.price}</span>
-                    <span className="ml-1 text-sm text-slate-400">/mês</span>
+                    {p.tier === "basic" ? (
+                      <span className="text-3xl font-bold tracking-tight" style={{ color: "#004DFF" }}>Grátis</span>
+                    ) : (
+                      <>
+                        <span className="text-3xl font-bold tracking-tight text-slate-900">R${p.price}</span>
+                        <span className="ml-1 text-sm text-slate-400">/mês</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
