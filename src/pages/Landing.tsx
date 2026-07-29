@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
+import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
-import heroWoman from "@/assets/hero-woman.jpg";
 import avatarRafael from "@/assets/cases/rafael.png.asset.json";
 import avatarIsabela from "@/assets/cases/isabela.png.asset.json";
 import avatarDiego from "@/assets/cases/diego.png.asset.json";
@@ -781,9 +781,18 @@ export default function Landing() {
     <div className="min-h-screen bg-white text-slate-900">
       {/* HERO com nav flutuante sobre a foto */}
       <section className="relative overflow-hidden">
-        {/* Fundo */}
+        {/* Fundo com vídeo */}
         <div className="absolute inset-0">
-          <img src={heroWoman} alt="Empreendedora usando a NEXT PRO" className="h-full w-full object-cover object-center" />
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="h-full w-full object-cover object-center"
+            poster=""
+          >
+            <source src={heroVideoAsset.url} type="video/mp4" />
+          </video>
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/20" />
         </div>
 
