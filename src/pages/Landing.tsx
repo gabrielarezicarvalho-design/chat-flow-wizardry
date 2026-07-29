@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
-import heroWoman from "@/assets/hero-woman.jpg";
+import heroVideo from "@/assets/video-hero.mp4.asset.json";
 import avatarRafael from "@/assets/cases/rafael.png.asset.json";
 import avatarIsabela from "@/assets/cases/isabela.png.asset.json";
 import avatarDiego from "@/assets/cases/diego.png.asset.json";
@@ -578,12 +578,16 @@ export default function Landing() {
           <div className="hero-reveal-right hero-d3 relative mx-auto w-full max-w-[520px]">
             <div className="relative aspect-square rounded-full border-2 border-dashed border-[#004DFF]/50 p-6">
               <div className="h-full w-full overflow-hidden rounded-full">
-                <img
-                  src={heroWoman}
-                  alt="Empreendedora usando a NEXT PRO"
+                <video
+                  src={heroVideo.url}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
                   width={1024}
                   height={1024}
                   className="h-full w-full object-cover"
+                  aria-label="Vídeo de apresentação da NEXT PRO"
                 />
               </div>
             </div>
