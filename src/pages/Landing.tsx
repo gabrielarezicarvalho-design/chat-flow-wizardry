@@ -2148,13 +2148,13 @@ export default function Landing() {
                 O CRM NEXT PRO é a ferramenta definitiva para quem deseja{"\u00a0"}{"\n"}executar disparos em massa, prospectar clientes e aumentar suas vendas, tudo em uma unica ferramenta.
               </p>
               <div className="flex items-center gap-1.5">
-                <a href="#" aria-label="Twitter" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
+                <a href="https://x.com/nextprocrm" target="_blank" rel="noreferrer" aria-label="Twitter" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
                   <Twitter className="h-3 w-3" />
                 </a>
-                <a href="#" aria-label="Instagram" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
+                <a href="https://instagram.com/nextprocrm" target="_blank" rel="noreferrer" aria-label="Instagram" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
                   <Instagram className="h-3 w-3" />
                 </a>
-                <a href="#" aria-label="Presentes" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
+                <a href="#planos" aria-label="Presentes" className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors">
                   <Gift className="h-3 w-3" />
                 </a>
               </div>
@@ -2166,8 +2166,8 @@ export default function Landing() {
               <ul className="space-y-1.5 text-xs text-slate-500">
                 <li><a href="#recursos" className="hover:text-primary transition-colors">Funcionalidades</a></li>
                 <li><a href="#planos" className="hover:text-primary transition-colors">Preços</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Download</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">FAQ</a></li>
+                <li><Link to="/auth" className="hover:text-primary transition-colors">Download</Link></li>
+                <li><Link to="/central-de-ajuda" className="hover:text-primary transition-colors">FAQ</Link></li>
               </ul>
             </div>
 
@@ -2176,7 +2176,7 @@ export default function Landing() {
               <h4 className="text-[11px] font-bold tracking-widest text-slate-900 uppercase">Suporte</h4>
               <ul className="space-y-1.5 text-xs text-slate-500">
                 <li><Link to="/central-de-ajuda" className="flex items-center gap-1.5 hover:text-primary transition-colors"><HelpCircle className="h-3.5 w-3.5" /> Central de Ajuda</Link></li>
-                <li><a href="#" className="flex items-center gap-1.5 text-emerald-500 hover:text-emerald-600 transition-colors"><MessageCircle className="h-3.5 w-3.5" /> Comunidade VIP</a></li>
+                <li><a href="https://wa.me/message/BYSDMLHYTA6EA1" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-emerald-500 hover:text-emerald-600 transition-colors"><MessageCircle className="h-3.5 w-3.5" /> Comunidade VIP</a></li>
               </ul>
             </div>
 
