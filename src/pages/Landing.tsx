@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform } from "framer-motion";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
 import heroWoman from "@/assets/hero-woman.jpg";
 import avatarRafael from "@/assets/cases/rafael.png.asset.json";
@@ -289,7 +290,7 @@ function TypewriterText() {
   return (
     <>
       <span className="block">
-        <span className="text-slate-900">voltam</span>{" "}
+        <span className="text-white">voltam</span>{" "}
         <span className="whitespace-nowrap text-[#4d8bff]">{prefixTyped}</span>
         {!onSuffix && cursor}
       </span>
@@ -340,7 +341,7 @@ function RotatingMetrics() {
       {metrics.map((text, i) => (
         <div
           key={i}
-          className={`pill-float absolute ${positions[i].className} rounded-lg border border-slate-200/60 bg-white/95 px-4 py-2 text-xs font-medium text-slate-900 shadow-xl whitespace-nowrap backdrop-blur-sm`}
+          className={`pill-float absolute ${positions[i].className} rounded-lg bg-[#1a1c1a]/95 px-4 py-2 text-xs font-medium text-white shadow-xl whitespace-nowrap`}
           style={{ animationDelay: positions[i].delay }}
         >
           <span className="pill-dot mr-2 inline-block h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
@@ -373,6 +374,26 @@ export default function Landing() {
   const [selectedLead, setSelectedLead] = useState<LeadItem | null>(null);
   const [savedLeads, setSavedLeads] = useState<string[]>([]);
   const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
+  const [activeSection, setActiveSection] = useState("");
+
+  useEffect(() => {
+    const sections = ["recursos", "planos", "depoimentos", "pagamentos", "segmentos"];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: 0 }
+    );
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const handleSubscribe = async (tier: "start" | "business") => {
     try {
@@ -403,6 +424,19 @@ export default function Landing() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const conversationRef = useRef<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const sweepY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  const sweepOpacity = useTransform(scrollYProgress, [0, 0.15, 0.5, 0.85, 1], [0, 1, 1, 0.8, 0]);
+  const heroDim = useTransform(scrollYProgress, [0, 0.6], [0, 0.45]);
+  const heroImageY = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
+  const heroImageScale = useTransform(scrollYProgress, [0, 1], [1, 0.88]);
+  const heroContentY = useTransform(scrollYProgress, [0, 1], ["0%", "-8%"]);
+  const heroContentOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
 
   const chatMessages = [
     { id: 1, sender: "client", content: "Vi sua mensagem, do que se trata?", delay: 0 },
@@ -671,7 +705,7 @@ export default function Landing() {
     <div className="min-h-screen bg-white text-slate-900">
       {/* NAV */}
       <header className="sticky top-0 z-40 bg-[#0b0d0b]/95 backdrop-blur">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-10">
             <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-white">
               <img
@@ -683,10 +717,30 @@ export default function Landing() {
             </div>
             <nav className="hidden lg:flex items-center gap-8 text-base text-slate-200">
               <FeaturesPopover />
-              <a href="#planos" className="hover:text-white">Planos</a>
-              <a href="#depoimentos" className="hover:text-white">Cases</a>
-              <a href="#pagamentos" className="hover:text-white">Integrações</a>
-              <a href="#segmentos" className="hover:text-white">Parceiros</a>
+              <a
+                href="#planos"
+                className={`transition-colors hover:text-white ${activeSection === "planos" ? "text-white" : ""}`}
+              >
+                Planos
+              </a>
+              <a
+                href="#depoimentos"
+                className={`transition-colors hover:text-white ${activeSection === "depoimentos" ? "text-white" : ""}`}
+              >
+                Cases
+              </a>
+              <a
+                href="#pagamentos"
+                className={`transition-colors hover:text-white ${activeSection === "pagamentos" ? "text-white" : ""}`}
+              >
+                Integrações
+              </a>
+              <a
+                href="#segmentos"
+                className={`transition-colors hover:text-white ${activeSection === "segmentos" ? "text-white" : ""}`}
+              >
+                Parceiros
+              </a>
             </nav>
           </div>
           <div className="hidden md:flex items-center gap-3">
@@ -705,15 +759,31 @@ export default function Landing() {
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-white">
-        <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/10 blur-[140px]" />
+      <section ref={heroRef} className="relative overflow-hidden bg-[#0b0d0b]">
+        {/* Sweep selection bar */}
+        <motion.div
+          style={{ y: sweepY, opacity: sweepOpacity }}
+          className="pointer-events-none absolute inset-x-0 z-20 h-24 -translate-y-1/2"
+        >
+          <div className="h-full w-full bg-gradient-to-b from-transparent via-[#004DFF]/40 to-transparent blur-md" />
+          <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-[#004DFF]" />
+          <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 bg-[#004DFF]/30 blur-sm" />
+        </motion.div>
+
+        {/* Dim overlay on scroll */}
+        <motion.div
+          style={{ opacity: heroDim }}
+          className="pointer-events-none absolute inset-0 z-10 bg-[#0b0d0b]/60"
+        />
+
+        <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
-          <div>
-            <h1 className="hero-reveal hero-d1 font-space-grotesk text-[clamp(2rem,5.6vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-slate-900">
+          <motion.div style={{ y: heroContentY, opacity: heroContentOpacity }}>
+            <h1 className="hero-reveal hero-d1 font-space-grotesk text-[clamp(2rem,5.6vw,3.5rem)] font-bold leading-[1.05] tracking-tight text-white">
               <span className="block">Seus clientes</span>
               <TypewriterText />
             </h1>
-            <p className="hero-reveal hero-d2 mt-8 max-w-lg text-xl leading-relaxed text-slate-600">
+            <p className="hero-reveal hero-d2 mt-8 max-w-lg text-xl leading-relaxed text-slate-400">
               Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
               automações. Impulsione as vendas do seu negócio em até 20% com a NEXT PRO.
             </p>
@@ -724,24 +794,27 @@ export default function Landing() {
                 </Button>
               </Link>
             </div>
-            <div className="hero-reveal hero-d4 mt-5 flex items-center gap-2 text-base text-slate-500">
+            <div className="hero-reveal hero-d4 mt-5 flex items-center gap-2 text-base text-slate-400">
               <ShieldCheck className="h-4 w-4 text-slate-500" />
               Garantia de 30 dias · Sem fidelidade
             </div>
             <div className="hero-reveal hero-d5 mt-12 flex flex-wrap items-center gap-8">
               {["Kaja", "BOOBOO", "SENSE", "Tangerine"].map((b) => (
-                <span key={b} className="font-space-grotesk text-xl font-bold tracking-wide text-slate-400">
+                <span key={b} className="font-space-grotesk text-xl font-bold tracking-wide text-white opacity-40">
                   {b}
                 </span>
               ))}
             </div>
-            <p className="hero-reveal hero-d6 mt-6 text-base text-slate-500">
-              <span className="font-semibold text-slate-900">+20 empresas</span> já vendem mais com a NEXT PRO.
+            <p className="hero-reveal hero-d6 mt-6 text-base text-slate-400">
+              <span className="font-semibold text-white">+20 empresas</span> já vendem mais com a NEXT PRO.
             </p>
-          </div>
+          </motion.div>
 
           {/* Composição circular */}
-          <div className="hero-reveal-right hero-d3 relative mx-auto w-full max-w-[520px]">
+          <motion.div
+            style={{ y: heroImageY, scale: heroImageScale, opacity: heroContentOpacity }}
+            className="hero-reveal-right hero-d3 relative mx-auto w-full max-w-[520px]"
+          >
             <div className="relative aspect-square rounded-full border-2 border-dashed border-[#004DFF]/50 p-6">
               <div className="h-full w-full overflow-hidden rounded-full">
                 <img
@@ -754,12 +827,12 @@ export default function Landing() {
               </div>
             </div>
             <RotatingMetrics />
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* DEMO AURORA */}
-      <section className="bg-gradient-to-b from-white to-slate-50">
+      <section className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white shadow-[0_-20px_60px_-10px_rgba(0,0,0,0.45)]">
         <div className="mx-auto max-w-6xl px-6 pt-20 pb-16 grid md:grid-cols-2 gap-12 items-center">
           <div className="text-center md:text-left">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary-dark">
@@ -1030,7 +1103,8 @@ export default function Landing() {
       </section>
 
       {/* PROSPECÇÃO */}
-      <section id="recursos" className="mx-auto max-w-6xl px-6 py-24">
+      <section id="recursos" className="dark-band bg-[#0b0d0b] pt-24 pb-32">
+        <div className="mx-auto max-w-6xl px-6">
         <div className="text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prospecção automática</span>
           <h2 className="mt-4 text-5xl md:text-6xl font-bold tracking-tight text-slate-900">
@@ -1157,11 +1231,12 @@ export default function Landing() {
             </div>
           ))}
         </div>
+        </div>
       </section>
 
 
       {/* IA */}
-      <section id="ia" className="bg-slate-50 py-24">
+      <section id="ia" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Tudo que você precisa</span>
@@ -1268,7 +1343,8 @@ export default function Landing() {
       </section>
 
       {/* PAGAMENTOS */}
-      <section id="pagamentos" className="mx-auto max-w-6xl px-6 py-24">
+      <section id="pagamentos" className="dark-band bg-[#0b0d0b] pt-24 pb-32">
+        <div className="mx-auto max-w-6xl px-6">
         <div className="text-center">
           <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Recuperação financeira</span>
           <h2 className="mt-3 text-4xl md:text-6xl font-bold tracking-tight">
@@ -1386,10 +1462,11 @@ export default function Landing() {
             </div>
           ))}
         </div>
+        </div>
       </section>
 
       {/* PLANOS */}
-      <section id="planos" className="bg-white py-24">
+      <section id="planos" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
@@ -1617,7 +1694,7 @@ export default function Landing() {
 
 
       {/* VOZ CLONADA */}
-      <section className="bg-gradient-to-b from-white to-slate-50 py-24">
+      <section className="dark-band bg-[#0b0d0b] pt-24 pb-32">
         <div className="mx-auto max-w-6xl px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-medium text-slate-700 shadow-sm">
@@ -1697,32 +1774,34 @@ export default function Landing() {
       </section>
 
       {/* SEGMENTOS */}
-      <section id="segmentos" className="mx-auto max-w-5xl px-6 py-24">
-        <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
-            Pra qualquer negócio
-          </span>
-          <h2 className="mt-4 text-4xl md:text-6xl font-bold font-space-grotesk">
-            Funciona pro{" "}
-            <span style={{ color: "#004DFF" }}>seu segmento.</span>
-          </h2>
-          <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
-          </p>
-        </div>
+      <section id="segmentos" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="text-center">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
+              Pra qualquer negócio
+            </span>
+            <h2 className="mt-4 text-4xl md:text-6xl font-bold font-space-grotesk">
+              Funciona pro{" "}
+              <span style={{ color: "#004DFF" }}>seu segmento.</span>
+            </h2>
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
+              A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
+            </p>
+          </div>
 
-        <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-5">
-          {segments.map((s) => (
-            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center hover:border-primary/40 hover:shadow-sm transition-all">
-              <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
-              <div className="mt-4 text-base font-medium text-slate-700">{s.label}</div>
-            </div>
-          ))}
+          <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-5">
+            {segments.map((s) => (
+              <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center hover:border-primary/40 hover:shadow-sm transition-all">
+                <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
+                <div className="mt-4 text-base font-medium text-slate-700">{s.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* CENTRAL COMPLETA */}
-      <section className="bg-slate-50 py-24">
+      <section className="dark-band bg-[#0b0d0b] pt-24 pb-32">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
@@ -1798,7 +1877,7 @@ export default function Landing() {
       </section>
 
       {/* CASOS REAIS */}
-      <section id="depoimentos" className="bg-white py-24">
+      <section id="depoimentos" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
@@ -1885,22 +1964,24 @@ export default function Landing() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
-          <h2 className="text-4xl md:text-6xl font-bold">Quero vender no automático.</h2>
-          <p className="mt-4 opacity-90 max-w-xl mx-auto">
-            Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
-          </p>
-          <Link to="/auth">
-            <Button size="lg" className="mt-8 bg-white text-primary-dark hover:bg-slate-100 rounded-full px-8 h-12 font-semibold">
-              Começar Teste Grátis <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+      <section className="dark-band bg-[#0b0d0b] pt-24 pb-32">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
+            <h2 className="text-4xl md:text-6xl font-bold">Quero vender no automático.</h2>
+            <p className="mt-4 opacity-90 max-w-xl mx-auto">
+              Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
+            </p>
+            <Link to="/auth">
+              <Button size="lg" className="mt-8 bg-white text-primary-dark hover:bg-slate-100 rounded-full px-8 h-12 font-semibold">
+                Começar Teste Grátis <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-200 bg-white">
+      <footer className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Brand */}
