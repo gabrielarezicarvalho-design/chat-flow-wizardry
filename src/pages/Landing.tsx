@@ -783,7 +783,7 @@ export default function Landing() {
         {/* Fundo */}
         <div className="absolute inset-0">
           <img src={heroWoman} alt="Empreendedora usando a NEXT PRO" className="h-full w-full object-cover object-center" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/65 to-slate-950/35" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/20" />
         </div>
 
         {/* NAV flutuante */}
