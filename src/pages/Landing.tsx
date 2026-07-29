@@ -453,6 +453,7 @@ export default function Landing() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
+  const [expandedTier, setExpandedTier] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("dentistas em São Paulo");
   const [mapLoaded, setMapLoaded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(0);
