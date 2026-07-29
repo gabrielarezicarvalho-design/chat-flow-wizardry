@@ -10,6 +10,7 @@ import {
   PlanLimits,
   RESOURCE_LABELS,
 } from "@/lib/planLimits";
+import { normalizeLimits } from "@/hooks/usePlanConfigs";
 
 interface UsageData {
   cycle_start?: string;
