@@ -714,8 +714,8 @@ export default function Landing() {
               <TypewriterText />
             </h1>
             <p className="hero-reveal hero-d2 mt-8 max-w-lg text-xl leading-relaxed text-slate-600">
-              Transformamos conversas em clientes fiéis com CRM, IA no WhatsApp e
-              automações. Impulsione as vendas do seu negócio em até 20% com a NEXT PRO.
+              Transformamos compras únicas em clientes fiéis com CRM, automações e
+              prospecção. Impulsione as vendas da sua loja física e e-commerce em até 20% com a Next Pro.
             </p>
             <div className="hero-reveal hero-d3 mt-10">
               <Link to="/auth">
