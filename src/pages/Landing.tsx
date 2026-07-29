@@ -670,10 +670,10 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* NAV */}
-      <header className="sticky top-0 z-40 bg-[#0b0d0b]/95 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-10">
-            <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-white">
+            <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-slate-900">
               <img
                 src={logoAurora.url}
                 alt="NEXT PRO"
@@ -681,17 +681,17 @@ export default function Landing() {
               />
               NEXT <span className="text-[#004DFF]">PRO</span>
             </div>
-            <nav className="hidden lg:flex items-center gap-8 text-base text-slate-200">
+            <nav className="hidden lg:flex items-center gap-8 text-base text-slate-600">
               <FeaturesPopover />
-              <a href="#planos" className="hover:text-white">Planos</a>
-              <a href="#depoimentos" className="hover:text-white">Cases</a>
-              <a href="#pagamentos" className="hover:text-white">Integrações</a>
-              <a href="#segmentos" className="hover:text-white">Parceiros</a>
+              <a href="#planos" className="hover:text-slate-900">Planos</a>
+              <a href="#depoimentos" className="hover:text-slate-900">Cases</a>
+              <a href="#pagamentos" className="hover:text-slate-900">Integrações</a>
+              <a href="#segmentos" className="hover:text-slate-900">Parceiros</a>
             </nav>
           </div>
           <div className="hidden md:flex items-center gap-3">
             <Link to="/auth">
-              <Button variant="outline" className="rounded-lg border-slate-600 bg-transparent px-6 text-white hover:bg-white/10 hover:text-white">
+              <Button variant="outline" className="rounded-lg border-slate-200 bg-white px-6 text-slate-700 hover:bg-slate-50 hover:text-slate-900">
                 Login
               </Button>
             </Link>
