@@ -1722,7 +1722,7 @@ export default function Landing() {
       </section>
 
       {/* CENTRAL COMPLETA */}
-      <section className="bg-slate-50 py-24">
+      <section className="dark-band bg-[#0b0d0b] pt-24 pb-32">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
