@@ -1697,27 +1697,29 @@ export default function Landing() {
       </section>
 
       {/* SEGMENTOS */}
-      <section id="segmentos" className="mx-auto max-w-5xl px-6 py-24">
-        <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
-            Pra qualquer negócio
-          </span>
-          <h2 className="mt-4 text-4xl md:text-6xl font-bold font-space-grotesk">
-            Funciona pro{" "}
-            <span style={{ color: "#004DFF" }}>seu segmento.</span>
-          </h2>
-          <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
-          </p>
-        </div>
+      <section id="segmentos" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="text-center">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
+              Pra qualquer negócio
+            </span>
+            <h2 className="mt-4 text-4xl md:text-6xl font-bold font-space-grotesk">
+              Funciona pro{" "}
+              <span style={{ color: "#004DFF" }}>seu segmento.</span>
+            </h2>
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
+              A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
+            </p>
+          </div>
 
-        <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-5">
-          {segments.map((s) => (
-            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center hover:border-primary/40 hover:shadow-sm transition-all">
-              <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
-              <div className="mt-4 text-base font-medium text-slate-700">{s.label}</div>
-            </div>
-          ))}
+          <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-5">
+            {segments.map((s) => (
+              <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center hover:border-primary/40 hover:shadow-sm transition-all">
+                <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
+                <div className="mt-4 text-base font-medium text-slate-700">{s.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
