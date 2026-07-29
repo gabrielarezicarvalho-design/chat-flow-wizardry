@@ -505,7 +505,7 @@ const MERCADO_CARDS = [
     className: "lg:col-span-2 h-[240px]",
   },
   {
-    img: imgSalao,
+    img: imgSalao.url,
     title: "Salão independente",
     desc: "agenda andando sem parar o atendimento",
     className: "lg:row-span-2 h-[560px]",
