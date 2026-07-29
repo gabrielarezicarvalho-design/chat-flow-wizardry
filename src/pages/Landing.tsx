@@ -1736,7 +1736,8 @@ export default function Landing() {
 
       {/* PLANOS */}
       <section id="planos" className="bg-white py-24">
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+
           <div className="text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
               Planos para cada fase
@@ -1770,7 +1771,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="mt-14 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
             {[
               {
                 tier: "basic",
@@ -1815,7 +1816,8 @@ export default function Landing() {
             ].map((p) => (
               <div
                 key={p.tier}
-                className="relative rounded-[28px] bg-slate-50 p-7 text-left"
+                className="relative min-w-0 w-full overflow-hidden rounded-[28px] bg-slate-50 p-5 sm:p-7 text-left"
+
                 style={
                   p.featured
                     ? { border: "1.5px solid #004DFF", boxShadow: "0 20px 60px -25px rgba(0,77,255,0.45)" }
