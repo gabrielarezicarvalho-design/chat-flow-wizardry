@@ -92,7 +92,7 @@ function FeaturesPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="group flex items-center gap-1 text-base text-slate-200 transition-colors hover:text-white">
+        <button className="group flex items-center gap-1 text-base text-slate-600 transition-colors hover:text-slate-900">
           Funcionalidades
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-70 transition-transform group-data-[state=open]:rotate-180">
             <polyline points="6 9 12 15 18 9" />
@@ -102,7 +102,7 @@ function FeaturesPopover() {
       <PopoverContent
         align="start"
         sideOffset={12}
-        className="w-[900px] max-w-[95vw] overflow-hidden border border-[#2a2d2a] bg-[#141614] p-0 text-white shadow-2xl shadow-black/70"
+        className="w-[900px] max-w-[95vw] overflow-hidden border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl shadow-slate-900/10"
       >
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Grid de funcionalidades */}
@@ -111,38 +111,38 @@ function FeaturesPopover() {
               <a
                 key={feature.title}
                 href={feature.href}
-                className="group flex flex-col gap-2 rounded-xl bg-[#1c1e1c] p-3 transition-all hover:bg-[#252825] hover:ring-1 hover:ring-[#3a3d3a]"
+                className="group flex flex-col gap-2 rounded-xl bg-slate-50 p-3 transition-all hover:bg-white hover:ring-1 hover:ring-slate-200"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#252825] text-[#004DFF] ring-1 ring-[#333633] transition-colors group-hover:bg-[#2f322f] group-hover:ring-[#004DFF]/30">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#004DFF] ring-1 ring-slate-200 transition-colors group-hover:bg-slate-50 group-hover:ring-[#004DFF]/30">
                     <feature.icon className="h-4 w-4" />
                   </div>
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-semibold text-white">{feature.title}</span>
+                      <span className="text-sm font-semibold text-slate-900">{feature.title}</span>
                       {feature.badge && (
-                        <span className="rounded-full bg-[#004DFF]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#004DFF]">
+                        <span className="rounded-full bg-[#004DFF]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#004DFF]">
                           {feature.badge}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
-                <p className="text-[11px] leading-snug text-slate-400">{feature.description}</p>
+                <p className="text-[11px] leading-snug text-slate-500">{feature.description}</p>
               </a>
             ))}
           </div>
 
           {/* Destaque lateral */}
-          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#0c1429] to-[#141614] p-5">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,77,255,0.12),transparent_60%)]" />
+          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#f0f4ff] to-white p-5">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,77,255,0.08),transparent_60%)]" />
             <div className="relative z-10">
               <div className="mb-3 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-[#004DFF]" />
                 <span className="text-xs font-bold uppercase tracking-wider text-[#004DFF]">NOVIDADE</span>
               </div>
-              <h3 className="mb-2 text-lg font-bold text-white">Voz clonada com IA chegou.</h3>
-              <p className="text-xs leading-relaxed text-slate-300">
+              <h3 className="mb-2 text-lg font-bold text-slate-900">Voz clonada com IA chegou.</h3>
+              <p className="text-xs leading-relaxed text-slate-600">
                 Gere áudios com a sua voz clonada pelo ElevenLabs e envie respostas de áudio para seus clientes no WhatsApp automaticamente.
               </p>
             </div>
@@ -670,10 +670,10 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* NAV */}
-      <header className="sticky top-0 z-40 bg-[#0b0d0b]/95 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-10">
-            <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-white">
+            <div className="flex items-center gap-2 font-bold text-xl font-space-grotesk text-slate-900">
               <img
                 src={logoAurora.url}
                 alt="NEXT PRO"
@@ -681,17 +681,17 @@ export default function Landing() {
               />
               NEXT <span className="text-[#004DFF]">PRO</span>
             </div>
-            <nav className="hidden lg:flex items-center gap-8 text-base text-slate-200">
+            <nav className="hidden lg:flex items-center gap-8 text-base text-slate-600">
               <FeaturesPopover />
-              <a href="#planos" className="hover:text-white">Planos</a>
-              <a href="#depoimentos" className="hover:text-white">Cases</a>
-              <a href="#pagamentos" className="hover:text-white">Integrações</a>
-              <a href="#segmentos" className="hover:text-white">Parceiros</a>
+              <a href="#planos" className="hover:text-slate-900">Planos</a>
+              <a href="#depoimentos" className="hover:text-slate-900">Cases</a>
+              <a href="#pagamentos" className="hover:text-slate-900">Integrações</a>
+              <a href="#segmentos" className="hover:text-slate-900">Parceiros</a>
             </nav>
           </div>
           <div className="hidden md:flex items-center gap-3">
             <Link to="/auth">
-              <Button variant="outline" className="rounded-lg border-slate-600 bg-transparent px-6 text-white hover:bg-white/10 hover:text-white">
+              <Button variant="outline" className="rounded-lg border-slate-200 bg-white px-6 text-slate-700 hover:bg-slate-50 hover:text-slate-900">
                 Login
               </Button>
             </Link>
