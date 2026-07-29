@@ -841,7 +841,11 @@ export default function Landing() {
             </div>
 
             <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.8rem,6.5vw,4.5rem)] font-bold leading-[1.05] tracking-tight text-white">
-              Sua IA vende, atende e <span className="text-[#4d8bff]">organiza seus clientes</span> no automático.
+              Sua IA vende, atende
+              <br />
+              e <span className="text-[#22c55e]">organiza seus</span>
+              <br />
+              <span className="text-[#22c55e]">clientes</span> no automático.
             </h1>
 
             <p className="hero-reveal hero-d2 mt-6 max-w-xl text-xl leading-relaxed text-white/80">
