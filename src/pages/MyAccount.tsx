@@ -125,7 +125,7 @@ export default function MyAccount() {
             <div className="text-xs text-muted-foreground flex items-center gap-1.5">
               <CreditCard className="h-3.5 w-3.5" /> Valor
             </div>
-            <div className="text-lg font-semibold mt-1">
+            <div className="text-lg font-semibold mt-1 flex flex-wrap items-baseline gap-x-1">
               {subscription?.amount
                 ? `R$ ${Number(subscription.amount).toLocaleString("pt-BR", {
                     minimumFractionDigits: 2,
@@ -137,15 +137,10 @@ export default function MyAccount() {
                 : billing === "annual"
                 ? "R$ 499,00"
                 : "R$ 49,90"}
-              <span className="text-xs text-muted-foreground font-normal ml-1">
-                /{billing === "annual" ? "ano" : "mês"}
+              <span className="text-xs text-muted-foreground font-normal">
+                /{billing === "annual" ? "ano cobrado por ano" : "mês"}
               </span>
             </div>
-            {billing === "annual" && (
-              <div className="text-xs text-muted-foreground mt-0.5">
-                cobrado por ano
-              </div>
-            )}
           </div>
           <div className="rounded-lg border p-3">
             <div className="text-xs text-muted-foreground flex items-center gap-1.5">
