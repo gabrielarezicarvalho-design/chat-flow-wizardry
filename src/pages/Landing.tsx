@@ -1389,7 +1389,7 @@ export default function Landing() {
       </section>
 
       {/* PLANOS */}
-      <section id="planos" className="bg-white py-24">
+      <section id="planos" className="relative z-10 -mt-10 rounded-t-[2rem] md:rounded-t-[2.5rem] bg-white pt-24 pb-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
