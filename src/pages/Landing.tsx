@@ -1588,15 +1588,16 @@ export default function Landing() {
                       <span className="text-3xl font-bold tracking-tight" style={{ color: "#004DFF" }}>Grátis</span>
                     ) : (
                       <>
-                        <div className="flex items-baseline justify-end">
+                        <div className="flex items-baseline justify-end gap-1">
                           <span className="text-3xl font-bold tracking-tight text-slate-900">R${billing === "annual" ? p.annualPrice : p.monthlyPrice}</span>
-                          <span className="ml-1 text-sm text-slate-400">/mês</span>
+                          <span className="text-sm text-slate-400">/mês</span>
+                          {billing === "annual" && (
+                            <span className="text-xs text-slate-500">(R$ {p.annualTotal} cobrado por ano)</span>
+                          )}
                         </div>
-                        <div className="text-xs text-slate-500">
-                          {billing === "annual"
-                            ? `R$ ${p.annualTotal} cobrado por ano`
-                            : "cobrado por mês"}
-                        </div>
+                        {billing === "monthly" && (
+                          <div className="text-xs text-slate-500">cobrado por mês</div>
+                        )}
                       </>
                     )}
                   </div>
