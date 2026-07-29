@@ -1606,7 +1606,7 @@ export default function Landing() {
 
 
           {/* TABELA COMPARATIVA */}
-          <div className="mt-16 max-w-4xl mx-auto">
+          <div className="mt-16 max-w-3xl mx-auto">
             <h3 className="text-center text-3xl font-bold text-slate-900">Compare os planos</h3>
             <p className="mt-2 text-center text-base text-slate-500">Veja lado a lado o que cada plano entrega.</p>
 
