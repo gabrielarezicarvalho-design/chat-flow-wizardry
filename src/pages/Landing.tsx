@@ -840,8 +840,14 @@ export default function Landing() {
               CRM nº 1 com IA para vender no WhatsApp
             </div>
 
-            <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.8rem,6.5vw,4.5rem)] font-bold leading-[1.05] tracking-tight text-white">
-              Sua IA vende, atende e <span className="text-[#4d8bff]">organiza seus clientes</span> no automático.
+            <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.2rem,5.2vw,3.6rem)] font-bold leading-[1.05] tracking-tight text-white">
+              <span className="block lg:whitespace-nowrap">Sua IA vende, atende</span>
+              <span className="block lg:whitespace-nowrap">
+                e <span className="text-[#22c55e]">organiza seus</span>
+              </span>
+              <span className="block lg:whitespace-nowrap">
+                <span className="text-[#22c55e]">clientes</span> no automático.
+              </span>
             </h1>
 
             <p className="hero-reveal hero-d2 mt-6 max-w-xl text-xl leading-relaxed text-white/80">
