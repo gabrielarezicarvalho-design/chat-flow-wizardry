@@ -879,11 +879,11 @@ export default function Landing() {
           </div>
 
           {/* Card de chat */}
-          <div className="hero-reveal-right hero-d3 mx-auto w-full max-w-[720px] rounded-3xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl">
-            <div className="flex h-[clamp(440px,56vh,520px)] flex-col rounded-2xl bg-white p-5 shadow-2xl">
+          <div className="hero-reveal-right hero-d3 mx-auto w-full max-w-[720px]">
+            <div className="flex h-[clamp(440px,56vh,520px)] flex-col rounded-[32px] bg-[#E8E5E2] p-5 shadow-2xl">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#4d8bff] to-[#004DFF]" />
+                  <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#7FE3A3] via-[#4CD080] to-[#2FB86A] shadow-md shadow-[#4CD080]/30" />
                   <div>
                     <p className="font-semibold text-slate-900">Seu colaborador de IA</p>
                     <p className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -898,7 +898,7 @@ export default function Landing() {
                 {["Clínica", "Imobiliária", "Loja", "Serviços"].map((c, i) => (
                   <span
                     key={c}
-                    className={`rounded-full border px-3 py-1 text-sm ${i === 0 ? "border-[#004DFF]/30 bg-[#004DFF]/10 text-[#004DFF]" : "border-slate-200 bg-white text-slate-600"}`}
+                    className={`rounded-full border px-3 py-1 text-sm ${i === 0 ? "border-[#7FE3A3]/40 bg-[#7FE3A3]/15 text-[#2A8C5A]" : "border-slate-300/60 bg-white/60 text-slate-600"}`}
                   >
                     {c}
                   </span>
@@ -906,20 +906,20 @@ export default function Landing() {
               </div>
 
               <div className="mt-4 flex-1">
-                <div className="inline-block max-w-[85%] rounded-2xl rounded-tl-sm bg-[#004DFF]/10 px-4 py-3 text-slate-800">
+                <div className="inline-block max-w-[85%] rounded-2xl rounded-tl-sm bg-[#A8C8B5]/55 px-4 py-3 text-slate-800">
                   Oi! 😄 Como posso ajudar você hoje?
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 {["Tem horário amanhã à tarde?", "Vocês atendem convênio?"].map((q) => (
-                  <span key={q} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                  <span key={q} className="rounded-full border border-slate-300/60 bg-white/70 px-3 py-1.5 text-sm text-slate-600">
                     {q}
                   </span>
                 ))}
               </div>
 
-              <div className="mt-3 flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-400">
+              <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/60 px-4 py-3 text-sm text-slate-500">
                 <Check className="h-4 w-4" /> Toque numa pergunta e veja a venda acontecer
               </div>
             </div>
