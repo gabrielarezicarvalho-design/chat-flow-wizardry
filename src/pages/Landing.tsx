@@ -47,42 +47,42 @@ const FEATURES = [
   {
     icon: Bot,
     title: "Aurora IA no WhatsApp",
-    description: "Atenda clientes 24/7 com IA treinada no seu negócio. Transfere para humano quando necessário.",
+    description: "Atenda 24/7 com IA treinada no seu negócio. Transferência para humano quando precisar.",
     badge: "NOVO",
     href: "#ia",
   },
   {
     icon: Zap,
     title: "Automações de Fluxo",
-    description: "Crie fluxos visuais drag-and-drop para vendas, pós-venda, aniversários e carrinho abandonado.",
+    description: "Fluxos visuais drag-and-drop para vendas, pós-venda, aniversários e carrinho abandonado.",
     badge: null,
     href: "#recursos",
   },
   {
     icon: Headphones,
     title: "URA & Atendimento",
-    description: "Distribua conversas entre IA e atendentes. Caixa de entrada compartilhada e métricas de atendimento.",
+    description: "Distribua conversas entre IA e atendentes. Caixa compartilhada e métricas de atendimento.",
     badge: null,
     href: "#recursos",
   },
   {
     icon: Megaphone,
     title: "Disparo em Massa",
-    description: "Envie campanhas no WhatsApp, e-mail e SMS com segmentação avançada e relatórios em tempo real.",
+    description: "Campanhas no WhatsApp, e-mail e SMS com segmentação e relatórios em tempo real.",
     badge: null,
     href: "#recursos",
   },
   {
     icon: MapPin,
     title: "Google Maps Leads",
-    description: "Extraia leads do Google Maps em segundos e envie para seus fluxos de vendas automáticos.",
+    description: "Extraia leads do Google Maps em segundos e envie para seus fluxos de vendas.",
     badge: null,
     href: "#recursos",
   },
   {
     icon: CreditCard,
     title: "Cobranças Recorrentes",
-    description: "Automatize cobranças, gere boletos e Pix, envie lembretes e recupere inadimplentes no WhatsApp.",
+    description: "Automatize cobranças, boletos, Pix, lembretes e recupere inadimplentes.",
     badge: null,
     href: "#pagamentos",
   },
@@ -92,9 +92,9 @@ function FeaturesPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="flex items-center gap-1 text-base text-slate-200 transition-colors hover:text-white">
+        <button className="group flex items-center gap-1 text-base text-slate-200 transition-colors hover:text-white">
           Funcionalidades
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-70">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-70 transition-transform group-data-[state=open]:rotate-180">
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
@@ -102,39 +102,39 @@ function FeaturesPopover() {
       <PopoverContent
         align="start"
         sideOffset={12}
-        className="w-[720px] max-w-[95vw] border-0 bg-[#141614] p-0 text-white shadow-2xl shadow-black/60"
+        className="w-[760px] max-w-[95vw] overflow-hidden border border-[#2a2d2a] bg-[#141614] p-0 text-white shadow-2xl shadow-black/70"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+        <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Grid de funcionalidades */}
-          <div className="grid grid-cols-2 gap-px bg-[#252825] p-6">
+          <div className="grid grid-cols-2 gap-4 p-6">
             {FEATURES.map((feature) => (
               <a
                 key={feature.title}
                 href={feature.href}
-                className="group flex flex-col gap-3 rounded-xl bg-[#141614] p-4 transition-colors hover:bg-[#1c1e1c]"
+                className="group flex flex-col gap-3 rounded-xl bg-[#1c1e1c] p-4 transition-all hover:bg-[#252825] hover:ring-1 hover:ring-[#3a3d3a]"
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#252825] text-[#a3e635] ring-1 ring-[#333633] transition-colors group-hover:ring-[#a3e635]/30">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#252825] text-[#a3e635] ring-1 ring-[#333633] transition-colors group-hover:bg-[#2f322f] group-hover:ring-[#a3e635]/30">
                     <feature.icon className="h-5 w-5" />
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-white">{feature.title}</span>
                       {feature.badge && (
-                        <span className="rounded-full bg-[#a3e635]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#a3e635]">
+                        <span className="rounded-full bg-[#a3e635]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#a3e635]">
                           {feature.badge}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs leading-relaxed text-slate-400">{feature.description}</p>
                   </div>
                 </div>
+                <p className="text-xs leading-relaxed text-slate-400">{feature.description}</p>
               </a>
             ))}
           </div>
 
           {/* Destaque lateral */}
-          <div className="relative flex flex-col justify-between overflow-hidden rounded-r-xl bg-gradient-to-br from-[#1c2416] to-[#141614] p-6">
+          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#1c2416] to-[#141614] p-6">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(163,230,53,0.12),transparent_60%)]" />
             <div className="relative z-10">
               <div className="mb-4 flex items-center gap-2">
