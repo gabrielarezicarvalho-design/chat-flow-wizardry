@@ -38,7 +38,9 @@ export interface LimitStatus {
   unlimited: boolean;
 }
 
-export function usePlanLimits() {
+export const TRIAL_DAYS = 2;
+
+export function usePlanLimits(){
   const { user } = useAuth();
 
   const { data, isLoading, refetch } = useQuery({
@@ -67,12 +69,13 @@ export function usePlanLimits() {
           plan: "start",
           limits: await resolveLimits("start"),
           usage: {} as UsageData,
+          companyCreatedAt: null,
         };
       }
 
       const { data: company } = await supabase
         .from("companies")
-        .select("plan")
+        .select("plan, created_at")
         .eq("id", profile.company_id)
         .maybeSingle();
 
@@ -86,6 +89,7 @@ export function usePlanLimits() {
         plan: planSlug,
         limits: await resolveLimits(planSlug),
         usage: (usage as UsageData) || {},
+        companyCreatedAt: company?.created_at || null,
       };
     },
   });
@@ -93,6 +97,22 @@ export function usePlanLimits() {
   const plan = data?.plan || "start";
   const limits: PlanLimits = data?.limits || getPlanLimits("start");
   const usage: UsageData = data?.usage || {};
+
+  // Teste grátis (plano Basic) dura 2 dias a partir da criação da empresa
+  const trialStart = data?.companyCreatedAt
+    ? new Date(data.companyCreatedAt)
+    : null;
+  const trialEndsAt =
+    plan === "basic" && trialStart
+      ? new Date(trialStart.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
+      : null;
+  const trialExpired = !!trialEndsAt && Date.now() > trialEndsAt.getTime();
+  const trialDaysLeft = trialEndsAt
+    ? Math.max(
+        0,
+        Math.ceil((trialEndsAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000))
+      )
+    : null;
 
   const getStatus = useCallback(
     (resource: LimitResource, increment = 0): LimitStatus => {
@@ -116,6 +136,22 @@ export function usePlanLimits() {
 
   const check = useCallback(
     (resource: LimitResource, increment = 1): boolean => {
+      if (trialExpired) {
+        toast.error(
+          `Seu teste grátis de ${TRIAL_DAYS} dias terminou. Assine um plano para continuar usando as funcionalidades.`,
+          {
+            duration: 10000,
+            action: {
+              label: "Fazer upgrade",
+              onClick: () =>
+                openUpgradeDialog(
+                  `Seu teste grátis de ${TRIAL_DAYS} dias expirou e o acesso às funcionalidades foi bloqueado. Escolha um plano para liberar tudo novamente.`
+                ),
+            },
+          }
+        );
+        return false;
+      }
       const st = getStatus(resource);
       if (st.unlimited) return true;
 
@@ -164,7 +200,7 @@ export function usePlanLimits() {
       }
       return true;
     },
-    [getStatus, plan]
+    [getStatus, plan, trialExpired]
   );
 
 
@@ -178,6 +214,9 @@ export function usePlanLimits() {
     plan,
     limits,
     usage,
+    trialEndsAt,
+    trialExpired,
+    trialDaysLeft,
     isLoading,
     refetch,
     getStatus,

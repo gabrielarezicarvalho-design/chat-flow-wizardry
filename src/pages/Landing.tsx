@@ -1503,7 +1503,7 @@ export default function Landing() {
               <span style={{ color: "#004DFF" }}>ideal pra você</span>
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-              Comece grátis por 3 dias. Sem cartão, sem fidelidade — mude de plano quando quiser.
+              Comece grátis por 2 dias. Sem cartão, sem fidelidade — mude de plano quando quiser.
             </p>
 
             <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 p-1">
@@ -1533,7 +1533,7 @@ export default function Landing() {
                 tier: "basic",
                 name: "Basic",
                 price: "0",
-                tagline: "Teste grátis: 20 disparos para explorar",
+                tagline: "Teste grátis de 2 dias: 20 disparos para explorar",
                 highlights: [
                   { strong: "20 disparos", pre: "até ", post: " no total" },
                   { strong: "Bloqueio automático", pre: "", post: " ao atingir o limite" },
@@ -1699,7 +1699,7 @@ export default function Landing() {
                     ["Voz clonada (ElevenLabs)", false, true],
                     ["API + Webhooks", false, true],
                     ["Suporte", "E-mail", "Prioritário"],
-                    ["Teste grátis", "3 dias", "3 dias"],
+                    ["Teste grátis", "2 dias", "2 dias"],
 
                   ].map(([label, start, business], idx) => (
                     <tr key={label as string} className={idx % 2 === 1 ? "bg-slate-50/50" : ""}>
