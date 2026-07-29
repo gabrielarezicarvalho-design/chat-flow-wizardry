@@ -1601,7 +1601,7 @@ export default function Landing() {
 
                 <button
                   onClick={() => (window.location.href = `/checkout?tier=${p.tier}&billing=${billing}`)}
-                  className="mt-5 w-full rounded-full py-4 text-lg font-bold text-white transition hover:opacity-90"
+                  className="mt-5 w-full rounded-xl py-4 text-lg font-bold text-white transition hover:opacity-90"
                   style={{ backgroundColor: "#004DFF" }}
                 >
                   Testar grátis
