@@ -1,3 +1,4 @@
+import { requireActivePlan } from "../_shared/planGuard.ts";
 // Instagram Leads via Apify actors
 // Requires APIFY_TOKEN secret. Uses run-sync-get-dataset-items to get results in one call.
 const corsHeaders = {
@@ -69,6 +70,9 @@ async function scrapeProfiles(usernames: string[]) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const blocked = await requireActivePlan(req, corsHeaders);
+  if (blocked) return blocked;
 
   try {
     if (!APIFY_TOKEN) {

@@ -1,3 +1,4 @@
+import { requireActivePlan } from "../_shared/planGuard.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import {
   connectEvolutionInstance,
@@ -66,6 +67,9 @@ function normalizeBaseUrl(value: string | undefined): string | null {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const blocked = await requireActivePlan(req, corsHeaders);
+  if (blocked) return blocked;
 
   try {
     const { name, phone, environment } = await req.json();

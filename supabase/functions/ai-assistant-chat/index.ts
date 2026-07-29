@@ -1,3 +1,4 @@
+import { requireActivePlan } from "../_shared/planGuard.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 import {
@@ -543,6 +544,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const blocked = await requireActivePlan(req, corsHeaders);
+  if (blocked) return blocked;
 
   try {
     const { 

@@ -1,3 +1,4 @@
+import { requireActivePlan } from "../_shared/planGuard.ts";
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
@@ -57,6 +58,9 @@ function extract(html: string) {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  const blocked = await requireActivePlan(req, corsHeaders);
+  if (blocked) return blocked;
 
   try {
     const { website } = await req.json();

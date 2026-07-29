@@ -1,3 +1,4 @@
+import { requireActivePlan } from "../_shared/planGuard.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -8,6 +9,9 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const blocked = await requireActivePlan(req, corsHeaders);
+  if (blocked) return blocked;
 
   try {
     const authHeader = req.headers.get("Authorization");

@@ -1,3 +1,4 @@
+import { requireActivePlan } from "../_shared/planGuard.ts";
 // TikTok Leads via Apify actors
 // Requires APIFY_TOKEN secret.
 const corsHeaders = {
@@ -66,6 +67,9 @@ function dedupeByUsername(list: any[]) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const blocked = await requireActivePlan(req, corsHeaders);
+  if (blocked) return blocked;
 
   try {
     if (!APIFY_TOKEN) {
