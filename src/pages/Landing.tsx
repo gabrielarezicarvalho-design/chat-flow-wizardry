@@ -843,10 +843,10 @@ export default function Landing() {
             <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.2rem,5.2vw,3.6rem)] font-bold leading-[1.05] tracking-tight text-white">
               <span className="block lg:whitespace-nowrap">Sua IA vende, atende</span>
               <span className="block lg:whitespace-nowrap">
-                e <span className="text-[#22c55e]">organiza seus</span>
+                e <span className="text-[#004DFF]">organiza seus</span>
               </span>
               <span className="block lg:whitespace-nowrap">
-                <span className="text-[#22c55e]">clientes</span> no automático.
+                <span className="text-[#004DFF]">clientes</span> no automático.
               </span>
             </h1>
 
@@ -890,11 +890,11 @@ export default function Landing() {
             <div className="flex h-[clamp(440px,56vh,520px)] flex-col rounded-[32px] bg-[#E8E5E2] p-5 shadow-2xl">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#7FE3A3] via-[#4CD080] to-[#2FB86A] shadow-md shadow-[#4CD080]/30" />
+                  <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#60A5FA] via-[#3B82F6] to-[#004DFF] shadow-md shadow-[#3B82F6]/30" />
                   <div>
                     <p className="font-semibold text-slate-900">Seu colaborador de IA</p>
                     <p className="flex items-center gap-1.5 text-xs text-slate-500">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> online agora
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" /> online agora
                     </p>
                   </div>
                 </div>
@@ -905,7 +905,7 @@ export default function Landing() {
                 {["Clínica", "Imobiliária", "Loja", "Serviços"].map((c, i) => (
                   <span
                     key={c}
-                    className={`rounded-full border px-3 py-1 text-sm ${i === 0 ? "border-[#7FE3A3]/40 bg-[#7FE3A3]/15 text-[#2A8C5A]" : "border-slate-300/60 bg-white/60 text-slate-600"}`}
+                    className={`rounded-full border px-3 py-1 text-sm ${i === 0 ? "border-[#004DFF]/40 bg-[#004DFF]/15 text-[#004DFF]" : "border-slate-300/60 bg-white/60 text-slate-600"}`}
                   >
                     {c}
                   </span>
@@ -913,7 +913,7 @@ export default function Landing() {
               </div>
 
               <div className="mt-4 flex-1">
-                <div className="inline-block max-w-[85%] rounded-2xl rounded-tl-sm bg-[#A8C8B5]/55 px-4 py-3 text-slate-800">
+                <div className="inline-block max-w-[85%] rounded-2xl rounded-tl-sm bg-[#004DFF]/20 px-4 py-3 text-slate-800">
                   Oi! 😄 Como posso ajudar você hoje?
                 </div>
               </div>
