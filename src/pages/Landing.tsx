@@ -1689,7 +1689,7 @@ export default function Landing() {
                       billing === "monthly" ? "R$ 49,90" : "R$ 41,58",
                       billing === "monthly" ? "R$ 99,90" : "R$ 83,25",
                     ],
-                    [billing === "annual" ? "R$ 499,00 cobrado por ano" : "—", billing === "annual" ? "R$ 999,00 cobrado por ano" : "—"],
+                    [billing === "annual" ? "Cobrança anual" : "", billing === "annual" ? "R$ 499,00 cobrado por ano" : "—", billing === "annual" ? "R$ 999,00 cobrado por ano" : "—"],
                     ["Atendentes", "5", "20"],
                     ["Conexões WhatsApp", "2", "10"],
                     ["Usuários", "10/mês", "Ilimitados"],
