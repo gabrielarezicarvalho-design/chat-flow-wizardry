@@ -1990,17 +1990,90 @@ export default function Landing() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
-          <h2 className="text-4xl md:text-6xl font-bold">Quero vender no automático.</h2>
-          <p className="mt-4 opacity-90 max-w-xl mx-auto">
-            Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
-          </p>
-          <Link to="/auth">
-            <Button size="lg" className="mt-8 bg-white text-primary-dark hover:bg-slate-100 rounded-full px-8 h-12 font-semibold">
-              Começar Teste Grátis <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+      <section className="bg-[#0a0a0a] py-20 md:py-28">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Coluna esquerda */}
+            <div className="text-left">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight">
+                Comece a fazer seus
+                <br />
+                clientes voltarem hoje
+              </h2>
+              <p className="mt-5 text-base md:text-lg text-slate-400 max-w-md">
+                Configure em minutos e veja a Next Pro trabalhar por você. Sem compromisso.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-4">
+                <Link to="/auth">
+                  <Button
+                    size="lg"
+                    className="h-12 rounded-full px-7 font-semibold text-[#0a0a0a] hover:opacity-90"
+                    style={{ backgroundColor: "#c8f560" }}
+                  >
+                    Testar grátis
+                  </Button>
+                </Link>
+                <Link to="#planos">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 rounded-full px-7 font-semibold text-white border-white/30 bg-transparent hover:bg-white/10 hover:text-white"
+                  >
+                    Ver planos
+                  </Button>
+                </Link>
+              </div>
+              <p className="mt-8 text-sm text-slate-500">
+                <span className="font-semibold text-white">+200 lojas</span> já vendem mais com a Next Pro
+              </p>
+              <div className="mt-4 flex items-center gap-6 text-slate-400">
+                <span className="text-sm font-medium tracking-tight">Casa</span>
+                <span className="text-sm font-medium tracking-tight">lands</span>
+                <span className="text-sm font-semibold tracking-tight uppercase">BREADY</span>
+                <span className="text-sm font-medium tracking-tight">yoha</span>
+              </div>
+            </div>
+
+            {/* Coluna direita — card de métrica */}
+            <div className="flex justify-center md:justify-end">
+              <div className="relative w-full max-w-[360px] rounded-3xl border border-white/10 bg-[#131316] p-8 shadow-2xl">
+                <div className="absolute inset-0 rounded-3xl bg-[#c8f560]/5 blur-2xl" />
+                <div className="relative flex flex-col items-center text-center">
+                  <div className="relative h-40 w-40">
+                    {/* Círculo tracejado */}
+                    <svg className="absolute inset-0 h-full w-full animate-spin" style={{ animationDuration: "20s" }}>
+                      <circle
+                        cx="80"
+                        cy="80"
+                        r="72"
+                        fill="none"
+                        stroke="#c8f560"
+                        strokeWidth="2"
+                        strokeDasharray="12 10"
+                        opacity="0.5"
+                      />
+                    </svg>
+                    {/* Círculos de destaque */}
+                    <span className="absolute top-0 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-[#c8f560]" />
+                    <span className="absolute bottom-6 right-4 h-1.5 w-1.5 rounded-full bg-[#c8f560]" />
+                    <span className="absolute bottom-10 left-4 h-1 w-1 rounded-full bg-[#c8f560]" />
+                    {/* Ícone central */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#c8f560]/15">
+                        <TrendingUp className="h-10 w-10 text-[#c8f560]" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-6 text-5xl md:text-6xl font-bold text-[#c8f560]">+36%</div>
+                  <p className="mt-2 text-sm text-slate-400">
+                    taxa média de recompra
+                    <br />
+                    dos clientes Next Pro
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
