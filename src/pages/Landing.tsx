@@ -834,8 +834,52 @@ export default function Landing() {
         {/* Conteúdo */}
         <div className="relative z-10 flex flex-1 items-center">
           <div className="mx-auto grid w-full max-w-[1400px] items-center gap-12 pl-4 pr-2 py-12 lg:grid-cols-2 lg:pr-0">
+          <div>
+            <div className="hero-reveal inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur">
+              <Trophy className="h-4 w-4 text-amber-300" />
+              CRM nº 1 com IA para vender no WhatsApp
+            </div>
+
+            <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.8rem,6.5vw,4.5rem)] font-bold leading-[1.05] tracking-tight text-white">
+              Sua IA vende, atende e <span className="text-[#4d8bff]">organiza seus clientes</span> no automático.
+            </h1>
+
+            <p className="hero-reveal hero-d2 mt-6 max-w-xl text-xl leading-relaxed text-white/80">
+              Enquanto você trabalha, ela responde cada cliente em segundos, fecha a
+              venda e organiza tudo no CRM. 7 dias grátis, sem cartão.
+            </p>
+
+            <div className="hero-reveal hero-d3 mt-8 flex items-baseline gap-2 text-white">
+              <span className="text-sm text-white/70">a partir de</span>
+              <span className="font-space-grotesk text-5xl font-bold">R$ 29,90</span>
+              <span className="text-white/70">/mês</span>
+            </div>
+
+            <div className="hero-reveal hero-d4 mt-8 flex flex-wrap items-center gap-4">
+              <Link to="/auth">
+                <Button size="lg" className="btn-shine btn-press h-14 rounded-full bg-[#004DFF] px-8 text-lg font-semibold text-white hover:bg-[#0040d6]">
+                  Testar 7 dias grátis <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+
+              </Link>
+              <a href="https://wa.me/message/BYSDMLHYTA6EA1" target="_blank" rel="noreferrer">
+                <Button size="lg" variant="outline" className="h-14 rounded-full border-white/40 bg-white/10 px-8 text-lg font-semibold text-white backdrop-blur hover:bg-white/20 hover:text-white">
+                  <Mail className="mr-2 h-4 w-4" /> Fale com a gente
+                </Button>
+              </a>
+            </div>
+
+            <div className="hero-reveal hero-d5 mt-6 flex flex-wrap items-center gap-6 text-sm text-white/80">
+              {["Sem cartão", "5 min pra configurar", "Cancele quando quiser"].map((t) => (
+                <span key={t} className="inline-flex items-center gap-2">
+                  <Check className="h-4 w-4 text-[#4d8bff]" /> {t}
+                </span>
+              ))}
+            </div>
+          </div>
+
           {/* Card de chat */}
-          <div className="hero-reveal-right hero-d3 w-full max-w-[600px] self-end">
+          <div className="hero-reveal-right hero-d3 w-full max-w-[600px] self-end ml-auto">
             <div className="flex h-[clamp(440px,56vh,520px)] flex-col rounded-[32px] bg-[#E8E5E2] p-5 shadow-2xl">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -878,50 +922,6 @@ export default function Landing() {
               <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/60 px-4 py-3 text-sm text-slate-500">
                 <Check className="h-4 w-4" /> Toque numa pergunta e veja a venda acontecer
               </div>
-            </div>
-          </div>
-
-          <div>
-            <div className="hero-reveal inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur">
-              <Trophy className="h-4 w-4 text-amber-300" />
-              CRM nº 1 com IA para vender no WhatsApp
-            </div>
-
-            <h1 className="hero-reveal hero-d1 mt-6 font-space-grotesk text-[clamp(2.8rem,6.5vw,4.5rem)] font-bold leading-[1.05] tracking-tight text-white">
-              Sua IA vende, atende e <span className="text-[#4d8bff]">organiza seus clientes</span> no automático.
-            </h1>
-
-            <p className="hero-reveal hero-d2 mt-6 max-w-xl text-xl leading-relaxed text-white/80">
-              Enquanto você trabalha, ela responde cada cliente em segundos, fecha a
-              venda e organiza tudo no CRM. 7 dias grátis, sem cartão.
-            </p>
-
-            <div className="hero-reveal hero-d3 mt-8 flex items-baseline gap-2 text-white">
-              <span className="text-sm text-white/70">a partir de</span>
-              <span className="font-space-grotesk text-5xl font-bold">R$ 29,90</span>
-              <span className="text-white/70">/mês</span>
-            </div>
-
-            <div className="hero-reveal hero-d4 mt-8 flex flex-wrap items-center gap-4">
-              <Link to="/auth">
-                <Button size="lg" className="btn-shine btn-press h-14 rounded-full bg-[#004DFF] px-8 text-lg font-semibold text-white hover:bg-[#0040d6]">
-                  Testar 7 dias grátis <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-
-              </Link>
-              <a href="https://wa.me/message/BYSDMLHYTA6EA1" target="_blank" rel="noreferrer">
-                <Button size="lg" variant="outline" className="h-14 rounded-full border-white/40 bg-white/10 px-8 text-lg font-semibold text-white backdrop-blur hover:bg-white/20 hover:text-white">
-                  <Mail className="mr-2 h-4 w-4" /> Fale com a gente
-                </Button>
-              </a>
-            </div>
-
-            <div className="hero-reveal hero-d5 mt-6 flex flex-wrap items-center gap-6 text-sm text-white/80">
-              {["Sem cartão", "5 min pra configurar", "Cancele quando quiser"].map((t) => (
-                <span key={t} className="inline-flex items-center gap-2">
-                  <Check className="h-4 w-4 text-[#4d8bff]" /> {t}
-                </span>
-              ))}
             </div>
           </div>
 
