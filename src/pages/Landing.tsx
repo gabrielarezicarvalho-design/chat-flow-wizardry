@@ -458,7 +458,44 @@ function RotatingChips({ tier }: { tier: string }) {
   );
 }
 
+const IDEAL_PARA = [
+  { icon: Wrench, label: "Prestadores de Serviço" },
+  { icon: Stethoscope, label: "Clínicas Odontológicas" },
+  { icon: Activity, label: "Clínicas e Consultórios" },
+  { icon: Building2, label: "Imobiliárias" },
+  { icon: Scale, label: "Advogados" },
+  { icon: Store, label: "E-commerce" },
+];
+
+function IdealParaMarquee() {
+  const loop = [...IDEAL_PARA, ...IDEAL_PARA, ...IDEAL_PARA];
+  return (
+    <section className="border-y border-slate-200/70 bg-[#faf9f6] py-8">
+      <p className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+        Ideal para
+      </p>
+      <div className="chip-marquee mt-5 w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+        <div
+          className="chip-marquee-track flex w-max items-center gap-8"
+          style={{ animationDuration: `${IDEAL_PARA.length * 6}s` }}
+        >
+          {loop.map((item, i) => (
+            <div key={`${i}-${item.label}`} className="flex shrink-0 items-center gap-8">
+              <span className="flex shrink-0 items-center gap-2 whitespace-nowrap text-[15px] text-slate-700">
+                <item.icon className="h-[18px] w-[18px] text-[#004DFF]" />
+                {item.label}
+              </span>
+              <span className="text-slate-300">·</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 type HeroQA = { q: string; a: string };
+
 
 const HERO_SEGMENTS: { name: string; greeting: string; qa: HeroQA[] }[] = [
   {
