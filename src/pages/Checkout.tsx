@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Lock, Check, Copy, ShieldCheck, ArrowRight, Package, Sparkles, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { usePlanConfigs } from "@/hooks/usePlanConfigs";
 
 type Tier = "start" | "business";
 type Billing = "monthly" | "annual";
@@ -72,7 +73,14 @@ export default function Checkout() {
   const tier = (params.get("tier") as Tier) === "business" ? "business" : "start";
   const billing = (params.get("billing") as Billing) === "annual" ? "annual" : "monthly";
 
-  const plan = PLANS[tier];
+  const { plans: planConfigs } = usePlanConfigs();
+  const configured = planConfigs.find((p) => p.slug === tier);
+  const plan = {
+    ...PLANS[tier],
+    name: configured?.name || PLANS[tier].name,
+    monthly: configured?.price_monthly ?? PLANS[tier].monthly,
+    annual: configured?.price_annual ?? PLANS[tier].annual,
+  };
   const total = billing === "annual" ? plan.annual * 12 : plan.monthly;
   const billingLabel = billing === "annual" ? "Anual (12 meses)" : "Mensal (recorrente)";
 
