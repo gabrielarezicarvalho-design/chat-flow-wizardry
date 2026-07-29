@@ -833,7 +833,7 @@ export default function Landing() {
 
         {/* Conteúdo */}
         <div className="relative z-10 flex flex-1 items-center">
-          <div className="mx-auto grid w-full max-w-7xl items-center gap-12 pl-6 pr-3 py-12 lg:grid-cols-2 lg:pr-2">
+          <div className="mx-auto grid w-full max-w-7xl items-center gap-12 pl-4 pr-2 py-12 lg:grid-cols-2 lg:pr-0">
           <div>
             <div className="hero-reveal inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur">
               <Trophy className="h-4 w-4 text-amber-300" />
