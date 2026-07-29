@@ -780,7 +780,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* HERO com nav flutuante sobre a foto */}
-      <section className="relative overflow-hidden">
+      <section className="relative flex min-h-screen flex-col overflow-hidden">
         {/* Fundo com vídeo */}
         <div className="absolute inset-0">
           <video
