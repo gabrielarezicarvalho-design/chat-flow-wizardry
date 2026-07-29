@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform } from "framer-motion";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
 import heroWoman from "@/assets/hero-woman.jpg";
 import avatarRafael from "@/assets/cases/rafael.png.asset.json";
@@ -403,6 +404,15 @@ export default function Landing() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const conversationRef = useRef<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const sweepY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  const sweepOpacity = useTransform(scrollYProgress, [0, 0.15, 0.5, 0.85, 1], [0, 1, 1, 0.8, 0]);
+  const heroDim = useTransform(scrollYProgress, [0, 0.6], [0, 0.45]);
 
   const chatMessages = [
     { id: 1, sender: "client", content: "Vi sua mensagem, do que se trata?", delay: 0 },
@@ -705,7 +715,23 @@ export default function Landing() {
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-[#0b0d0b]">
+      <section ref={heroRef} className="relative overflow-hidden bg-[#0b0d0b]">
+        {/* Sweep selection bar */}
+        <motion.div
+          style={{ y: sweepY, opacity: sweepOpacity }}
+          className="pointer-events-none absolute inset-x-0 z-20 h-24 -translate-y-1/2"
+        >
+          <div className="h-full w-full bg-gradient-to-b from-transparent via-[#004DFF]/40 to-transparent blur-md" />
+          <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-[#004DFF]" />
+          <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 bg-[#004DFF]/30 blur-sm" />
+        </motion.div>
+
+        {/* Dim overlay on scroll */}
+        <motion.div
+          style={{ opacity: heroDim }}
+          className="pointer-events-none absolute inset-0 z-10 bg-[#0b0d0b]/60"
+        />
+
         <div className="pointer-events-none absolute -right-40 top-0 h-[700px] w-[700px] rounded-full bg-[#004DFF]/20 blur-[140px]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-16 lg:grid-cols-2">
           <div>
