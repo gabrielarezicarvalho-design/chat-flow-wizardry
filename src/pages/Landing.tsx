@@ -102,7 +102,7 @@ function FeaturesPopover() {
       <PopoverContent
         align="start"
         sideOffset={12}
-        className="w-[1024px] max-w-[95vw] overflow-hidden border border-[#2a2d2a] bg-[#141614] p-0 text-white shadow-2xl shadow-black/70"
+        className="w-[900px] max-w-[95vw] overflow-hidden border border-[#2a2d2a] bg-[#141614] p-0 text-white shadow-2xl shadow-black/70"
       >
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Grid de funcionalidades */}
