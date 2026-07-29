@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Infinity as InfinityIcon, Crown, Calendar, CreditCard, ArrowUpRight } from "lucide-react";
+import { Infinity as InfinityIcon, Crown, Calendar, CreditCard, ArrowUpRight, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const CATEGORIES: { title: string; items: LimitResource[] }[] = [
