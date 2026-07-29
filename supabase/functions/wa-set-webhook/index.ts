@@ -161,7 +161,7 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    console.log("🔧 CONFIGURANDO WEBHOOK Evolution → MARKETFLOW");
+    console.log("🔧 CONFIGURANDO WEBHOOK Evolution → NEXTPRO");
     console.log("  Instance ID:", instance_id, " Base URL:", base_url);
 
     if (!instance_id || !base_url || !token) {

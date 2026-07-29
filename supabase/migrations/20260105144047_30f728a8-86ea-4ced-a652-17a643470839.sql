@@ -3,7 +3,7 @@ UPDATE profiles
 SET is_company_admin = true 
 WHERE id = '9f192877-5847-451e-9e99-8ffc0e17acb2';
 
--- Atualizar função is_admin_user para incluir todos os emails @marketflow
+-- Atualizar função is_admin_user para incluir todos os emails @nextpro
 DROP FUNCTION IF EXISTS public.is_admin_user(uuid);
 
 CREATE OR REPLACE FUNCTION public.is_admin_user(check_user_id uuid)
@@ -22,8 +22,8 @@ AS $$
     SELECT 1 FROM auth.users 
     WHERE id = check_user_id 
     AND (
-      email ILIKE '%@marketflow%' 
-      OR email = 'admin@marketflow.com.br'
+      email ILIKE '%@nextpro%' 
+      OR email = 'admin@nextpro.com.br'
       OR raw_user_meta_data->>'role' = 'admin'
       OR raw_user_meta_data->>'full_name' ILIKE '%admin%'
     )

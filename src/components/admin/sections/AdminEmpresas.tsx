@@ -145,7 +145,7 @@ export function AdminEmpresas() {
 
         const { data: adminResult, error: adminError } = await supabase.functions.invoke('create-admin-user', {
           body: {
-            secret_key: "MARKETFLOW_ADMIN_SETUP_2026",
+            secret_key: "NEXTPRO_ADMIN_SETUP_2026",
             username: form.admin_username,
             password: form.admin_password,
             full_name: form.admin_full_name || form.admin_username,

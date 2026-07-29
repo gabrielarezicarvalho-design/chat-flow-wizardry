@@ -37,7 +37,7 @@ CREATE TABLE public.white_label_partners (
 ALTER TABLE public.white_label_partners ENABLE ROW LEVEL SECURITY;
 
 -- Políticas RLS
--- Admins MarketFlow podem gerenciar todos os parceiros
+-- Admins Next Pro podem gerenciar todos os parceiros
 CREATE POLICY "Admins can manage all partners"
 ON public.white_label_partners
 FOR ALL

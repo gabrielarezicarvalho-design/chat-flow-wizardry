@@ -2452,7 +2452,7 @@ serve(async (req) => {
   try {
     const payload = await req.json();
     console.log("=".repeat(80));
-    console.log("📩 WEBHOOK Evolution → MARKETFLOW");
+    console.log("📩 WEBHOOK Evolution → NEXTPRO");
     console.log("⏰ Timestamp:", new Date().toISOString());
     console.log("=".repeat(80));
     console.log("📦 Payload:", JSON.stringify(payload, null, 2));

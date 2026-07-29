@@ -1,13 +1,13 @@
 #!/bin/bash
 # =============================================================
 # Script de instalação da Storage API na VPS
-# Execute como root: bash /var/www/marketflow/vps-setup/install-storage-api.sh
+# Execute como root: bash /var/www/nextpro/vps-setup/install-storage-api.sh
 # =============================================================
 
 set -e
 
-STORAGE_API_DIR="/var/www/marketflow/storage-api"
-STORAGE_DATA_DIR="/var/www/marketflow/storage"
+STORAGE_API_DIR="/var/www/nextpro/storage-api"
+STORAGE_DATA_DIR="/var/www/nextpro/storage"
 
 echo "📦 Instalando Storage API..."
 
@@ -16,8 +16,8 @@ mkdir -p "$STORAGE_API_DIR"
 mkdir -p "$STORAGE_DATA_DIR"
 
 # 2. Copiar arquivos
-cp /var/www/marketflow/vps-setup/storage-api/server.js "$STORAGE_API_DIR/"
-cp /var/www/marketflow/vps-setup/storage-api/package.json "$STORAGE_API_DIR/"
+cp /var/www/nextpro/vps-setup/storage-api/server.js "$STORAGE_API_DIR/"
+cp /var/www/nextpro/vps-setup/storage-api/package.json "$STORAGE_API_DIR/"
 
 # 3. Instalar dependências
 cd "$STORAGE_API_DIR"

@@ -672,8 +672,8 @@ function IntegrationGuide() {
         <CardContent className="space-y-3">
           <p className="text-sm text-slate-400">Adicione estas variáveis no <code className="text-cyan-400">.env</code> do seu sistema:</p>
           <CodeBlock code={`# .env do seu sistema
-MARKETFLOW_API_URL=${BASE_URL}
-MARKETFLOW_API_KEY=mk_live_sua_chave_aqui
+NEXTPRO_API_URL=${BASE_URL}
+NEXTPRO_API_KEY=mk_live_sua_chave_aqui
 
 # Para o Embedded Signup do Facebook (será retornado pela API)
 # META_APP_ID será obtido via /connections/start-signup`} />
@@ -706,8 +706,8 @@ class NextProService {
   private apiKey: string;
 
   constructor() {
-    this.baseUrl = process.env.MARKETFLOW_API_URL!;
-    this.apiKey = process.env.MARKETFLOW_API_KEY!;
+    this.baseUrl = process.env.NEXTPRO_API_URL!;
+    this.apiKey = process.env.NEXTPRO_API_KEY!;
   }
 
   private async request(method: string, path: string, body?: any) {
@@ -824,8 +824,8 @@ import requests
 
 class NextProService:
     def __init__(self):
-        self.base_url = os.environ["MARKETFLOW_API_URL"]
-        self.api_key = os.environ["MARKETFLOW_API_KEY"]
+        self.base_url = os.environ["NEXTPRO_API_URL"]
+        self.api_key = os.environ["NEXTPRO_API_KEY"]
 
     def _request(self, method, path, json=None):
         res = requests.request(
@@ -894,8 +894,8 @@ class NextProService {
     private string $apiKey;
 
     public function __construct() {
-        $this->baseUrl = env('MARKETFLOW_API_URL');
-        $this->apiKey = env('MARKETFLOW_API_KEY');
+        $this->baseUrl = env('NEXTPRO_API_URL');
+        $this->apiKey = env('NEXTPRO_API_KEY');
     }
 
     private function request(string $method, string $path, ?array $body = null): array {
@@ -970,9 +970,9 @@ class NextProService {
           <CodeBlock code={`// embedded-signup.js
 // Passo 1: Buscar config do Next Pro
 async function startWhatsAppSignup() {
-  const res = await fetch(MARKETFLOW_API_URL + '/connections/start-signup', {
+  const res = await fetch(NEXTPRO_API_URL + '/connections/start-signup', {
     method: 'POST',
-    headers: { 'X-Api-Key': MARKETFLOW_API_KEY },
+    headers: { 'X-Api-Key': NEXTPRO_API_KEY },
   });
   const config = await res.json();
 
@@ -1016,10 +1016,10 @@ window.addEventListener('message', async (event) => {
       const { phone_number_id, waba_id } = data.data;
       
       // Enviar callback para o Next Pro
-      const res = await fetch(MARKETFLOW_API_URL + '/connections/callback', {
+      const res = await fetch(NEXTPRO_API_URL + '/connections/callback', {
         method: 'POST',
         headers: {
-          'X-Api-Key': MARKETFLOW_API_KEY,
+          'X-Api-Key': NEXTPRO_API_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

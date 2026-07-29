@@ -90,8 +90,8 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- Verificar se o email é do admin MarketFlow
-  IF NEW.email = 'admin@marketflow.com.br' THEN
+  -- Verificar se o email é do admin Next Pro
+  IF NEW.email = 'admin@nextpro.com.br' THEN
     INSERT INTO public.user_roles (user_id, role)
     VALUES (NEW.id, 'admin')
     ON CONFLICT (user_id, role) DO NOTHING;
