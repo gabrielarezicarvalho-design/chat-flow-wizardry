@@ -1503,6 +1503,9 @@ export default function Landing() {
       </section>
 
 
+      {/* DA PRIMEIRA MENSAGEM AO PAGAMENTO */}
+      <FluxoCompletoSection />
+
       {/* IA */}
       <section id="ia" className="bg-slate-50 py-24">
         <div className="mx-auto max-w-6xl px-6">
