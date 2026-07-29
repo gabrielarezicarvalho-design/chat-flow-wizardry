@@ -682,7 +682,7 @@ export default function Landing() {
               NEXT <span className="text-[#004DFF]">PRO</span>
             </div>
             <nav className="hidden lg:flex items-center gap-8 text-base text-slate-200">
-              <a href="#recursos" className="hover:text-white">Funcionalidades</a>
+              <FeaturesPopover />
               <a href="#planos" className="hover:text-white">Planos</a>
               <a href="#depoimentos" className="hover:text-white">Cases</a>
               <a href="#pagamentos" className="hover:text-white">Integrações</a>
