@@ -17,7 +17,7 @@ import {
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
-  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight, CheckCircle2
+  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight
 } from "lucide-react";
 
 type LeadItem = { name: string; phone: string; origin: string };
@@ -379,65 +379,6 @@ function RotatingBrands() {
           className="brand-fade-in font-space-grotesk text-xl font-bold tracking-wide text-slate-400"
         >
           {b}
-        </span>
-      ))}
-    </>
-  );
-}
-
-const PLAN_FEATURES: Record<string, string[]> = {
-  start: [
-    "5 atendentes",
-    "2 conexões WhatsApp",
-    "IA completa",
-    "Chat interno",
-    "CRM com funil de vendas",
-    "Automação de fluxos",
-    "Disparos em massa",
-    "Agendamentos",
-    "Prospecção Google Maps",
-    "Cobranças recorrentes",
-    "Relatórios essenciais",
-    "Suporte por WhatsApp",
-  ],
-  business: [
-    "20 atendentes",
-    "Clientes ilimitados",
-    "Prospecção completa",
-    "Suporte prioritário",
-    "Conexões WhatsApp ilimitadas",
-    "Agentes de IA avançados",
-    "Voz clonada com IA",
-    "Leads Instagram e TikTok",
-    "Espionagem de anúncios",
-    "Recuperação financeira",
-    "API e webhooks",
-    "Relatórios avançados",
-  ],
-};
-
-function RotatingChips({ tier }: { tier: string }) {
-  const features = PLAN_FEATURES[tier] ?? [];
-  const pages = Math.max(1, Math.ceil(features.length / 4));
-  const [page, setPage] = useState(0);
-
-  useEffect(() => {
-    if (pages <= 1) return;
-    const interval = setInterval(() => setPage((p) => (p + 1) % pages), 4000);
-    return () => clearInterval(interval);
-  }, [pages]);
-
-  const current = features.slice(page * 4, page * 4 + 4);
-
-  return (
-    <>
-      {current.map((c) => (
-        <span
-          key={`${page}-${c}`}
-          className="brand-fade-in flex items-center gap-1.5 text-sm text-slate-600"
-        >
-          <CheckCircle2 className="h-4 w-4 text-slate-400" />
-          {c}
         </span>
       ))}
     </>
@@ -1513,100 +1454,121 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="mt-14 grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {[
-              {
-                tier: "start",
-                name: "Start",
-                price: billing === "monthly" ? "49,90" : "41,58",
-                tagline: "Para quem está começando",
-                highlights: [
-                  { strong: "100 disparos", pre: "até ", post: "/mês" },
-                  { strong: "1.000", pre: "", post: " créditos de mensagem" },
-                ],
-                chips: ["5 atendentes", "2 conexões WhatsApp", "IA completa", "Chat interno"],
-                featured: false,
-              },
-              {
-                tier: "business",
-                name: "Business",
-                price: billing === "monthly" ? "99,90" : "83,25",
-                tagline: "Para operações de alto volume",
-                highlights: [
-                  { strong: "10.000 disparos", pre: "até ", post: "/mês" },
-                  { strong: "50.000", pre: "", post: " créditos de mensagem" },
-                ],
-                chips: ["20 atendentes", "Clientes ilimitados", "Prospecção completa", "Suporte prioritário"],
-                featured: true,
-              },
-            ].map((p) => (
-              <div
-                key={p.tier}
-                className="relative rounded-[28px] bg-slate-50 p-7 text-left"
-                style={
-                  p.featured
-                    ? { border: "1.5px solid #004DFF", boxShadow: "0 20px 60px -25px rgba(0,77,255,0.45)" }
-                    : { border: "1px solid #e2e8f0" }
-                }
-              >
-                <div className="text-sm text-slate-400">Plano</div>
+          <div className="mt-14 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {/* Start */}
+            <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-8">
+              <div className="text-2xl font-bold text-slate-900">Start</div>
+              <p className="mt-1 text-base text-slate-500">Para autônomos e pequenos times.</p>
 
-                <div className="mt-1 flex items-baseline justify-between gap-3">
-                  <div className="text-3xl font-bold tracking-tight text-slate-900">{p.name}</div>
-                  <div className="flex items-baseline">
-                    <span className="text-3xl font-bold tracking-tight text-slate-900">R${p.price}</span>
-                    <span className="ml-1 text-sm text-slate-400">/mês</span>
-                  </div>
-                </div>
-
-                <p className="mt-3 text-sm font-semibold" style={{ color: "#004DFF" }}>
-                  {p.tagline}
-                </p>
-
-                <div className="my-6 h-px bg-slate-200" />
-
-                <div className="space-y-3">
-                  <div className="rounded-2xl px-5 py-4 text-base text-slate-500" style={{ backgroundColor: "rgba(0,77,255,0.06)", border: "1px solid rgba(0,77,255,0.12)" }}>
-                    {p.highlights[0].pre}
-                    <span className="font-bold text-slate-900">{p.highlights[0].strong}</span>
-                    {p.highlights[0].post}
-                  </div>
-                  <div className="rounded-2xl bg-white border border-slate-200 px-5 py-4 text-base text-slate-500">
-                    <span className="font-bold text-slate-900">{p.highlights[1].strong}</span>
-                    {p.highlights[1].post}
-                  </div>
-                </div>
-
-                <p className="mt-7 text-center text-sm font-semibold" style={{ color: "#004DFF" }}>
-                  *Todas Funcionalidades Inclusas
-                </p>
-
-                <button
-                  onClick={() => (window.location.href = `/checkout?tier=${p.tier}&billing=${billing}`)}
-                  className="mt-3 w-full rounded-full py-4 text-lg font-bold text-white transition hover:opacity-90"
-                  style={{ backgroundColor: "#004DFF" }}
-                >
-                  Testar grátis
-                </button>
-
-                <div className="mt-5 flex flex-col items-center">
-                  <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
-                    <ShieldCheck className="h-4 w-4" style={{ color: "#004DFF" }} />
-                    Garantia de 30 dias
-                  </div>
-                  <div className="text-sm text-slate-500">ou seu dinheiro de volta</div>
-                </div>
-
-                <div className="mt-6 flex min-h-[52px] flex-wrap justify-center gap-x-5 gap-y-2 border-t border-slate-200 pt-5">
-                  <RotatingChips tier={p.tier} />
-                </div>
+              <div className="mt-8 flex items-baseline gap-2">
+                <span className="text-6xl font-bold text-slate-900">
+                  R$ {billing === "monthly" ? "49,90" : "41,58"}
+                </span>
+                <span className="text-slate-500">/mês</span>
               </div>
-            ))}
+              <div className="mt-1 text-xs text-slate-500">
+                {billing === "monthly" ? "ou R$ 41,58/mês no anual" : "cobrado R$ 499 uma vez por ano"}
+              </div>
+              <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: "#004DFF" }}>
+                <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
+              </div>
+
+              <ul className="mt-8 space-y-3 text-base text-slate-700">
+                {[
+                  "5 atendentes",
+                  "2 conexões WhatsApp",
+                  "IA completa",
+                  "100 disparos em massa/mês",
+                  "500 contatos/mês",
+                  "Histórico de atendimentos",
+                  "Relatórios",
+                  "500 vendas e cobranças/mês",
+                  "3 fluxos de IA/mês",
+                  "3 agentes de IA/mês",
+                  "4 departamentos/mês",
+                  "Segmentação de contatos",
+                  "Chat interno",
+                  "10 usuários/mês",
+                ].map((f) => (
+                  <li key={f} className="flex items-center gap-2.5">
+                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs shrink-0">✓</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+
+              <button
+                onClick={() => (window.location.href = `/checkout?tier=start&billing=${billing}`)}
+                className="mt-6 w-full rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold py-3 transition"
+              >
+                Assinar Start
+              </button>
+
+            </div>
+
+            {/* Business */}
+            <div className="relative rounded-3xl bg-white border-2 p-8" style={{ borderColor: "#004DFF", boxShadow: "0 20px 60px -25px rgba(0, 77, 255, 0.4)" }}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white" style={{ backgroundColor: "#004DFF" }}>
+                Mais popular
+              </div>
+              <div className="text-2xl font-bold text-slate-900">Business</div>
+              <p className="mt-1 text-base text-slate-500">Para equipes em crescimento.</p>
+
+              <div className="mt-8 flex items-baseline gap-2">
+                <span className="text-6xl font-bold text-slate-900">
+                  R$ {billing === "monthly" ? "99,90" : "83,25"}
+                </span>
+                <span className="text-slate-500">/mês</span>
+              </div>
+              <div className="mt-1 text-xs text-slate-500">
+                {billing === "monthly" ? "ou R$ 83,25/mês no anual" : "cobrado R$ 999 uma vez por ano"}
+              </div>
+              <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium" style={{ color: "#004DFF" }}>
+                <Sparkles className="h-3.5 w-3.5" /> 3 dias grátis
+              </div>
+
+              <ul className="mt-8 space-y-3 text-base text-slate-700">
+                {[
+                  "20 atendentes",
+                  "10 conexões WhatsApp",
+                  "IA completa",
+                  "Até 10.000 disparos em massa/mês",
+                  "10.000 contatos/mês",
+                  "Histórico de atendimentos",
+                  "Relatórios avançados",
+                  "Vendas e cobranças ilimitadas",
+                  "Fluxos de IA ilimitados",
+                  "Agentes de IA ilimitados",
+                  "Departamentos ilimitados",
+                  "Segmentação de contatos",
+                  "Chat interno",
+                  "Prospecção Google Maps",
+                  "Prospecção Instagram e TikTok",
+                  "Espionar anúncios",
+                  "Suporte prioritário",
+                ].map((f) => (
+                  <li key={f} className="flex items-center gap-2.5">
+                    <span className="h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs shrink-0">✓</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+
+              <button
+                onClick={() => (window.location.href = `/checkout?tier=business&billing=${billing}`)}
+                className="mt-6 w-full rounded-xl text-white font-semibold py-3 transition hover:opacity-90"
+                style={{ backgroundColor: "#004DFF" }}
+              >
+                Assinar Business
+              </button>
+
+            </div>
           </div>
 
-
           {/* TABELA COMPARATIVA */}
-          <div className="mt-16 max-w-3xl mx-auto">
+          <div className="mt-16 max-w-4xl mx-auto">
             <h3 className="text-center text-3xl font-bold text-slate-900">Compare os planos</h3>
             <p className="mt-2 text-center text-base text-slate-500">Veja lado a lado o que cada plano entrega.</p>
 
