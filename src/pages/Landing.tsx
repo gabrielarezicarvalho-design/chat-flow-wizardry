@@ -851,8 +851,9 @@ export default function Landing() {
             </h1>
 
             <p className="hero-reveal hero-d2 mt-6 max-w-xl text-xl leading-relaxed text-white/80">
-              Enquanto você trabalha, ela responde cada cliente em segundos, fecha a
-              venda e organiza tudo no CRM. 7 dias grátis, sem cartão.
+              <span className="block lg:whitespace-nowrap">Enquanto você trabalha, ela responde cada cliente em</span>
+              <span className="block lg:whitespace-nowrap">segundos, fecha a venda e organiza tudo no CRM. 7 dias</span>
+              <span className="block lg:whitespace-nowrap">grátis, sem cartão.</span>
             </p>
 
             <div className="hero-reveal hero-d3 mt-8 flex items-baseline gap-2 text-white">
