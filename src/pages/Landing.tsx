@@ -1544,7 +1544,9 @@ export default function Landing() {
               {
                 tier: "start",
                 name: "Start",
-                price: billing === "monthly" ? "49,90" : "41,58",
+                monthlyPrice: "49,90",
+                annualPrice: "41,58",
+                annualTotal: "499,00",
                 tagline: "Para quem está começando",
                 highlights: [
                   { strong: "100 disparos", pre: "até ", post: "/mês" },
@@ -1556,7 +1558,9 @@ export default function Landing() {
               {
                 tier: "business",
                 name: "Business",
-                price: billing === "monthly" ? "99,90" : "83,25",
+                monthlyPrice: "99,90",
+                annualPrice: "83,25",
+                annualTotal: "999,00",
                 tagline: "Para operações de alto volume",
                 highlights: [
                   { strong: "10.000 disparos", pre: "até ", post: "/mês" },
