@@ -1597,13 +1597,8 @@ export default function Landing() {
                   <div className="text-sm text-slate-500">ou seu dinheiro de volta</div>
                 </div>
 
-                <div className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 border-t border-slate-200 pt-5">
-                  {p.chips.map((c) => (
-                    <span key={c} className="flex items-center gap-1.5 text-sm text-slate-600">
-                      <CheckCircle2 className="h-4 w-4 text-slate-400" />
-                      {c}
-                    </span>
-                  ))}
+                <div className="mt-6 flex min-h-[52px] flex-wrap justify-center gap-x-5 gap-y-2 border-t border-slate-200 pt-5">
+                  <RotatingChips tier={p.tier} />
                 </div>
               </div>
             ))}
