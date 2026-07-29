@@ -1514,7 +1514,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="mt-14 grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="mt-14 grid md:grid-cols-2 gap-6 max-w-3xl mx-auto items-start">
             {[
               {
                 tier: "start",
