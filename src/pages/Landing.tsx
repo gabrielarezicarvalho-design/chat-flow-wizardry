@@ -570,7 +570,7 @@ export default function Landing() {
               ))}
             </div>
             <p className="hero-reveal hero-d6 mt-6 text-base text-slate-400">
-              <span className="font-semibold text-white">+200 empresas</span> já vendem mais com a NEXT PRO.
+              <span className="font-semibold text-white">+20 empresas</span> já vendem mais com a NEXT PRO.
             </p>
           </div>
 
