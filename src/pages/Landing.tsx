@@ -1885,17 +1885,19 @@ export default function Landing() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
-          <h2 className="text-4xl md:text-6xl font-bold">Quero vender no automático.</h2>
-          <p className="mt-4 opacity-90 max-w-xl mx-auto">
-            Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
-          </p>
-          <Link to="/auth">
-            <Button size="lg" className="mt-8 bg-white text-primary-dark hover:bg-slate-100 rounded-full px-8 h-12 font-semibold">
-              Começar Teste Grátis <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+      <section className="dark-band bg-[#0b0d0b] pt-24 pb-32">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
+            <h2 className="text-4xl md:text-6xl font-bold">Quero vender no automático.</h2>
+            <p className="mt-4 opacity-90 max-w-xl mx-auto">
+              Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
+            </p>
+            <Link to="/auth">
+              <Button size="lg" className="mt-8 bg-white text-primary-dark hover:bg-slate-100 rounded-full px-8 h-12 font-semibold">
+                Começar Teste Grátis <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
