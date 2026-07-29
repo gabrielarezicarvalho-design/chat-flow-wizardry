@@ -1615,7 +1615,7 @@ export default function Landing() {
                   <div className="text-sm text-slate-500">ou seu dinheiro de volta</div>
                 </div>
 
-                <div className="mt-6 flex min-h-[52px] flex-wrap justify-center gap-x-5 gap-y-2 border-t border-slate-200 pt-5">
+                <div className="mt-6 min-h-[52px] border-t border-slate-200 pt-5">
                   <RotatingChips tier={p.tier} />
                 </div>
               </div>
