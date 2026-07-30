@@ -1384,7 +1384,7 @@ export default function Landing() {
 
           {/* Right Content: macOS window com mapa + leads */}
           <div className="order-1 lg:order-2">
-            <ProspeccaoMapWindow />
+            <ProspeccaoMapWindow onLeads={setLiveLeads} />
           </div>
 
 
