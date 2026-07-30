@@ -1379,8 +1379,8 @@ export default function Landing() {
         <div className="text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prospecção automática</span>
           <h2 className="mt-4 text-5xl md:text-6xl font-bold tracking-tight text-slate-900 font-space-grotesk">
-            Encontre clientes{" "}
-            <span className="text-[#004DFF]">automaticamente.</span>
+            Encontre clientes
+            <span className="block text-[#004DFF]">automaticamente.</span>
           </h2>
           <p className="mt-5 text-slate-600 max-w-2xl mx-auto leading-relaxed">
             Pesquisa no Google Maps, extrai contatos e dispara o primeiro "oi" no WhatsApp.
