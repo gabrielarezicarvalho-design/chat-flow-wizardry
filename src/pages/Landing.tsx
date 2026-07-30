@@ -1714,7 +1714,7 @@ export default function Landing() {
           {/* Bento grid */}
           <div className="mt-16 grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Chat — grande */}
-            <div className="group md:col-span-8 flex flex-col md:flex-row gap-8 rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm">
+            <div className="group md:col-span-8 flex flex-col md:flex-row gap-8 rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20">
               <div className="md:w-[42%] shrink-0">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
                   <MessageCircle className="h-6 w-6 text-white" />
@@ -1752,7 +1752,7 @@ export default function Landing() {
             </div>
 
             {/* Transcreve áudio */}
-            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm">
+            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20">
               <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
                 <Mic className="h-6 w-6 text-white" />
               </div>
@@ -1778,7 +1778,7 @@ export default function Landing() {
             </div>
 
             {/* Recupera leads frios */}
-            <div className="md:col-span-4 flex flex-col justify-between rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm">
+            <div className="md:col-span-4 flex flex-col justify-between rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20">
               <div>
                 <h3 className="font-space-grotesk text-xl font-bold text-[#0B1220]">Recupera leads frios</h3>
                 <p className="mt-2 text-sm text-[#0B1220]/70">
@@ -1794,7 +1794,7 @@ export default function Landing() {
             </div>
 
             {/* Agenda automático */}
-            <div className="relative md:col-span-4 flex flex-col justify-between overflow-hidden rounded-3xl bg-[#0B1220] p-8">
+            <div className="relative md:col-span-4 flex flex-col justify-between overflow-hidden rounded-3xl bg-[#0B1220] p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/25 hover:ring-1 hover:ring-[#004DFF]/30">
               <div className="relative z-10">
                 <Calendar className="mb-5 h-6 w-6 text-[#004DFF]" />
                 <h3 className="font-space-grotesk text-xl font-bold text-white">Agenda automático</h3>
@@ -1811,7 +1811,7 @@ export default function Landing() {
             </div>
 
             {/* Aviso de lead quente */}
-            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm">
+            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20">
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
                   <TrendingUp className="h-6 w-6 text-white" />
@@ -1832,7 +1832,7 @@ export default function Landing() {
             </div>
 
             {/* Anti-bloqueio */}
-            <div className="md:col-span-12 flex flex-col items-center justify-between gap-6 rounded-3xl border border-[#E6ECF7] bg-white p-8 shadow-sm md:flex-row">
+            <div className="md:col-span-12 flex flex-col items-center justify-between gap-6 rounded-3xl border border-[#E6ECF7] bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20 md:flex-row">
               <div className="flex items-center gap-6">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#004DFF]/10">
                   <ShieldCheck className="h-8 w-8 text-[#004DFF]" />
