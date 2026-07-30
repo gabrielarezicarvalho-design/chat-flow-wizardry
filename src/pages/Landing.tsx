@@ -23,6 +23,8 @@ import {
   Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight, ChevronUp, CheckCircle2,
   Trophy, Globe, Mail
 } from "lucide-react";
+import { ProspeccaoMapWindow } from "@/components/landing/ProspeccaoMapWindow";
+
 
 const EMOJIS = ["😀","😂","😍","🥳","🚀","🔥","👍","🙏","💜","✨","✅","💡","📞","📎","🎉","💬","🤖","💰","📈","🎯"];
 
