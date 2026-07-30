@@ -1374,24 +1374,27 @@ export default function Landing() {
 
 
       {/* PROSPECÇÃO */}
-      <section id="recursos" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prospecção automática</span>
-          <h2 className="mt-4 text-5xl md:text-6xl font-bold tracking-tight text-slate-900 font-space-grotesk">
+      <section id="recursos" className="mx-auto max-w-[1240px] px-5 sm:px-6 py-20 sm:py-28">
+        <div className="text-center max-w-3xl mx-auto">
+          <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#004DFF] shadow-sm">
+            <MapPin className="h-3.5 w-3.5" />
+            Prospecção automática
+          </span>
+          <h2 className="mt-5 text-4xl sm:text-5xl md:text-[3.5rem] font-bold tracking-tight leading-[1.05] text-slate-900 font-space-grotesk">
             Encontre clientes
             <span className="block text-[#004DFF]">automaticamente.</span>
           </h2>
-          <p className="mt-5 text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-5 text-base sm:text-lg text-slate-600 leading-relaxed">
             Pesquisa no Google Maps, extrai contatos e dispara o primeiro "oi" no WhatsApp.
             O sistema acha clientes enquanto você dorme.
           </p>
         </div>
 
-        <div className="mt-14 grid md:grid-cols-2 gap-6">
+        <div className="mt-12 sm:mt-16 grid lg:grid-cols-[1.35fr_1fr] gap-5 sm:gap-6 items-start">
           {/* Card do mapa estilo macOS */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
-              <div className="flex gap-1.5 group">
+          <div className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-12px_rgba(15,23,42,0.12)] overflow-hidden transition-shadow duration-300 hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_20px_44px_-16px_rgba(0,77,255,0.18)]">
+            <div className="flex items-center gap-3 px-3 sm:px-4 py-3 border-b border-slate-100 bg-slate-50/60">
+              <div className="hidden sm:flex gap-1.5">
                 <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
                 <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
                 <span className="h-3 w-3 rounded-full bg-[#28c840]" />
@@ -1409,7 +1412,7 @@ export default function Landing() {
                     });
                   }
                 }}
-                className="flex-1 flex items-center gap-2 rounded-md bg-white border border-slate-200 px-3 py-1.5 text-xs text-slate-500 cursor-text hover:border-slate-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition"
+                className="flex-1 flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-3 py-2 text-xs text-slate-500 cursor-text hover:border-slate-300 focus-within:border-[#004DFF] focus-within:ring-2 focus-within:ring-[#004DFF]/15 transition-all duration-200"
               >
                 <Search className="h-3.5 w-3.5 shrink-0" />
                 <input
@@ -1418,19 +1421,21 @@ export default function Landing() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Buscar no Google Maps..."
                   className="flex-1 bg-transparent outline-none text-slate-700 placeholder:text-slate-400"
+                  aria-label="Buscar local no Google Maps"
                 />
               </form>
             </div>
-            <div className="p-3 grid grid-cols-[1fr_180px] gap-3">
-              <div className="relative h-80 bg-slate-100 rounded-xl overflow-hidden">
+            <div className="p-3 grid gap-3 sm:grid-cols-[1fr_200px]">
+              <div className="relative h-56 sm:h-[22rem] bg-slate-100 rounded-xl overflow-hidden">
                 <div ref={mapRef} className="absolute inset-0" />
                 {!mapLoaded && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                    <div className="h-6 w-6 border-2 border-[#004DFF]/25 border-t-[#004DFF] rounded-full animate-spin" />
+                    <span className="text-[11px] text-slate-400">Carregando mapa…</span>
                   </div>
                 )}
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 sm:max-h-[22rem] sm:overflow-y-auto sm:pr-0.5">
                 {([
                   { name: "Clínica Sorriso+", phone: "(11) 9 9876-***", origin: "Google Maps" },
                   { name: "OdontoCenter Jardins", phone: "(11) 9 4421-***", origin: "Google Maps" },
@@ -1443,16 +1448,16 @@ export default function Landing() {
                     type="button"
                     key={lead.name}
                     onClick={() => setSelectedLead(lead)}
-                    className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-left hover:border-primary/40 hover:shadow-sm transition"
+                    className="group flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left transition-all duration-200 hover:border-[#004DFF]/40 hover:bg-[#004DFF]/[0.03] hover:shadow-sm active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004DFF]/40"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#004DFF]/10 text-[#004DFF] shrink-0 transition-colors duration-200 group-hover:bg-[#004DFF] group-hover:text-white">
                       <Building2 className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[11px] font-semibold text-slate-900 truncate leading-tight">{lead.name}</div>
-                      <div className="text-[10px] text-slate-500 truncate">{lead.phone}</div>
+                      <div className="text-[11.5px] font-semibold text-slate-900 truncate leading-tight">{lead.name}</div>
+                      <div className="text-[10px] text-slate-500 truncate tabular-nums">{lead.phone}</div>
                     </div>
-                    <span className="text-[9px] font-medium text-[#004DFF] bg-[#004DFF]/10 border border-[#004DFF]/20 px-1.5 py-0.5 rounded-full shrink-0">novo</span>
+                    <span className="text-[9px] font-semibold uppercase tracking-wide text-[#004DFF] bg-[#004DFF]/10 border border-[#004DFF]/20 px-1.5 py-0.5 rounded-full shrink-0">novo</span>
                   </button>
                 ))}
               </div>
@@ -1460,48 +1465,68 @@ export default function Landing() {
           </div>
 
           {/* Fluxo automatizado */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 mb-5">
-              Fluxo automatizado
+          <div className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-12px_rgba(15,23,42,0.1)] p-5 sm:p-6">
+            <div className="flex items-center justify-between mb-5">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Fluxo automatizado
+              </span>
+              <span className="flex items-center gap-1.5 text-[10px] font-medium text-emerald-600">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Ativo
+              </span>
             </div>
-            <div className="space-y-3">
-              {[
-                { icon: Search, title: "Buscar no Maps", desc: "Nicho + cidade" },
-                { icon: Filter, title: "Limpar lista", desc: "Remove duplicados/inválidos" },
-                { icon: Send, title: "Primeira mensagem", desc: "Ritmo humano no WhatsApp" },
-                { icon: Bot, title: "Next Pro conduz a conversa", desc: "Responde, qualifica, agenda" },
-              ].map((step) => (
-                <div key={step.title} className="flex items-center gap-4 rounded-xl px-3 py-3 hover:bg-slate-50 transition">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
-                    <step.icon className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-900 text-base">{step.title}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{step.desc}</div>
-                  </div>
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF] shrink-0" />
-                </div>
-              ))}
+            <div className="relative">
+              <span className="absolute left-[26px] top-8 bottom-8 w-px bg-gradient-to-b from-[#004DFF]/25 via-slate-200 to-transparent" aria-hidden />
+              <ol className="space-y-1.5">
+                {[
+                  { icon: Search, title: "Buscar no Maps", desc: "Nicho + cidade" },
+                  { icon: Filter, title: "Limpar lista", desc: "Remove duplicados/inválidos" },
+                  { icon: Send, title: "Primeira mensagem", desc: "Ritmo humano no WhatsApp" },
+                  { icon: Bot, title: "Next Pro conduz a conversa", desc: "Responde, qualifica, agenda" },
+                ].map((step, i) => (
+                  <li
+                    key={step.title}
+                    className="relative flex items-center gap-4 rounded-xl px-2.5 py-3 transition-colors duration-200 hover:bg-slate-50"
+                  >
+                    <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-[#004DFF]/8 text-[#004DFF] shrink-0 ring-1 ring-[#004DFF]/10">
+                      <step.icon className="h-5 w-5" />
+                      <span className="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#004DFF] text-[9px] font-bold text-white">
+                        {i + 1}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-slate-900 text-[15px] leading-snug">{step.title}</div>
+                      <div className="text-xs text-slate-500 mt-0.5 leading-relaxed">{step.desc}</div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
         </div>
 
         {/* Quatro cards de recursos */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { icon: MapPin, title: "Google Maps", desc: "Extração por nicho + cidade" },
             { icon: Filter, title: "Filtros inteligentes", desc: "Tira duplicados e inválidos" },
             { icon: Send, title: "Disparo no WhatsApp", desc: "Ritmo humano, anti-bloqueio" },
             { icon: Bot, title: "Next Pro assume a conversa", desc: "Responde, agenda, recupera" },
           ].map((f) => (
-            <div key={f.title} className="rounded-2xl border border-slate-200 bg-white p-5 hover:border-primary/40 hover:shadow-sm transition">
-              <f.icon className="h-5 w-5 text-primary" />
-              <div className="mt-3 font-semibold text-slate-900 text-base">{f.title}</div>
-              <div className="text-xs text-slate-500 mt-1 leading-relaxed">{f.desc}</div>
+            <div
+              key={f.title}
+              className="group rounded-2xl border border-slate-200/80 bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#004DFF]/35 hover:shadow-[0_12px_28px_-14px_rgba(0,77,255,0.28)]"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#004DFF]/8 text-[#004DFF] ring-1 ring-[#004DFF]/10 transition-colors duration-300 group-hover:bg-[#004DFF] group-hover:text-white">
+                <f.icon className="h-5 w-5" />
+              </div>
+              <div className="mt-4 font-semibold text-slate-900 text-[15px] leading-snug">{f.title}</div>
+              <div className="text-xs text-slate-500 mt-1.5 leading-relaxed">{f.desc}</div>
             </div>
           ))}
         </div>
       </section>
+
 
 
       {/* DA PRIMEIRA MENSAGEM AO PAGAMENTO */}
