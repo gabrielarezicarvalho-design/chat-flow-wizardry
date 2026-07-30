@@ -1194,56 +1194,6 @@ export default function Landing() {
     }
   };
 
-  useEffect(() => {
-    const key = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
-    const channel = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID;
-    if (!key || !mapRef.current) return;
-
-    const initMap = () => {
-      const mapDiv = mapRef.current;
-      if (!mapDiv) return;
-      const g = (window as any).google;
-      const map = new g.maps.Map(mapDiv, {
-        center: { lat: -23.55052, lng: -46.633308 },
-        zoom: 12,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        draggable: true,
-        scrollwheel: true,
-        gestureHandling: "greedy",
-        disableDoubleClickZoom: false,
-        zoomControl: true,
-      });
-      mapInstanceRef.current = map;
-      const places = [
-        { lat: -23.548, lng: -46.636, title: "Padaria do João" },
-        { lat: -23.553, lng: -46.628, title: "Clínica Bem Estar" },
-        { lat: -23.545, lng: -46.642, title: "Studio de Beleza" },
-        { lat: -23.558, lng: -46.62, title: "Auto Escola Rápida" },
-        { lat: -23.552, lng: -46.638, title: "Restaurante Sabor" },
-      ];
-      places.forEach((p) => new g.maps.Marker({ position: p, map, title: p.title }));
-      setMapLoaded(true);
-    };
-
-    if ((window as any).google?.maps) {
-      initMap();
-      return;
-    }
-
-    (window as any).initLandingMap = initMap;
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&callback=initLandingMap&channel=${channel}`;
-    script.async = true;
-    document.head.appendChild(script);
-    return () => {
-      script.remove();
-    };
-  }, []);
-
-
-
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* HERO com nav flutuante sobre a foto */}
