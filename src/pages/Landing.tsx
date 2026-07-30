@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import imgPadaria from "@/assets/biz/padaria.jpg.asset.json";
-import imgOficina from "@/assets/biz/oficina.jpg.asset.json";
-import imgSalao from "@/assets/biz/salao.jpg.asset.json";
+import imgImobiliaria from "@/assets/segments/imobiliaria.jpg.asset.json";
+import imgClinica from "@/assets/segments/clinica.jpg.asset.json";
+import imgLoja from "@/assets/segments/loja.jpg.asset.json";
 import heroVideoAsset from "@/assets/hero.mp4.asset.json";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
 import avatarRafael from "@/assets/cases/rafael.png.asset.json";
@@ -26,7 +26,6 @@ import {
 
 type LeadItem = { name: string; phone: string; origin: string };
 
-const EMOJIS = ["😀","😂","😍","🥳","🚀","🔥","👍","🙏","💜","✨","✅","💡","📞","📎","🎉","💬","🤖","💰","📈","🎯"];
 
 const stats = [
   { value: "+2.1M", label: "Mensagens enviadas" },
@@ -36,13 +35,13 @@ const stats = [
 ];
 
 const segments = [
-  { icon: Building2, label: "Imobiliária" },
-  { icon: Stethoscope, label: "Dentista" },
+  { image: imgImobiliaria.url, label: "Imobiliária" },
+  { image: imgClinica.url, label: "Clínica" },
+  { image: imgLoja.url, label: "Loja" },
   { icon: Scale, label: "Advogado" },
-  { icon: Activity, label: "Clínica" },
+  { icon: Stethoscope, label: "Dentista" },
   { icon: Scissors, label: "Estética" },
   { icon: Sun, label: "Energia Solar" },
-  { icon: Store, label: "Loja" },
   { icon: Wrench, label: "Oficina" },
   { icon: Utensils, label: "Restaurante" },
 ];
@@ -499,21 +498,21 @@ function IdealParaMarquee() {
 
 const MERCADO_CARDS = [
   {
-    img: imgPadaria.url,
-    title: "Padaria de bairro",
-    desc: "pedido novo enquanto o balcão está cheio",
+    img: imgImobiliaria.url,
+    title: "Imobiliária",
+    desc: "qualificação de leads enquanto visita imóveis",
     className: "lg:col-span-2 h-[240px]",
   },
   {
-    img: imgSalao.url,
-    title: "Salão independente",
-    desc: "agenda andando sem parar o atendimento",
+    img: imgClinica.url,
+    title: "Clínica",
+    desc: "agenda preenchida sem interromper o atendimento",
     className: "lg:row-span-2 h-[560px]",
   },
   {
-    img: imgOficina.url,
-    title: "Oficina local",
-    desc: "orçamento respondido no meio do serviço",
+    img: imgLoja.url,
+    title: "Loja de bairro",
+    desc: "pedido novo sem parar o balcão",
     className: "lg:col-span-2 h-[300px]",
   },
 ];
@@ -575,8 +574,8 @@ function MercadoSection() {
                   <p className="text-2xl font-medium">{c.title}</p>
                   <p className="mt-1 max-w-[260px] text-sm text-white/70">{c.desc}</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-[#004DFF] px-4 py-1.5 text-xs font-semibold text-white">
-                  IA atendendo
+                <span className="shrink-0 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                  Atendimento ativo
                 </span>
               </div>
             </div>
@@ -651,7 +650,7 @@ function FluxoCompletoSection() {
                   <span className="text-xs font-semibold text-slate-900">Conversas</span>
                 </div>
                 <span className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" /> IA online
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" /> online
                 </span>
               </div>
               <div className="grid grid-cols-[40%_60%] min-h-[300px]">
@@ -687,7 +686,7 @@ function FluxoCompletoSection() {
                       <div className="text-[11px] font-semibold text-slate-900">Marina Costa</div>
                       <div className="text-[9px] font-medium text-[#004DFF]">Lead qualificado · agora</div>
                     </div>
-                    <span className="rounded-full bg-[#004DFF]/10 px-2 py-0.5 text-[9px] font-medium text-[#004DFF]">IA atendendo</span>
+                    <span className="rounded-full bg-[#004DFF]/10 px-2 py-0.5 text-[9px] font-medium text-[#004DFF]">Atendendo</span>
                   </div>
                   <div className="mt-4 flex-1 space-y-2">
                     <div className="w-fit max-w-[85%] rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] text-slate-700">
@@ -698,7 +697,7 @@ function FluxoCompletoSection() {
                       <div className="mt-0.5 text-right text-[8px] text-white/70">10:42 ✓✓</div>
                     </div>
                     <div className="w-fit max-w-[85%] rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] text-slate-700">
-                      14h30, por favor 😊
+                      14h30, por favor.
                     </div>
                     <div className="ml-auto w-fit rounded-full bg-[#004DFF]/10 px-2.5 py-1 text-[9px] font-medium text-[#004DFF]">
                       Agendamento criado
@@ -901,42 +900,42 @@ function FluxoCompletoSection() {
 const HERO_SEGMENTS: { name: string; greeting: string; qa: HeroQA[] }[] = [
   {
     name: "Clínica",
-    greeting: "Oi! 😄 Sou o agente da clínica. Como posso ajudar você hoje?",
+    greeting: "Oi, bem-vindo à nossa clínica. Como posso te ajudar hoje?",
     qa: [
-      { q: "Tem horário amanhã à tarde?", a: "Tenho sim! 🗓️ Amanhã às 14h30, 16h ou 17h15. Qual fica melhor pra você?" },
+      { q: "Tem horário amanhã à tarde?", a: "Tenho sim. Amanhã às 14h30, 16h ou 17h15. Qual fica melhor pra você?" },
       { q: "Vocês atendem convênio?", a: "Atendemos os principais convênios e também particular com desconto à vista. Qual é o seu plano?" },
       { q: "Quanto custa a consulta?", a: "A avaliação particular fica R$ 180 e já inclui o plano de tratamento. Posso reservar um horário?" },
-      { q: "Onde vocês ficam?", a: "Estamos na Av. Paulista, 1200 — 5º andar, com estacionamento no prédio. Te envio a localização no WhatsApp? 📍" },
-      { q: "Pode remarcar meu horário?", a: "Claro! Já localizei seu agendamento. Prefere quinta às 10h ou sexta às 15h?" },
+      { q: "Onde vocês ficam?", a: "Estamos na Av. Paulista, 1200 — 5º andar, com estacionamento no prédio. Te envio a localização no WhatsApp?" },
+      { q: "Pode remarcar meu horário?", a: "Claro. Já localizei seu agendamento. Prefere quinta às 10h ou sexta às 15h?" },
     ],
   },
   {
     name: "Imobiliária",
-    greeting: "Olá! 🏡 Posso te ajudar a encontrar o imóvel ideal. O que procura?",
+    greeting: "Olá, posso te ajudar a encontrar um imóvel. O que você procura?",
     qa: [
       { q: "Tem apartamento de 2 quartos?", a: "Tenho 7 opções de 2 quartos entre R$ 320 mil e R$ 480 mil. Prefere pronto pra morar ou na planta?" },
-      { q: "Aceitam financiamento?", a: "Sim! Trabalhamos com Caixa e Itaú, com entrada a partir de 10%. Quer uma simulação agora?" },
-      { q: "Posso agendar uma visita?", a: "Posso agendar hoje mesmo 😊 Tenho horários às 15h e às 18h. Qual prefere?" },
+      { q: "Aceitam financiamento?", a: "Sim. Trabalhamos com Caixa e Itaú, com entrada a partir de 10%. Quer uma simulação agora?" },
+      { q: "Posso agendar uma visita?", a: "Posso agendar hoje mesmo. Tenho horários às 15h e às 18h. Qual prefere?" },
       { q: "Qual o valor do condomínio?", a: "O condomínio fica em R$ 420 com água inclusa e IPTU de R$ 110/mês." },
     ],
   },
   {
     name: "Loja",
-    greeting: "Oi! 🛍️ Bem-vindo(a). Posso te ajudar com pedidos, trocas e entregas.",
+    greeting: "Olá, bem-vindo(a). Posso te ajudar com pedidos, trocas e entregas.",
     qa: [
-      { q: "Esse produto tem em estoque?", a: "Tem sim! Restam 4 unidades no tamanho M e 2 no G. Quer que eu separe o seu?" },
-      { q: "Qual o prazo de entrega?", a: "Para o seu CEP a entrega sai em 2 a 4 dias úteis, com frete grátis acima de R$ 199. 🚚" },
+      { q: "Esse produto tem em estoque?", a: "Tem sim. Restam 4 unidades no tamanho M e 2 no G. Quer que eu separe o seu?" },
+      { q: "Qual o prazo de entrega?", a: "Para o seu CEP a entrega sai em 2 a 4 dias úteis, com frete grátis acima de R$ 199." },
       { q: "Aceitam parcelamento?", a: "Sim, em até 12x no cartão ou 10% de desconto no Pix. Como prefere pagar?" },
-      { q: "Como faço uma troca?", a: "Você tem 30 dias para trocar. Só me passar o número do pedido que eu já gero a etiqueta. 📦" },
+      { q: "Como faço uma troca?", a: "Você tem 30 dias para trocar. Só me passar o número do pedido que eu já gero a etiqueta." },
     ],
   },
   {
     name: "Serviços",
-    greeting: "Olá! 👋 Sou o agente da equipe. Me conta o que você precisa?",
+    greeting: "Olá, sou da equipe de atendimento. Me conta o que você precisa?",
     qa: [
-      { q: "Fazem orçamento sem custo?", a: "Fazemos! O orçamento é gratuito e sai em até 1 hora. Pode me descrever o serviço?" },
+      { q: "Fazem orçamento sem custo?", a: "Fazemos. O orçamento é gratuito e sai em até 1 hora. Pode me descrever o serviço?" },
       { q: "Atendem no fim de semana?", a: "Sim, sábado das 8h às 14h e domingo com plantão para urgências." },
-      { q: "Quanto tempo demora?", a: "Na média o serviço leva 2 a 3 horas e já sai com garantia de 90 dias. ✅" },
+      { q: "Quanto tempo demora?", a: "Na média o serviço leva 2 a 3 horas e já sai com garantia de 90 dias." },
       { q: "Atendem minha região?", a: "Atendemos toda a região metropolitana sem taxa extra. Qual é o seu bairro?" },
     ],
   },
@@ -1032,7 +1031,7 @@ function HeroChatCard() {
       setTyping(false);
       setMessages((m) => [
         ...m,
-        { from: "ai", text: "Consigo te ajudar com isso! 😊 Me conta um pouco mais sobre o que você precisa." },
+        { from: "ai", text: "Consigo te ajudar com isso. Me conta um pouco mais sobre o que você precisa." },
       ]);
     }
   };
@@ -1049,7 +1048,7 @@ function HeroChatCard() {
           <div className="flex items-center gap-3">
             <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#60A5FA] via-[#3B82F6] to-[#004DFF] shadow-md shadow-[#3B82F6]/30" />
             <div>
-              <p className="font-semibold text-slate-900">Seu agente de IA</p>
+              <p className="font-semibold text-slate-900">Assistente Next Pro</p>
               <p className="flex items-center gap-1.5 text-xs text-slate-500">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" /> online agora
               </p>
@@ -1393,9 +1392,9 @@ export default function Landing() {
           <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
               <div className="flex gap-1.5 group">
-                <span className="h-3 w-3 rounded-full bg-[#ff5f57] animate-pulse shadow-[0_0_6px_#ff5f57]" />
-                <span className="h-3 w-3 rounded-full bg-[#febc2e] animate-pulse delay-75 shadow-[0_0_6px_#febc2e]" />
-                <span className="h-3 w-3 rounded-full bg-[#28c840] animate-pulse delay-150 shadow-[0_0_6px_#28c840]" />
+                <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+                <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
+                <span className="h-3 w-3 rounded-full bg-[#28c840]" />
               </div>
               <form
                 onSubmit={(e) => {
@@ -1453,7 +1452,7 @@ export default function Landing() {
                       <div className="text-[11px] font-semibold text-slate-900 truncate leading-tight">{lead.name}</div>
                       <div className="text-[10px] text-slate-500 truncate">{lead.phone}</div>
                     </div>
-                    <span className="text-[9px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full shrink-0">novo</span>
+                    <span className="text-[9px] font-medium text-[#004DFF] bg-[#004DFF]/10 border border-[#004DFF]/20 px-1.5 py-0.5 rounded-full shrink-0">novo</span>
                   </button>
                 ))}
               </div>
@@ -1480,7 +1479,7 @@ export default function Landing() {
                     <div className="font-semibold text-slate-900 text-base">{step.title}</div>
                     <div className="text-xs text-slate-500 mt-0.5">{step.desc}</div>
                   </div>
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF] shrink-0" />
                 </div>
               ))}
             </div>
@@ -1539,7 +1538,7 @@ export default function Landing() {
                 style={billing === "annual" ? { backgroundColor: "#004DFF" } : undefined}
               >
                 Anual
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${billing === "annual" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-700"}`}>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${billing === "annual" ? "bg-white/20 text-white" : "bg-blue-100 text-[#004DFF]"}`}>
                   -2 meses
                 </span>
               </button>
@@ -1752,7 +1751,7 @@ export default function Landing() {
                         <td className="px-6 py-3.5 text-center">
                           {typeof basic === "boolean" ? (
                             basic ? (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#004DFF]/10 text-[#004DFF] text-xs">✓</span>
                             ) : (
                               <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
                             )
@@ -1763,7 +1762,7 @@ export default function Landing() {
                         <td className="px-6 py-3.5 text-center">
                           {typeof start === "boolean" ? (
                             start ? (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#004DFF]/10 text-[#004DFF] text-xs">✓</span>
                             ) : (
                               <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
                             )
@@ -1774,7 +1773,7 @@ export default function Landing() {
                         <td className="px-6 py-3.5 text-center">
                           {typeof business === "boolean" ? (
                             business ? (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#004DFF]/10 text-[#004DFF] text-xs">✓</span>
                             ) : (
                               <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
                             )
@@ -1798,14 +1797,14 @@ export default function Landing() {
           <div className="text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Tudo que você precisa</span>
             <h2 className="mt-3 text-4xl md:text-6xl font-bold text-slate-900">
-              Uma IA que{" "}
+              Uma central de vendas{" "}
               <span className="text-[#004DFF]">
-                vende sozinha
+                no WhatsApp
               </span>
               .
             </h2>
             <p className="mt-4 text-slate-500 max-w-2xl mx-auto">
-              Do primeiro "oi" até o fechamento. Tudo automático, tudo natural.
+              Do primeiro contato até o fechamento, sem trocar de ferramenta.
             </p>
           </div>
 
@@ -1820,18 +1819,16 @@ export default function Landing() {
 
               <div className="mt-8 space-y-3">
                 <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-base text-slate-800">
-                  Oi, vi o anúncio. Tem disponível?
+                  Oi, tenho interesse no anúncio. Ainda está disponível?
                 </div>
-                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-base text-white">
-                  <div className="text-[10px] font-semibold opacity-80 mb-0.5">✦ IA Next Pro</div>
-                  Tenho sim! Pra quando você precisa? Posso já reservar 😊
+                <div className="ml-auto max-w-[75%] rounded-2xl bg-[#004DFF] px-4 py-2.5 text-base text-white">
+                  Tenho sim. Para quando você precisa? Posso reservar.
                 </div>
                 <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-base text-slate-800">
-                  Pode ser amanhã 14h?
+                  Pode ser amanhã às 14h?
                 </div>
-                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-base text-white">
-                  <div className="text-[10px] font-semibold opacity-80 mb-0.5">✦ IA Next Pro</div>
-                  Agendado! Te mando um lembrete 1h antes ✅
+                <div className="ml-auto max-w-[75%] rounded-2xl bg-[#004DFF] px-4 py-2.5 text-base text-white">
+                  Agendado. Envio um lembrete 1h antes.
                 </div>
               </div>
             </div>
@@ -1903,14 +1900,14 @@ export default function Landing() {
       {/* PAGAMENTOS */}
       <section id="pagamentos" className="mx-auto max-w-6xl px-6 py-24">
         <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Recuperação financeira</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">Recuperação financeira</span>
           <h2 className="mt-3 text-4xl md:text-6xl font-bold tracking-tight">
             Receba pagamentos{" "}
             <span style={{ color: "#004DFF" }}>sem levantar um dedo</span>
             <span className="text-slate-900">.</span>
           </h2>
           <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            Cobrança automática no WhatsApp. PIX, boleto, lembretes e recuperação de inadimplentes — tudo a IA faz por você.
+            Cobrança automática no WhatsApp. PIX, boleto, lembretes e recuperação de inadimplentes — sem complicação.
           </p>
         </div>
 
@@ -1930,21 +1927,19 @@ export default function Landing() {
               </div>
             </div>
             <div className="flex-1 p-5 space-y-3 bg-white">
-              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-base">
-                <div className="text-[10px] opacity-90 font-semibold mb-1">✦ IA Next Pro</div>
-                Olá 👋 Seu pagamento vence hoje. Segue novamente o link para pagamento.
+              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-[#004DFF] text-white px-4 py-3 text-base">
+                Olá. Seu pagamento vence hoje. Segue novamente o link para pagamento.
               </div>
               <div className="max-w-[60%] rounded-2xl rounded-tl-sm bg-slate-100 text-slate-800 px-4 py-2 text-base">
                 Pode mandar
               </div>
-              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-base space-y-2">
-                <div className="text-[10px] opacity-90 font-semibold">✦ IA Next Pro</div>
-                <div className="font-semibold">Aqui está 👇</div>
-                <div className="rounded-lg bg-emerald-600/40 px-2 py-1.5 text-xs">
-                  💳 Link de pagamento:<br />pix.nextpro.ai/p/abc123
+              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-[#004DFF] text-white px-4 py-3 text-base space-y-2">
+                <div className="font-semibold">Aqui está</div>
+                <div className="rounded-lg bg-[#0033cc] px-2 py-1.5 text-xs">
+                  Link de pagamento:<br />pix.nextpro.ai/p/abc123
                 </div>
-                <div className="rounded-lg bg-emerald-600/40 px-2 py-1.5 text-xs">
-                  📄 Boleto também disponível
+                <div className="rounded-lg bg-[#0033cc] px-2 py-1.5 text-xs">
+                  Boleto também disponível
                 </div>
               </div>
             </div>
@@ -1952,20 +1947,20 @@ export default function Landing() {
 
           {/* Timeline */}
           <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-6">
-            <div className="text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-6">
+            <div className="text-xs font-semibold uppercase tracking-wider text-primary mb-6">
               Recuperação automática
             </div>
             <ul className="space-y-5">
               {[
-                { icon: "💵", title: "Cobrança enviada", sub: "Dia do vencimento", dot: "bg-emerald-500" },
-                { icon: "🔔", title: "Lembrete automático", sub: "24h antes do vencimento", dot: "bg-amber-400" },
-                { icon: "⚠️", title: "Aviso de atraso", sub: "1 dia após vencimento", dot: "bg-orange-400" },
-                { icon: "💬", title: "Follow-up humanizado", sub: "3 dias depois · tom suave", dot: "bg-violet-500", highlight: true },
-                { icon: "📈", title: "Cliente pagou", sub: "Confirmação automática", dot: "bg-emerald-500" },
+                { icon: CreditCard, title: "Cobrança enviada", sub: "Dia do vencimento", dot: "bg-slate-400" },
+                { icon: Bell, title: "Lembrete automático", sub: "24h antes do vencimento", dot: "bg-amber-400" },
+                { icon: AlertCircle, title: "Aviso de atraso", sub: "1 dia após vencimento", dot: "bg-orange-400" },
+                { icon: MessageSquare, title: "Follow-up humanizado", sub: "3 dias depois · tom suave", dot: "bg-[#004DFF]", highlight: true },
+                { icon: TrendingUp, title: "Cliente pagou", sub: "Confirmação automática", dot: "bg-[#004DFF]" },
               ].map((s) => (
                 <li key={s.title} className="flex items-center gap-4">
-                  <div className={`h-11 w-11 rounded-xl flex items-center justify-center text-xl ${s.highlight ? "bg-violet-500 text-white" : "bg-slate-100"}`}>
-                    {s.icon}
+                  <div className={`h-11 w-11 rounded-xl flex items-center justify-center ${s.highlight ? "bg-[#004DFF] text-white" : "bg-slate-100 text-slate-600"}`}>
+                    <s.icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1">
                     <div className="font-semibold text-base text-slate-900">{s.title}</div>
@@ -1994,8 +1989,8 @@ export default function Landing() {
               </div>
             ))}
           </div>
-          <div className="rounded-3xl bg-emerald-50 border border-emerald-100 p-8 flex flex-col justify-center">
-            <div className="text-5xl font-bold text-emerald-600">+40%</div>
+          <div className="rounded-3xl bg-slate-50 border border-slate-200 p-8 flex flex-col justify-center">
+            <div className="text-5xl font-bold text-[#004DFF]">+40%</div>
             <p className="mt-2 text-base text-slate-600">
               de clientes inadimplentes pagam com follow-up automático
             </p>
@@ -2026,7 +2021,7 @@ export default function Landing() {
         <div className="mx-auto max-w-6xl px-6 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-medium text-slate-700 shadow-sm">
-              <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
               Tecnologia exclusiva
             </span>
             <h2 className="mt-5 text-5xl md:text-6xl font-bold tracking-tight leading-[1.1]">
@@ -2118,9 +2113,15 @@ export default function Landing() {
 
         <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-5">
           {segments.map((s) => (
-            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center hover:border-primary/40 hover:shadow-sm transition-all">
-              <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
-              <div className="mt-4 text-base font-medium text-slate-700">{s.label}</div>
+            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white p-4 text-center hover:border-primary/40 hover:shadow-sm transition-all overflow-hidden">
+              {s.image ? (
+                <div className="mb-4 h-32 w-full overflow-hidden rounded-xl">
+                  <img src={s.image} alt={s.label} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
+                </div>
+              ) : (
+                <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
+              )}
+              <div className="text-base font-medium text-slate-700">{s.label}</div>
             </div>
           ))}
         </div>
@@ -2131,7 +2132,7 @@ export default function Landing() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
-              <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
               Tudo em um único painel
             </span>
             <h2 className="mt-4 text-4xl md:text-5xl font-bold">
@@ -2207,7 +2208,7 @@ export default function Landing() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
             <span className="text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
-              // Casos reais
+              Casos reais
             </span>
             <h2 className="mt-4 text-4xl md:text-6xl font-bold tracking-tight text-slate-900">
               Antes e depois de{" "}
@@ -2291,7 +2292,7 @@ export default function Landing() {
 
       {/* CTA FINAL */}
       <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
+        <div className="rounded-3xl bg-[#004DFF] p-12 md:p-16 text-center text-white shadow-2xl">
           <h2 className="text-4xl md:text-6xl font-bold">Quero vender no automático.</h2>
           <p className="mt-4 opacity-90 max-w-xl mx-auto">
             Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
