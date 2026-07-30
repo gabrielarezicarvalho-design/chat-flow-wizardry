@@ -21,7 +21,7 @@ import {
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
   Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight, ChevronUp, CheckCircle2,
-  Trophy, Globe, Mail
+  Trophy, Globe, Mail, BarChart3
 } from "lucide-react";
 import { ProspeccaoMapWindow } from "@/components/landing/ProspeccaoMapWindow";
 
@@ -1860,123 +1860,144 @@ export default function Landing() {
 
 
       {/* PAGAMENTOS */}
-      <section id="pagamentos" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Recuperação financeira</span>
-          <h2 className="mt-3 text-4xl md:text-6xl font-bold tracking-tight">
-            Receba pagamentos{" "}
-            <span style={{ color: "#004DFF" }}>sem levantar um dedo</span>
-            <span className="text-slate-900">.</span>
-          </h2>
-          <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            Cobrança automática no WhatsApp. PIX, boleto, lembretes e recuperação de inadimplentes — tudo a IA faz por você.
-          </p>
-        </div>
+      <section id="pagamentos" className="bg-[#F7F9FC] py-24">
+        <div className="mx-auto max-w-[1240px] px-6">
+          {/* Header */}
+          <div className="mb-16 text-center">
+            <span className="inline-block rounded-full bg-[#E6ECF7] px-4 py-1.5 font-space-grotesk text-xs font-bold uppercase tracking-[0.2em] text-[#004DFF]">
+              Automação Inteligente
+            </span>
+            <h2 className="mt-5 font-space-grotesk text-4xl md:text-5xl font-bold leading-tight tracking-tight text-[#0B1220]">
+              Recuperação <span className="text-[#004DFF]">financeira</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-[#0B1220]/60">
+              Reduza a inadimplência com réguas de cobrança automatizadas e múltiplos métodos de pagamento.
+            </p>
+          </div>
 
-        {/* Top row: chat + timeline */}
-        <div className="mt-12 grid md:grid-cols-2 gap-6">
-          {/* Chat mockup */}
-          <div className="rounded-3xl bg-white border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
-              <div className="flex gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-red-400" />
-                <span className="h-3 w-3 rounded-full bg-yellow-400" />
-                <span className="h-3 w-3 rounded-full bg-green-400" />
-              </div>
-              <div className="text-xs text-slate-500 flex items-center gap-2">
-                <span className="inline-block h-3 w-3 rounded-sm bg-slate-200" />
-                Cobrança automática · WhatsApp
+          {/* Bento grid */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+            {/* WhatsApp mockup */}
+            <div className="group relative min-h-[500px] overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white shadow-[0_20px_50px_-20px_rgba(0,77,255,0.12)] md:col-span-7">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#E6ECF7]/50 to-transparent" />
+              <div className="relative flex h-full flex-col p-8">
+                <div className="mb-8 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#25D366] text-white">
+                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-4.821 4.754a8.962 8.962 0 01-4.419-1.176l-.317-.188-3.272.858.873-3.19-.205-.326C4.161 13.91 3.4 12.095 3.4 10.22 3.4 5.355 7.355 1.4 12.22 1.4c4.865 0 8.82 3.955 8.82 8.82 0 4.865-3.955 8.82-8.82 8.82M12.22 0C6.583 0 2 4.583 2 10.22c0 1.802.47 3.56 1.363 5.148L2 22l6.828-1.792A10.183 10.183 0 0012.22 21.6c5.637 0 10.22-4.583 10.22-10.22C22.44 4.583 17.857 0 12.22 0z"/></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-space-grotesk font-bold text-[#0B1220]">WhatsApp Business</h4>
+                    <p className="text-xs text-[#0B1220]/50">Cobrança ativa</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="max-w-[85%] rounded-2xl rounded-tl-none bg-[#F7F9FC] p-4 shadow-sm">
+                    <p className="text-sm text-[#0B1220]/80">
+                      Olá, <strong>Mariana</strong>! Identificamos que sua fatura de R$ 450,00 vence hoje. Gostaria do código Pix para pagamento?
+                    </p>
+                    <span className="mt-1 block text-[10px] text-[#0B1220]/40">09:41</span>
+                  </div>
+                  <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-none bg-[#004DFF] p-4 shadow-lg">
+                    <p className="text-sm text-white">Sim, por favor. Pode enviar?</p>
+                    <span className="mt-1 block text-right text-[10px] text-blue-200">09:42</span>
+                  </div>
+                  <div className="max-w-[85%] overflow-hidden rounded-2xl rounded-tl-none border border-slate-100 bg-white p-4 shadow-xl">
+                    <div className="absolute left-0 top-0 h-full w-1 bg-[#004DFF]" />
+                    <p className="mb-3 text-sm font-medium text-[#0B1220]">Aqui está o seu código Pix Copia e Cola:</p>
+                    <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3 text-xs font-mono text-slate-500">
+                      00020101021226840014br.gov.bcb.pix25620021nextpro.crm.recup...
+                    </div>
+                    <button className="mt-3 w-full rounded-lg bg-[#004DFF] py-2 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-blue-700">
+                      Copiar Código
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-auto flex items-center justify-between pt-8">
+                  <div className="flex -space-x-2">
+                    <div className="h-8 w-8 rounded-full border-2 border-white bg-slate-200" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#E6ECF7] text-[10px] font-bold text-[#004DFF]">
+                      +12k
+                    </div>
+                  </div>
+                  <p className="text-xs font-medium text-[#0B1220]/50">+85% de taxa de conversão no WhatsApp</p>
+                </div>
               </div>
             </div>
-            <div className="flex-1 p-5 space-y-3 bg-white">
-              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-base">
-                <div className="text-[10px] opacity-90 font-semibold mb-1">✦ IA Next Pro</div>
-                Olá 👋 Seu pagamento vence hoje. Segue novamente o link para pagamento.
-              </div>
-              <div className="max-w-[60%] rounded-2xl rounded-tl-sm bg-slate-100 text-slate-800 px-4 py-2 text-base">
-                Pode mandar
-              </div>
-              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-base space-y-2">
-                <div className="text-[10px] opacity-90 font-semibold">✦ IA Next Pro</div>
-                <div className="font-semibold">Aqui está 👇</div>
-                <div className="rounded-lg bg-emerald-600/40 px-2 py-1.5 text-xs">
-                  💳 Link de pagamento:<br />pix.nextpro.ai/p/abc123
+
+            {/* Right column */}
+            <div className="grid grid-cols-1 gap-6 md:col-span-5">
+              {/* Timeline */}
+              <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white p-8 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)]">
+                <h4 className="mb-6 font-space-grotesk text-lg font-bold text-[#0B1220]">Jornada de Recuperação</h4>
+                <div className="relative space-y-6">
+                  <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-100" />
+                  <div className="flex items-start gap-4 relative">
+                    <div className="z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-4 border-white bg-[#E6ECF7] shadow-sm" />
+                    <div>
+                      <p className="text-sm font-bold text-[#0B1220]">Lembrete Preventivo</p>
+                      <p className="text-xs text-[#0B1220]/50 italic">Enviado 3 dias antes</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4 relative">
+                    <div className="z-10 flex h-6 w-6 shrink-0 animate-pulse items-center justify-center rounded-full border-4 border-white bg-[#004DFF] shadow-[0_0_10px_rgba(0,77,255,0.4)]" />
+                    <div>
+                      <p className="text-sm font-bold text-[#0B1220]">Dia do Vencimento</p>
+                      <p className="text-xs font-medium text-[#004DFF]">Pix gerado automaticamente</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4 relative">
+                    <div className="z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-4 border-white bg-emerald-500 shadow-sm">
+                      <Check className="h-3 w-3 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-emerald-600">Pagamento Confirmado</p>
+                      <p className="text-xs text-[#0B1220]/50">Recuperação concluída em 2h</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="rounded-lg bg-emerald-600/40 px-2 py-1.5 text-xs">
-                  📄 Boleto também disponível
+              </div>
+
+              {/* Payment methods */}
+              <div className="relative overflow-hidden rounded-[2rem] bg-[#004DFF] p-8 text-white">
+                <div className="absolute -right-8 -bottom-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+                <h4 className="mb-6 font-space-grotesk text-lg font-bold">Métodos integrados</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { label: "PIX", icon: <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 22l4-4 4 4m-8-20l4 4 4-4m-8 8l4 4 4-4" /></svg> },
+                    { label: "CARD", icon: <CreditCard className="h-8 w-8" /> },
+                    { label: "BOLETO", icon: <Receipt className="h-8 w-8" /> },
+                  ].map((m) => (
+                    <div key={m.label} className="flex aspect-square flex-col items-center justify-center rounded-2xl border border-white/20 bg-white/10 p-2 backdrop-blur-md">
+                      {m.icon}
+                      <span className="mt-2 text-[10px] font-bold tracking-widest">{m.label}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Timeline */}
-          <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-6">
-            <div className="text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-6">
-              Recuperação automática
-            </div>
-            <ul className="space-y-5">
-              {[
-                { icon: "💵", title: "Cobrança enviada", sub: "Dia do vencimento", dot: "bg-emerald-500" },
-                { icon: "🔔", title: "Lembrete automático", sub: "24h antes do vencimento", dot: "bg-amber-400" },
-                { icon: "⚠️", title: "Aviso de atraso", sub: "1 dia após vencimento", dot: "bg-orange-400" },
-                { icon: "💬", title: "Follow-up humanizado", sub: "3 dias depois · tom suave", dot: "bg-violet-500", highlight: true },
-                { icon: "📈", title: "Cliente pagou", sub: "Confirmação automática", dot: "bg-emerald-500" },
-              ].map((s) => (
-                <li key={s.title} className="flex items-center gap-4">
-                  <div className={`h-11 w-11 rounded-xl flex items-center justify-center text-xl ${s.highlight ? "bg-violet-500 text-white" : "bg-slate-100"}`}>
-                    {s.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-base text-slate-900">{s.title}</div>
-                    <div className="text-xs text-slate-500">{s.sub}</div>
-                  </div>
-                  <span className={`h-2 w-2 rounded-full ${s.dot}`} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Middle row: payment methods + stat */}
-        <div className="mt-6 grid md:grid-cols-2 gap-6">
-          <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-8 flex items-center justify-around">
+          {/* Bottom features */}
+          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: <CreditCard className="h-6 w-6" />, label: "PIX" },
-              { icon: <CreditCard className="h-6 w-6" />, label: "Boleto" },
-              { icon: <CreditCard className="h-6 w-6" />, label: "Link" },
-            ].map((m) => (
-              <div key={m.label} className="flex flex-col items-center gap-2 text-slate-600">
-                <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-                  {m.icon}
+              { icon: <Zap className="h-6 w-6" />, title: "Multicanal", sub: "SMS, Email e Whats" },
+              { icon: <ShieldCheck className="h-6 w-6" />, title: "Score de Risco", sub: "IA de prevenção" },
+              { icon: <Clock className="h-6 w-6" />, title: "Retentativa", sub: "Cobrança recorrente" },
+              { icon: <BarChart3 className="h-6 w-6" />, title: "Dashboard", sub: "Métricas em tempo real" },
+            ].map((f) => (
+              <div key={f.title} className="flex items-center gap-4 rounded-3xl border border-slate-200/60 bg-white p-6">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E6ECF7] text-[#004DFF]">
+                  {f.icon}
                 </div>
-                <span className="text-base">{m.label}</span>
+                <div>
+                  <p className="font-space-grotesk text-sm font-bold text-[#0B1220]">{f.title}</p>
+                  <p className="text-xs text-[#0B1220]/50">{f.sub}</p>
+                </div>
               </div>
             ))}
           </div>
-          <div className="rounded-3xl bg-emerald-50 border border-emerald-100 p-8 flex flex-col justify-center">
-            <div className="text-5xl font-bold text-emerald-600">+40%</div>
-            <p className="mt-2 text-base text-slate-600">
-              de clientes inadimplentes pagam com follow-up automático
-            </p>
-          </div>
-        </div>
-
-        {/* Bottom features */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { icon: <CreditCard className="h-5 w-5" />, title: "Cobrança no WhatsApp", sub: "Envio automático com link de pagamento" },
-            { icon: <Bell className="h-5 w-5" />, title: "Lembrete inteligente", sub: "Aviso antes e no dia do vencimento" },
-            { icon: <CreditCard className="h-5 w-5" />, title: "PIX + Boleto", sub: "Links de pagamento direto no chat" },
-            { icon: <TrendingUp className="h-5 w-5" />, title: "Recuperação ativa", sub: "Follow-up até o cliente pagar" },
-          ].map((f) => (
-            <div key={f.title} className="rounded-2xl bg-white border border-slate-200 p-5">
-              <div className="h-9 w-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 mb-3">
-                {f.icon}
-              </div>
-              <div className="font-semibold text-base text-slate-900">{f.title}</div>
-              <div className="text-xs text-slate-500 mt-1">{f.sub}</div>
-            </div>
-          ))}
         </div>
       </section>
 
