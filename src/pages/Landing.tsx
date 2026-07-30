@@ -36,16 +36,17 @@ const stats = [
 ];
 
 const segments = [
-  { icon: Building2, label: "Imobiliária" },
-  { icon: Stethoscope, label: "Dentista" },
-  { icon: Scale, label: "Advogado" },
-  { icon: Activity, label: "Clínica" },
-  { icon: Scissors, label: "Estética" },
-  { icon: Sun, label: "Energia Solar" },
-  { icon: Store, label: "Loja" },
-  { icon: Wrench, label: "Oficina" },
-  { icon: Utensils, label: "Restaurante" },
+  { icon: Building2, label: "Imobiliária", desc: "Captação e follow-up de leads" },
+  { icon: Stethoscope, label: "Dentista", desc: "Agenda cheia e retornos" },
+  { icon: Scale, label: "Advogado", desc: "Triagem e atendimento 24h" },
+  { icon: Activity, label: "Clínica", desc: "Confirmação e lembretes" },
+  { icon: Scissors, label: "Estética", desc: "Recompra e fidelização" },
+  { icon: Sun, label: "Energia Solar", desc: "Prospecção qualificada" },
+  { icon: Store, label: "Loja", desc: "Vendas no WhatsApp" },
+  { icon: Wrench, label: "Oficina", desc: "Orçamentos e revisões" },
+  { icon: Utensils, label: "Restaurante", desc: "Pedidos e promoções" },
 ];
+
 
 const FEATURES = [
   {
@@ -2110,29 +2111,80 @@ export default function Landing() {
 
 
       {/* SEGMENTOS */}
-      <section id="segmentos" className="mx-auto max-w-5xl px-6 py-24">
-        <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
-            Pra qualquer negócio
-          </span>
-          <h2 className="mt-4 text-4xl md:text-6xl font-bold font-space-grotesk">
-            Funciona pro{" "}
-            <span style={{ color: "#004DFF" }}>seu segmento.</span>
-          </h2>
-          <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
+      <section id="segmentos" className="relative overflow-hidden py-28">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 50% 0%, rgba(0,77,255,0.07) 0%, transparent 55%)",
+          }}
+        />
+        <div className="relative mx-auto max-w-[1240px] px-6">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 font-space-grotesk text-[11px] font-bold uppercase tracking-[0.18em] text-slate-900 backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
+              Pra qualquer negócio
+            </span>
+            <h2 className="mt-6 font-space-grotesk text-4xl md:text-[56px] font-bold leading-[1.02] tracking-tight text-slate-900">
+              Funciona pro{" "}
+              <span className="relative inline-block" style={{ color: "#004DFF" }}>
+                seu segmento
+                <span
+                  className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full"
+                  style={{ backgroundColor: "#004DFF", opacity: 0.16 }}
+                />
+              </span>
+              .
+            </h2>
+            <p className="mt-6 text-lg text-slate-600">
+              A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
+            </p>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {segments.map((s, i) => (
+              <div
+                key={s.label}
+                className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#004DFF]/30 hover:shadow-[0_24px_48px_-24px_rgba(0,77,255,0.45)]"
+              >
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(circle at 15% 0%, rgba(0,77,255,0.10) 0%, transparent 60%)",
+                  }}
+                />
+                <div className="relative flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#004DFF]/15 bg-[#004DFF]/[0.06] transition-colors duration-300 group-hover:bg-[#004DFF]">
+                    <s.icon
+                      className="h-5 w-5 transition-colors duration-300 group-hover:text-white"
+                      style={{ color: "#004DFF" }}
+                      strokeWidth={1.75}
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-space-grotesk text-lg font-bold text-slate-900">
+                      {s.label}
+                    </div>
+                    <p className="mt-1 text-sm leading-snug text-slate-500">{s.desc}</p>
+                  </div>
+                  <span className="ml-auto font-space-grotesk text-xs font-bold text-slate-300">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-10 text-center text-sm text-slate-500">
+            Não achou o seu?{" "}
+            <span className="font-semibold text-slate-900">
+              A Aurora aprende qualquer nicho em minutos.
+            </span>
           </p>
         </div>
-
-        <div className="mt-14 grid grid-cols-2 md:grid-cols-3 gap-5">
-          {segments.map((s) => (
-            <div key={s.label} className="rounded-2xl border border-slate-200 bg-white px-6 py-8 text-center hover:border-primary/40 hover:shadow-sm transition-all">
-              <s.icon className="h-7 w-7 mx-auto" style={{ color: "#004DFF" }} strokeWidth={1.75} />
-              <div className="mt-4 text-base font-medium text-slate-700">{s.label}</div>
-            </div>
-          ))}
-        </div>
       </section>
+
 
       {/* CENTRAL COMPLETA */}
       <section className="bg-slate-50 py-24">
