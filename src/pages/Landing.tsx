@@ -633,9 +633,11 @@ function FluxoCompletoSection() {
             </h2>
           </div>
           <p className="text-slate-500 leading-relaxed lg:pb-3">
-            Um único fluxo para atender, vender, organizar e trazer o cliente de volta — com a IA
-            cuidando do trabalho repetitivo.
+            <span className="block">Um único fluxo para atender, vender, organizar</span>
+            <span className="block">e trazer o cliente de volta — com a IA cuidando</span>
+            <span className="block">do trabalho repetitivo.</span>
           </p>
+
         </div>
 
         {/* Cards */}
