@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "asset_id": "fee7ee13-a7ea-4738-b0d2-85c00cb3061c",
+  "asset_id": "2d191e11-0857-4708-a993-3ae9de96405f",
   "project_id": "21dd7b9f-c0bf-4b8e-957f-c6952c532fb1",
-  "url": "/__l5e/assets-v1/fee7ee13-a7ea-4738-b0d2-85c00cb3061c/diego.jpg",
-  "r2_key": "a/v1/21dd7b9f-c0bf-4b8e-957f-c6952c532fb1/fee7ee13-a7ea-4738-b0d2-85c00cb3061c/diego.jpg",
-  "original_filename": "diego.jpg",
-  "size": 122345,
-  "content_type": "image/jpeg",
-  "created_at": "2026-07-30T21:42:24Z"
+  "url": "/__l5e/assets-v1/2d191e11-0857-4708-a993-3ae9de96405f/diego.png",
+  "r2_key": "a/v1/21dd7b9f-c0bf-4b8e-957f-c6952c532fb1/2d191e11-0857-4708-a993-3ae9de96405f/diego.png",
+  "original_filename": "diego.png",
+  "size": 1125668,
+  "content_type": "image/png",
+  "created_at": "2026-07-27T22:31:50Z"
 }
