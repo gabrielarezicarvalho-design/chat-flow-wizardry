@@ -1378,7 +1378,7 @@ export default function Landing() {
       <section id="recursos" className="mx-auto max-w-6xl px-6 py-24">
         <div className="text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prospecção automática</span>
-          <h2 className="mt-4 text-5xl md:text-6xl font-bold tracking-tight text-slate-900">
+          <h2 className="mt-4 text-5xl md:text-6xl font-bold tracking-tight text-slate-900 font-space-grotesk">
             Encontre clientes{" "}
             <span className="text-[#004DFF]">automaticamente.</span>
           </h2>
