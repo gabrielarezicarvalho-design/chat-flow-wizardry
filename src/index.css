@@ -339,3 +339,17 @@ All colors MUST be HSL.
   50% { transform: translate(-50%, -100%) translateY(-6px); }
 }
 .float-soft { animation: floatSoft 3s ease-in-out infinite; }
+
+/* Waveform da voz clonada */
+@keyframes voz-bar-pulse {
+  0%, 100% { transform: scaleY(1); opacity: 0.7; }
+  50% { transform: scaleY(1.35); opacity: 1; }
+}
+.voz-bar {
+  transform-origin: center;
+  animation: voz-bar-pulse 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .voz-bar { animation: none; }
+}
+
