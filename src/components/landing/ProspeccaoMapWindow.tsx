@@ -94,7 +94,8 @@ export function ProspeccaoMapWindow({
   const markersRef = useRef<any[]>([]);
 
   const estado = ESTADOS[idx];
-  const full = `dentistas em ${estado.capital}`;
+  const nicho = NICHOS[idx % NICHOS.length];
+  const full = `${nicho.plural} em ${estado.capital}`;
 
   // Carrega o mapa real uma única vez
   useEffect(() => {
