@@ -36,16 +36,17 @@ const stats = [
 ];
 
 const segments = [
-  { icon: Building2, label: "Imobiliária" },
-  { icon: Stethoscope, label: "Dentista" },
-  { icon: Scale, label: "Advogado" },
-  { icon: Activity, label: "Clínica" },
-  { icon: Scissors, label: "Estética" },
-  { icon: Sun, label: "Energia Solar" },
-  { icon: Store, label: "Loja" },
-  { icon: Wrench, label: "Oficina" },
-  { icon: Utensils, label: "Restaurante" },
+  { icon: Building2, label: "Imobiliária", desc: "Captação e follow-up de leads" },
+  { icon: Stethoscope, label: "Dentista", desc: "Agenda cheia e retornos" },
+  { icon: Scale, label: "Advogado", desc: "Triagem e atendimento 24h" },
+  { icon: Activity, label: "Clínica", desc: "Confirmação e lembretes" },
+  { icon: Scissors, label: "Estética", desc: "Recompra e fidelização" },
+  { icon: Sun, label: "Energia Solar", desc: "Prospecção qualificada" },
+  { icon: Store, label: "Loja", desc: "Vendas no WhatsApp" },
+  { icon: Wrench, label: "Oficina", desc: "Orçamentos e revisões" },
+  { icon: Utensils, label: "Restaurante", desc: "Pedidos e promoções" },
 ];
+
 
 const FEATURES = [
   {
