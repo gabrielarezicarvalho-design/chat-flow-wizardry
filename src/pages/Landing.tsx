@@ -1169,6 +1169,7 @@ export default function Landing() {
   const [expandedTier, setExpandedTier] = useState<string | null>(null);
   const [showCompareTable, setShowCompareTable] = useState(false);
   const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
+  const [liveLeads, setLiveLeads] = useState<{ name: string; segment: string; city: string }[]>([]);
 
   const handleSubscribe = async (tier: "start" | "business") => {
     try {
@@ -1340,13 +1341,28 @@ export default function Landing() {
               <div className="absolute -inset-4 bg-[#004DFF]/5 blur-3xl rounded-full" />
 
               <div className="relative space-y-3">
-                {[
-                  { name: "Clínica Sorriso+", segment: "Saúde bucal", city: "São Paulo", initial: "C", offset: "-rotate-1 translate-x-2" },
-                  { name: "OdontoCenter Jardins", segment: "Dentista", city: "São Paulo", initial: "O", offset: "", highlight: true },
-                  { name: "Dr. Renato Dental", segment: "Odontologia", city: "Curitiba", initial: "R", offset: "rotate-1 translate-x-4 opacity-80" },
-                ].map((lead) => (
+                {(liveLeads.length >= 3
+                  ? liveLeads.slice(0, 3)
+                  : [
+                      { name: "Clínica Sorriso+", segment: "Saúde bucal", city: "São Paulo" },
+                      { name: "OdontoCenter Jardins", segment: "Dentista", city: "São Paulo" },
+                      { name: "Dr. Renato Dental", segment: "Odontologia", city: "Curitiba" },
+                    ]
+                ).map((l, i) => {
+                  const lead = {
+                    ...l,
+                    initial: l.name.trim().charAt(0).toUpperCase(),
+                    highlight: i === 1,
+                    offset:
+                      i === 0
+                        ? "-rotate-1 translate-x-2"
+                        : i === 2
+                          ? "rotate-1 translate-x-4 opacity-80"
+                          : "",
+                  };
+                  return (
                   <div
-                    key={lead.name}
+                    key={`${lead.name}-${i}`}
                     className={`bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between transform transition hover:-translate-y-1 hover:shadow-md ${lead.offset}`}
                   >
                     <div className="flex items-center gap-4">
@@ -1354,20 +1370,21 @@ export default function Landing() {
                         {lead.initial}
                       </div>
                       <div>
-                        <p className="font-bold text-slate-900 text-sm">{lead.name}</p>
+                        <p className="font-bold text-slate-900 text-sm truncate max-w-[200px]">{lead.name}</p>
                         <p className="text-xs text-slate-500">{lead.segment} • {lead.city}</p>
                       </div>
                     </div>
                     <span className="bg-[#004DFF] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Novo</span>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* Right Content: macOS window com mapa + leads */}
           <div className="order-1 lg:order-2">
-            <ProspeccaoMapWindow />
+            <ProspeccaoMapWindow onLeads={setLiveLeads} />
           </div>
 
 

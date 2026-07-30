@@ -77,7 +77,11 @@ function loadGoogleMaps(): Promise<void> {
   return mapsPromise;
 }
 
-export function ProspeccaoMapWindow() {
+export function ProspeccaoMapWindow({
+  onLeads,
+}: {
+  onLeads?: (leads: { name: string; segment: string; city: string }[]) => void;
+} = {}) {
   const [idx, setIdx] = useState(23); // começa em SP
   const [typed, setTyped] = useState("");
   const [phase, setPhase] = useState<"typing" | "hold" | "deleting">("typing");
@@ -149,7 +153,15 @@ export function ProspeccaoMapWindow() {
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error) throw error;
-        setLeads(Array.isArray(data?.leads) ? data.leads : []);
+        const next: Lead[] = Array.isArray(data?.leads) ? data.leads : [];
+        setLeads(next);
+        onLeads?.(
+          next.slice(0, 3).map((l) => ({
+            name: l.name,
+            segment: "Dentista",
+            city: estado.capital,
+          })),
+        );
       })
       .catch((e) => {
         if (!cancelled) {
