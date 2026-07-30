@@ -1169,6 +1169,7 @@ export default function Landing() {
   const [expandedTier, setExpandedTier] = useState<string | null>(null);
   const [showCompareTable, setShowCompareTable] = useState(false);
   const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
+  const [liveLeads, setLiveLeads] = useState<{ name: string; segment: string; city: string }[]>([]);
 
   const handleSubscribe = async (tier: "start" | "business") => {
     try {
