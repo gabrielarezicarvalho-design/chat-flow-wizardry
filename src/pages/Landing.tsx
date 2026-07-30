@@ -2054,7 +2054,7 @@ export default function Landing() {
                 <Mic className="h-6 w-6 text-white" />
               </div>
               <div>
-                <div className="font-semibold text-slate-900">Sua voz · IA Next Pro</div>
+                <div className="font-semibold text-slate-900">Sua voz · Next Pro</div>
                 <div className="text-xs text-slate-500">Clonada com 60s de áudio</div>
               </div>
             </div>
