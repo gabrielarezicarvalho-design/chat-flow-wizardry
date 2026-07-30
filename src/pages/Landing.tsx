@@ -1376,113 +1376,96 @@ export default function Landing() {
 
       {/* PROSPECÇÃO */}
       <section id="recursos" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prospecção automática</span>
-          <h2 className="mt-4 text-5xl md:text-6xl font-bold tracking-tight text-slate-900 font-space-grotesk">
-            Encontre clientes
-            <span className="block text-[#004DFF]">automaticamente.</span>
-          </h2>
-          <p className="mt-5 text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Pesquisa no Google Maps, extrai contatos e dispara o primeiro "oi" no WhatsApp.
-            O sistema acha clientes enquanto você dorme.
-          </p>
-        </div>
-
-        <div className="mt-14 grid md:grid-cols-2 gap-6">
-          {/* Card do mapa estilo macOS */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
-              <div className="flex gap-1.5 group">
-                <span className="h-3 w-3 rounded-full bg-[#ff5f57] animate-pulse shadow-[0_0_6px_#ff5f57]" />
-                <span className="h-3 w-3 rounded-full bg-[#febc2e] animate-pulse delay-75 shadow-[0_0_6px_#febc2e]" />
-                <span className="h-3 w-3 rounded-full bg-[#28c840] animate-pulse delay-150 shadow-[0_0_6px_#28c840]" />
-              </div>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const g = (window as any).google;
-                  if (g?.maps && mapInstanceRef.current && searchQuery.trim()) {
-                    new g.maps.Geocoder().geocode({ address: searchQuery }, (results: any, status: string) => {
-                      if (status === "OK" && results?.[0]) {
-                        mapInstanceRef.current.setCenter(results[0].geometry.location);
-                        mapInstanceRef.current.setZoom(13);
-                      }
-                    });
-                  }
-                }}
-                className="flex-1 flex items-center gap-2 rounded-md bg-white border border-slate-200 px-3 py-1.5 text-xs text-slate-500 cursor-text hover:border-slate-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition"
-              >
-                <Search className="h-3.5 w-3.5 shrink-0" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar no Google Maps..."
-                  className="flex-1 bg-transparent outline-none text-slate-700 placeholder:text-slate-400"
-                />
-              </form>
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left Content: Leads & Messaging */}
+          <div className="space-y-8 order-2 lg:order-1">
+            <div className="space-y-4">
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prospecção automática</span>
+              <h2 className="font-space-grotesk text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
+                Encontre clientes
+                <span className="block text-[#004DFF]">automaticamente.</span>
+              </h2>
+              <p className="text-lg text-slate-600 max-w-md leading-relaxed">
+                Pesquisa no Google Maps, extrai contatos e dispara o primeiro "oi" no WhatsApp.
+                O sistema acha clientes enquanto você dorme.
+              </p>
             </div>
-            <div className="p-3 grid grid-cols-[1fr_180px] gap-3">
-              <div className="relative h-80 bg-slate-100 rounded-xl overflow-hidden">
-                <div ref={mapRef} className="absolute inset-0" />
-                {!mapLoaded && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col gap-2">
-                {([
-                  { name: "Clínica Sorriso+", phone: "(11) 9 9876-***", origin: "Google Maps" },
-                  { name: "OdontoCenter Jardins", phone: "(11) 9 4421-***", origin: "Google Maps" },
-                  { name: "Dr. Renato Dental", phone: "(11) 9 7766-***", origin: "Google Maps" },
-                  { name: "Odonto Vila Mariana", phone: "(11) 9 3312-***", origin: "Google Maps" },
-                  { name: "Sorriso Perfeito SP", phone: "(11) 9 8821-***", origin: "Google Maps" },
-                  { name: "Implantes Paulista", phone: "(11) 9 5540-***", origin: "Google Maps" },
-                ] as LeadItem[]).map((lead) => (
-                  <button
-                    type="button"
+
+            <div className="relative">
+              {/* Decorative Glow */}
+              <div className="absolute -inset-4 bg-[#004DFF]/5 blur-3xl rounded-full" />
+
+              <div className="relative space-y-3">
+                {[
+                  { name: "Clínica Sorriso+", segment: "Saúde bucal", city: "São Paulo", initial: "C", offset: "-rotate-1 translate-x-2" },
+                  { name: "OdontoCenter Jardins", segment: "Dentista", city: "São Paulo", initial: "O", offset: "", highlight: true },
+                  { name: "Dr. Renato Dental", segment: "Odontologia", city: "Curitiba", initial: "R", offset: "rotate-1 translate-x-4 opacity-80" },
+                ].map((lead) => (
+                  <div
                     key={lead.name}
-                    onClick={() => setSelectedLead(lead)}
-                    className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-left hover:border-primary/40 hover:shadow-sm transition"
+                    className={`bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between transform transition hover:-translate-y-1 hover:shadow-md ${lead.offset}`}
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
-                      <Building2 className="h-4 w-4" />
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${lead.highlight ? "bg-[#004DFF]/10 text-[#004DFF]" : "bg-slate-100 text-slate-900"}`}>
+                        {lead.initial}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 text-sm">{lead.name}</p>
+                        <p className="text-xs text-slate-500">{lead.segment} • {lead.city}</p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[11px] font-semibold text-slate-900 truncate leading-tight">{lead.name}</div>
-                      <div className="text-[10px] text-slate-500 truncate">{lead.phone}</div>
-                    </div>
-                    <span className="text-[9px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full shrink-0">novo</span>
-                  </button>
+                    <span className="bg-[#004DFF] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Novo</span>
+                  </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Fluxo automatizado */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 mb-5">
-              Fluxo automatizado
-            </div>
-            <div className="space-y-3">
-              {[
-                { icon: Search, title: "Buscar no Maps", desc: "Nicho + cidade" },
-                { icon: Filter, title: "Limpar lista", desc: "Remove duplicados/inválidos" },
-                { icon: Send, title: "Primeira mensagem", desc: "Ritmo humano no WhatsApp" },
-                { icon: Bot, title: "IA conduz a conversa", desc: "Responde, qualifica, agenda" },
-              ].map((step) => (
-                <div key={step.title} className="flex items-center gap-4 rounded-xl px-3 py-3 hover:bg-slate-50 transition">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
-                    <step.icon className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-900 text-base">{step.title}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{step.desc}</div>
-                  </div>
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />
+          {/* Right Content: Automation Flow */}
+          <div className="order-1 lg:order-2">
+            <div className="bg-[#1a1a2e] rounded-[32px] p-8 lg:p-10 shadow-2xl relative overflow-hidden">
+              {/* Tech pattern overlay */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,_#004DFF_0%,_transparent_70%)]" />
+
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-10">
+                  <div className="w-2 h-2 rounded-full bg-[#004DFF] animate-pulse" />
+                  <h3 className="text-white font-bold tracking-widest text-xs uppercase font-space-grotesk">Fluxo Automatizado</h3>
                 </div>
-              ))}
+
+                <div className="space-y-6 relative">
+                  {/* Connection Line */}
+                  <div className="absolute left-[23px] top-6 bottom-6 w-0.5 bg-gradient-to-b from-[#004DFF] via-[#004DFF]/30 to-transparent" />
+
+                  {[
+                    { icon: Search, title: "Buscar no Maps", desc: "Segmentação por raio e categoria." },
+                    { icon: Filter, title: "Limpar lista", desc: "Filtro inteligente de duplicados." },
+                    { icon: Send, title: "Primeira mensagem", desc: "Envio personalizado via WhatsApp." },
+                  ].map((step, idx) => (
+                    <div key={step.title} className="flex items-start gap-6 group">
+                      <div className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center text-white transition-transform group-hover:scale-110 ${idx === 0 ? "bg-[#004DFF] shadow-[0_0_20px_rgba(0,77,255,0.4)]" : "bg-white/10 border border-white/20"}`}>
+                        <step.icon className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-white font-bold text-lg mb-1">{step.title}</h4>
+                        <p className="text-white/50 text-sm">{step.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Flow Stats */}
+                <div className="mt-12 pt-8 border-t border-white/10 flex justify-between">
+                  <div>
+                    <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1">Taxa de abertura</p>
+                    <p className="text-white text-xl font-bold font-space-grotesk">94.2%</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1">Tempo Médio</p>
+                    <p className="text-white text-xl font-bold font-space-grotesk">2.4s</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
