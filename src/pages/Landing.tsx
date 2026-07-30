@@ -24,8 +24,6 @@ import {
   Trophy, Globe, Mail
 } from "lucide-react";
 
-type LeadItem = { name: string; phone: string; origin: string };
-
 const EMOJIS = ["😀","😂","😍","🥳","🚀","🔥","👍","🙏","💜","✨","✅","💡","📞","📎","🎉","💬","🤖","💰","📈","🎯"];
 
 const stats = [
