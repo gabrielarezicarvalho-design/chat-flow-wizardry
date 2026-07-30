@@ -1469,7 +1469,7 @@ export default function Landing() {
                 { icon: Search, title: "Buscar no Maps", desc: "Nicho + cidade" },
                 { icon: Filter, title: "Limpar lista", desc: "Remove duplicados/inválidos" },
                 { icon: Send, title: "Primeira mensagem", desc: "Ritmo humano no WhatsApp" },
-                { icon: Bot, title: "IA conduz a conversa", desc: "Responde, qualifica, agenda" },
+                { icon: Bot, title: "Next Pro conduz a conversa", desc: "Responde, qualifica, agenda" },
               ].map((step) => (
                 <div key={step.title} className="flex items-center gap-4 rounded-xl px-3 py-3 hover:bg-slate-50 transition">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
@@ -1492,7 +1492,7 @@ export default function Landing() {
             { icon: MapPin, title: "Google Maps", desc: "Extração por nicho + cidade" },
             { icon: Filter, title: "Filtros inteligentes", desc: "Tira duplicados e inválidos" },
             { icon: Send, title: "Disparo no WhatsApp", desc: "Ritmo humano, anti-bloqueio" },
-            { icon: Bot, title: "IA assume a conversa", desc: "Responde, agenda, recupera" },
+            { icon: Bot, title: "Next Pro assume a conversa", desc: "Responde, agenda, recupera" },
           ].map((f) => (
             <div key={f.title} className="rounded-2xl border border-slate-200 bg-white p-5 hover:border-primary/40 hover:shadow-sm transition">
               <f.icon className="h-5 w-5 text-primary" />
@@ -2107,7 +2107,7 @@ export default function Landing() {
             <span style={{ color: "#004DFF" }}>seu segmento.</span>
           </h2>
           <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
+            A plataforma se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
           </p>
         </div>
 
@@ -2139,7 +2139,7 @@ export default function Landing() {
               Sua central comercial <span style={{ color: "#004DFF" }}>completa.</span>
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-              Prospecção, IA, CRM, cobrança e campanhas — organizados, sem complicação.
+              Prospecção, atendimento, CRM, cobrança e campanhas — organizados, sem complicação.
             </p>
           </div>
 
@@ -2155,9 +2155,9 @@ export default function Landing() {
                 ],
               },
               {
-                icon: Bot, title: "IA & Automação",
+                icon: Bot, title: "Atendimento & Automação",
                 items: [
-                  { i: Headphones, l: "Atendimento IA" },
+                  { i: Headphones, l: "Atendimento virtual" },
                   { i: Volume2, l: "Áudio IA" },
                   { i: Mic, l: "Clonagem de voz" },
                   { i: Repeat, l: "Follow-up automático" },
