@@ -142,10 +142,10 @@ function FeaturesPopover({ label = "Funcionalidades" }: { label?: string }) {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,77,255,0.08),transparent_60%)]" />
             <div className="relative z-10">
               <div className="mb-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#004DFF]" />
+                <Mic className="h-4 w-4 text-[#004DFF]" />
                 <span className="text-xs font-bold uppercase tracking-wider text-[#004DFF]">NOVIDADE</span>
               </div>
-              <h3 className="mb-2 text-lg font-bold text-slate-900">Voz clonada com IA chegou.</h3>
+              <h3 className="mb-2 text-lg font-bold text-slate-900">Voz clonada chegou.</h3>
               <p className="text-xs leading-relaxed text-slate-600">
                 Gere áudios com a sua voz clonada pelo ElevenLabs e envie respostas de áudio para seus clientes no WhatsApp automaticamente.
               </p>
@@ -393,7 +393,7 @@ const PLAN_FEATURES: Record<string, string[]> = {
   basic: [
     "1 atendente",
     "1 conexão WhatsApp",
-    "IA completa (limitada)",
+    "Assistente limitado",
     "Chat interno",
     "CRM com funil de vendas",
     "Automação de fluxos (limitada)",
@@ -407,7 +407,7 @@ const PLAN_FEATURES: Record<string, string[]> = {
   start: [
     "5 atendentes",
     "2 conexões WhatsApp",
-    "IA completa",
+    "Assistente completo",
     "Chat interno",
     "CRM com funil de vendas",
     "Automação de fluxos",
@@ -424,8 +424,8 @@ const PLAN_FEATURES: Record<string, string[]> = {
     "Prospecção completa",
     "Suporte prioritário",
     "Conexões WhatsApp ilimitadas",
-    "Agentes de IA avançados",
-    "Voz clonada com IA",
+    "Agentes virtuais avançados",
+    "Voz clonada",
     "Leads Instagram e TikTok",
     "Espionagem de anúncios",
     "Recuperação financeira",
@@ -1556,7 +1556,7 @@ export default function Landing() {
                   { strong: "20 disparos", pre: "até ", post: " no total" },
                   { strong: "Bloqueio automático", pre: "", post: " ao atingir o limite" },
                 ],
-                chips: ["1 atendente", "1 conexão WhatsApp", "IA completa (limitada)", "Chat interno"],
+                chips: ["1 atendente", "1 conexão WhatsApp", "Assistente limitado", "Chat interno"],
                 featured: false,
               },
               {
@@ -1570,7 +1570,7 @@ export default function Landing() {
                   { strong: "100 disparos", pre: "até ", post: "/mês" },
                   { strong: "1.000", pre: "", post: " créditos de mensagem" },
                 ],
-                chips: ["5 atendentes", "2 conexões WhatsApp", "IA completa", "Chat interno"],
+                chips: ["5 atendentes", "2 conexões WhatsApp", "Assistente completo", "Chat interno"],
                 featured: false,
               },
               {
@@ -1730,9 +1730,9 @@ export default function Landing() {
                       ["Disparos em massa", "20 no total", "100/mês", "Até 10.000/mês"],
                       ["Vendas e cobranças", "50", "500/mês", "Ilimitadas"],
                       ["Fluxos de IA", "1", "3/mês", "Ilimitados"],
-                      ["Agentes de IA", "1", "3/mês", "Ilimitados"],
+                      ["Agentes virtuais", "1", "3/mês", "Ilimitados"],
                       ["Departamentos", "1", "4/mês", "Ilimitados"],
-                      ["IA completa (Aurora)", true, true, true],
+                      ["Assistente completo (Aurora)", true, true, true],
                       ["Histórico de atendimentos", true, true, true],
                       ["Segmentação de contatos", true, true, true],
                       ["Chat interno", true, true, true],
@@ -2029,7 +2029,7 @@ export default function Landing() {
               respondendo por você.
             </h2>
             <p className="mt-5 text-slate-600 text-lg leading-relaxed">
-              Grave 60 segundos da sua voz. A IA clona e envia áudios automáticos no WhatsApp — tão naturais que o cliente jura que é você.
+              Grave 60 segundos da sua voz. A plataforma clona e envia áudios automáticos no WhatsApp — tão naturais que o cliente jura que é você.
             </p>
             <ul className="mt-6 space-y-3 text-base text-slate-700">
               {["Áudios ultra naturais em português", "Atendimento humanizado em escala", "Mais retenção, mais conversão", "Cliente sente que está falando com gente"].map((i) => (
