@@ -1165,15 +1165,9 @@ function HeroChatCard() {
 
 export default function Landing() {
 
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
   const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
   const [expandedTier, setExpandedTier] = useState<string | null>(null);
   const [showCompareTable, setShowCompareTable] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("dentistas em São Paulo");
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<LeadItem | null>(null);
-  const [savedLeads, setSavedLeads] = useState<string[]>([]);
   const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
 
   const handleSubscribe = async (tier: "start" | "business") => {
