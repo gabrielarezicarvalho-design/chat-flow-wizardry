@@ -2307,52 +2307,6 @@ export default function Landing() {
         </div>
       </footer>
 
-      <Dialog open={!!selectedLead} onOpenChange={(o) => !o && setSelectedLead(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Building2 className="h-5 w-5" />
-              </div>
-              <div>
-                <DialogTitle className="text-lg">{selectedLead?.name}</DialogTitle>
-                <DialogDescription className="text-xs">Lead capturado automaticamente</DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
-          <div className="space-y-2 text-base">
-            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-              <PhoneCall className="h-4 w-4 text-slate-500" />
-              <span className="font-medium text-slate-900">{selectedLead?.phone}</span>
-            </div>
-            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-              <MapPin className="h-4 w-4 text-slate-500" />
-              <span className="text-slate-700">Origem: <span className="font-medium text-slate-900">{selectedLead?.origin}</span></span>
-            </div>
-          </div>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={() => {
-                if (selectedLead) window.open(`tel:${selectedLead.phone.replace(/\D/g, "")}`);
-              }}
-            >
-              <PhoneCall className="h-4 w-4 mr-2" /> Chamar agora
-            </Button>
-            <Button
-              className="w-full sm:w-auto"
-              onClick={() => {
-                if (selectedLead) setSavedLeads((s) => Array.from(new Set([...s, selectedLead.name])));
-                setSelectedLead(null);
-              }}
-            >
-              <Target className="h-4 w-4 mr-2" />
-              {selectedLead && savedLeads.includes(selectedLead.name) ? "Já no funil" : "Salvar no funil"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
