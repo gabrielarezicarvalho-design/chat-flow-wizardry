@@ -1508,341 +1508,10 @@ export default function Landing() {
       {/* DA PRIMEIRA MENSAGEM AO PAGAMENTO */}
       <FluxoCompletoSection />
 
-      {/* IA */}
-      <section id="ia" className="bg-slate-50 py-24">
-        <div className="mx-auto max-w-6xl px-6">
-
-
-          {/* BOTÃO COMPARAR PLANOS */}
-          <div className="mt-12 flex justify-center">
-            <button
-              onClick={() => setShowCompareTable((s) => !s)}
-              className="group inline-flex items-center gap-3 rounded-xl bg-slate-100 px-5 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-200"
-            >
-              Compare os planos
-              <ChevronUp className={`h-4 w-4 transition-transform duration-200 ${showCompareTable ? "" : "rotate-180"}`} />
-            </button>
-          </div>
-
-          {/* TABELA COMPARATIVA */}
-          {showCompareTable && (
-            <div className="mt-8 max-w-4xl mx-auto animate-fade-in">
-              <h3 className="text-center text-3xl font-bold text-slate-900">Resumo de recursos e limites</h3>
-              <p className="mt-2 text-center text-base text-slate-500">Veja lado a lado o que cada plano entrega.</p>
-
-              <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <table className="w-full text-base">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="text-left font-semibold text-slate-700 px-6 py-4">Recurso</th>
-                      <th className="text-center font-semibold px-6 py-4" style={{ color: "#004DFF" }}>Basic</th>
-                      <th className="text-center font-semibold text-slate-700 px-6 py-4">Start</th>
-                      <th className="text-center font-semibold px-6 py-4" style={{ color: "#004DFF" }}>Business</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-slate-700">
-                    {[
-                      [
-                        billing === "monthly" ? "Preço mensal" : "Preço anual (por mês)",
-                        "Grátis",
-                        billing === "monthly" ? "R$ 49,90" : "R$ 41,58",
-                        billing === "monthly" ? "R$ 99,90" : "R$ 83,25",
-                      ],
-                      [billing === "annual" ? "Cobrança anual" : "", "—", billing === "annual" ? "R$ 499,00 cobrado por ano" : "—", billing === "annual" ? "R$ 999,00 cobrado por ano" : "—"],
-                      ["Atendentes", "1", "5", "20"],
-                      ["Conexões WhatsApp", "1", "2", "10"],
-                      ["Usuários", "2", "10/mês", "Ilimitados"],
-                      ["Contatos", "50", "500/mês", "10.000/mês"],
-                      ["Disparos em massa", "20 no total", "100/mês", "Até 10.000/mês"],
-                      ["Vendas e cobranças", "50", "500/mês", "Ilimitadas"],
-                      ["Fluxos de IA", "1", "3/mês", "Ilimitados"],
-                      ["Agentes de IA", "1", "3/mês", "Ilimitados"],
-                      ["Departamentos", "1", "4/mês", "Ilimitados"],
-                      ["IA completa (Aurora)", true, true, true],
-                      ["Histórico de atendimentos", true, true, true],
-                      ["Segmentação de contatos", true, true, true],
-                      ["Chat interno", true, true, true],
-                      ["Relatórios", "Básicos", "Básicos", "Avançados"],
-                      ["Prospecção Google Maps", false, false, true],
-                      ["Prospecção Instagram/TikTok", false, false, true],
-                      ["Espionar anúncios", false, false, true],
-                      ["Voz clonada (ElevenLabs)", false, false, true],
-                      ["API + Webhooks", false, false, true],
-                      ["Suporte", "E-mail", "E-mail", "Prioritário"],
-                      ["Teste grátis", "2 dias", "2 dias", "2 dias"],
-
-                    ].map(([label, basic, start, business], idx) => (
-                      <tr key={label as string} className={idx % 2 === 1 ? "bg-slate-50/50" : ""}>
-                        <td className="px-6 py-3.5 font-medium text-slate-800">{label as string}</td>
-                        <td className="px-6 py-3.5 text-center">
-                          {typeof basic === "boolean" ? (
-                            basic ? (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
-                            ) : (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
-                            )
-                          ) : (
-                            <span className="font-semibold" style={{ color: "#004DFF" }}>{basic}</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-3.5 text-center">
-                          {typeof start === "boolean" ? (
-                            start ? (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
-                            ) : (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
-                            )
-                          ) : (
-                            <span>{start}</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-3.5 text-center">
-                          {typeof business === "boolean" ? (
-                            business ? (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
-                            ) : (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
-                            )
-                          ) : (
-                            <span className="font-semibold" style={{ color: "#004DFF" }}>{business}</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-          <div className="text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Tudo que você precisa</span>
-            <h2 className="mt-3 text-4xl md:text-6xl font-bold text-slate-900">
-              Uma IA que{" "}
-              <span className="text-[#004DFF]">
-                vende sozinha
-              </span>
-              .
-            </h2>
-            <p className="mt-4 text-slate-500 max-w-2xl mx-auto">
-              Do primeiro "oi" até o fechamento. Tudo automático, tudo natural.
-            </p>
-          </div>
-
-          <div className="mt-12 grid md:grid-cols-3 gap-6">
-            {/* Chat bento — 2 cols wide, 2 rows tall */}
-            <div className="md:col-span-2 md:row-span-2 rounded-2xl bg-white p-6 border border-slate-200">
-              <MessageCircle className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Atende como um humano</div>
-              <div className="text-base text-slate-500 mt-1">
-                Responde texto e áudio, entende contexto, lembra do cliente. Conversa de verdade.
-              </div>
-
-              <div className="mt-8 space-y-3">
-                <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-base text-slate-800">
-                  Oi, vi o anúncio. Tem disponível?
-                </div>
-                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-base text-white">
-                  <div className="text-[10px] font-semibold opacity-80 mb-0.5">✦ IA Next Pro</div>
-                  Tenho sim! Pra quando você precisa? Posso já reservar 😊
-                </div>
-                <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-base text-slate-800">
-                  Pode ser amanhã 14h?
-                </div>
-                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-base text-white">
-                  <div className="text-[10px] font-semibold opacity-80 mb-0.5">✦ IA Next Pro</div>
-                  Agendado! Te mando um lembrete 1h antes ✅
-                </div>
-              </div>
-            </div>
-
-            {/* Transcreve áudio */}
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <Mic className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Transcreve áudio</div>
-              <div className="text-base text-slate-500 mt-1">
-                Cliente mandou áudio? A IA escuta, entende e responde na hora.
-              </div>
-              <div className="mt-5 flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-white">
-                  <Play className="h-4 w-4 ml-0.5" />
-                </div>
-                <div className="flex-1 flex gap-0.5 h-6 items-center">
-                  {[...Array(24)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex-1 rounded-full bg-primary/70"
-                      style={{ height: `${25 + Math.abs(Math.sin(i * 0.9)) * 75}%` }}
-                    />
-                  ))}
-                </div>
-                <span className="text-xs text-slate-400">0:12</span>
-              </div>
-            </div>
-
-            {/* Recupera leads frios */}
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <Clock className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Recupera leads frios</div>
-              <div className="text-base text-slate-500 mt-1">
-                Follow-up automático até o cliente responder.
-              </div>
-            </div>
-
-            {/* Agenda automático */}
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <Calendar className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Agenda automático</div>
-              <div className="text-base text-slate-500 mt-1">
-                Marca reuniões e visitas sem você abrir a agenda.
-              </div>
-            </div>
-
-            {/* Aviso de lead quente */}
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <TrendingUp className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Aviso de lead quente</div>
-              <div className="text-base text-slate-500 mt-1">
-                Quando o cliente tá pronto, você recebe no WhatsApp.
-              </div>
-            </div>
-
-            {/* Anti-bloqueio */}
-            <div className="rounded-2xl bg-white p-6 border border-slate-200">
-              <ShieldCheck className="h-6 w-6 text-primary" />
-              <div className="mt-4 font-semibold text-slate-900">Anti-bloqueio</div>
-              <div className="text-base text-slate-500 mt-1">
-                Disparos seguros, ritmo natural, simulação humana.
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PAGAMENTOS */}
-      <section id="pagamentos" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Recuperação financeira</span>
-          <h2 className="mt-3 text-4xl md:text-6xl font-bold tracking-tight">
-            Receba pagamentos{" "}
-            <span style={{ color: "#004DFF" }}>sem levantar um dedo</span>
-            <span className="text-slate-900">.</span>
-          </h2>
-          <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            Cobrança automática no WhatsApp. PIX, boleto, lembretes e recuperação de inadimplentes — tudo a IA faz por você.
-          </p>
-        </div>
-
-        {/* Top row: chat + timeline */}
-        <div className="mt-12 grid md:grid-cols-2 gap-6">
-          {/* Chat mockup */}
-          <div className="rounded-3xl bg-white border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
-              <div className="flex gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-red-400" />
-                <span className="h-3 w-3 rounded-full bg-yellow-400" />
-                <span className="h-3 w-3 rounded-full bg-green-400" />
-              </div>
-              <div className="text-xs text-slate-500 flex items-center gap-2">
-                <span className="inline-block h-3 w-3 rounded-sm bg-slate-200" />
-                Cobrança automática · WhatsApp
-              </div>
-            </div>
-            <div className="flex-1 p-5 space-y-3 bg-white">
-              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-base">
-                <div className="text-[10px] opacity-90 font-semibold mb-1">✦ IA Next Pro</div>
-                Olá 👋 Seu pagamento vence hoje. Segue novamente o link para pagamento.
-              </div>
-              <div className="max-w-[60%] rounded-2xl rounded-tl-sm bg-slate-100 text-slate-800 px-4 py-2 text-base">
-                Pode mandar
-              </div>
-              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-base space-y-2">
-                <div className="text-[10px] opacity-90 font-semibold">✦ IA Next Pro</div>
-                <div className="font-semibold">Aqui está 👇</div>
-                <div className="rounded-lg bg-emerald-600/40 px-2 py-1.5 text-xs">
-                  💳 Link de pagamento:<br />pix.nextpro.ai/p/abc123
-                </div>
-                <div className="rounded-lg bg-emerald-600/40 px-2 py-1.5 text-xs">
-                  📄 Boleto também disponível
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Timeline */}
-          <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-6">
-            <div className="text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-6">
-              Recuperação automática
-            </div>
-            <ul className="space-y-5">
-              {[
-                { icon: "💵", title: "Cobrança enviada", sub: "Dia do vencimento", dot: "bg-emerald-500" },
-                { icon: "🔔", title: "Lembrete automático", sub: "24h antes do vencimento", dot: "bg-amber-400" },
-                { icon: "⚠️", title: "Aviso de atraso", sub: "1 dia após vencimento", dot: "bg-orange-400" },
-                { icon: "💬", title: "Follow-up humanizado", sub: "3 dias depois · tom suave", dot: "bg-violet-500", highlight: true },
-                { icon: "📈", title: "Cliente pagou", sub: "Confirmação automática", dot: "bg-emerald-500" },
-              ].map((s) => (
-                <li key={s.title} className="flex items-center gap-4">
-                  <div className={`h-11 w-11 rounded-xl flex items-center justify-center text-xl ${s.highlight ? "bg-violet-500 text-white" : "bg-slate-100"}`}>
-                    {s.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-base text-slate-900">{s.title}</div>
-                    <div className="text-xs text-slate-500">{s.sub}</div>
-                  </div>
-                  <span className={`h-2 w-2 rounded-full ${s.dot}`} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Middle row: payment methods + stat */}
-        <div className="mt-6 grid md:grid-cols-2 gap-6">
-          <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-8 flex items-center justify-around">
-            {[
-              { icon: <CreditCard className="h-6 w-6" />, label: "PIX" },
-              { icon: <CreditCard className="h-6 w-6" />, label: "Boleto" },
-              { icon: <CreditCard className="h-6 w-6" />, label: "Link" },
-            ].map((m) => (
-              <div key={m.label} className="flex flex-col items-center gap-2 text-slate-600">
-                <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-                  {m.icon}
-                </div>
-                <span className="text-base">{m.label}</span>
-              </div>
-            ))}
-          </div>
-          <div className="rounded-3xl bg-emerald-50 border border-emerald-100 p-8 flex flex-col justify-center">
-            <div className="text-5xl font-bold text-emerald-600">+40%</div>
-            <p className="mt-2 text-base text-slate-600">
-              de clientes inadimplentes pagam com follow-up automático
-            </p>
-          </div>
-        </div>
-
-        {/* Bottom features */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { icon: <CreditCard className="h-5 w-5" />, title: "Cobrança no WhatsApp", sub: "Envio automático com link de pagamento" },
-            { icon: <Bell className="h-5 w-5" />, title: "Lembrete inteligente", sub: "Aviso antes e no dia do vencimento" },
-            { icon: <CreditCard className="h-5 w-5" />, title: "PIX + Boleto", sub: "Links de pagamento direto no chat" },
-            { icon: <TrendingUp className="h-5 w-5" />, title: "Recuperação ativa", sub: "Follow-up até o cliente pagar" },
-          ].map((f) => (
-            <div key={f.title} className="rounded-2xl bg-white border border-slate-200 p-5">
-              <div className="h-9 w-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 mb-3">
-                {f.icon}
-              </div>
-              <div className="font-semibold text-base text-slate-900">{f.title}</div>
-              <div className="text-xs text-slate-500 mt-1">{f.sub}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* PLANOS */}
       <section id="planos" className="bg-white py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
 
           <div className="text-center">
@@ -2020,6 +1689,338 @@ export default function Landing() {
           </div>
 
 
+          {/* BOTÃO COMPARAR PLANOS */}
+          <div className="mt-12 flex justify-center">
+            <button
+              onClick={() => setShowCompareTable((s) => !s)}
+              className="group inline-flex items-center gap-3 rounded-xl bg-slate-100 px-5 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-200"
+            >
+              Compare os planos
+              <ChevronUp className={`h-4 w-4 transition-transform duration-200 ${showCompareTable ? "" : "rotate-180"}`} />
+            </button>
+          </div>
+
+          {/* TABELA COMPARATIVA */}
+          {showCompareTable && (
+            <div className="mt-8 max-w-4xl mx-auto animate-fade-in">
+              <h3 className="text-center text-3xl font-bold text-slate-900">Resumo de recursos e limites</h3>
+              <p className="mt-2 text-center text-base text-slate-500">Veja lado a lado o que cada plano entrega.</p>
+
+              <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <table className="w-full text-base">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="text-left font-semibold text-slate-700 px-6 py-4">Recurso</th>
+                      <th className="text-center font-semibold px-6 py-4" style={{ color: "#004DFF" }}>Basic</th>
+                      <th className="text-center font-semibold text-slate-700 px-6 py-4">Start</th>
+                      <th className="text-center font-semibold px-6 py-4" style={{ color: "#004DFF" }}>Business</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-slate-700">
+                    {[
+                      [
+                        billing === "monthly" ? "Preço mensal" : "Preço anual (por mês)",
+                        "Grátis",
+                        billing === "monthly" ? "R$ 49,90" : "R$ 41,58",
+                        billing === "monthly" ? "R$ 99,90" : "R$ 83,25",
+                      ],
+                      [billing === "annual" ? "Cobrança anual" : "", "—", billing === "annual" ? "R$ 499,00 cobrado por ano" : "—", billing === "annual" ? "R$ 999,00 cobrado por ano" : "—"],
+                      ["Atendentes", "1", "5", "20"],
+                      ["Conexões WhatsApp", "1", "2", "10"],
+                      ["Usuários", "2", "10/mês", "Ilimitados"],
+                      ["Contatos", "50", "500/mês", "10.000/mês"],
+                      ["Disparos em massa", "20 no total", "100/mês", "Até 10.000/mês"],
+                      ["Vendas e cobranças", "50", "500/mês", "Ilimitadas"],
+                      ["Fluxos de IA", "1", "3/mês", "Ilimitados"],
+                      ["Agentes de IA", "1", "3/mês", "Ilimitados"],
+                      ["Departamentos", "1", "4/mês", "Ilimitados"],
+                      ["IA completa (Aurora)", true, true, true],
+                      ["Histórico de atendimentos", true, true, true],
+                      ["Segmentação de contatos", true, true, true],
+                      ["Chat interno", true, true, true],
+                      ["Relatórios", "Básicos", "Básicos", "Avançados"],
+                      ["Prospecção Google Maps", false, false, true],
+                      ["Prospecção Instagram/TikTok", false, false, true],
+                      ["Espionar anúncios", false, false, true],
+                      ["Voz clonada (ElevenLabs)", false, false, true],
+                      ["API + Webhooks", false, false, true],
+                      ["Suporte", "E-mail", "E-mail", "Prioritário"],
+                      ["Teste grátis", "2 dias", "2 dias", "2 dias"],
+
+                    ].map(([label, basic, start, business], idx) => (
+                      <tr key={label as string} className={idx % 2 === 1 ? "bg-slate-50/50" : ""}>
+                        <td className="px-6 py-3.5 font-medium text-slate-800">{label as string}</td>
+                        <td className="px-6 py-3.5 text-center">
+                          {typeof basic === "boolean" ? (
+                            basic ? (
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                            ) : (
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
+                            )
+                          ) : (
+                            <span className="font-semibold" style={{ color: "#004DFF" }}>{basic}</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-3.5 text-center">
+                          {typeof start === "boolean" ? (
+                            start ? (
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                            ) : (
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
+                            )
+                          ) : (
+                            <span>{start}</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-3.5 text-center">
+                          {typeof business === "boolean" ? (
+                            business ? (
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-xs">✓</span>
+                            ) : (
+                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 text-xs">—</span>
+                            )
+                          ) : (
+                            <span className="font-semibold" style={{ color: "#004DFF" }}>{business}</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* IA */}
+      <section id="ia" className="bg-slate-50 py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="text-center">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Tudo que você precisa</span>
+            <h2 className="mt-3 text-4xl md:text-6xl font-bold text-slate-900">
+              Uma IA que{" "}
+              <span className="text-[#004DFF]">
+                vende sozinha
+              </span>
+              .
+            </h2>
+            <p className="mt-4 text-slate-500 max-w-2xl mx-auto">
+              Do primeiro "oi" até o fechamento. Tudo automático, tudo natural.
+            </p>
+          </div>
+
+          <div className="mt-12 grid md:grid-cols-3 gap-6">
+            {/* Chat bento — 2 cols wide, 2 rows tall */}
+            <div className="md:col-span-2 md:row-span-2 rounded-2xl bg-white p-6 border border-slate-200">
+              <MessageCircle className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Atende como um humano</div>
+              <div className="text-base text-slate-500 mt-1">
+                Responde texto e áudio, entende contexto, lembra do cliente. Conversa de verdade.
+              </div>
+
+              <div className="mt-8 space-y-3">
+                <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-base text-slate-800">
+                  Oi, vi o anúncio. Tem disponível?
+                </div>
+                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-base text-white">
+                  <div className="text-[10px] font-semibold opacity-80 mb-0.5">✦ IA Next Pro</div>
+                  Tenho sim! Pra quando você precisa? Posso já reservar 😊
+                </div>
+                <div className="max-w-[70%] rounded-2xl bg-slate-100 px-4 py-2.5 text-base text-slate-800">
+                  Pode ser amanhã 14h?
+                </div>
+                <div className="ml-auto max-w-[75%] rounded-2xl bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-base text-white">
+                  <div className="text-[10px] font-semibold opacity-80 mb-0.5">✦ IA Next Pro</div>
+                  Agendado! Te mando um lembrete 1h antes ✅
+                </div>
+              </div>
+            </div>
+
+            {/* Transcreve áudio */}
+            <div className="rounded-2xl bg-white p-6 border border-slate-200">
+              <Mic className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Transcreve áudio</div>
+              <div className="text-base text-slate-500 mt-1">
+                Cliente mandou áudio? A IA escuta, entende e responde na hora.
+              </div>
+              <div className="mt-5 flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-white">
+                  <Play className="h-4 w-4 ml-0.5" />
+                </div>
+                <div className="flex-1 flex gap-0.5 h-6 items-center">
+                  {[...Array(24)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex-1 rounded-full bg-primary/70"
+                      style={{ height: `${25 + Math.abs(Math.sin(i * 0.9)) * 75}%` }}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-slate-400">0:12</span>
+              </div>
+            </div>
+
+            {/* Recupera leads frios */}
+            <div className="rounded-2xl bg-white p-6 border border-slate-200">
+              <Clock className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Recupera leads frios</div>
+              <div className="text-base text-slate-500 mt-1">
+                Follow-up automático até o cliente responder.
+              </div>
+            </div>
+
+            {/* Agenda automático */}
+            <div className="rounded-2xl bg-white p-6 border border-slate-200">
+              <Calendar className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Agenda automático</div>
+              <div className="text-base text-slate-500 mt-1">
+                Marca reuniões e visitas sem você abrir a agenda.
+              </div>
+            </div>
+
+            {/* Aviso de lead quente */}
+            <div className="rounded-2xl bg-white p-6 border border-slate-200">
+              <TrendingUp className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Aviso de lead quente</div>
+              <div className="text-base text-slate-500 mt-1">
+                Quando o cliente tá pronto, você recebe no WhatsApp.
+              </div>
+            </div>
+
+            {/* Anti-bloqueio */}
+            <div className="rounded-2xl bg-white p-6 border border-slate-200">
+              <ShieldCheck className="h-6 w-6 text-primary" />
+              <div className="mt-4 font-semibold text-slate-900">Anti-bloqueio</div>
+              <div className="text-base text-slate-500 mt-1">
+                Disparos seguros, ritmo natural, simulação humana.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* PAGAMENTOS */}
+      <section id="pagamentos" className="mx-auto max-w-6xl px-6 py-24">
+        <div className="text-center">
+          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600">Recuperação financeira</span>
+          <h2 className="mt-3 text-4xl md:text-6xl font-bold tracking-tight">
+            Receba pagamentos{" "}
+            <span style={{ color: "#004DFF" }}>sem levantar um dedo</span>
+            <span className="text-slate-900">.</span>
+          </h2>
+          <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
+            Cobrança automática no WhatsApp. PIX, boleto, lembretes e recuperação de inadimplentes — tudo a IA faz por você.
+          </p>
+        </div>
+
+        {/* Top row: chat + timeline */}
+        <div className="mt-12 grid md:grid-cols-2 gap-6">
+          {/* Chat mockup */}
+          <div className="rounded-3xl bg-white border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
+              <div className="flex gap-1.5">
+                <span className="h-3 w-3 rounded-full bg-red-400" />
+                <span className="h-3 w-3 rounded-full bg-yellow-400" />
+                <span className="h-3 w-3 rounded-full bg-green-400" />
+              </div>
+              <div className="text-xs text-slate-500 flex items-center gap-2">
+                <span className="inline-block h-3 w-3 rounded-sm bg-slate-200" />
+                Cobrança automática · WhatsApp
+              </div>
+            </div>
+            <div className="flex-1 p-5 space-y-3 bg-white">
+              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-base">
+                <div className="text-[10px] opacity-90 font-semibold mb-1">✦ IA Next Pro</div>
+                Olá 👋 Seu pagamento vence hoje. Segue novamente o link para pagamento.
+              </div>
+              <div className="max-w-[60%] rounded-2xl rounded-tl-sm bg-slate-100 text-slate-800 px-4 py-2 text-base">
+                Pode mandar
+              </div>
+              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-emerald-500 text-white px-4 py-3 text-base space-y-2">
+                <div className="text-[10px] opacity-90 font-semibold">✦ IA Next Pro</div>
+                <div className="font-semibold">Aqui está 👇</div>
+                <div className="rounded-lg bg-emerald-600/40 px-2 py-1.5 text-xs">
+                  💳 Link de pagamento:<br />pix.nextpro.ai/p/abc123
+                </div>
+                <div className="rounded-lg bg-emerald-600/40 px-2 py-1.5 text-xs">
+                  📄 Boleto também disponível
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Timeline */}
+          <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-6">
+            <div className="text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-6">
+              Recuperação automática
+            </div>
+            <ul className="space-y-5">
+              {[
+                { icon: "💵", title: "Cobrança enviada", sub: "Dia do vencimento", dot: "bg-emerald-500" },
+                { icon: "🔔", title: "Lembrete automático", sub: "24h antes do vencimento", dot: "bg-amber-400" },
+                { icon: "⚠️", title: "Aviso de atraso", sub: "1 dia após vencimento", dot: "bg-orange-400" },
+                { icon: "💬", title: "Follow-up humanizado", sub: "3 dias depois · tom suave", dot: "bg-violet-500", highlight: true },
+                { icon: "📈", title: "Cliente pagou", sub: "Confirmação automática", dot: "bg-emerald-500" },
+              ].map((s) => (
+                <li key={s.title} className="flex items-center gap-4">
+                  <div className={`h-11 w-11 rounded-xl flex items-center justify-center text-xl ${s.highlight ? "bg-violet-500 text-white" : "bg-slate-100"}`}>
+                    {s.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-base text-slate-900">{s.title}</div>
+                    <div className="text-xs text-slate-500">{s.sub}</div>
+                  </div>
+                  <span className={`h-2 w-2 rounded-full ${s.dot}`} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Middle row: payment methods + stat */}
+        <div className="mt-6 grid md:grid-cols-2 gap-6">
+          <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-8 flex items-center justify-around">
+            {[
+              { icon: <CreditCard className="h-6 w-6" />, label: "PIX" },
+              { icon: <CreditCard className="h-6 w-6" />, label: "Boleto" },
+              { icon: <CreditCard className="h-6 w-6" />, label: "Link" },
+            ].map((m) => (
+              <div key={m.label} className="flex flex-col items-center gap-2 text-slate-600">
+                <div className="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+                  {m.icon}
+                </div>
+                <span className="text-base">{m.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-3xl bg-emerald-50 border border-emerald-100 p-8 flex flex-col justify-center">
+            <div className="text-5xl font-bold text-emerald-600">+40%</div>
+            <p className="mt-2 text-base text-slate-600">
+              de clientes inadimplentes pagam com follow-up automático
+            </p>
+          </div>
+        </div>
+
+        {/* Bottom features */}
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { icon: <CreditCard className="h-5 w-5" />, title: "Cobrança no WhatsApp", sub: "Envio automático com link de pagamento" },
+            { icon: <Bell className="h-5 w-5" />, title: "Lembrete inteligente", sub: "Aviso antes e no dia do vencimento" },
+            { icon: <CreditCard className="h-5 w-5" />, title: "PIX + Boleto", sub: "Links de pagamento direto no chat" },
+            { icon: <TrendingUp className="h-5 w-5" />, title: "Recuperação ativa", sub: "Follow-up até o cliente pagar" },
+          ].map((f) => (
+            <div key={f.title} className="rounded-2xl bg-white border border-slate-200 p-5">
+              <div className="h-9 w-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 mb-3">
+                {f.icon}
+              </div>
+              <div className="font-semibold text-base text-slate-900">{f.title}</div>
+              <div className="text-xs text-slate-500 mt-1">{f.sub}</div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* VOZ CLONADA */}
       <section className="bg-gradient-to-b from-white to-slate-50 py-24">
