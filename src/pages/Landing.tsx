@@ -1490,7 +1490,7 @@ export default function Landing() {
                   >
                     <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-[#004DFF]/8 text-[#004DFF] shrink-0 ring-1 ring-[#004DFF]/10">
                       <step.icon className="h-5 w-5" />
-                      <span className="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#004DFF] text-[9px] font-bold text-white">
+                      <span className="absolute -top-1.5 -right-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-[#004DFF] text-[9px] font-bold text-white">
                         {i + 1}
                       </span>
                     </div>
