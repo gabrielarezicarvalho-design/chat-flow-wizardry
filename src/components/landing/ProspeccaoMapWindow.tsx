@@ -77,7 +77,11 @@ function loadGoogleMaps(): Promise<void> {
   return mapsPromise;
 }
 
-export function ProspeccaoMapWindow() {
+export function ProspeccaoMapWindow({
+  onLeads,
+}: {
+  onLeads?: (leads: { name: string; segment: string; city: string }[]) => void;
+} = {}) {
   const [idx, setIdx] = useState(23); // começa em SP
   const [typed, setTyped] = useState("");
   const [phase, setPhase] = useState<"typing" | "hold" | "deleting">("typing");
