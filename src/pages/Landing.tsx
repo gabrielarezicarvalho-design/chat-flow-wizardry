@@ -1021,10 +1021,10 @@ function HeroChatCard() {
         ...m,
         {
           from: "ai",
-          text:
-            !error && reply
-              ? reply
-              : "Consigo te ajudar com isso! 😊 Me conta um pouco mais — ou clique numa das perguntas sugeridas.",
+            text:
+              !error && reply
+                ? reply
+                : "Consigo te ajudar com isso. Me conta um pouco mais — ou clique numa das perguntas sugeridas.",
         },
       ]);
     } catch {
