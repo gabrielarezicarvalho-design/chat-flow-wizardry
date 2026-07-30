@@ -1983,7 +1983,7 @@ export default function Landing() {
           <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { icon: <Zap className="h-6 w-6" />, title: "Cobrança no WhatsApp", sub: "Envio automático com link de pagamento" },
-              { icon: <ShieldCheck className="h-6 w-6 text-[#22C55E]" />, title: "Score de Risco", sub: "IA de prevenção" },
+              { icon: <ShieldCheck className="h-6 w-6 text-[#22C55E]" />, title: "PIX + Boleto", sub: "Links de pagamento direto no chat" },
               { icon: <Clock className="h-6 w-6 text-[#FACC15]" />, title: "Retentativa", sub: "Cobrança recorrente" },
               { icon: <BarChart3 className="h-6 w-6 text-[#7C3AED]" />, title: "Dashboard", sub: "Métricas em tempo real" },
             ].map((f) => (
