@@ -36,16 +36,17 @@ const stats = [
 ];
 
 const segments = [
-  { icon: Building2, label: "Imobiliária" },
-  { icon: Stethoscope, label: "Dentista" },
-  { icon: Scale, label: "Advogado" },
-  { icon: Activity, label: "Clínica" },
-  { icon: Scissors, label: "Estética" },
-  { icon: Sun, label: "Energia Solar" },
-  { icon: Store, label: "Loja" },
-  { icon: Wrench, label: "Oficina" },
-  { icon: Utensils, label: "Restaurante" },
+  { icon: Building2, label: "Imobiliária", desc: "Captação de imóveis e follow-up de visitas", span: "md:col-span-2" },
+  { icon: Stethoscope, label: "Dentista", desc: "Agenda cheia e retorno de pacientes", span: "md:col-span-1" },
+  { icon: Scale, label: "Advogado", desc: "Triagem de casos no WhatsApp", span: "md:col-span-1" },
+  { icon: Activity, label: "Clínica", desc: "Confirmação e lembretes automáticos", span: "md:col-span-1" },
+  { icon: Scissors, label: "Estética", desc: "Recompra de procedimentos e pacotes", span: "md:col-span-2" },
+  { icon: Sun, label: "Energia Solar", desc: "Qualificação de leads e orçamentos", span: "md:col-span-1" },
+  { icon: Store, label: "Loja", desc: "Vitrine no chat e cobrança por PIX", span: "md:col-span-1" },
+  { icon: Wrench, label: "Oficina", desc: "Revisões programadas e orçamentos", span: "md:col-span-1" },
+  { icon: Utensils, label: "Restaurante", desc: "Pedidos, reservas e campanhas", span: "md:col-span-2" },
 ];
+
 
 const FEATURES = [
   {
