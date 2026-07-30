@@ -77,6 +77,21 @@ function loadGoogleMaps(): Promise<void> {
   return mapsPromise;
 }
 
+const NICHOS = [
+  { plural: "dentistas", singular: "Dentista" },
+  { plural: "academias", singular: "Academia" },
+  { plural: "restaurantes", singular: "Restaurante" },
+  { plural: "salões de beleza", singular: "Salão de beleza" },
+  { plural: "pet shops", singular: "Pet shop" },
+  { plural: "clínicas de estética", singular: "Clínica de estética" },
+  { plural: "oficinas mecânicas", singular: "Oficina mecânica" },
+  { plural: "padarias", singular: "Padaria" },
+  { plural: "imobiliárias", singular: "Imobiliária" },
+  { plural: "advogados", singular: "Advogado" },
+  { plural: "barbearias", singular: "Barbearia" },
+  { plural: "escolas de idiomas", singular: "Escola de idiomas" },
+];
+
 export function ProspeccaoMapWindow({
   onLeads,
 }: {
@@ -94,7 +109,8 @@ export function ProspeccaoMapWindow({
   const markersRef = useRef<any[]>([]);
 
   const estado = ESTADOS[idx];
-  const full = `dentistas em ${estado.capital}`;
+  const nicho = NICHOS[idx % NICHOS.length];
+  const full = `${nicho.plural} em ${estado.capital}`;
 
   // Carrega o mapa real uma única vez
   useEffect(() => {
@@ -149,7 +165,7 @@ export function ProspeccaoMapWindow({
     let cancelled = false;
     setLoading(true);
     supabase.functions
-      .invoke("landing-maps-search", { body: { query: "dentistas", city: estado.capital } })
+      .invoke("landing-maps-search", { body: { query: nicho.plural, city: estado.capital } })
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error) throw error;
@@ -158,7 +174,7 @@ export function ProspeccaoMapWindow({
         onLeads?.(
           next.slice(0, 3).map((l) => ({
             name: l.name,
-            segment: "Dentista",
+            segment: nicho.singular,
             city: estado.capital,
           })),
         );
