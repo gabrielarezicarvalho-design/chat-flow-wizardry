@@ -1370,13 +1370,14 @@ export default function Landing() {
                         {lead.initial}
                       </div>
                       <div>
-                        <p className="font-bold text-slate-900 text-sm">{lead.name}</p>
+                        <p className="font-bold text-slate-900 text-sm truncate max-w-[200px]">{lead.name}</p>
                         <p className="text-xs text-slate-500">{lead.segment} • {lead.city}</p>
                       </div>
                     </div>
                     <span className="bg-[#004DFF] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Novo</span>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
