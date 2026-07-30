@@ -153,7 +153,15 @@ export function ProspeccaoMapWindow({
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error) throw error;
-        setLeads(Array.isArray(data?.leads) ? data.leads : []);
+        const next: Lead[] = Array.isArray(data?.leads) ? data.leads : [];
+        setLeads(next);
+        onLeads?.(
+          next.slice(0, 3).map((l) => ({
+            name: l.name,
+            segment: "Dentista",
+            city: estado.capital,
+          })),
+        );
       })
       .catch((e) => {
         if (!cancelled) {
