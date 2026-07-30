@@ -1317,7 +1317,7 @@ export default function Landing() {
 
 
       {/* PROSPECÇÃO */}
-      <section id="recursos" className="mx-auto max-w-6xl px-6 py-24">
+      <section id="recursos" className="mx-auto max-w-[1240px] px-6 py-24">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Content: Leads & Messaging */}
           <div className="space-y-8 order-2 lg:order-1">
