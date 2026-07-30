@@ -12,6 +12,11 @@ const ALLOWED_QUERIES = new Set([
   "academias",
   "pet shops",
   "restaurantes",
+  "clínicas de estética",
+  "imobiliárias",
+  "advogados",
+  "barbearias",
+  "escolas de idiomas",
 ]);
 
 const CAPITALS = new Set([
