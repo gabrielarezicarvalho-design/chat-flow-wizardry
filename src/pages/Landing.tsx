@@ -1714,8 +1714,8 @@ export default function Landing() {
           {/* Bento grid */}
           <div className="mt-16 grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Chat — grande */}
-            <div className="group relative overflow-hidden md:col-span-8 min-h-[420px] rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm">
-              <div className="relative z-10 max-w-sm">
+            <div className="group md:col-span-8 flex flex-col md:flex-row gap-8 rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm">
+              <div className="md:w-[42%] shrink-0">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
                   <MessageCircle className="h-6 w-6 text-white" />
                 </div>
@@ -1726,7 +1726,8 @@ export default function Landing() {
               </div>
 
               {/* Mock chat */}
-              <div className="absolute bottom-0 right-0 w-[92%] sm:w-[62%] translate-x-4 translate-y-6 rounded-tl-3xl bg-white p-5 shadow-2xl transition-transform duration-500 group-hover:translate-y-2">
+              <div className="flex-1 rounded-2xl bg-white p-5 shadow-xl shadow-[#0B1220]/5 transition-transform duration-500 group-hover:-translate-y-1">
+
                 <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
                   <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#0B1220]/50">IA ativa</span>
