@@ -618,7 +618,7 @@ type HeroQA = { q: string; a: string };
 function FluxoCompletoSection() {
   return (
     <section className="bg-[#f4f1ec]">
-      <div className="mx-auto max-w-6xl px-6 py-24">
+      <div className="mx-auto max-w-[1240px] px-6 py-24">
         {/* Cabeçalho */}
         <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-16 items-end">
           <div>
