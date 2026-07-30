@@ -77,6 +77,21 @@ function loadGoogleMaps(): Promise<void> {
   return mapsPromise;
 }
 
+const NICHOS = [
+  { plural: "dentistas", singular: "Dentista" },
+  { plural: "academias", singular: "Academia" },
+  { plural: "restaurantes", singular: "Restaurante" },
+  { plural: "salões de beleza", singular: "Salão de beleza" },
+  { plural: "pet shops", singular: "Pet shop" },
+  { plural: "clínicas de estética", singular: "Clínica de estética" },
+  { plural: "oficinas mecânicas", singular: "Oficina mecânica" },
+  { plural: "padarias", singular: "Padaria" },
+  { plural: "imobiliárias", singular: "Imobiliária" },
+  { plural: "advogados", singular: "Advogado" },
+  { plural: "barbearias", singular: "Barbearia" },
+  { plural: "escolas de idiomas", singular: "Escola de idiomas" },
+];
+
 export function ProspeccaoMapWindow({
   onLeads,
 }: {
