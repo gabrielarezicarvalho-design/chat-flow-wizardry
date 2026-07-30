@@ -165,7 +165,7 @@ export function ProspeccaoMapWindow({
     let cancelled = false;
     setLoading(true);
     supabase.functions
-      .invoke("landing-maps-search", { body: { query: "dentistas", city: estado.capital } })
+      .invoke("landing-maps-search", { body: { query: nicho.plural, city: estado.capital } })
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error) throw error;
@@ -174,7 +174,7 @@ export function ProspeccaoMapWindow({
         onLeads?.(
           next.slice(0, 3).map((l) => ({
             name: l.name,
-            segment: "Dentista",
+            segment: nicho.singular,
             city: estado.capital,
           })),
         );
