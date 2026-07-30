@@ -36,15 +36,15 @@ const stats = [
 ];
 
 const segments = [
-  { icon: Building2, label: "Imobiliária", desc: "Captação e follow-up de leads" },
-  { icon: Stethoscope, label: "Dentista", desc: "Agenda cheia e retornos" },
-  { icon: Scale, label: "Advogado", desc: "Triagem e atendimento 24h" },
-  { icon: Activity, label: "Clínica", desc: "Confirmação e lembretes" },
-  { icon: Scissors, label: "Estética", desc: "Recompra e fidelização" },
-  { icon: Sun, label: "Energia Solar", desc: "Prospecção qualificada" },
-  { icon: Store, label: "Loja", desc: "Vendas no WhatsApp" },
-  { icon: Wrench, label: "Oficina", desc: "Orçamentos e revisões" },
-  { icon: Utensils, label: "Restaurante", desc: "Pedidos e promoções" },
+  { icon: Building2, label: "Imobiliária", desc: "Captação de imóveis e follow-up de visitas", span: "md:col-span-2" },
+  { icon: Stethoscope, label: "Dentista", desc: "Agenda cheia e retorno de pacientes", span: "md:col-span-1" },
+  { icon: Scale, label: "Advogado", desc: "Triagem de casos no WhatsApp", span: "md:col-span-1" },
+  { icon: Activity, label: "Clínica", desc: "Confirmação e lembretes automáticos", span: "md:col-span-1" },
+  { icon: Scissors, label: "Estética", desc: "Recompra de procedimentos e pacotes", span: "md:col-span-2" },
+  { icon: Sun, label: "Energia Solar", desc: "Qualificação de leads e orçamentos", span: "md:col-span-1" },
+  { icon: Store, label: "Loja", desc: "Vitrine no chat e cobrança por PIX", span: "md:col-span-1" },
+  { icon: Wrench, label: "Oficina", desc: "Revisões programadas e orçamentos", span: "md:col-span-1" },
+  { icon: Utensils, label: "Restaurante", desc: "Pedidos, reservas e campanhas", span: "md:col-span-2" },
 ];
 
 
@@ -2111,76 +2111,66 @@ export default function Landing() {
 
 
       {/* SEGMENTOS */}
-      <section id="segmentos" className="relative overflow-hidden py-28">
+      <section id="segmentos" className="relative overflow-hidden bg-white py-28">
         <div
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 opacity-[0.55]"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 50% 0%, rgba(0,77,255,0.07) 0%, transparent 55%)",
+              "radial-gradient(circle at 50% 0%, rgba(0,77,255,0.09) 0%, transparent 55%), linear-gradient(to bottom, rgba(241,245,249,0.9), transparent 40%)",
           }}
         />
         <div className="relative mx-auto max-w-[1240px] px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 font-space-grotesk text-[11px] font-bold uppercase tracking-[0.18em] text-slate-900 backdrop-blur">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 font-space-grotesk text-[11px] font-bold uppercase tracking-[0.18em] text-[#0B1220] shadow-[0_1px_2px_rgba(11,18,32,0.04)] backdrop-blur">
               <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
               Pra qualquer negócio
             </span>
-            <h2 className="mt-6 font-space-grotesk text-4xl md:text-[56px] font-bold leading-[1.02] tracking-tight text-slate-900">
+            <h2 className="mt-6 font-space-grotesk text-4xl md:text-[60px] font-bold leading-[1] tracking-tight text-[#0B1220]">
               Funciona pro{" "}
               <span className="relative inline-block" style={{ color: "#004DFF" }}>
-                seu segmento
+                seu segmento.
                 <span
                   className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full"
                   style={{ backgroundColor: "#004DFF", opacity: 0.16 }}
                 />
               </span>
-              .
             </h2>
-            <p className="mt-6 text-lg text-slate-600">
+            <p className="mx-auto mt-6 max-w-xl text-[15px] leading-relaxed text-slate-500">
               A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
             </p>
           </div>
 
-          <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {segments.map((s, i) => (
+          <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+            {segments.map((s) => (
               <div
                 key={s.label}
-                className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#004DFF]/30 hover:shadow-[0_24px_48px_-24px_rgba(0,77,255,0.45)]"
+                className={`group relative overflow-hidden rounded-[22px] border border-slate-200/90 bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#004DFF]/35 hover:shadow-[0_20px_45px_-24px_rgba(0,77,255,0.55)] ${s.span}`}
               >
                 <div
                   className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                   style={{
                     backgroundImage:
-                      "radial-gradient(circle at 15% 0%, rgba(0,77,255,0.10) 0%, transparent 60%)",
+                      "radial-gradient(circle at 100% 0%, rgba(0,77,255,0.10) 0%, transparent 60%)",
                   }}
                 />
-                <div className="relative flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#004DFF]/15 bg-[#004DFF]/[0.06] transition-colors duration-300 group-hover:bg-[#004DFF]">
+                <div className="relative flex h-full flex-col">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#004DFF]/15 bg-[#004DFF]/[0.06] transition-colors duration-300 group-hover:bg-[#004DFF] group-hover:border-[#004DFF]">
                     <s.icon
-                      className="h-5 w-5 transition-colors duration-300 group-hover:text-white"
-                      style={{ color: "#004DFF" }}
+                      className="h-5 w-5 text-[#004DFF] transition-colors duration-300 group-hover:text-white"
                       strokeWidth={1.75}
                     />
                   </div>
-                  <div className="min-w-0">
-                    <div className="font-space-grotesk text-lg font-bold text-slate-900">
-                      {s.label}
-                    </div>
-                    <p className="mt-1 text-sm leading-snug text-slate-500">{s.desc}</p>
+                  <div className="mt-6 font-space-grotesk text-lg font-bold tracking-tight text-[#0B1220]">
+                    {s.label}
                   </div>
-                  <span className="ml-auto font-space-grotesk text-xs font-bold text-slate-300">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
+                  <p className="mt-1.5 text-[13px] leading-snug text-slate-500">{s.desc}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <p className="mt-10 text-center text-sm text-slate-500">
-            Não achou o seu?{" "}
-            <span className="font-semibold text-slate-900">
-              A Aurora aprende qualquer nicho em minutos.
-            </span>
+          <p className="mt-10 text-center text-[13px] text-slate-400">
+            Não achou o seu? A IA aprende qualquer nicho em minutos.
           </p>
         </div>
       </section>
