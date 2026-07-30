@@ -1075,21 +1075,14 @@ function HeroChatCard() {
           ))}
         </div>
 
-        <div
-          ref={scrollRef}
-          className="mt-4 flex-1 space-y-2 overflow-y-auto rounded-2xl p-3 pr-1"
-          style={{
-            backgroundColor: "#0b141a",
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23182229' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        >
+        <div ref={scrollRef} className="mt-4 flex-1 space-y-2 overflow-y-auto pr-1">
           {messages.map((m, i) => (
             <div key={i} className={m.from === "user" ? "flex justify-end" : "flex justify-start"}>
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
                   m.from === "user"
-                    ? "rounded-tr-sm bg-[#005c4b] text-white"
-                    : "rounded-tl-sm bg-[#1f3631] text-white"
+                    ? "rounded-tr-sm bg-[#004DFF] text-white"
+                    : "rounded-tl-sm bg-[#004DFF]/20 text-slate-800"
                 }`}
               >
                 {m.text}
@@ -1098,11 +1091,11 @@ function HeroChatCard() {
           ))}
           {typing && (
             <div className="flex justify-start">
-              <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-[#1f3631] px-4 py-3">
+              <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-[#004DFF]/20 px-4 py-3">
                 {[0, 1, 2].map((d) => (
                   <span
                     key={d}
-                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400"
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-600"
                     style={{ animationDelay: `${d * 0.15}s` }}
                   />
                 ))}
