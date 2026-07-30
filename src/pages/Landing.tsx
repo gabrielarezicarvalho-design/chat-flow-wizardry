@@ -1985,7 +1985,7 @@ export default function Landing() {
               { icon: <Zap className="h-6 w-6" />, title: "Multicanal", sub: "SMS, Email e Whats" },
               { icon: <ShieldCheck className="h-6 w-6" />, title: "Score de Risco", sub: "IA de prevenção" },
               { icon: <Clock className="h-6 w-6" />, title: "Retentativa", sub: "Cobrança recorrente" },
-              { icon: <BarChart3 className="h-6 w-6" />, title: "Dashboard", sub: "Métricas em tempo real" },
+              { icon: <BarChart3 className="h-6 w-6 text-[#7C3AED]" />, title: "Dashboard", sub: "Métricas em tempo real" },
             ].map((f) => (
               <div key={f.title} className="flex items-center gap-4 rounded-3xl border border-slate-200/60 bg-white p-6">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E6ECF7] text-[#004DFF]">
