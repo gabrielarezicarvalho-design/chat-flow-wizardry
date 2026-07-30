@@ -2119,13 +2119,14 @@ export default function Landing() {
               "radial-gradient(circle at 50% 0%, rgba(0,77,255,0.09) 0%, transparent 55%), linear-gradient(to bottom, rgba(241,245,249,0.9), transparent 40%)",
           }}
         />
-        <div className="relative mx-auto max-w-[1240px] px-6">
-          <div className="mx-auto max-w-3xl text-center">
+        <div className="relative mx-auto grid max-w-[1240px] items-start gap-14 px-6 lg:grid-cols-[0.85fr_1.15fr]">
+          {/* Coluna esquerda — texto */}
+          <div className="lg:sticky lg:top-28">
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 font-space-grotesk text-[11px] font-bold uppercase tracking-[0.18em] text-[#0B1220] shadow-[0_1px_2px_rgba(11,18,32,0.04)] backdrop-blur">
               <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
               Pra qualquer negócio
             </span>
-            <h2 className="mt-6 font-space-grotesk text-4xl md:text-[60px] font-bold leading-[1] tracking-tight text-[#0B1220]">
+            <h2 className="mt-6 font-space-grotesk text-4xl md:text-[56px] font-bold leading-[1] tracking-tight text-[#0B1220]">
               Funciona pro{" "}
               <span className="relative inline-block" style={{ color: "#004DFF" }}>
                 seu segmento.
@@ -2135,16 +2136,34 @@ export default function Landing() {
                 />
               </span>
             </h2>
-            <p className="mx-auto mt-6 max-w-xl text-[15px] leading-relaxed text-slate-500">
+            <p className="mt-6 max-w-md text-[15px] leading-relaxed text-slate-500">
               A IA se adapta ao seu nicho. Prospecção e atendimento ajustados ao seu mercado.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <div className="rounded-2xl border border-slate-200/90 bg-white px-5 py-3.5">
+                <div className="font-space-grotesk text-2xl font-bold text-[#0B1220]">+40</div>
+                <div className="text-[12px] text-slate-500">nichos atendidos</div>
+              </div>
+              <div className="rounded-2xl border border-slate-200/90 bg-white px-5 py-3.5">
+                <div className="font-space-grotesk text-2xl font-bold" style={{ color: "#004DFF" }}>
+                  5 min
+                </div>
+                <div className="text-[12px] text-slate-500">pra treinar a IA</div>
+              </div>
+            </div>
+
+            <p className="mt-8 max-w-sm text-[13px] leading-relaxed text-slate-400">
+              Não achou o seu? A IA aprende qualquer nicho em minutos.
             </p>
           </div>
 
-          <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+          {/* Coluna direita — grid de segmentos */}
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
             {segments.map((s) => (
               <div
                 key={s.label}
-                className={`group relative overflow-hidden rounded-[22px] border border-slate-200/90 bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#004DFF]/35 hover:shadow-[0_20px_45px_-24px_rgba(0,77,255,0.55)] ${s.span}`}
+                className="group relative overflow-hidden rounded-[22px] border border-slate-200/90 bg-white p-5 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#004DFF]/35 hover:shadow-[0_20px_45px_-24px_rgba(0,77,255,0.55)]"
               >
                 <div
                   className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -2160,7 +2179,7 @@ export default function Landing() {
                       strokeWidth={1.75}
                     />
                   </div>
-                  <div className="mt-6 font-space-grotesk text-lg font-bold tracking-tight text-[#0B1220]">
+                  <div className="mt-5 font-space-grotesk text-[17px] font-bold tracking-tight text-[#0B1220]">
                     {s.label}
                   </div>
                   <p className="mt-1.5 text-[13px] leading-snug text-slate-500">{s.desc}</p>
@@ -2168,11 +2187,8 @@ export default function Landing() {
               </div>
             ))}
           </div>
-
-          <p className="mt-10 text-center text-[13px] text-slate-400">
-            Não achou o seu? A IA aprende qualquer nicho em minutos.
-          </p>
         </div>
+
       </section>
 
 
