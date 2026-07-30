@@ -1697,7 +1697,7 @@ export default function Landing() {
 
       {/* IA */}
       <section id="ia" className="bg-[#F7F9FC] py-24">
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="mx-auto max-w-[1240px] px-6">
           {/* Header */}
           <div className="text-center">
             <span className="inline-block rounded-full bg-[#E6ECF7] px-4 py-1.5 font-space-grotesk text-xs font-bold uppercase tracking-[0.2em] text-[#004DFF]">
