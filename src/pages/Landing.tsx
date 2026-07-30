@@ -1812,18 +1812,23 @@ export default function Landing() {
 
             {/* Aviso de lead quente */}
             <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm">
-              <div className="mb-4 flex items-center gap-3">
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
+                  <TrendingUp className="h-6 w-6 text-white" />
+                </div>
                 <span className="relative flex h-3 w-3">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#004DFF]/60" />
                   <span className="relative inline-flex h-3 w-3 rounded-full bg-[#004DFF]" />
                 </span>
-                <span className="text-xs font-bold uppercase tracking-widest text-[#004DFF]">Alerta em tempo real</span>
               </div>
-              <TrendingUp className="mb-4 h-6 w-6 text-[#004DFF]" />
               <h3 className="font-space-grotesk text-xl font-bold text-[#0B1220]">Aviso de lead quente</h3>
               <p className="mt-2 text-sm text-[#0B1220]/70">
                 Quando o cliente tá pronto, você recebe no WhatsApp.
               </p>
+              <span className="mt-auto pt-6 text-xs font-bold uppercase tracking-widest text-[#004DFF]">
+                Alerta em tempo real
+              </span>
+
             </div>
 
             {/* Anti-bloqueio */}
