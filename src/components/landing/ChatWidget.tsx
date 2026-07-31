@@ -372,15 +372,15 @@ export function ChatWidget() {
                         <RefreshCw className="h-4 w-4" />
                       </button>
                     </div>
-                    <div className="flex flex-col gap-2.5">
+                    <div className="flex flex-col gap-2">
                       {Array.from({ length: 3 }, (_, i) => FAQ[(faqOffset + i) % FAQ.length]).map((item) => (
                         <button
                           key={item.q}
                           onClick={() => openChatWithQuestion(item.q)}
-                          className="rounded-lg border border-slate-200 bg-white px-3.5 py-3 text-left transition-all hover:border-[#004DFF]/30 hover:shadow-sm"
+                          className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-left transition-all hover:border-[#004DFF]/30 hover:shadow-sm"
                         >
-                          <p className="text-sm font-bold text-slate-900">{item.topic}</p>
-                          <p className="mt-1 text-sm text-slate-400">
+                          <p className="text-sm font-bold leading-tight text-slate-900">{item.topic}</p>
+                          <p className="mt-0.5 text-sm leading-tight text-slate-400">
                             {item.q}
                             {item.emoji ? ` ${item.emoji}` : ""}
                           </p>
