@@ -37,7 +37,7 @@ const LegalPageLayout = ({
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="mx-auto max-w-3xl px-6 pt-16 pb-12 text-center">
+        <section className="mx-auto max-w-3xl px-6 pt-24 pb-12 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-4 py-1.5 text-[11px] font-semibold tracking-widest uppercase">
             <BadgeIcon className="h-3.5 w-3.5" />
             {badgeLabel}

@@ -30,7 +30,7 @@ export default function HelpCenter() {
     <div className="light min-h-screen bg-white text-slate-900">
       <LandingNav />
 
-      <main className="mx-auto max-w-4xl px-6 py-16">
+      <main className="mx-auto max-w-4xl px-6 pt-24 pb-16">
         {/* Hero */}
         <div className="text-center space-y-5">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
