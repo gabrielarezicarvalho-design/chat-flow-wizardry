@@ -7,7 +7,7 @@ const FloatingChatButton = () => {
       target="_blank"
       rel="noreferrer"
       aria-label="Falar com suporte no WhatsApp"
-      className="fixed bottom-6 right-6 z-50 group"
+      className="fixed bottom-6 right-6 z-[110] group"
     >
       {/* Outer pulse ring */}
       <span className="absolute inset-0 rounded-full bg-[#004DFF]/25 animate-ping" />
