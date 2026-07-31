@@ -1490,8 +1490,8 @@ export default function Landing() {
         <div className="mx-auto max-w-[1240px] px-6">
           {/* Header */}
           <div className="text-center">
-            <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#004DFF]">
-              <span className="h-2 w-2 rounded-full bg-[#004DFF]" />
+            <span className="inline-flex items-center gap-2 rounded-none border-0 bg-transparent p-0 text-sm sm:text-sm md:text-sm font-semibold normal-case tracking-normal leading-none text-[#004DFF]">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-[#004DFF]" />
               Tudo que você precisa
             </span>
             <h2 className="mt-5 font-space-grotesk text-4xl md:text-5xl font-bold leading-tight tracking-tight text-[#0B1220]">
