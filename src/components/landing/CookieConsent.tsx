@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { MessageCircle } from "lucide-react";
 
 const STORAGE_KEY = "nextpro_cookie_consent";
 
@@ -26,39 +27,51 @@ export function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[100] border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:justify-between md:gap-10">
-        <p className="max-w-3xl text-sm leading-relaxed text-foreground/80">
-          Ao clicar em “Aceitar todos os cookies”, concorda com o armazenamento de cookies no seu
-          dispositivo para melhorar a navegação no site, analisar a utilização do site e ajudar nas
-          nossas iniciativas de marketing. Consulte nossa{" "}
-          <Link
-            to="/politica-de-privacidade"
-            className="font-semibold text-[#004DFF] hover:underline"
-          >
-            Política de Privacidade
-          </Link>
-          .
-        </p>
+    <>
+      <div className="fixed bottom-0 left-0 right-0 z-[100] border-t border-slate-200 bg-[#f8fafc]">
+        <div className="mx-auto flex max-w-7xl flex-col items-start gap-5 px-6 py-5 md:flex-row md:items-center md:justify-between md:gap-10">
+          <p className="max-w-3xl text-sm leading-relaxed text-slate-600">
+            Ao clicar em "Aceitar todos os cookies", concorda com o armazenamento de cookies no seu
+            dispositivo para melhorar a navegação no site, analisar a utilização do site e ajudar nas
+            nossas iniciativas de marketing. Consulte nossa{" "}
+            <Link
+              to="/politica-de-privacidade"
+              className="font-semibold text-[#004DFF] hover:underline"
+            >
+              Política de Privacidade
+            </Link>
+            .
+          </p>
 
-        <div className="flex shrink-0 items-center gap-6">
-          <button
-            type="button"
-            onClick={() => decide("rejected")}
-            className="text-sm font-semibold text-foreground hover:opacity-70"
-          >
-            Rejeitar Todos
-          </button>
-          <button
-            type="button"
-            onClick={() => decide("accepted")}
-            className="rounded-lg bg-[#004DFF] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#003ACC]"
-          >
-            Aceitar todos os cookies
-          </button>
+          <div className="flex shrink-0 items-center gap-4">
+            <button
+              type="button"
+              onClick={() => decide("rejected")}
+              className="text-sm font-semibold text-slate-700 hover:text-slate-900"
+            >
+              Rejeitar Todos
+            </button>
+            <button
+              type="button"
+              onClick={() => decide("accepted")}
+              className="rounded-lg bg-[#004DFF] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#003ACC]"
+            >
+              Aceitar todos os cookies
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      <a
+        href="https://wa.me/message/BYSDMLHYTA6EA1"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Falar no WhatsApp"
+        className="fixed bottom-20 right-5 z-[101] flex h-12 w-12 items-center justify-center rounded-full bg-[#004DFF] text-white shadow-lg transition-transform hover:scale-105"
+      >
+        <MessageCircle className="h-6 w-6" />
+      </a>
+    </>
   );
 }
 
