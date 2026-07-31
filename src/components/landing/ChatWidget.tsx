@@ -185,6 +185,7 @@ export function ChatWidget() {
   const openChatWithQuestion = useCallback(
     (question: string) => {
       setActiveTab("chat");
+      setChatView("thread");
       window.setTimeout(() => handleSend(question), 50);
     },
     [handleSend]
