@@ -69,16 +69,6 @@ export function CookieConsent() {
           </div>
         </div>
       </div>
-
-      <a
-        href="https://wa.me/message/BYSDMLHYTA6EA1"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Falar no WhatsApp"
-        className="fixed bottom-20 right-5 z-[101] flex h-12 w-12 items-center justify-center rounded-full bg-[#004DFF] text-white shadow-lg transition-transform hover:scale-105"
-      >
-        <MessageCircle className="h-6 w-6" />
-      </a>
     </>
   );
 }
