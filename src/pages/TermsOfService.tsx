@@ -359,16 +359,20 @@ const TermsOfService = () => {
             <P>Dúvidas sobre estes Termos:</P>
             <UL
               items={[
-                <><B>Empresa:</B> {COMPANY}</>,
-                <><B>CNPJ:</B> {CNPJ}</>,
+                <><B>Empresa:</B> {COMPANY} · <B>CNPJ:</B> {CNPJ}</>,
                 <>
-                  <B>E-mail:</B>{" "}
+                  <B>E-mail / DPO:</B>{" "}
                   <a href={`mailto:${EMAIL}`} className="text-primary hover:underline">
                     {EMAIL}
                   </a>
                 </>,
               ]}
             />
+            <P>
+              Caso não esteja satisfeito, você pode reclamar à Autoridade Nacional de Proteção de Dados
+              (ANPD).
+            </P>
+
           </article>
         </section>
       </main>
