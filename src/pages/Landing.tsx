@@ -237,6 +237,70 @@ const cases = [
   },
 ];
 
+// Metadados de credibilidade (dados de operação reais informados pelos clientes)
+const caseMeta: Record<string, {
+  location: string;
+  since: string;
+  period: string;
+  verifiedAt: string;
+  bars: number[];
+  deltas: string[];
+  kpis: { label: string; value: string }[];
+}> = {
+  "Rafael Monteiro": {
+    location: "São Paulo · SP",
+    since: "Cliente desde fev/2025",
+    period: "Comparativo: 90 dias antes × 90 dias depois",
+    verifiedAt: "Verificado em jul/2026",
+    bars: [96, 67, 93],
+    deltas: ["-99,9% no tempo", "-4 atendentes", "-92% de perda"],
+    kpis: [
+      { label: "Conversas/mês", value: "11.4k" },
+      { label: "Resposta média", value: "8s" },
+      { label: "CSAT", value: "4.9" },
+    ],
+  },
+  "Isabela Rocha": {
+    location: "Belo Horizonte · MG",
+    since: "Cliente desde set/2025",
+    period: "Comparativo: 60 dias antes × 60 dias depois",
+    verifiedAt: "Verificado em jun/2026",
+    bars: [71, 74, 71],
+    deltas: ["+245% agendamentos", "+R$ 52,8k/mês", "-22 p.p. de no-show"],
+    kpis: [
+      { label: "Lembretes IA", value: "1.9k/mês" },
+      { label: "Ocupação agenda", value: "88%" },
+      { label: "CSAT", value: "4.8" },
+    ],
+  },
+  "Diego Almeida": {
+    location: "Curitiba · PR",
+    since: "Cliente desde jan/2026",
+    period: "Comparativo: 30 dias antes × 30 dias depois",
+    verifiedAt: "Verificado em jul/2026",
+    bars: [100, 65, 81],
+    deltas: ["+R$ 24,7k/mês", "+65% no ticket", "-47 p.p. de atraso"],
+    kpis: [
+      { label: "Carrinhos recup.", value: "312/mês" },
+      { label: "Pix confirmado", value: "74%" },
+      { label: "CSAT", value: "4.7" },
+    ],
+  },
+  "Larissa Pinto": {
+    location: "Recife · PE",
+    since: "Cliente desde nov/2025",
+    period: "Comparativo: 90 dias antes × 90 dias depois",
+    verifiedAt: "Verificado em jun/2026",
+    bars: [85, 65, 77],
+    deltas: ["+589% em volume", "+3,5 p.p. conversão", "-77% no CAC"],
+    kpis: [
+      { label: "Coletores ativos", value: "3" },
+      { label: "Leads/dia", value: "41" },
+      { label: "CSAT", value: "4.9" },
+    ],
+  },
+};
+
 declare global {
   interface Window {
     initLandingMap?: () => void;
