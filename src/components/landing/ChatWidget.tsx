@@ -367,12 +367,12 @@ export function ChatWidget() {
                   <div className="flex items-center gap-2.5">
                     <BrandAvatar />
                     <div>
-                      <p className="text-base font-semibold text-white">Next Pro</p>
-                      <p className="text-xs text-slate-400">Como podemos ajudar?</p>
+                      <p className="text-base font-semibold text-slate-900">Next Pro</p>
+                      <p className="text-xs text-slate-500">Como podemos ajudar?</p>
                     </div>
                   </div>
 
-                  <div className="my-3 h-px w-full bg-white/10" />
+                  <div className="my-3 h-px w-full bg-slate-200" />
 
                   <div className="grid grid-cols-2 gap-2">
                     {[
@@ -391,20 +391,20 @@ export function ChatWidget() {
                       <button
                         key={label}
                         onClick={action}
-                        className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-2.5 py-2 text-left transition-colors hover:bg-white/[0.09]"
+                        className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-left transition-colors hover:bg-slate-100"
                       >
-                        <Icon className="h-4 w-4 shrink-0 text-slate-300" />
-                        <span className="text-sm font-semibold text-white">{label}</span>
+                        <Icon className="h-4 w-4 shrink-0 text-slate-600" />
+                        <span className="text-sm font-semibold text-slate-900">{label}</span>
                       </button>
                     ))}
                   </div>
 
                   <div className="mb-2 mt-4 flex items-center justify-between">
-                    <p className="text-xs text-slate-400">Dúvidas frequentes?</p>
+                    <p className="text-xs text-slate-500">Dúvidas frequentes?</p>
                     <button
                       onClick={() => setFaqOffset((v) => v + 1)}
                       aria-label="Atualizar perguntas"
-                      className="rounded-full p-1 text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
+                      className="rounded-full p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
                     </button>
@@ -416,9 +416,9 @@ export function ChatWidget() {
                         <button
                           key={item.q}
                           onClick={() => openChatWithQuestion(item.q)}
-                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-left transition-colors hover:bg-white/[0.07]"
+                          className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-left transition-colors hover:bg-slate-100"
                         >
-                          <span className="block text-sm font-bold leading-tight text-white">
+                          <span className="block text-sm font-bold leading-tight text-slate-900">
                             {item.topic}
                           </span>
                           <span className="mt-0.5 block text-[11px] leading-tight text-slate-500">
@@ -434,7 +434,7 @@ export function ChatWidget() {
                       setActiveTab("chat");
                       setChatView("thread");
                     }}
-                    className="mx-auto mb-5 block rounded-full bg-white px-6 py-1.5 text-xs font-bold text-[#0b0b10] transition-opacity hover:opacity-90"
+                    className="mx-auto mb-5 block rounded-full bg-[#004DFF] px-6 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
                   >
                     Iniciar
                   </button>
