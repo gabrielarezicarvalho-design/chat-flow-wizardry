@@ -76,6 +76,9 @@ const LandingFooter = () => {
         </div>
       </div>
     </footer>
+    <CookieConsent />
+    </>
+
   );
 };
 
