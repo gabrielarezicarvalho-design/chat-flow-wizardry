@@ -1415,17 +1415,17 @@ export default function Landing() {
       {/* PLANOS */}
       <section id="planos" className="bg-white py-24 lg:py-32">
         <div className="mx-auto max-w-[1240px] px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] xl:grid-cols-[0.85fr_1.15fr] gap-12 xl:gap-16 items-start">
-            {/* Left: sticky text */}
-            <div className="lg:sticky lg:top-28">
-              <span className="inline-block rounded-full bg-[#E6ECF7] px-4 py-1.5 font-space-grotesk text-xs font-bold uppercase tracking-[0.2em] text-[#004DFF]">
+          <div>
+            {/* Header centralizado */}
+            <div className="text-center">
+              <span className="font-space-grotesk text-xs font-bold uppercase tracking-[0.2em] text-[#004DFF]">
                 Planos para cada fase
               </span>
-              <h2 className="mt-5 font-space-grotesk text-4xl md:text-5xl font-bold leading-tight tracking-tight text-[#0B1220]">
+              <h2 className="mt-4 font-space-grotesk text-4xl md:text-5xl font-bold leading-tight tracking-tight text-[#0B1220]">
                 Escolha o plano{" "}
                 <span className="text-[#004DFF]">ideal pra você</span>
               </h2>
-              <p className="mt-4 text-lg text-[#0B1220]/60 max-w-md">
+              <p className="mt-4 text-base text-[#0B1220]/60 max-w-2xl mx-auto">
                 Comece grátis por 2 dias. Sem cartão, sem fidelidade — mude de plano quando quiser.
               </p>
 
@@ -1448,22 +1448,11 @@ export default function Landing() {
                   </span>
                 </button>
               </div>
-
-              <div className="mt-10 hidden lg:flex items-center gap-5 text-sm text-slate-500">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-[#004DFF]" />
-                  <span>Garantia 30 dias</span>
-                </div>
-                <div className="h-1 w-1 rounded-full bg-slate-300" />
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[#004DFF]" />
-                  <span>Sem fidelidade</span>
-                </div>
-              </div>
             </div>
 
-            {/* Right: cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Cards */}
+            <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+
               {[
                 {
                   tier: "basic",
