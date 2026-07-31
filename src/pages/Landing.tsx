@@ -2705,6 +2705,7 @@ export default function Landing() {
       </footer>
 
       <CookieConsent />
+      <FloatingChatButton />
     </div>
   );
 }
