@@ -2489,37 +2489,37 @@ export default function Landing() {
 
       {/* CTA FINAL */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
-        <div className="relative overflow-hidden rounded-[28px] bg-[#111214] px-8 py-12 md:px-14 md:py-16">
+        <div className="relative overflow-hidden rounded-[28px] bg-[#111214] px-8 py-8 md:px-12 md:py-10">
           {/* glow */}
-          <div className="pointer-events-none absolute -right-24 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-[#004DFF]/25 blur-[120px]" />
+          <div className="pointer-events-none absolute -right-24 top-1/2 h-[400px] w-[400px] -translate-y-1/2 rounded-full bg-[#004DFF]/25 blur-[120px]" />
 
-          <div className="relative grid items-center gap-12 md:grid-cols-[1.15fr_0.85fr]">
+          <div className="relative grid items-center gap-8 md:grid-cols-[1.15fr_0.85fr]">
             {/* Texto */}
             <div>
-              <h2 className="font-space-grotesk text-4xl md:text-5xl font-bold leading-[1.08] tracking-tight text-white">
+              <h2 className="font-space-grotesk text-3xl md:text-4xl font-bold leading-[1.1] tracking-tight text-white">
                 Comece a fazer seus<br />clientes voltarem hoje
               </h2>
-              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-slate-400">
+              <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-400">
                 Configure em minutos e veja a Next Pro trabalhar por você. Sem compromisso.
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Link to="/auth">
-                  <Button className="h-11 rounded-xl bg-[#004DFF] px-6 text-sm font-semibold text-white hover:bg-[#0040d6]">
+                  <Button className="h-9 rounded-xl bg-[#004DFF] px-5 text-sm font-semibold text-white hover:bg-[#0040d6]">
                     Testar grátis
                   </Button>
                 </Link>
                 <a href="#planos">
                   <Button
                     variant="outline"
-                    className="h-11 rounded-xl border-white/25 bg-transparent px-6 text-sm font-semibold text-white hover:bg-white/10 hover:text-white"
+                    className="h-9 rounded-xl border-white/25 bg-transparent px-5 text-sm font-semibold text-white hover:bg-white/10 hover:text-white"
                   >
                     Ver planos
                   </Button>
                 </a>
               </div>
 
-              <div className="mt-10 flex items-center gap-6">
+              <div className="mt-7 flex items-center gap-4">
                 <div className="flex -space-x-3">
                   {[
                     { l: "M1", bg: "bg-zinc-800" },
@@ -2529,7 +2529,7 @@ export default function Landing() {
                   ].map((m) => (
                     <span
                       key={m.l}
-                      className={`flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#111214] text-[10px] font-bold text-white ${m.bg}`}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#111214] text-[10px] font-bold text-white ${m.bg}`}
                     >
                       {m.l}
                     </span>
@@ -2543,41 +2543,41 @@ export default function Landing() {
             </div>
 
             {/* Card métrica */}
-            <div className="relative mx-auto w-full max-w-[300px] py-6">
+            <div className="relative mx-auto w-full max-w-[260px] py-4">
               <div className="pointer-events-none absolute inset-0 scale-90 rounded-full bg-[#004DFF]/20 blur-3xl" />
 
-              <div className="group relative rotate-3 rounded-[32px] border border-white/10 bg-gradient-to-br from-white/[0.10] to-white/[0.03] p-8 shadow-2xl backdrop-blur-xl transition-transform duration-500 hover:rotate-0">
-                <div className="mb-8 flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF]/20">
-                    <TrendingUp className="h-6 w-6 text-[#3f7bff]" />
+              <div className="group relative rotate-3 rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.10] to-white/[0.03] p-6 shadow-2xl backdrop-blur-xl transition-transform duration-500 hover:rotate-0">
+                <div className="mb-5 flex items-center justify-between">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#004DFF]/20">
+                    <TrendingUp className="h-5 w-5 text-[#3f7bff]" />
                   </div>
                   <span className="rounded-full bg-[#004DFF]/15 px-3 py-1 text-[10px] font-bold tracking-wide text-[#4d8bff]">
                     AO VIVO
                   </span>
                 </div>
 
-                <div className="font-space-grotesk text-5xl font-bold tracking-tight text-white">+36%</div>
-                <p className="mt-1 text-base text-slate-400">Taxa de recompra</p>
+                <div className="font-space-grotesk text-4xl font-bold tracking-tight text-white">+36%</div>
+                <p className="mt-1 text-sm text-slate-400">Taxa de recompra</p>
 
-                <div className="mt-8 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-white/10">
                   <div className="h-full w-[36%] rounded-full bg-[#004DFF] shadow-[0_0_10px_#004DFF]" />
                 </div>
 
-                <div className="mt-8 flex -space-x-3">
-                  <span className="h-8 w-8 rounded-full bg-zinc-700 ring-2 ring-[#111214]" />
-                  <span className="h-8 w-8 rounded-full bg-zinc-600 ring-2 ring-[#111214]" />
-                  <span className="h-8 w-8 rounded-full bg-zinc-500 ring-2 ring-[#111214]" />
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#004DFF] text-[10px] font-bold text-white ring-2 ring-[#111214]">
+                <div className="mt-5 flex -space-x-3">
+                  <span className="h-7 w-7 rounded-full bg-zinc-700 ring-2 ring-[#111214]" />
+                  <span className="h-7 w-7 rounded-full bg-zinc-600 ring-2 ring-[#111214]" />
+                  <span className="h-7 w-7 rounded-full bg-zinc-500 ring-2 ring-[#111214]" />
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#004DFF] text-[9px] font-bold text-white ring-2 ring-[#111214]">
                     +8k
                   </span>
                 </div>
               </div>
 
               {/* Badge flutuante */}
-              <div className="absolute -bottom-4 -left-4 -rotate-6 rounded-2xl bg-white px-4 py-3 shadow-2xl">
+              <div className="absolute -bottom-3 -left-3 -rotate-6 rounded-2xl bg-white px-3 py-2 shadow-2xl">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                  <span className="text-sm font-bold text-black">IA Ativa</span>
+                  <span className="text-xs font-bold text-black">IA Ativa</span>
                 </div>
               </div>
             </div>
