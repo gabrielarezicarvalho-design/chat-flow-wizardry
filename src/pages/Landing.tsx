@@ -1957,8 +1957,8 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-[1240px] items-center gap-16 px-6 md:grid-cols-[1.05fr_1fr]">
           {/* Coluna esquerda */}
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#0B1220]/10 bg-white/70 px-4 py-1.5 font-space-grotesk text-[11px] font-bold uppercase tracking-[0.18em] text-[#0B1220] backdrop-blur">
-              <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#004DFF]">
+              <span className="h-2 w-2 rounded-full bg-[#004DFF]" />
               Tecnologia exclusiva
             </span>
             <h2 className="mt-6 font-space-grotesk text-5xl md:text-[64px] font-bold leading-[0.98] tracking-tight text-[#0B1220]">
