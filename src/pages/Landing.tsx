@@ -2665,7 +2665,7 @@ export default function Landing() {
               </div>
               <div className="flex items-center gap-1.5">
                 <CreditCard className="h-4 w-4 text-[#004DFF]" />
-                <span>Pagamento Seguro · Asaas Certificado</span>
+                <span>Pagamento Seguro · Mercado Pago Certificado</span>
               </div>
             </div>
           </div>
