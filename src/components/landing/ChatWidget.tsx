@@ -309,14 +309,14 @@ export function ChatWidget() {
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="fixed bottom-24 right-4 z-[120] flex w-[92vw] max-w-[360px] flex-col overflow-hidden rounded-[26px] border border-white/10 bg-[#0b0b10] shadow-2xl shadow-black/60 md:right-6"
-            style={{ height: "clamp(420px, 58vh, 520px)" }}
+            style={{ height: "clamp(340px, 50vh, 420px)" }}
           >
             {/* Top bar */}
-            <div className="flex items-center gap-2 px-4 pt-4">
+            <div className="flex items-center gap-2 px-3 pt-3">
               <button
                 onClick={() => setActiveTab("home")}
                 aria-label="Início"
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
                   activeTab === "home"
                     ? "bg-[#004DFF] text-white"
                     : "bg-white/[0.06] text-slate-300 hover:bg-white/[0.1]"
@@ -328,7 +328,7 @@ export function ChatWidget() {
               <div className="flex flex-1 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
                 <button
                   onClick={() => setActiveTab("chat")}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors ${
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1 text-sm transition-colors ${
                     activeTab === "chat"
                       ? "bg-white/[0.1] text-white"
                       : "text-slate-300 hover:text-white"
@@ -339,7 +339,7 @@ export function ChatWidget() {
                 </button>
                 <button
                   onClick={() => setActiveTab("articles")}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors ${
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1 text-sm transition-colors ${
                     activeTab === "articles"
                       ? "bg-white/[0.1] text-white"
                       : "text-slate-300 hover:text-white"
@@ -353,27 +353,27 @@ export function ChatWidget() {
               <button
                 onClick={() => setIsOpen(false)}
                 aria-label="Fechar"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
               >
-                <ChevronDown className="h-5 w-5" />
+                <ChevronDown className="h-4 w-4" />
               </button>
             </div>
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto">
               {activeTab === "home" && (
-                <div className="px-5 pt-6">
+                <div className="px-4 pt-4">
                   <div className="flex items-center gap-3">
                     <BrandAvatar />
                     <div>
-                      <p className="text-lg font-semibold text-white">Next Pro</p>
-                      <p className="text-sm text-slate-400">Como podemos ajudar?</p>
+                      <p className="text-base font-semibold text-white">Next Pro</p>
+                      <p className="text-xs text-slate-400">Como podemos ajudar?</p>
                     </div>
                   </div>
 
-                  <div className="my-4 h-px w-full bg-white/10" />
+                  <div className="my-2 h-px w-full bg-white/10" />
 
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-2 gap-2">
                     {[
                       { icon: Search, label: "Buscar", action: () => setActiveTab("articles") },
                       { icon: HelpCircle, label: "Dúvidas", action: () => setActiveTab("articles") },
@@ -390,7 +390,7 @@ export function ChatWidget() {
                       <button
                         key={label}
                         onClick={action}
-                        className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.09]"
+                        className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-left transition-colors hover:bg-white/[0.09]"
                       >
                         <Icon className="h-[18px] w-[18px] shrink-0 text-slate-300" />
                         <span className="text-sm font-semibold text-white">{label}</span>
@@ -398,7 +398,7 @@ export function ChatWidget() {
                     ))}
                   </div>
 
-                  <div className="mb-2 mt-4 flex items-center justify-between">
+                  <div className="mb-1 mt-3 flex items-center justify-between">
                     <p className="text-xs text-slate-400">Dúvidas frequentes?</p>
                     <button
                       onClick={() => setFaqOffset((v) => v + 1)}
@@ -409,18 +409,18 @@ export function ChatWidget() {
                     </button>
                   </div>
 
-                  <div className="flex flex-col gap-2 pb-4">
-                    {Array.from({ length: 3 }, (_, i) => FAQ[(faqOffset + i) % FAQ.length]).map(
+                  <div className="flex flex-col gap-1.5 pb-3">
+                    {Array.from({ length: 2 }, (_, i) => FAQ[(faqOffset + i) % FAQ.length]).map(
                       (item) => (
                         <button
                           key={item.q}
                           onClick={() => openChatWithQuestion(item.q)}
-                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-left transition-colors hover:bg-white/[0.07]"
+                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-left transition-colors hover:bg-white/[0.07]"
                         >
-                          <span className="block text-sm font-bold leading-tight text-white">
+                          <span className="block text-sm font-semibold leading-tight text-white">
                             {item.topic}
                           </span>
-                          <span className="mt-0.5 block text-xs leading-tight text-slate-500">
+                          <span className="mt-0.5 block text-[11px] leading-tight text-slate-500">
                             {item.q} {item.emoji}
                           </span>
                         </button>
@@ -433,7 +433,7 @@ export function ChatWidget() {
                       setActiveTab("chat");
                       setChatView("thread");
                     }}
-                    className="mx-auto mb-5 block rounded-full bg-white px-8 py-2.5 text-sm font-bold text-[#0b0b10] transition-opacity hover:opacity-90"
+                    className="mx-auto mb-4 block rounded-full bg-white px-6 py-2 text-sm font-bold text-[#0b0b10] transition-opacity hover:opacity-90"
                   >
                     Iniciar
                   </button>
@@ -442,7 +442,7 @@ export function ChatWidget() {
 
               {activeTab === "chat" && chatView === "list" && (
                 <div className="flex h-full flex-col">
-                  <div className="space-y-2 px-4 py-4">
+                  <div className="space-y-1.5 px-4 py-3">
                     <div className="relative">
                       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                       <input
@@ -450,7 +450,7 @@ export function ChatWidget() {
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Buscar por nome, status ou número"
                         aria-label="Buscar conversas"
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-2 pl-9 pr-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-white/20 focus:outline-none"
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-1.5 pl-9 pr-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-white/20 focus:outline-none"
                       />
                     </div>
                     <div className="flex gap-1.5">
@@ -458,7 +458,7 @@ export function ChatWidget() {
                         <button
                           key={f.id}
                           onClick={() => setStatusFilter(f.id)}
-                          className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-colors ${
+                          className={`rounded-full px-3 py-0.5 text-[11px] font-semibold transition-colors ${
                             statusFilter === f.id
                               ? "bg-[#004DFF] text-white"
                               : "bg-white/[0.06] text-slate-400 hover:bg-white/[0.1]"
@@ -470,7 +470,7 @@ export function ChatWidget() {
                     </div>
                   </div>
 
-                  <div className="flex-1 space-y-2 overflow-y-auto px-4 pb-4">
+                  <div className="flex-1 space-y-1.5 overflow-y-auto px-4 pb-4">
                     {filteredThreads.length === 0 && (
                       <p className="px-1 py-6 text-center text-xs font-medium text-slate-500">
                         Nenhuma conversa encontrada.
@@ -480,7 +480,7 @@ export function ChatWidget() {
                       <button
                         key={t.id}
                         onClick={() => setChatView("thread")}
-                        className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition-colors hover:bg-white/[0.07]"
+                        className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-2.5 text-left transition-colors hover:bg-white/[0.07]"
                       >
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-[#4d7dff]">
                           <MessageCircle className="h-4 w-4" />
@@ -505,7 +505,7 @@ export function ChatWidget() {
 
               {activeTab === "chat" && chatView === "thread" && (
                 <div className="flex h-full flex-col overflow-hidden">
-                  <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2.5">
+                  <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2">
                     <button
                       onClick={() => setChatView("list")}
                       aria-label="Voltar"
@@ -517,7 +517,7 @@ export function ChatWidget() {
                   </div>
                   <div className="min-h-0 flex-1">
                     <Conversation className="h-full">
-                      <ConversationContent className="gap-3 p-3">
+                      <ConversationContent className="gap-3 p-2">
                         {messages.map((m, i) => (
                           <Message key={i} from={m.role}>
                             <MessageContent
@@ -549,7 +549,7 @@ export function ChatWidget() {
                       </ConversationContent>
                     </Conversation>
                   </div>
-                  <div className="border-t border-white/10 p-3">
+                  <div className="border-t border-white/10 p-2.5">
                     <PromptInputProvider initialInput="">
                       <ChatComposer onSend={handleSend} status={chatStatus} />
                     </PromptInputProvider>
@@ -558,14 +558,14 @@ export function ChatWidget() {
               )}
 
               {activeTab === "articles" && (
-                <div className="flex flex-col gap-2 px-5 pt-5">
-                  <p className="mb-1 text-sm font-semibold text-white">Artigos de ajuda</p>
+                <div className="flex flex-col gap-1.5 px-4 pt-3">
+                  <p className="mb-0.5 text-sm font-semibold text-white">Artigos de ajuda</p>
                   {FAQ.map((item) => {
                     const isOpenArticle = openArticle === item.q;
                     return (
                       <div
                         key={item.q}
-                        className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
+                        className="rounded-2xl border border-white/10 bg-white/[0.03] px-3.5 py-2"
                       >
                         <button
                           onClick={() => setOpenArticle(isOpenArticle ? null : item.q)}
@@ -585,11 +585,11 @@ export function ChatWidget() {
                           />
                         </button>
                         {isOpenArticle && (
-                          <div className="mt-3 border-t border-white/10 pt-3">
+                          <div className="mt-2 border-t border-white/10 pt-2">
                             <p className="text-xs leading-relaxed text-slate-400">{item.a}</p>
                             <button
                               onClick={() => openChatWithQuestion(item.q)}
-                              className="mt-3 text-xs font-semibold text-[#4d7dff] hover:underline"
+                              className="mt-2 text-xs font-semibold text-[#4d7dff] hover:underline"
                             >
                               Falar com a Aurora sobre isso
                             </button>
@@ -603,7 +603,7 @@ export function ChatWidget() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-center gap-2 py-4 text-xs text-slate-500">
+            <div className="flex items-center justify-center gap-2 py-2.5 text-xs text-slate-500">
               <span>Funcionamos com</span>
               <Settings className="h-3.5 w-3.5" />
               <span className="font-medium text-slate-400">gpt 5</span>
