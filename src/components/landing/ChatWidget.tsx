@@ -508,10 +508,10 @@ export function ChatWidget() {
               )}
 
               {activeTab === "help" && (
-                <div className="flex flex-col gap-4 p-4">
-                  <div className="rounded-xl bg-white p-4 shadow-sm">
-                    <p className="text-sm font-semibold text-slate-900">Central de ajuda</p>
-                    <p className="mt-1 text-xs text-slate-500">
+                <div className="flex flex-col gap-4 p-6">
+                  <div>
+                    <p className="font-space-grotesk text-xl font-bold tracking-tight text-[#0F172A]">Central de ajuda</p>
+                    <p className="mt-1 text-sm text-slate-500">
                       Escolha um tópico ou fale com nosso time pelo WhatsApp.
                     </p>
                   </div>
@@ -519,16 +519,16 @@ export function ChatWidget() {
                     <button
                       key={item.q}
                       onClick={() => openChatWithQuestion(item.q)}
-                      className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-3 text-left shadow-sm transition-all hover:border-[#004DFF]/20 hover:shadow-md"
+                      className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-[#F4F6FB] p-4 text-left transition-all hover:border-[#004DFF]/25 hover:bg-white hover:shadow-md"
                     >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-                        <HelpCircle className="h-3.5 w-3.5" />
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#004DFF]/10 text-[#004DFF]">
+                        <HelpCircle className="h-4 w-4" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">{item.q}</p>
-                        <p className="mt-1 text-xs text-slate-500">{item.a}</p>
+                        <p className="text-sm font-semibold text-[#0F172A]">{item.q}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-slate-500">{item.a}</p>
                       </div>
-                      <ArrowRight className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                      <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
                     </button>
                   ))}
                   <Button
@@ -541,23 +541,24 @@ export function ChatWidget() {
               )}
 
               {activeTab === "news" && (
-                <div className="flex flex-col gap-4 p-4">
-                  <div className="rounded-xl bg-white p-4 shadow-sm">
-                    <p className="text-sm font-semibold text-slate-900">Notícias</p>
-                    <p className="mt-1 text-xs text-slate-500">Novidades da Next Pro para o seu negócio.</p>
+                <div className="flex flex-col gap-4 p-6">
+                  <div>
+                    <p className="font-space-grotesk text-xl font-bold tracking-tight text-[#0F172A]">Notícias</p>
+                    <p className="mt-1 text-sm text-slate-500">Novidades da Next Pro para o seu negócio.</p>
                   </div>
                   {NEWS.map((item) => (
                     <div
                       key={item.title}
-                      className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm"
+                      className="rounded-2xl border border-slate-100 bg-[#F4F6FB] p-4"
                     >
-                      <p className="text-xs font-medium text-[#004DFF]">{item.date}</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900">{item.title}</p>
-                      <p className="mt-1 text-xs text-slate-500">{item.excerpt}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[#004DFF]">{item.date}</p>
+                      <p className="mt-1.5 text-sm font-semibold text-[#0F172A]">{item.title}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-500">{item.excerpt}</p>
                     </div>
                   ))}
                 </div>
               )}
+
             </div>
 
             <div className="flex items-center justify-around border-t border-slate-100 bg-white/95 px-2 py-2 backdrop-blur">
