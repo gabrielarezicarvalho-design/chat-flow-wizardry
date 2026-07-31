@@ -103,9 +103,21 @@ function HeaderLogo() {
   );
 }
 
+function generateTicketId() {
+  const now = new Date();
+  const date = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+  const letters = Array.from({ length: 4 }, () =>
+    String.fromCharCode(65 + Math.floor(Math.random() * 26))
+  ).join("");
+  const digits = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+  return `#PRO${date}${letters}${digits}`;
+}
+
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("home");
+  const [chatView, setChatView] = useState<"list" | "thread">("list");
+  const [ticketId] = useState(generateTicketId);
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_GREETING]);
   const [isLoading, setIsLoading] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
