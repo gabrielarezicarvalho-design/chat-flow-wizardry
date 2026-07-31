@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
 import { Twitter, Instagram, Gift, HelpCircle, MessageCircle, Shield, FileText, Cookie } from "lucide-react";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
+import CookieConsent from "@/components/landing/CookieConsent";
+
 
 const LandingFooter = () => {
   return (
+    <>
     <footer className="border-t border-slate-200 bg-white">
       <div className="mx-auto max-w-6xl px-6 py-5">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -74,6 +77,9 @@ const LandingFooter = () => {
         </div>
       </div>
     </footer>
+    <CookieConsent />
+    </>
+
   );
 };
 
