@@ -2535,26 +2535,45 @@ export default function Landing() {
             </div>
 
             {/* Card métrica */}
-            <div className="relative mx-auto w-full max-w-[280px]">
-              <div className="absolute inset-0 rounded-[24px] bg-[#004DFF]/30 blur-3xl" />
-              <div className="relative rounded-[24px] border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-8 text-center backdrop-blur-sm">
-                <div className="relative mx-auto mb-8 h-32 w-32">
-                  <div className="absolute inset-0 rounded-full border border-dashed border-[#004DFF]/50 animate-[spin_18s_linear_infinite]" />
-                  <div className="absolute inset-4 rounded-full border border-[#004DFF]/30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#004DFF] shadow-[0_0_40px_rgba(0,77,255,0.7)]">
-                      <Zap className="h-7 w-7 text-white" />
-                    </div>
+            <div className="relative mx-auto w-full max-w-[300px] py-6">
+              <div className="pointer-events-none absolute inset-0 scale-90 rounded-full bg-[#004DFF]/20 blur-3xl" />
+
+              <div className="group relative rotate-3 rounded-[32px] border border-white/10 bg-gradient-to-br from-white/[0.10] to-white/[0.03] p-8 shadow-2xl backdrop-blur-xl transition-transform duration-500 hover:rotate-0">
+                <div className="mb-8 flex items-center justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF]/20">
+                    <TrendingUp className="h-6 w-6 text-[#3f7bff]" />
                   </div>
-                  <span className="absolute right-1 top-4 h-2 w-2 rounded-full bg-[#004DFF]" />
-                  <span className="absolute bottom-3 left-2 h-1.5 w-1.5 rounded-full bg-[#004DFF]/70" />
+                  <span className="rounded-full bg-[#004DFF]/15 px-3 py-1 text-[10px] font-bold tracking-wide text-[#4d8bff]">
+                    AO VIVO
+                  </span>
                 </div>
-                <div className="font-space-grotesk text-5xl font-bold text-[#4d8bff]">+36%</div>
-                <p className="mt-3 text-sm leading-snug text-slate-400">
-                  taxa média de recompra<br />dos clientes Next Pro
-                </p>
+
+                <div className="font-space-grotesk text-5xl font-bold tracking-tight text-white">+36%</div>
+                <p className="mt-1 text-base text-slate-400">Taxa de recompra</p>
+
+                <div className="mt-8 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full w-[36%] rounded-full bg-[#004DFF] shadow-[0_0_10px_#004DFF]" />
+                </div>
+
+                <div className="mt-8 flex -space-x-3">
+                  <span className="h-8 w-8 rounded-full bg-zinc-700 ring-2 ring-[#111214]" />
+                  <span className="h-8 w-8 rounded-full bg-zinc-600 ring-2 ring-[#111214]" />
+                  <span className="h-8 w-8 rounded-full bg-zinc-500 ring-2 ring-[#111214]" />
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#004DFF] text-[10px] font-bold text-white ring-2 ring-[#111214]">
+                    +8k
+                  </span>
+                </div>
+              </div>
+
+              {/* Badge flutuante */}
+              <div className="absolute -bottom-4 -left-4 -rotate-6 rounded-2xl bg-white px-4 py-3 shadow-2xl">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                  <span className="text-sm font-bold text-black">IA Ativa</span>
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
