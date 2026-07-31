@@ -2488,19 +2488,77 @@ export default function Landing() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-12 md:p-16 text-center text-white shadow-2xl">
-          <h2 className="text-4xl md:text-6xl font-bold">Quero vender no automático.</h2>
-          <p className="mt-4 opacity-90 max-w-xl mx-auto">
-            Prospecção + WhatsApp + IA + cobrança automática — em uma única plataforma.
-          </p>
-          <Link to="/auth">
-            <Button size="lg" className="mt-8 bg-white text-primary-dark hover:bg-slate-100 rounded-full px-8 h-12 font-semibold">
-              Começar Teste Grátis <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+      <section className="mx-auto max-w-6xl px-6 pb-24">
+        <div className="relative overflow-hidden rounded-[28px] bg-[#111214] px-8 py-12 md:px-14 md:py-16">
+          {/* glow */}
+          <div className="pointer-events-none absolute -right-24 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-[#004DFF]/25 blur-[120px]" />
+
+          <div className="relative grid items-center gap-12 md:grid-cols-[1.15fr_0.85fr]">
+            {/* Texto */}
+            <div>
+              <h2 className="font-space-grotesk text-4xl md:text-5xl font-bold leading-[1.08] tracking-tight text-white">
+                Comece a fazer seus<br />clientes voltarem hoje
+              </h2>
+              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-slate-400">
+                Configure em minutos e veja a Next Pro trabalhar por você. Sem compromisso.
+              </p>
+
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link to="/auth">
+                  <Button className="h-11 rounded-xl bg-[#004DFF] px-6 text-sm font-semibold text-white hover:bg-[#0040d6]">
+                    Testar grátis
+                  </Button>
+                </Link>
+                <a href="#planos">
+                  <Button
+                    variant="outline"
+                    className="h-11 rounded-xl border-white/25 bg-transparent px-6 text-sm font-semibold text-white hover:bg-white/10 hover:text-white"
+                  >
+                    Ver planos
+                  </Button>
+                </a>
+              </div>
+
+              <p className="mt-8 text-xs text-slate-400">
+                <span className="font-bold text-white">+200 lojas</span> já vendem mais com a Next Pro
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-6 opacity-45">
+                {["CALÊ", "lands", "BREADY", "yoha"].map((b) => (
+                  <span
+                    key={b}
+                    className="font-space-grotesk text-lg font-semibold tracking-[0.15em] text-white"
+                  >
+                    {b}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Card métrica */}
+            <div className="relative mx-auto w-full max-w-[280px]">
+              <div className="absolute inset-0 rounded-[24px] bg-[#004DFF]/30 blur-3xl" />
+              <div className="relative rounded-[24px] border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-8 text-center backdrop-blur-sm">
+                <div className="relative mx-auto mb-8 h-32 w-32">
+                  <div className="absolute inset-0 rounded-full border border-dashed border-[#004DFF]/50 animate-[spin_18s_linear_infinite]" />
+                  <div className="absolute inset-4 rounded-full border border-[#004DFF]/30" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#004DFF] shadow-[0_0_40px_rgba(0,77,255,0.7)]">
+                      <Zap className="h-7 w-7 text-white" />
+                    </div>
+                  </div>
+                  <span className="absolute right-1 top-4 h-2 w-2 rounded-full bg-[#004DFF]" />
+                  <span className="absolute bottom-3 left-2 h-1.5 w-1.5 rounded-full bg-[#004DFF]/70" />
+                </div>
+                <div className="font-space-grotesk text-5xl font-bold text-[#4d8bff]">+36%</div>
+                <p className="mt-3 text-sm leading-snug text-slate-400">
+                  taxa média de recompra<br />dos clientes Next Pro
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
+
 
       {/* FOOTER */}
       <footer className="border-t border-slate-200 bg-white">
