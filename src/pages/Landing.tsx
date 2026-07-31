@@ -2653,7 +2653,24 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-2 text-[11px] tracking-widest uppercase text-slate-400">
+          <div className="mt-8 border-y border-slate-200 py-4">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] text-slate-500 md:gap-10">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="h-4 w-4 text-[#004DFF]" />
+                <span>Dados Criptografados · SSL/TLS 256-bit</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Shield className="h-4 w-4 text-[#004DFF]" />
+                <span>Conforme LGPD · Lei 13.709/2018</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CreditCard className="h-4 w-4 text-[#004DFF]" />
+                <span>Pagamento Seguro · Asaas Certificado</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-col md:flex-row items-center justify-between gap-2 text-[11px] tracking-widest uppercase text-slate-400">
             <div>© {new Date().getFullYear()} Next Pro — Todos os direitos reservados</div>
             <div className="flex items-center gap-1.5">
               Feito com precisão no <span className="font-semibold text-slate-700">Brasil</span>
