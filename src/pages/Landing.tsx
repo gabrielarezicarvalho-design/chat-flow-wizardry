@@ -586,10 +586,6 @@ const MERCADO_CARDS = [
 function MercadoSection() {
   return (
     <section className="relative overflow-hidden bg-[#f4f1ec] text-slate-900">
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(1200px 600px at 20% 0%, rgba(0,77,255,0.10), transparent 60%)" }}
-      />
       <div className="relative mx-auto max-w-[1240px] px-6 py-24">
         <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           <div>
