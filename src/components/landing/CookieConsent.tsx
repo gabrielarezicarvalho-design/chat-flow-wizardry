@@ -36,8 +36,8 @@ export function CookieConsent() {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 z-[100] border-t border-slate-200 bg-[#f8fafc]">
-        <div className="mx-auto flex max-w-7xl flex-col items-start gap-5 px-6 py-5 md:flex-row md:items-center md:justify-between md:gap-10">
+      <div className="fixed bottom-0 left-0 right-0 z-[100] px-4 pb-4">
+        <div className="mx-auto flex max-w-[1400px] flex-col items-start gap-5 rounded-2xl border border-slate-200 bg-[#f8fafc]/95 px-6 py-5 shadow-lg backdrop-blur-xl md:flex-row md:items-center md:justify-between md:gap-10">
           <p className="max-w-3xl text-sm leading-relaxed text-slate-600">
             Ao clicar em "Aceitar todos os cookies", concorda com o armazenamento de cookies no seu
             dispositivo para melhorar a navegação no site, analisar a utilização do site e ajudar nas
