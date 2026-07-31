@@ -560,37 +560,37 @@ export function ChatWidget() {
 
               {activeTab === "articles" && (
                 <div className="flex flex-col gap-1.5 px-5 pt-5">
-                  <p className="mb-1 text-sm font-semibold text-white">Artigos de ajuda</p>
+                  <p className="mb-1 text-sm font-semibold text-slate-900">Artigos de ajuda</p>
                   {FAQ.map((item) => {
                     const isOpenArticle = openArticle === item.q;
                     return (
                       <div
                         key={item.q}
-                        className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2.5"
+                        className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5"
                       >
                         <button
                           onClick={() => setOpenArticle(isOpenArticle ? null : item.q)}
                           className="flex w-full items-center gap-3 text-left"
                         >
-                          <BookOpen className="h-4 w-4 shrink-0 text-[#4d7dff]" />
+                          <BookOpen className="h-4 w-4 shrink-0 text-[#004DFF]" />
                           <span className="flex-1">
-                            <span className="block text-sm font-semibold text-white">
+                            <span className="block text-sm font-semibold text-slate-900">
                               {item.topic}
                             </span>
                             <span className="block text-xs text-slate-500">{item.q}</span>
                           </span>
                           <ChevronRight
-                            className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${
+                            className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${
                               isOpenArticle ? "rotate-90" : ""
                             }`}
                           />
                         </button>
                         {isOpenArticle && (
-                          <div className="mt-3 border-t border-white/10 pt-3">
-                            <p className="text-xs leading-relaxed text-slate-400">{item.a}</p>
+                          <div className="mt-3 border-t border-slate-200 pt-3">
+                            <p className="text-xs leading-relaxed text-slate-600">{item.a}</p>
                             <button
                               onClick={() => openChatWithQuestion(item.q)}
-                              className="mt-3 text-xs font-semibold text-[#4d7dff] hover:underline"
+                              className="mt-3 text-xs font-semibold text-[#004DFF] hover:underline"
                             >
                               Falar com a Aurora sobre isso
                             </button>
@@ -607,7 +607,7 @@ export function ChatWidget() {
             <div className="flex items-center justify-center gap-2 py-4 text-xs text-slate-500">
               <span>Funcionamos com</span>
               <Settings className="h-3.5 w-3.5" />
-              <span className="font-medium text-slate-400">gpt 5</span>
+              <span className="font-medium text-slate-700">gpt 5</span>
             </div>
           </motion.div>
         )}
