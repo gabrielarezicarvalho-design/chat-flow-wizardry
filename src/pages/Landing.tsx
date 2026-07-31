@@ -1970,16 +1970,31 @@ export default function Landing() {
               Grave 60 segundos da sua voz. A IA clona e envia áudios automáticos no WhatsApp — tão naturais que o cliente jura que é você.
             </p>
 
-            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-              {["Áudios ultra naturais em português", "Atendimento humanizado em escala", "Mais retenção, mais conversão", "Cliente sente que está falando com gente"].map((i) => (
+            <ul className="mt-8 grid gap-4 sm:grid-cols-2">
+              {[
+                { icon: Volume2, title: "Áudios ultra naturais em português", desc: "Timming, entonação e sotaque 100% brasileiro" },
+                { icon: Headphones, title: "Atendimento humanizado em escala", desc: "Respostas empáticas e personalizadas automaticamente" },
+                { icon: TrendingUp, title: "Mais retenção, mais conversão", desc: "Aumente o LTV sem esforço manual" },
+                { icon: Heart, title: "Cliente sente que está falando com gente", desc: "Crie conexão real e gere confiança" },
+              ].map((item) => (
                 <li
-                  key={i}
-                  className="flex items-start gap-3 rounded-2xl border border-[#0B1220]/8 bg-white/60 px-4 py-3 text-[15px] text-[#0B1220]/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#004DFF]/30 hover:bg-white"
+                  key={item.title}
+                  className="group relative overflow-hidden rounded-2xl border border-[#0B1220]/8 bg-white px-5 py-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_-12px_rgba(0,77,255,0.25)] hover:border-[#004DFF]/20"
                 >
-                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "#004DFF" }}>
-                    <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                  </span>
-                  {i}
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#004DFF] to-[#004DFF]/0" />
+                  <div className="flex items-start gap-4">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#004DFF] to-[#0040d6] text-white shadow-lg shadow-[#004DFF]/20">
+                      <item.icon className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <div className="font-space-grotesk font-semibold text-[15px] text-[#0B1220]">
+                        {item.title}
+                      </div>
+                      <div className="mt-0.5 text-sm leading-snug text-[#0B1220]/60">
+                        {item.desc}
+                      </div>
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
