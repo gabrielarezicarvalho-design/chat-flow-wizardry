@@ -2510,6 +2510,8 @@ export default function Landing() {
         </div>
       </section>
 
+      <LandingFAQ />
+
       {/* CTA FINAL */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
         <div className="relative overflow-hidden rounded-[28px] bg-[#f4f1ec] px-8 py-8 md:px-12 md:py-10">
