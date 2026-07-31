@@ -561,7 +561,7 @@ export function ChatWidget() {
 
             </div>
 
-            <div className="flex items-center justify-around border-t border-slate-100 bg-white/95 px-2 py-2 backdrop-blur">
+            <div className="flex shrink-0 items-center justify-between border-t border-slate-100 bg-white px-5 py-3.5">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -569,19 +569,18 @@ export function ChatWidget() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors ${
-                      isActive
-                        ? "text-[#004DFF]"
-                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                    className={`flex flex-col items-center gap-1 rounded-lg px-2 py-1 transition-colors ${
+                      isActive ? "text-[#004DFF]" : "text-slate-400 hover:text-[#004DFF]"
                     }`}
                     aria-label={tab.label}
                   >
                     <Icon className="h-5 w-5" />
-                    <span>{tab.label}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">{tab.label}</span>
                   </button>
                 );
               })}
             </div>
+
           </motion.div>
         )}
       </AnimatePresence>
