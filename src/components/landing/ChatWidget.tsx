@@ -516,31 +516,33 @@ export function ChatWidget() {
                     </button>
                     <p className="text-sm font-semibold text-slate-900">{ticketId}</p>
                   </div>
-                  <div className="min-h-0 flex-1">
+                  <div className="min-h-0 flex-1 overflow-hidden">
                     <Conversation className="h-full">
-                      <ConversationContent className="gap-3 p-3">
+                      <ConversationContent className="gap-3 p-3 scrollbar-hide">
                         {messages.map((m, i) => (
-                          <Message key={i} from={m.role}>
+                          <Message key={i} from={m.role} className="max-w-full">
                             <MessageContent
                               className={
                                 m.role === "user"
-                                  ? "bg-[#004DFF] text-white"
-                                  : "bg-slate-100 text-slate-800"
+                                  ? "max-w-[85%] rounded-2xl bg-[#004DFF] px-3 py-2 !text-white"
+                                  : "max-w-[85%] rounded-2xl bg-slate-100 px-3 py-2 !text-slate-800"
                               }
                             >
                               {m.role === "assistant" ? (
-                                <MessageResponse className="text-sm leading-relaxed">
+                                <MessageResponse className="text-sm leading-relaxed text-slate-800 [&_*]:text-slate-800">
                                   {m.content}
                                 </MessageResponse>
                               ) : (
-                                <p className="text-sm leading-relaxed">{m.content}</p>
+                                <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-white">
+                                  {m.content}
+                                </p>
                               )}
                             </MessageContent>
                           </Message>
                         ))}
                         {isLoading && (
-                          <Message from="assistant">
-                            <MessageContent className="max-w-[80%] bg-slate-100">
+                          <Message from="assistant" className="max-w-full">
+                            <MessageContent className="max-w-[85%] rounded-2xl bg-slate-100 px-3 py-2">
                               <Shimmer as="span" className="text-sm text-slate-500">
                                 Pensando...
                               </Shimmer>
@@ -550,6 +552,7 @@ export function ChatWidget() {
                       </ConversationContent>
                     </Conversation>
                   </div>
+
                   <div className="border-t border-slate-200 p-3">
                     <PromptInputProvider initialInput="">
                       <ChatComposer onSend={handleSend} status={chatStatus} />
