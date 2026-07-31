@@ -103,6 +103,14 @@ function HeaderLogo() {
   );
 }
 
+const STATUS_FILTERS = [
+  { id: "all", label: "Todos" },
+  { id: "open", label: "Abertos" },
+  { id: "closed", label: "Resolvidos" },
+] as const;
+
+type StatusFilter = (typeof STATUS_FILTERS)[number]["id"];
+
 function generateTicketId() {
   const now = new Date();
   const date = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
@@ -118,8 +126,34 @@ export function ChatWidget() {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [chatView, setChatView] = useState<"list" | "thread">("list");
   const [ticketId] = useState(generateTicketId);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_GREETING]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const threads = [
+    {
+      id: ticketId,
+      name: "Suporte Next Pro",
+      phone: "+55 11 91234-5678",
+      status: "open" as StatusFilter,
+      statusLabel: "Abertos",
+    },
+  ];
+
+  const query = search.trim().toLowerCase();
+  const filteredThreads = threads.filter((t) => {
+    const matchesStatus = statusFilter === "all" || t.status === statusFilter;
+    const matchesQuery =
+      !query ||
+      t.name.toLowerCase().includes(query) ||
+      t.id.toLowerCase().includes(query) ||
+      t.statusLabel.toLowerCase().includes(query) ||
+      t.phone.replace(/\D/g, "").includes(query.replace(/\D/g, "")) ||
+      t.phone.toLowerCase().includes(query);
+    return matchesStatus && matchesQuery;
+  });
+
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef(messages);
