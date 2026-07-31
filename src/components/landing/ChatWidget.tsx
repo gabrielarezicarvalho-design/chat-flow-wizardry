@@ -19,26 +19,37 @@ type ChatMessage = {
 
 const FAQ = [
   {
+    topic: "Fluxo com IA",
+    emoji: "🤖",
     q: "Como funciona o fluxo com IA?",
     a: "Na Next Pro você monta fluxos automáticos que respondem, qualificam e encaminham leads no WhatsApp sem código. É só escolher gatilhos, mensagens e ações que a IA executa para você.",
   },
   {
+    topic: "Cadastros",
+    emoji: "📓",
     q: "Quero deletar um contato, como faço?",
     a: "Vá em Contatos, busque o contato, abra o perfil e clique nos três pontos no canto superior direito para excluir. A ação é irreversível.",
   },
   {
+    topic: "Agente IA",
+    emoji: "",
     q: "Minha IA está com as informações desatualizadas.",
     a: "Atualize as instruções e a base de conhecimento do seu agente em Configurações > Agentes de IA. Salve e teste antes de ativar no fluxo.",
   },
   {
+    topic: "Prospecção",
+    emoji: "🔎",
     q: "Como funciona a busca de clientes?",
     a: "A Next Pro captura leads de Google Maps, Instagram, TikTok e pesquisa de anúncios, organizando tudo em listas que você pode importar para o CRM.",
   },
   {
+    topic: "Pagamentos",
+    emoji: "💳",
     q: "Posso fazer cobranças automáticas?",
     a: "Sim. Configure cobranças recorrentes e o sistema envia lembretes no WhatsApp com link de pagamento, de forma automática.",
   },
 ];
+
 
 const NEWS = [
   { title: "Novo fluxo de recuperação financeira", date: "30 jul 2026", excerpt: "Automatize lembretes de pagamento e reduza inadimplência com poucos cliques." },
