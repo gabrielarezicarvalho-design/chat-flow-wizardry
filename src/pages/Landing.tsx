@@ -1414,198 +1414,174 @@ export default function Landing() {
 
       {/* PLANOS */}
       <section id="planos" className="bg-white py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-12 lg:gap-16 items-start">
 
-
-          <div className="text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
-              Planos para cada fase
-            </span>
-            <h2 className="mt-3 text-4xl md:text-6xl font-bold tracking-tight text-slate-900">
-              Escolha o plano{" "}
-              <span style={{ color: "#004DFF" }}>ideal pra você</span>
-            </h2>
-            <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-              Comece grátis por 2 dias. Sem cartão, sem fidelidade — mude de plano quando quiser.
-            </p>
-
-            <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 p-1">
-              <button
-                onClick={() => setBilling("monthly")}
-                className={`px-5 py-2 rounded-full text-base font-semibold transition ${billing === "monthly" ? "text-white" : "text-slate-600"}`}
-                style={billing === "monthly" ? { backgroundColor: "#004DFF" } : undefined}
-              >
-                Mensal
-              </button>
-              <button
-                onClick={() => setBilling("annual")}
-                className={`px-5 py-2 rounded-full text-base font-semibold transition flex items-center gap-2 ${billing === "annual" ? "text-white" : "text-slate-600"}`}
-                style={billing === "annual" ? { backgroundColor: "#004DFF" } : undefined}
-              >
-                Anual
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${billing === "annual" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-700"}`}>
-                  -2 meses
+            {/* Left Column: Text & Toggle */}
+            <div className="flex flex-col space-y-8">
+              <div className="space-y-4">
+                <span className="text-[#004DFF] font-bold tracking-wider uppercase text-sm font-space-grotesk">
+                  Planos para cada fase
                 </span>
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
-            {[
-              {
-                tier: "basic",
-                name: "Basic",
-                price: "0",
-                tagline: "Teste grátis de 2 dias: 20 disparos para explorar",
-                highlights: [
-                  { strong: "20 disparos", pre: "até ", post: " no total" },
-                  { strong: "Bloqueio automático", pre: "", post: " ao atingir o limite" },
-                ],
-                chips: ["1 atendente", "1 conexão WhatsApp", "IA completa (limitada)", "Chat interno"],
-                featured: false,
-              },
-              {
-                tier: "start",
-                name: "Start",
-                monthlyPrice: "49,90",
-                annualPrice: "41,58",
-                annualTotal: "499,00",
-                tagline: "Para quem está começando",
-                highlights: [
-                  { strong: "100 disparos", pre: "até ", post: "/mês" },
-                  { strong: "1.000", pre: "", post: " créditos de mensagem" },
-                ],
-                chips: ["5 atendentes", "2 conexões WhatsApp", "IA completa", "Chat interno"],
-                featured: false,
-              },
-              {
-                tier: "business",
-                name: "Business",
-                monthlyPrice: "99,90",
-                annualPrice: "83,25",
-                annualTotal: "999,00",
-                tagline: "Para operações de alto volume",
-                highlights: [
-                  { strong: "10.000 disparos", pre: "até ", post: "/mês" },
-                  { strong: "50.000", pre: "", post: " créditos de mensagem" },
-                ],
-                chips: ["20 atendentes", "Clientes ilimitados", "Prospecção completa", "Suporte prioritário"],
-                featured: true,
-              },
-            ].map((p) => (
-              <div
-                key={p.tier}
-                className="relative min-w-0 w-full overflow-hidden rounded-[28px] bg-slate-50 p-5 sm:p-7 text-left"
-
-                style={
-                  p.featured
-                    ? { border: "1.5px solid #004DFF", boxShadow: "0 20px 60px -25px rgba(0,77,255,0.45)" }
-                    : { border: "1px solid #e2e8f0" }
-                }
-              >
-                <div className="text-sm text-slate-400">Plano</div>
-
-                <div className="mt-1 flex items-baseline justify-between gap-3">
-                  <div className="text-3xl font-bold tracking-tight text-slate-900">{p.name}</div>
-                  <div className="text-right">
-                    {p.tier === "basic" ? (
-                      <span className="text-3xl font-bold tracking-tight" style={{ color: "#004DFF" }}>Grátis</span>
-                    ) : (
-                      <>
-                        <div className="flex items-baseline justify-end">
-                          <span className="text-3xl font-bold tracking-tight text-slate-900">R${billing === "annual" ? p.annualPrice : p.monthlyPrice}</span>
-                          <span className="ml-1 text-sm text-slate-400">/mês</span>
-                        </div>
-                        <div className="text-xs text-slate-500 whitespace-nowrap">
-                          {billing === "annual"
-                            ? `R$ ${p.annualTotal} cobrado por ano`
-                            : "cobrado por mês"}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <p className="mt-3 text-sm font-semibold" style={{ color: "#004DFF" }}>
-                  {p.tagline}
+                <h2 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight leading-tight font-space-grotesk">
+                  Escolha o plano{" "}
+                  <span className="text-[#004DFF]">ideal pra você.</span>
+                </h2>
+                <p className="text-lg text-slate-600 leading-relaxed">
+                  Comece grátis por 2 dias. Sem cartão, sem fidelidade — mude de plano quando quiser.
                 </p>
-
-                <div className="my-6 h-px bg-slate-200" />
-
-                <div className="space-y-3">
-                  <div className="rounded-2xl px-5 py-4 text-base text-slate-500" style={{ backgroundColor: "rgba(0,77,255,0.06)", border: "1px solid rgba(0,77,255,0.12)" }}>
-                    {p.highlights[0].pre}
-                    <span className="font-bold text-slate-900">{p.highlights[0].strong}</span>
-                    {p.highlights[0].post}
-                  </div>
-                  <div className="rounded-2xl bg-white border border-slate-200 px-5 py-4 text-base text-slate-500">
-                    <span className="font-bold text-slate-900">{p.highlights[1].strong}</span>
-                    {p.highlights[1].post}
-                  </div>
-                </div>
-
-
-
-                <button
-                  onClick={() => setExpandedTier(expandedTier === p.tier ? null : p.tier)}
-                  className="mt-7 w-full flex items-center justify-center gap-2 text-sm font-semibold transition hover:opacity-80"
-                  style={{ color: "#004DFF" }}
-                >
-                  {expandedTier === p.tier ? "Ocultar funcionalidades" : "Ver todas as funcionalidades"}
-                  <ChevronRight className={`h-4 w-4 transition-transform ${expandedTier === p.tier ? "rotate-90" : ""}`} />
-                </button>
-
-                {expandedTier === p.tier && (
-                  <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 animate-fade-in">
-                    <ul className="space-y-3">
-                      {PLAN_FEATURES[p.tier].map((feature) => (
-                        <li key={feature} className="flex items-start gap-3 text-sm text-slate-700">
-                          <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: "#004DFF" }} />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => (window.location.href = `/checkout?tier=${p.tier}&billing=${billing}`)}
-                  className="mt-5 w-full rounded-xl py-4 text-lg font-bold text-white transition hover:opacity-90"
-                  style={{ backgroundColor: "#004DFF" }}
-                >
-                  {p.tier === "basic" ? "Testar grátis" : `Assinar ${p.name}`}
-                </button>
-
-                <div className="mt-5 flex flex-col items-center">
-                  <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
-                    <ShieldCheck className="h-4 w-4" style={{ color: "#004DFF" }} />
-                    Garantia de 30 dias
-                  </div>
-                  <div className="text-sm text-slate-500">ou seu dinheiro de volta</div>
-                </div>
-
-                <div className="mt-6 min-h-[52px] border-t border-slate-200 pt-5">
-                  <RotatingChips tier={p.tier} />
-                </div>
               </div>
-            ))}
-          </div>
 
+              {/* Toggle */}
+              <div className="flex items-center space-x-4">
+                <span className={`text-sm font-medium ${billing === "monthly" ? "text-slate-900" : "text-slate-400"}`}>
+                  Mensal
+                </span>
+                <button
+                  onClick={() => setBilling(billing === "monthly" ? "annual" : "monthly")}
+                  className="relative w-14 h-7 bg-slate-100 rounded-full p-1 transition-colors hover:bg-slate-200"
+                >
+                  <div
+                    className={`absolute top-1 w-5 h-5 bg-[#004DFF] rounded-full shadow-sm transition-all duration-200 ${billing === "annual" ? "left-8" : "left-1"}`}
+                  />
+                </button>
+                <span className={`text-sm font-medium ${billing === "annual" ? "text-slate-900" : "text-slate-400"}`}>
+                  Anual
+                </span>
+                <span className="text-xs font-bold text-[#004DFF] bg-blue-50 px-2 py-1 rounded-full">
+                  -20%
+                </span>
+              </div>
 
-          {/* BOTÃO COMPARAR PLANOS */}
-          <div className="mt-12 flex justify-center">
-            <button
-              onClick={() => setShowCompareTable((s) => !s)}
-              className="group inline-flex items-center gap-3 rounded-xl bg-slate-100 px-5 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-200"
-            >
-              Compare os planos
-              <ChevronUp className={`h-4 w-4 transition-transform duration-200 ${showCompareTable ? "" : "rotate-180"}`} />
-            </button>
+              {/* Comparison link */}
+              <div className="pt-4">
+                <button
+                  onClick={() => setShowCompareTable((s) => !s)}
+                  className="text-slate-900 font-semibold flex items-center group"
+                >
+                  {showCompareTable ? "Ocultar comparação detalhada" : "Compare todos os recursos e limites"}
+                  <ArrowRight className={`h-4 w-4 ml-2 transition-transform group-hover:translate-x-1 ${showCompareTable ? "-rotate-90" : "rotate-90"}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  tier: "basic",
+                  name: "Basic",
+                  tagline: "Teste grátis de 2 dias: 20 disparos para explorar.",
+                  features: ["20 disparos no total", "1 conexão WhatsApp", "IA completa (limitada)", "Chat interno"],
+                  featured: false,
+                },
+                {
+                  tier: "start",
+                  name: "Start",
+                  monthlyPrice: "49,90",
+                  annualPrice: "41,58",
+                  annualTotal: "499,00",
+                  tagline: "Para quem está começando.",
+                  features: ["100 disparos/mês", "2 conexões WhatsApp", "IA completa", "5 atendentes"],
+                  featured: false,
+                },
+                {
+                  tier: "business",
+                  name: "Business",
+                  monthlyPrice: "99,90",
+                  annualPrice: "83,25",
+                  annualTotal: "999,00",
+                  tagline: "Para operações de alto volume.",
+                  features: ["Até 10.000 disparos/mês", "10 conexões WhatsApp", "20 atendentes", "Suporte prioritário"],
+                  featured: true,
+                },
+              ].map((p) => (
+                <div
+                  key={p.tier}
+                  className={`rounded-2xl p-8 flex flex-col transition-all ${p.featured ? "bg-[#004DFF] ring-4 ring-blue-100 relative overflow-hidden" : "bg-white border border-slate-200 hover:border-slate-300"}`}
+                >
+                  {p.featured && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-[#004DFF] text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm border border-blue-100">
+                      Mais Popular
+                    </div>
+                  )}
+
+                  <div className="mb-8">
+                    <h3 className={`text-xl font-bold mb-2 font-space-grotesk ${p.featured ? "text-white" : "text-slate-900"}`}>
+                      {p.name}
+                    </h3>
+                    <div className="flex items-baseline mb-4">
+                      {p.tier === "basic" ? (
+                        <span className={`text-3xl font-bold ${p.featured ? "text-white" : "text-slate-900"}`}>Grátis</span>
+                      ) : (
+                        <>
+                          <span className={`text-sm font-semibold mr-1 ${p.featured ? "text-blue-200" : "text-slate-900"}`}>R$</span>
+                          <span className={`text-3xl font-bold ${p.featured ? "text-white" : "text-slate-900"}`}>
+                            {billing === "annual" ? p.annualPrice : p.monthlyPrice}
+                          </span>
+                          <span className={`text-sm ml-1 ${p.featured ? "text-blue-200" : "text-slate-500"}`}>/mês</span>
+                        </>
+                      )}
+                    </div>
+                    {p.tier !== "basic" && billing === "annual" && (
+                      <p className={`text-xs font-medium ${p.featured ? "text-blue-200" : "text-[#004DFF]"}`}>
+                        R$ {p.annualTotal} cobrado por ano
+                      </p>
+                    )}
+                    <p className={`text-sm mt-2 ${p.featured ? "text-blue-100" : "text-slate-500"}`}>
+                      {p.tagline}
+                    </p>
+                  </div>
+
+                  <ul className="space-y-4 mb-8 flex-grow">
+                    {p.features.map((feature) => (
+                      <li key={feature} className={`flex items-center text-sm ${p.featured ? "text-white font-medium" : "text-slate-600"}`}>
+                        <Check className={`h-4 w-4 mr-3 flex-shrink-0 ${p.featured ? "text-white" : "text-green-500"}`} />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    onClick={() => setExpandedTier(expandedTier === p.tier ? null : p.tier)}
+                    className={`mb-4 w-full flex items-center justify-center gap-2 text-sm font-semibold transition hover:opacity-80 ${p.featured ? "text-white" : "text-[#004DFF]"}`}
+                  >
+                    {expandedTier === p.tier ? "Ocultar funcionalidades" : "Ver todas as funcionalidades"}
+                    <ChevronRight className={`h-4 w-4 transition-transform ${expandedTier === p.tier ? "rotate-90" : ""}`} />
+                  </button>
+
+                  {expandedTier === p.tier && (
+                    <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-5 animate-fade-in">
+                      <ul className="space-y-3">
+                        {PLAN_FEATURES[p.tier].map((feature) => (
+                          <li key={feature} className="flex items-start gap-3 text-sm text-slate-700">
+                            <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: "#004DFF" }} />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => (window.location.href = `/checkout?tier=${p.tier}&billing=${billing}`)}
+                    className={`w-full rounded-xl py-4 text-lg font-bold transition hover:opacity-90 ${p.featured ? "bg-white text-[#004DFF] hover:bg-blue-50" : "text-white"}`}
+                    style={p.featured ? undefined : { backgroundColor: "#004DFF" }}
+                  >
+                    {p.tier === "basic" ? "Testar grátis" : `Assinar ${p.name}`}
+                  </button>
+
+                  <div className="mt-5 min-h-[52px] border-t border-slate-200/30 pt-4">
+                    <RotatingChips tier={p.tier} />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* TABELA COMPARATIVA */}
           {showCompareTable && (
-            <div className="mt-8 max-w-4xl mx-auto animate-fade-in">
+            <div className="mt-16 max-w-4xl mx-auto animate-fade-in">
               <h3 className="text-center text-3xl font-bold text-slate-900">Resumo de recursos e limites</h3>
               <p className="mt-2 text-center text-base text-slate-500">Veja lado a lado o que cada plano entrega.</p>
 
@@ -1644,12 +1620,11 @@ export default function Landing() {
                       ["Relatórios", "Básicos", "Básicos", "Avançados"],
                       ["Prospecção Google Maps", false, false, true],
                       ["Prospecção Instagram/TikTok", false, false, true],
-                      ["Espionar anúncios", false, false, true],
+                      ["Espionagem de anúncios", false, false, true],
                       ["Voz clonada (ElevenLabs)", false, false, true],
                       ["API + Webhooks", false, false, true],
                       ["Suporte", "E-mail", "E-mail", "Prioritário"],
                       ["Teste grátis", "2 dias", "2 dias", "2 dias"],
-
                     ].map(([label, basic, start, business], idx) => (
                       <tr key={label as string} className={idx % 2 === 1 ? "bg-slate-50/50" : ""}>
                         <td className="px-6 py-3.5 font-medium text-slate-800">{label as string}</td>
