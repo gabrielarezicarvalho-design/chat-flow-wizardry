@@ -361,9 +361,9 @@ export function ChatWidget() {
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
+            <div className="relative min-h-0 flex-1 overflow-hidden">
               {activeTab === "home" && (
-                <div className="px-5 pt-5">
+                <div className="h-full overflow-y-auto scrollbar-hide px-5 pt-5">
                   <div className="flex items-center gap-2.5">
                     <BrandAvatar />
                     <div>
