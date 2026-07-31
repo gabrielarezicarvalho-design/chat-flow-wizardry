@@ -286,30 +286,46 @@ export function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-24 right-4 z-[120] flex w-[92vw] max-w-[380px] flex-col overflow-hidden rounded-[24px] border border-slate-100 bg-white shadow-2xl shadow-slate-900/10 md:right-6"
-            style={{ height: "clamp(520px, 70vh, 640px)" }}
+            className="fixed bottom-24 right-4 z-[120] flex w-[92vw] max-w-[392px] flex-col overflow-hidden rounded-[32px] border border-slate-100 bg-white shadow-[0_28px_70px_-20px_rgba(15,23,42,0.35)] md:right-6"
+            style={{ height: "clamp(540px, 74vh, 680px)" }}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
-              <div className="flex items-center gap-2.5">
-                <HeaderLogo />
-                <div>
-                  <p className="font-semibold text-slate-900">NEXT PRO</p>
-                  <p className="flex items-center gap-1.5 text-xs text-slate-500">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
-                    online agora
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                aria-label="Fechar"
-                className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            <div className="relative shrink-0 overflow-hidden bg-gradient-to-br from-[#004DFF] via-[#1a5cff] to-[#0038C7] px-6 pb-10 pt-6">
+              <svg
+                className="pointer-events-none absolute inset-0 h-full w-full opacity-15"
+                aria-hidden="true"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <X className="h-4 w-4" />
-              </button>
+                <path d="M-20 24C10 54 80 4 150 44S280 24 350 64" stroke="white" strokeWidth="2" />
+                <path d="M-20 64C30 94 100 44 170 84S300 64 370 104" stroke="white" strokeWidth="2" />
+                <path d="M-20 104C30 134 100 84 170 124S300 104 370 144" stroke="white" strokeWidth="2" />
+              </svg>
+
+              <div className="relative z-10 flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/30 bg-white/20 p-1 backdrop-blur-md">
+                    <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-white">
+                      <HeaderLogo />
+                    </div>
+                    <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-space-grotesk text-lg font-bold tracking-tight text-white">NEXT PRO</p>
+                    <p className="text-sm font-medium text-blue-100">online agora</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  aria-label="Fechar"
+                  className="rounded-full p-1.5 text-white/70 transition-colors hover:bg-white/15 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-slate-50">
+            <div className="relative z-20 -mt-6 flex-1 overflow-y-auto rounded-t-[28px] bg-white">
+
               {activeTab === "home" && (
                 <div className="flex flex-col gap-5 p-4">
                   <div>
