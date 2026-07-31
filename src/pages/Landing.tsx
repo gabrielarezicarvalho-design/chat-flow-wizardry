@@ -2519,19 +2519,27 @@ export default function Landing() {
                 </a>
               </div>
 
-              <p className="mt-8 text-xs text-slate-400">
-                <span className="font-bold text-white">+200 lojas</span> já vendem mais com a Next Pro
-              </p>
-              <div className="mt-3 flex flex-wrap items-center gap-6 opacity-45">
-                {["CALÊ", "lands", "BREADY", "yoha"].map((b) => (
-                  <span
-                    key={b}
-                    className="font-space-grotesk text-lg font-semibold tracking-[0.15em] text-white"
-                  >
-                    {b}
-                  </span>
-                ))}
+              <div className="mt-10 flex items-center gap-6">
+                <div className="flex -space-x-3">
+                  {[
+                    { l: "M1", bg: "bg-zinc-800" },
+                    { l: "M2", bg: "bg-zinc-700" },
+                    { l: "M3", bg: "bg-zinc-600" },
+                    { l: "M4", bg: "bg-zinc-500" },
+                  ].map((m) => (
+                    <span
+                      key={m.l}
+                      className={`flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#111214] text-[10px] font-bold text-white ${m.bg}`}
+                    >
+                      {m.l}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-sm text-slate-400">
+                  <span className="font-semibold text-white">+200 lojas</span> já utilizam
+                </p>
               </div>
+
             </div>
 
             {/* Card métrica */}
