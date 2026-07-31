@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SectionLink from "@/components/layout/SectionLink";
 import {
   Twitter,
   Instagram,
@@ -22,7 +23,11 @@ const LandingFooter = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Brand */}
             <div className="lg:col-span-2 space-y-2">
-              <div className="flex items-center gap-2">
+              <Link
+                to="/homepage"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="flex items-center gap-2"
+              >
                 <img src={logoAurora.url} alt="NEXT PRO" className="h-6 w-6" />
                 <span
                   className="text-base font-bold tracking-tight text-slate-900"
@@ -30,7 +35,7 @@ const LandingFooter = () => {
                 >
                   NEXT <span className="text-primary">PRO</span>
                 </span>
-              </div>
+              </Link>
               <p className="text-xs text-slate-500 leading-snug max-w-sm whitespace-pre-line">
                 O CRM NEXT PRO é a ferramenta definitiva para quem deseja{"\u00a0"}
                 {"\n"}executar disparos em massa, prospectar clientes e aumentar suas vendas, tudo em uma unica
@@ -55,13 +60,13 @@ const LandingFooter = () => {
                 >
                   <Instagram className="h-3 w-3" />
                 </a>
-                <a
-                  href="#planos"
+                <SectionLink
+                  hash="planos"
                   aria-label="Presentes"
                   className="h-7 w-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-700 hover:border-primary hover:text-primary transition-colors"
                 >
                   <Gift className="h-3 w-3" />
-                </a>
+                </SectionLink>
               </div>
             </div>
 
@@ -70,14 +75,14 @@ const LandingFooter = () => {
               <h4 className="text-[11px] font-bold tracking-widest text-slate-900 uppercase">Produto</h4>
               <ul className="space-y-1.5 text-xs text-slate-500">
                 <li>
-                  <a href="#recursos" className="hover:text-primary transition-colors">
+                  <SectionLink hash="recursos" className="hover:text-primary transition-colors">
                     Funcionalidades
-                  </a>
+                  </SectionLink>
                 </li>
                 <li>
-                  <a href="#planos" className="hover:text-primary transition-colors">
+                  <SectionLink hash="planos" className="hover:text-primary transition-colors">
                     Preços
-                  </a>
+                  </SectionLink>
                 </li>
                 <li>
                   <Link to="/auth" className="hover:text-primary transition-colors">
