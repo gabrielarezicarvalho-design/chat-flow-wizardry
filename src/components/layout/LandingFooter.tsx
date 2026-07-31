@@ -177,6 +177,7 @@ const LandingFooter = () => {
         </div>
       </footer>
       <CookieConsent />
+      <FloatingChatButton />
     </>
   );
 };
