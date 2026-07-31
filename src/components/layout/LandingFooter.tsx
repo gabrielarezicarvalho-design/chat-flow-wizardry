@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { Twitter, Instagram, Gift, HelpCircle, MessageCircle, Shield, FileText, Cookie } from "lucide-react";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
+import CookieConsent from "@/components/landing/CookieConsent";
+
 
 const LandingFooter = () => {
   return (
