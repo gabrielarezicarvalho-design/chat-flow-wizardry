@@ -87,29 +87,54 @@ function ChatComposer({
   status: ChatStatus;
 }) {
   const { textInput } = usePromptInputController();
+  const hasText = !!textInput.value.trim();
   return (
     <PromptInput
       onSubmit={({ text }) => {
         onSend(text);
       }}
-      className="w-full border border-slate-200 bg-white text-slate-800"
+      className="w-full flex-row items-center gap-1 rounded-full border-none bg-slate-100 px-2 py-1 shadow-none divide-y-0"
     >
+      <button
+        type="button"
+        aria-label="Anexar"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700"
+      >
+        <Plus className="h-[18px] w-[18px]" />
+      </button>
+      <button
+        type="button"
+        aria-label="Emoji"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700"
+      >
+        <Smile className="h-[18px] w-[18px]" />
+      </button>
       <PromptInputTextarea
-        placeholder="Digite sua mensagem..."
-        className="min-h-9 max-h-24 py-1.5 text-sm text-slate-800 placeholder:text-slate-400"
-
+        placeholder="Digite uma mensagem"
+        rows={1}
+        className="min-h-8 max-h-20 flex-1 resize-none border-none bg-transparent px-1 py-1.5 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus-visible:ring-0"
         disabled={status === "submitted"}
         autoFocus
       />
-      <PromptInputFooter className="justify-end border-none p-1 pt-0">
+      {hasText ? (
         <PromptInputSubmit
           status={status}
-          disabled={!textInput.value.trim() || status === "submitted"}
+          disabled={status === "submitted"}
+          className="h-8 w-8 shrink-0 rounded-full bg-[#004DFF] text-white hover:bg-[#003ACC]"
         />
-      </PromptInputFooter>
+      ) : (
+        <button
+          type="button"
+          aria-label="Áudio"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700"
+        >
+          <Mic className="h-[18px] w-[18px]" />
+        </button>
+      )}
     </PromptInput>
   );
 }
+
 
 function BrandAvatar() {
   const [error, setError] = useState(false);
