@@ -92,11 +92,12 @@ function ChatComposer({
       onSubmit={({ text }) => {
         onSend(text);
       }}
-      className="w-full border-white/10 bg-white/[0.04] text-slate-100"
+      className="w-full border border-slate-200 bg-white text-slate-800"
     >
       <PromptInputTextarea
         placeholder="Digite sua mensagem..."
-        className="min-h-10 max-h-24 py-2 text-sm text-slate-100 placeholder:text-slate-500"
+        className="min-h-10 max-h-24 py-2 text-sm text-slate-800 placeholder:text-slate-400"
+
         disabled={status === "submitted"}
         autoFocus
       />
@@ -308,7 +309,7 @@ export function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-24 right-4 z-[120] flex w-[92vw] max-w-[360px] flex-col overflow-hidden rounded-[26px] border border-white/10 bg-[#0b0b10] shadow-2xl shadow-black/60 md:right-6"
+            className="fixed bottom-24 right-4 z-[120] flex w-[92vw] max-w-[360px] flex-col overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-2xl shadow-black/20 md:right-6"
             style={{ height: "clamp(420px, 58vh, 520px)" }}
           >
             {/* Top bar */}
@@ -319,19 +320,19 @@ export function ChatWidget() {
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
                   activeTab === "home"
                     ? "bg-[#004DFF] text-white"
-                    : "bg-white/[0.06] text-slate-300 hover:bg-white/[0.1]"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
                 <Home className="h-[18px] w-[18px]" />
               </button>
 
-              <div className="flex flex-1 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+              <div className="flex flex-1 items-center gap-1 rounded-full border border-slate-200 bg-slate-100 p-1">
                 <button
                   onClick={() => setActiveTab("chat")}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors ${
                     activeTab === "chat"
-                      ? "bg-white/[0.1] text-white"
-                      : "text-slate-300 hover:text-white"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   <MessageCircle className="h-4 w-4" />
@@ -341,8 +342,8 @@ export function ChatWidget() {
                   onClick={() => setActiveTab("articles")}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors ${
                     activeTab === "articles"
-                      ? "bg-white/[0.1] text-white"
-                      : "text-slate-300 hover:text-white"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   <BookOpen className="h-4 w-4" />
@@ -353,7 +354,7 @@ export function ChatWidget() {
               <button
                 onClick={() => setIsOpen(false)}
                 aria-label="Fechar"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
               >
                 <ChevronDown className="h-5 w-5" />
               </button>
@@ -366,12 +367,12 @@ export function ChatWidget() {
                   <div className="flex items-center gap-2.5">
                     <BrandAvatar />
                     <div>
-                      <p className="text-base font-semibold text-white">Next Pro</p>
-                      <p className="text-xs text-slate-400">Como podemos ajudar?</p>
+                      <p className="text-base font-semibold text-slate-900">Next Pro</p>
+                      <p className="text-xs text-slate-500">Como podemos ajudar?</p>
                     </div>
                   </div>
 
-                  <div className="my-3 h-px w-full bg-white/10" />
+                  <div className="my-3 h-px w-full bg-slate-200" />
 
                   <div className="grid grid-cols-2 gap-2">
                     {[
@@ -390,20 +391,20 @@ export function ChatWidget() {
                       <button
                         key={label}
                         onClick={action}
-                        className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-2.5 py-2 text-left transition-colors hover:bg-white/[0.09]"
+                        className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-left transition-colors hover:bg-slate-100"
                       >
-                        <Icon className="h-4 w-4 shrink-0 text-slate-300" />
-                        <span className="text-sm font-semibold text-white">{label}</span>
+                        <Icon className="h-4 w-4 shrink-0 text-slate-600" />
+                        <span className="text-sm font-semibold text-slate-900">{label}</span>
                       </button>
                     ))}
                   </div>
 
                   <div className="mb-2 mt-4 flex items-center justify-between">
-                    <p className="text-xs text-slate-400">Dúvidas frequentes?</p>
+                    <p className="text-xs text-slate-500">Dúvidas frequentes?</p>
                     <button
                       onClick={() => setFaqOffset((v) => v + 1)}
                       aria-label="Atualizar perguntas"
-                      className="rounded-full p-1 text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
+                      className="rounded-full p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
                     </button>
@@ -415,9 +416,9 @@ export function ChatWidget() {
                         <button
                           key={item.q}
                           onClick={() => openChatWithQuestion(item.q)}
-                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-left transition-colors hover:bg-white/[0.07]"
+                          className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-left transition-colors hover:bg-slate-100"
                         >
-                          <span className="block text-sm font-bold leading-tight text-white">
+                          <span className="block text-sm font-bold leading-tight text-slate-900">
                             {item.topic}
                           </span>
                           <span className="mt-0.5 block text-[11px] leading-tight text-slate-500">
@@ -433,7 +434,7 @@ export function ChatWidget() {
                       setActiveTab("chat");
                       setChatView("thread");
                     }}
-                    className="mx-auto mb-5 block rounded-full bg-white px-6 py-1.5 text-xs font-bold text-[#0b0b10] transition-opacity hover:opacity-90"
+                    className="mx-auto mb-5 block rounded-full bg-[#004DFF] px-6 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90"
                   >
                     Iniciar
                   </button>
@@ -444,13 +445,13 @@ export function ChatWidget() {
                 <div className="flex h-full flex-col">
                   <div className="space-y-2 px-4 py-4">
                     <div className="relative">
-                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                       <input
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Buscar por nome, status ou número"
                         aria-label="Buscar conversas"
-                        className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-2 pl-9 pr-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-white/20 focus:outline-none"
+                        className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[#004DFF] focus:outline-none"
                       />
                     </div>
                     <div className="flex gap-1.5">
@@ -461,7 +462,7 @@ export function ChatWidget() {
                           className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-colors ${
                             statusFilter === f.id
                               ? "bg-[#004DFF] text-white"
-                              : "bg-white/[0.06] text-slate-400 hover:bg-white/[0.1]"
+                              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                           }`}
                         >
                           {f.label}
@@ -480,14 +481,14 @@ export function ChatWidget() {
                       <button
                         key={t.id}
                         onClick={() => setChatView("thread")}
-                        className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition-colors hover:bg-white/[0.07]"
+                        className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-left transition-colors hover:bg-slate-50"
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-[#4d7dff]">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#004DFF]">
                           <MessageCircle className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <p className="truncate text-sm font-bold text-white">{t.id}</p>
+                            <p className="truncate text-sm font-bold text-slate-900">{t.id}</p>
                             <span className="shrink-0 rounded-full bg-[#004DFF] px-2 py-0.5 text-[10px] font-semibold text-white">
                               {t.statusLabel}
                             </span>
@@ -496,7 +497,7 @@ export function ChatWidget() {
                             {t.name} · {t.phone}
                           </p>
                         </div>
-                        <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" />
+                        <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
                       </button>
                     ))}
                   </div>
@@ -505,15 +506,15 @@ export function ChatWidget() {
 
               {activeTab === "chat" && chatView === "thread" && (
                 <div className="flex h-full flex-col overflow-hidden">
-                  <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2.5">
+                  <div className="flex items-center gap-2 border-b border-slate-200 px-3 py-2.5">
                     <button
                       onClick={() => setChatView("list")}
                       aria-label="Voltar"
-                      className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
+                      className="rounded-full p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
-                    <p className="text-sm font-semibold text-white">{ticketId}</p>
+                    <p className="text-sm font-semibold text-slate-900">{ticketId}</p>
                   </div>
                   <div className="min-h-0 flex-1">
                     <Conversation className="h-full">
@@ -524,7 +525,7 @@ export function ChatWidget() {
                               className={
                                 m.role === "user"
                                   ? "bg-[#004DFF] text-white"
-                                  : "bg-transparent text-slate-100"
+                                  : "bg-slate-100 text-slate-800"
                               }
                             >
                               {m.role === "assistant" ? (
@@ -539,8 +540,8 @@ export function ChatWidget() {
                         ))}
                         {isLoading && (
                           <Message from="assistant">
-                            <MessageContent className="max-w-[80%] bg-transparent">
-                              <Shimmer as="span" className="text-sm">
+                            <MessageContent className="max-w-[80%] bg-slate-100">
+                              <Shimmer as="span" className="text-sm text-slate-500">
                                 Pensando...
                               </Shimmer>
                             </MessageContent>
@@ -549,7 +550,7 @@ export function ChatWidget() {
                       </ConversationContent>
                     </Conversation>
                   </div>
-                  <div className="border-t border-white/10 p-3">
+                  <div className="border-t border-slate-200 p-3">
                     <PromptInputProvider initialInput="">
                       <ChatComposer onSend={handleSend} status={chatStatus} />
                     </PromptInputProvider>
@@ -559,37 +560,37 @@ export function ChatWidget() {
 
               {activeTab === "articles" && (
                 <div className="flex flex-col gap-1.5 px-5 pt-5">
-                  <p className="mb-1 text-sm font-semibold text-white">Artigos de ajuda</p>
+                  <p className="mb-1 text-sm font-semibold text-slate-900">Artigos de ajuda</p>
                   {FAQ.map((item) => {
                     const isOpenArticle = openArticle === item.q;
                     return (
                       <div
                         key={item.q}
-                        className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2.5"
+                        className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5"
                       >
                         <button
                           onClick={() => setOpenArticle(isOpenArticle ? null : item.q)}
                           className="flex w-full items-center gap-3 text-left"
                         >
-                          <BookOpen className="h-4 w-4 shrink-0 text-[#4d7dff]" />
+                          <BookOpen className="h-4 w-4 shrink-0 text-[#004DFF]" />
                           <span className="flex-1">
-                            <span className="block text-sm font-semibold text-white">
+                            <span className="block text-sm font-semibold text-slate-900">
                               {item.topic}
                             </span>
                             <span className="block text-xs text-slate-500">{item.q}</span>
                           </span>
                           <ChevronRight
-                            className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${
+                            className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${
                               isOpenArticle ? "rotate-90" : ""
                             }`}
                           />
                         </button>
                         {isOpenArticle && (
-                          <div className="mt-3 border-t border-white/10 pt-3">
-                            <p className="text-xs leading-relaxed text-slate-400">{item.a}</p>
+                          <div className="mt-3 border-t border-slate-200 pt-3">
+                            <p className="text-xs leading-relaxed text-slate-600">{item.a}</p>
                             <button
                               onClick={() => openChatWithQuestion(item.q)}
-                              className="mt-3 text-xs font-semibold text-[#4d7dff] hover:underline"
+                              className="mt-3 text-xs font-semibold text-[#004DFF] hover:underline"
                             >
                               Falar com a Aurora sobre isso
                             </button>
@@ -606,7 +607,7 @@ export function ChatWidget() {
             <div className="flex items-center justify-center gap-2 py-4 text-xs text-slate-500">
               <span>Funcionamos com</span>
               <Settings className="h-3.5 w-3.5" />
-              <span className="font-medium text-slate-400">gpt 5</span>
+              <span className="font-medium text-slate-700">gpt 5</span>
             </div>
           </motion.div>
         )}
