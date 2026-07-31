@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import SectionLink from "@/components/layout/SectionLink";
+import FloatingChatButton from "@/components/landing/FloatingChatButton";
 import {
   Twitter,
   Instagram,
