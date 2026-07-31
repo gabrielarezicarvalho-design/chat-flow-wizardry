@@ -24,6 +24,7 @@ import {
   Trophy, Globe, Mail, BarChart3
 } from "lucide-react";
 import { ProspeccaoMapWindow } from "@/components/landing/ProspeccaoMapWindow";
+import CookieConsent from "@/components/landing/CookieConsent";
 
 
 const EMOJIS = ["😀","😂","😍","🥳","🚀","🔥","👍","🙏","💜","✨","✅","💡","📞","📎","🎉","💬","🤖","💰","📈","🎯"];
