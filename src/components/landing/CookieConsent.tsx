@@ -8,11 +8,20 @@ export function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    try {
-      if (!localStorage.getItem(STORAGE_KEY)) setVisible(true);
-    } catch {
-      setVisible(true);
-    }
+    const check = () => {
+      try {
+        setVisible(!localStorage.getItem(STORAGE_KEY));
+      } catch {
+        setVisible(true);
+      }
+    };
+    check();
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY) setVisible(false);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const decide = (value: "accepted" | "rejected") => {

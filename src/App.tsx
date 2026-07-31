@@ -102,9 +102,10 @@ function App() {
                 <MultiSessionAlert />
                 <UpgradeDialog />
                 <Suspense fallback={<Loading />}>
-                  <Routes>
-                    <Route path="/" element={<Landing />} />
-                    <Route path="/auth" element={<Auth />} />
+                    <Routes>
+                      <Route path="/" element={<Landing />} />
+                      <Route path="/homepage" element={<Landing />} />
+                      <Route path="/auth" element={<Auth />} />
                     {/* Admin routes - separate login flow */}
                     <Route path="/admin-login" element={<AdminLogin />} />
                     <Route path="/admin" element={<AdminPanel />} />
