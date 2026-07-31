@@ -2687,6 +2687,7 @@ export default function Landing() {
         </div>
       </footer>
 
+      <CookieConsent />
     </div>
   );
 }
