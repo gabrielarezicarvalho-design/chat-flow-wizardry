@@ -1860,6 +1860,114 @@ export default function Landing() {
 
 
 
+      {/* VOZ CLONADA */}
+      <section className="relative overflow-hidden bg-[#F5EFE6] py-28">
+        {/* textura de fundo */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.5]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 15% 20%, #E8DFD2 0%, transparent 45%), radial-gradient(circle at 85% 75%, #E8DFD2 0%, transparent 50%)",
+          }}
+        />
+        <div className="relative mx-auto grid max-w-[1240px] items-center gap-16 px-6 md:grid-cols-[1.05fr_1fr]">
+          {/* Coluna esquerda */}
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#0B1220]/10 bg-white/70 px-4 py-1.5 font-space-grotesk text-[11px] font-bold uppercase tracking-[0.18em] text-[#0B1220] backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
+              Tecnologia exclusiva
+            </span>
+            <h2 className="mt-6 font-space-grotesk text-5xl md:text-[64px] font-bold leading-[0.98] tracking-tight text-[#0B1220]">
+              Sua <span className="relative inline-block" style={{ color: "#004DFF" }}>
+                voz clonada
+                <span className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full" style={{ backgroundColor: "#004DFF", opacity: 0.16 }} />
+              </span>,<br />
+              respondendo por você.
+            </h2>
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-[#0B1220]/65">
+              Grave 60 segundos da sua voz. A IA clona e envia áudios automáticos no WhatsApp — tão naturais que o cliente jura que é você.
+            </p>
+
+            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+              {["Áudios ultra naturais em português", "Atendimento humanizado em escala", "Mais retenção, mais conversão", "Cliente sente que está falando com gente"].map((i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 rounded-2xl border border-[#0B1220]/8 bg-white/60 px-4 py-3 text-[15px] text-[#0B1220]/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#004DFF]/30 hover:bg-white"
+                >
+                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "#004DFF" }}>
+                    <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                  </span>
+                  {i}
+                </li>
+              ))}
+            </ul>
+
+            <Link to="/auth">
+              <Button className="btn-press mt-10 rounded-full px-8 py-6 text-base text-white shadow-[0_14px_34px_-12px_rgba(0,77,255,0.7)]" style={{ backgroundColor: "#004DFF" }}>
+                Clonar minha voz <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+
+          {/* Coluna direita — player como objeto físico */}
+          <div className="relative">
+            <div className="absolute -inset-6 rounded-[42px] bg-[#E8DFD2]/70 blur-[2px]" />
+            <div className="relative rounded-[32px] border border-white/70 bg-white p-8 shadow-[0_36px_70px_-30px_rgba(11,18,32,0.35)] transition-transform duration-500 hover:-translate-y-1">
+              <div className="mb-8 flex items-center gap-3">
+                <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: "#004DFF" }}>
+                  <Mic className="h-6 w-6 text-white" />
+                  <span className="absolute inset-0 rounded-2xl ring-4 ring-[#004DFF]/15" />
+                </div>
+                <div>
+                  <div className="font-space-grotesk font-bold text-[#0B1220]">Sua voz · IA Next Pro</div>
+                  <div className="text-xs text-[#0B1220]/50">Clonada com 60s de áudio</div>
+                </div>
+                <span className="ml-auto flex items-center gap-1.5 rounded-full bg-[#F5EFE6] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#0B1220]/60">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ backgroundColor: "#004DFF" }} />
+                  ao vivo
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4 rounded-2xl bg-[#F5EFE6]/70 p-4">
+                <button className="h-14 w-14 flex-shrink-0 rounded-full shadow-[0_10px_24px_-10px_rgba(0,77,255,0.8)] transition-transform hover:scale-105 flex items-center justify-center" style={{ backgroundColor: "#004DFF" }}>
+                  <Play className="ml-0.5 h-5 w-5 text-white" fill="currentColor" />
+                </button>
+                <div className="flex h-12 flex-1 items-center gap-[3px]">
+                  {[...Array(48)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="voz-bar flex-1 rounded-full"
+                      style={{
+                        height: `${25 + Math.abs(Math.sin(i * 0.7)) * 70 + Math.abs(Math.cos(i * 1.3)) * 20}%`,
+                        backgroundColor: "#004DFF",
+                        opacity: 0.75,
+                        animationDelay: `${(i % 12) * 0.09}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="flex-shrink-0 font-space-grotesk text-xs font-bold text-[#0B1220]/50">0:18</span>
+              </div>
+              <p className="mt-4 text-center text-xs text-[#0B1220]/45">Clique no play e ouça uma amostra agora.</p>
+
+              <div className="mt-8 grid grid-cols-3 gap-3 border-t border-[#0B1220]/8 pt-6">
+                {[
+                  { v: "60s", l: "pra clonar" },
+                  { v: "100%", l: "natural" },
+                  { v: "pt-BR", l: "nativo" },
+                ].map((s) => (
+                  <div key={s.l} className="rounded-2xl bg-[#F5EFE6]/60 py-3 text-center transition-colors hover:bg-[#E8DFD2]">
+                    <div className="font-space-grotesk text-2xl font-bold" style={{ color: "#004DFF" }}>{s.v}</div>
+                    <div className="mt-0.5 text-[11px] text-[#0B1220]/50">{s.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
       {/* PAGAMENTOS */}
       <section id="pagamentos" className="bg-[#F7F9FC] py-24">
         <div className="mx-auto max-w-[1240px] px-6">
@@ -2001,114 +2109,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
-      {/* VOZ CLONADA */}
-      <section className="relative overflow-hidden bg-[#F5EFE6] py-28">
-        {/* textura de fundo */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.5]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 15% 20%, #E8DFD2 0%, transparent 45%), radial-gradient(circle at 85% 75%, #E8DFD2 0%, transparent 50%)",
-          }}
-        />
-        <div className="relative mx-auto grid max-w-[1240px] items-center gap-16 px-6 md:grid-cols-[1.05fr_1fr]">
-          {/* Coluna esquerda */}
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#0B1220]/10 bg-white/70 px-4 py-1.5 font-space-grotesk text-[11px] font-bold uppercase tracking-[0.18em] text-[#0B1220] backdrop-blur">
-              <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
-              Tecnologia exclusiva
-            </span>
-            <h2 className="mt-6 font-space-grotesk text-5xl md:text-[64px] font-bold leading-[0.98] tracking-tight text-[#0B1220]">
-              Sua <span className="relative inline-block" style={{ color: "#004DFF" }}>
-                voz clonada
-                <span className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full" style={{ backgroundColor: "#004DFF", opacity: 0.16 }} />
-              </span>,<br />
-              respondendo por você.
-            </h2>
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-[#0B1220]/65">
-              Grave 60 segundos da sua voz. A IA clona e envia áudios automáticos no WhatsApp — tão naturais que o cliente jura que é você.
-            </p>
-
-            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-              {["Áudios ultra naturais em português", "Atendimento humanizado em escala", "Mais retenção, mais conversão", "Cliente sente que está falando com gente"].map((i) => (
-                <li
-                  key={i}
-                  className="flex items-start gap-3 rounded-2xl border border-[#0B1220]/8 bg-white/60 px-4 py-3 text-[15px] text-[#0B1220]/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#004DFF]/30 hover:bg-white"
-                >
-                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "#004DFF" }}>
-                    <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                  </span>
-                  {i}
-                </li>
-              ))}
-            </ul>
-
-            <Link to="/auth">
-              <Button className="btn-press mt-10 rounded-full px-8 py-6 text-base text-white shadow-[0_14px_34px_-12px_rgba(0,77,255,0.7)]" style={{ backgroundColor: "#004DFF" }}>
-                Clonar minha voz <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          {/* Coluna direita — player como objeto físico */}
-          <div className="relative">
-            <div className="absolute -inset-6 rounded-[42px] bg-[#E8DFD2]/70 blur-[2px]" />
-            <div className="relative rounded-[32px] border border-white/70 bg-white p-8 shadow-[0_36px_70px_-30px_rgba(11,18,32,0.35)] transition-transform duration-500 hover:-translate-y-1">
-              <div className="mb-8 flex items-center gap-3">
-                <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: "#004DFF" }}>
-                  <Mic className="h-6 w-6 text-white" />
-                  <span className="absolute inset-0 rounded-2xl ring-4 ring-[#004DFF]/15" />
-                </div>
-                <div>
-                  <div className="font-space-grotesk font-bold text-[#0B1220]">Sua voz · IA Next Pro</div>
-                  <div className="text-xs text-[#0B1220]/50">Clonada com 60s de áudio</div>
-                </div>
-                <span className="ml-auto flex items-center gap-1.5 rounded-full bg-[#F5EFE6] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#0B1220]/60">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ backgroundColor: "#004DFF" }} />
-                  ao vivo
-                </span>
-              </div>
-
-              <div className="flex items-center gap-4 rounded-2xl bg-[#F5EFE6]/70 p-4">
-                <button className="h-14 w-14 flex-shrink-0 rounded-full shadow-[0_10px_24px_-10px_rgba(0,77,255,0.8)] transition-transform hover:scale-105 flex items-center justify-center" style={{ backgroundColor: "#004DFF" }}>
-                  <Play className="ml-0.5 h-5 w-5 text-white" fill="currentColor" />
-                </button>
-                <div className="flex h-12 flex-1 items-center gap-[3px]">
-                  {[...Array(48)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="voz-bar flex-1 rounded-full"
-                      style={{
-                        height: `${25 + Math.abs(Math.sin(i * 0.7)) * 70 + Math.abs(Math.cos(i * 1.3)) * 20}%`,
-                        backgroundColor: "#004DFF",
-                        opacity: 0.75,
-                        animationDelay: `${(i % 12) * 0.09}s`,
-                      }}
-                    />
-                  ))}
-                </div>
-                <span className="flex-shrink-0 font-space-grotesk text-xs font-bold text-[#0B1220]/50">0:18</span>
-              </div>
-              <p className="mt-4 text-center text-xs text-[#0B1220]/45">Clique no play e ouça uma amostra agora.</p>
-
-              <div className="mt-8 grid grid-cols-3 gap-3 border-t border-[#0B1220]/8 pt-6">
-                {[
-                  { v: "60s", l: "pra clonar" },
-                  { v: "100%", l: "natural" },
-                  { v: "pt-BR", l: "nativo" },
-                ].map((s) => (
-                  <div key={s.l} className="rounded-2xl bg-[#F5EFE6]/60 py-3 text-center transition-colors hover:bg-[#E8DFD2]">
-                    <div className="font-space-grotesk text-2xl font-bold" style={{ color: "#004DFF" }}>{s.v}</div>
-                    <div className="mt-0.5 text-[11px] text-[#0B1220]/50">{s.l}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
 
       {/* SEGMENTOS */}
       <section id="segmentos" className="relative overflow-hidden bg-white py-28">
