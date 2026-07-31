@@ -26,6 +26,7 @@ import {
 import { ProspeccaoMapWindow } from "@/components/landing/ProspeccaoMapWindow";
 import CookieConsent from "@/components/landing/CookieConsent";
 import LandingFAQ from "@/components/landing/LandingFAQ";
+import FloatingChatButton from "@/components/landing/FloatingChatButton";
 
 
 const EMOJIS = ["😀","😂","😍","🥳","🚀","🔥","👍","🙏","💜","✨","✅","💡","📞","📎","🎉","💬","🤖","💰","📈","🎯"];
