@@ -16,19 +16,15 @@ import {
   Headphones,
   Megaphone,
   RefreshCw,
+  Plus,
+  Smile,
+  Mic,
+  SendHorizontal,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
 import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
-import {
-  PromptInput,
-  PromptInputTextarea,
-  PromptInputFooter,
-  PromptInputSubmit,
-  PromptInputProvider,
-  usePromptInputController,
-} from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import type { ChatStatus } from "ai";
 
@@ -86,30 +82,85 @@ function ChatComposer({
   onSend: (text: string) => void;
   status: ChatStatus;
 }) {
-  const { textInput } = usePromptInputController();
-  return (
-    <PromptInput
-      onSubmit={({ text }) => {
-        onSend(text);
-      }}
-      className="w-full border border-slate-200 bg-white text-slate-800"
-    >
-      <PromptInputTextarea
-        placeholder="Digite sua mensagem..."
-        className="min-h-9 max-h-24 py-1.5 text-sm text-slate-800 placeholder:text-slate-400"
+  const [value, setValue] = useState("");
+  const taRef = useRef<HTMLTextAreaElement>(null);
+  const busy = status === "submitted" || status === "streaming";
+  const hasText = !!value.trim();
 
-        disabled={status === "submitted"}
+  const submit = () => {
+    if (!hasText || busy) return;
+    onSend(value.trim());
+    setValue("");
+    if (taRef.current) taRef.current.style.height = "auto";
+    taRef.current?.focus();
+  };
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+      className="flex w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-1"
+    >
+      <button
+        type="button"
+        aria-label="Anexar"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700"
+      >
+        <Plus className="h-[18px] w-[18px]" />
+      </button>
+      <button
+        type="button"
+        aria-label="Emoji"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700"
+      >
+        <Smile className="h-[18px] w-[18px]" />
+      </button>
+      <textarea
+        ref={taRef}
+        value={value}
+        rows={1}
+        disabled={busy}
         autoFocus
+        onChange={(e) => {
+          setValue(e.target.value);
+          const el = e.currentTarget;
+          el.style.height = "auto";
+          el.style.height = `${Math.min(el.scrollHeight, 80)}px`;
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            submit();
+          }
+        }}
+        placeholder="Digite uma mensagem"
+        className="max-h-20 min-h-8 flex-1 resize-none border-none bg-transparent py-1.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:outline-none focus-visible:outline-none scrollbar-hide disabled:opacity-60"
       />
-      <PromptInputFooter className="justify-end border-none p-1 pt-0">
-        <PromptInputSubmit
-          status={status}
-          disabled={!textInput.value.trim() || status === "submitted"}
-        />
-      </PromptInputFooter>
-    </PromptInput>
+      {hasText ? (
+        <button
+          type="submit"
+          aria-label="Enviar"
+          disabled={busy}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#004DFF] text-white transition-colors hover:bg-[#003ACC] disabled:opacity-60"
+        >
+          <SendHorizontal className="h-4 w-4" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          aria-label="Áudio"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700"
+        >
+          <Mic className="h-[18px] w-[18px]" />
+        </button>
+      )}
+    </form>
   );
 }
+
+
 
 function BrandAvatar() {
   const [error, setError] = useState(false);
@@ -554,9 +605,7 @@ export function ChatWidget() {
                   </div>
 
                   <div className="border-t border-slate-200 p-3">
-                    <PromptInputProvider initialInput="">
-                      <ChatComposer onSend={handleSend} status={chatStatus} />
-                    </PromptInputProvider>
+                    <ChatComposer onSend={handleSend} status={chatStatus} />
                   </div>
                 </div>
               )}
