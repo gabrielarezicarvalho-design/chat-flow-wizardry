@@ -1658,7 +1658,8 @@ export default function Landing() {
           <div>
             {/* Header centralizado */}
             <div className="text-center">
-              <span className="font-space-grotesk text-xs font-bold uppercase tracking-[0.2em] text-[#004DFF]">
+              <span className="inline-flex items-center gap-2 border-0 bg-transparent p-0 text-sm font-semibold normal-case tracking-normal leading-none text-[#004DFF]">
+                <span className="h-2 w-2 shrink-0 rounded-full bg-[#004DFF]" />
                 Planos para cada fase
               </span>
               <h2 className="mt-4 font-space-grotesk text-4xl md:text-5xl font-bold leading-tight tracking-tight text-[#0B1220]">
