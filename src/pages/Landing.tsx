@@ -1471,8 +1471,11 @@ export default function Landing() {
                 {
                   tier: "basic",
                   name: "Basic",
-                  tagline: "Teste grátis de 2 dias: 20 disparos para explorar.",
-                  features: ["20 disparos no total", "1 conexão WhatsApp", "IA completa (limitada)", "Chat interno"],
+                  tagline: "Teste grátis de 2 dias: 20 disparos para explorar",
+                  highlights: [
+                    { pre: "até ", strong: "20 disparos", post: " no total", filled: true },
+                    { pre: "", strong: "Bloqueio automático", post: " ao atingir o limite", filled: false },
+                  ],
                   featured: false,
                 },
                 {
@@ -1481,8 +1484,11 @@ export default function Landing() {
                   monthlyPrice: "49,90",
                   annualPrice: "41,58",
                   annualTotal: "499,00",
-                  tagline: "Para quem está começando.",
-                  features: ["100 disparos/mês", "2 conexões WhatsApp", "IA completa", "5 atendentes"],
+                  tagline: "Para quem está começando",
+                  highlights: [
+                    { pre: "até ", strong: "100 disparos", post: "/mês", filled: true },
+                    { pre: "", strong: "1.000", post: " créditos de mensagem", filled: false },
+                  ],
                   featured: false,
                 },
                 {
@@ -1491,60 +1497,59 @@ export default function Landing() {
                   monthlyPrice: "99,90",
                   annualPrice: "83,25",
                   annualTotal: "999,00",
-                  tagline: "Para operações de alto volume.",
-                  features: ["Até 10.000 disparos/mês", "10 conexões WhatsApp", "20 atendentes", "Suporte prioritário"],
+                  tagline: "Para operações de alto volume",
+                  highlights: [
+                    { pre: "até ", strong: "10.000 disparos", post: "/mês", filled: true },
+                    { pre: "", strong: "50.000", post: " créditos de mensagem", filled: false },
+                  ],
                   featured: true,
                 },
               ].map((p) => (
                 <div
                   key={p.tier}
-                  className={`rounded-2xl p-8 flex flex-col transition-all ${p.featured ? "bg-[#004DFF] ring-4 ring-blue-100 relative overflow-hidden" : "bg-white border border-slate-200 hover:border-slate-300"}`}
+                  className={`rounded-[26px] bg-white p-7 flex flex-col transition-all ${p.featured ? "border-2 border-[#004DFF] shadow-[0_18px_40px_rgba(0,77,255,0.12)]" : "border border-slate-200 hover:border-slate-300 shadow-sm"}`}
                 >
-                  {p.featured && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-[#004DFF] text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm border border-blue-100">
-                      Mais Popular
-                    </div>
-                  )}
+                  <p className="text-sm text-slate-400 mb-1">Plano</p>
 
-                  <div className="mb-8">
-                    <h3 className={`text-xl font-bold mb-2 font-space-grotesk ${p.featured ? "text-white" : "text-slate-900"}`}>
-                      {p.name}
-                    </h3>
-                    <div className="flex items-baseline mb-4">
+                  <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                    <h3 className="text-2xl font-bold text-slate-900 font-space-grotesk">{p.name}</h3>
+                    <div className="text-right">
                       {p.tier === "basic" ? (
-                        <span className={`text-3xl font-bold ${p.featured ? "text-white" : "text-slate-900"}`}>Grátis</span>
+                        <span className="text-2xl font-bold text-[#004DFF] font-space-grotesk">Grátis</span>
                       ) : (
                         <>
-                          <span className={`text-sm font-semibold mr-1 ${p.featured ? "text-blue-200" : "text-slate-900"}`}>R$</span>
-                          <span className={`text-3xl font-bold ${p.featured ? "text-white" : "text-slate-900"}`}>
-                            {billing === "annual" ? p.annualPrice : p.monthlyPrice}
+                          <span className="text-2xl font-bold text-slate-900 font-space-grotesk">
+                            R${billing === "annual" ? p.annualPrice : p.monthlyPrice}
                           </span>
-                          <span className={`text-sm ml-1 ${p.featured ? "text-blue-200" : "text-slate-500"}`}>/mês</span>
+                          <span className="text-xs text-slate-400">/mês</span>
+                          <p className="text-[11px] text-slate-400 leading-none mt-0.5">
+                            {billing === "annual" ? `R$ ${p.annualTotal} por ano` : "cobrado por mês"}
+                          </p>
                         </>
                       )}
                     </div>
-                    {p.tier !== "basic" && billing === "annual" && (
-                      <p className={`text-xs font-medium ${p.featured ? "text-blue-200" : "text-[#004DFF]"}`}>
-                        R$ {p.annualTotal} cobrado por ano
-                      </p>
-                    )}
-                    <p className={`text-sm mt-2 ${p.featured ? "text-blue-100" : "text-slate-500"}`}>
-                      {p.tagline}
-                    </p>
                   </div>
 
-                  <ul className="space-y-4 mb-8 flex-grow">
-                    {p.features.map((feature) => (
-                      <li key={feature} className={`flex items-center text-sm ${p.featured ? "text-white font-medium" : "text-slate-600"}`}>
-                        <Check className={`h-4 w-4 mr-3 flex-shrink-0 ${p.featured ? "text-white" : "text-green-500"}`} />
-                        {feature}
-                      </li>
+                  <p className="mt-3 text-sm font-medium text-[#004DFF] leading-snug">{p.tagline}</p>
+
+                  <div className="my-5 border-t border-slate-200" />
+
+                  <div className="space-y-3">
+                    {p.highlights.map((h) => (
+                      <div
+                        key={h.strong}
+                        className={`rounded-2xl px-4 py-3.5 text-sm text-slate-600 leading-snug ${h.filled ? "bg-slate-100" : "bg-white border border-slate-200"}`}
+                      >
+                        {h.pre}
+                        <span className="font-bold text-slate-900">{h.strong}</span>
+                        {h.post}
+                      </div>
                     ))}
-                  </ul>
+                  </div>
 
                   <button
                     onClick={() => setExpandedTier(expandedTier === p.tier ? null : p.tier)}
-                    className={`mb-4 w-full flex items-center justify-center gap-2 text-sm font-semibold transition hover:opacity-80 ${p.featured ? "text-white" : "text-[#004DFF]"}`}
+                    className="mt-5 mb-4 w-full flex items-center justify-center gap-1.5 text-sm font-semibold text-[#004DFF] transition hover:opacity-80"
                   >
                     {expandedTier === p.tier ? "Ocultar funcionalidades" : "Ver todas as funcionalidades"}
                     <ChevronRight className={`h-4 w-4 transition-transform ${expandedTier === p.tier ? "rotate-90" : ""}`} />
@@ -1565,17 +1570,26 @@ export default function Landing() {
 
                   <button
                     onClick={() => (window.location.href = `/checkout?tier=${p.tier}&billing=${billing}`)}
-                    className={`w-full rounded-xl py-4 text-lg font-bold transition hover:opacity-90 ${p.featured ? "bg-white text-[#004DFF] hover:bg-blue-50" : "text-white"}`}
-                    style={p.featured ? undefined : { backgroundColor: "#004DFF" }}
+                    className="w-full rounded-2xl py-4 text-base font-bold text-white transition hover:opacity-90"
+                    style={{ backgroundColor: "#004DFF" }}
                   >
                     {p.tier === "basic" ? "Testar grátis" : `Assinar ${p.name}`}
                   </button>
 
-                  <div className="mt-5 min-h-[52px] border-t border-slate-200/30 pt-4">
+                  <div className="mt-5 text-center">
+                    <p className="flex items-center justify-center gap-1.5 text-sm font-medium text-slate-700">
+                      <ShieldCheck className="h-4 w-4 text-[#004DFF]" />
+                      Garantia de 30 dias
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">ou seu dinheiro de volta</p>
+                  </div>
+
+                  <div className="mt-5 min-h-[52px] border-t border-slate-200 pt-4">
                     <RotatingChips tier={p.tier} />
                   </div>
                 </div>
               ))}
+
             </div>
           </div>
 
