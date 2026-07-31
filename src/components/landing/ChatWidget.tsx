@@ -333,28 +333,28 @@ export function ChatWidget() {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => openChatWithQuestion("Como funciona a busca de clientes?")}
-                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-3 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
+                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-2.5 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
                     >
                       <Search className="h-4 w-4 text-slate-600" />
                       Buscar
                     </button>
                     <button
                       onClick={() => setActiveTab("help")}
-                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-3 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
+                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-2.5 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
                     >
                       <HelpCircle className="h-4 w-4 text-slate-600" />
                       Dúvidas
                     </button>
                     <button
                       onClick={() => window.open("https://wa.me/message/BYSDMLHYTA6EA1", "_blank", "noopener,noreferrer")}
-                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-3 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
+                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-2.5 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
                     >
                       <Headphones className="h-4 w-4 text-slate-600" />
                       Suporte
                     </button>
                     <button
                       onClick={() => setActiveTab("news")}
-                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-3 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
+                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-2.5 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
                     >
                       <Megaphone className="h-4 w-4 text-slate-600" />
                       Notícias
