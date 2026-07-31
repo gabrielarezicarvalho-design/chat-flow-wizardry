@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessagesSquare, X, Home, Search, HelpCircle, Headphones, Megaphone, MessageSquare, Bot, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { MessagesSquare, X, Home, Search, HelpCircle, Headphones, Megaphone, MessageSquare, Bot, ArrowRight, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
@@ -19,26 +19,37 @@ type ChatMessage = {
 
 const FAQ = [
   {
+    topic: "Fluxo com IA",
+    emoji: "🤖",
     q: "Como funciona o fluxo com IA?",
     a: "Na Next Pro você monta fluxos automáticos que respondem, qualificam e encaminham leads no WhatsApp sem código. É só escolher gatilhos, mensagens e ações que a IA executa para você.",
   },
   {
+    topic: "Cadastros",
+    emoji: "📓",
     q: "Quero deletar um contato, como faço?",
     a: "Vá em Contatos, busque o contato, abra o perfil e clique nos três pontos no canto superior direito para excluir. A ação é irreversível.",
   },
   {
+    topic: "Agente IA",
+    emoji: "",
     q: "Minha IA está com as informações desatualizadas.",
     a: "Atualize as instruções e a base de conhecimento do seu agente em Configurações > Agentes de IA. Salve e teste antes de ativar no fluxo.",
   },
   {
+    topic: "Prospecção",
+    emoji: "🔎",
     q: "Como funciona a busca de clientes?",
     a: "A Next Pro captura leads de Google Maps, Instagram, TikTok e pesquisa de anúncios, organizando tudo em listas que você pode importar para o CRM.",
   },
   {
+    topic: "Pagamentos",
+    emoji: "💳",
     q: "Posso fazer cobranças automáticas?",
     a: "Sim. Configure cobranças recorrentes e o sistema envia lembretes no WhatsApp com link de pagamento, de forma automática.",
   },
 ];
+
 
 const NEWS = [
   { title: "Novo fluxo de recuperação financeira", date: "30 jul 2026", excerpt: "Automatize lembretes de pagamento e reduza inadimplência com poucos cliques." },
@@ -128,6 +139,8 @@ export function ChatWidget() {
   const [ticketId] = useState(generateTicketId);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [faqOffset, setFaqOffset] = useState(0);
+
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_GREETING]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -309,61 +322,68 @@ export function ChatWidget() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-slate-50">
+            <div className="flex-1 overflow-y-auto bg-white">
               {activeTab === "home" && (
-                <div className="flex flex-col gap-5 p-4">
+                <div className="flex flex-col gap-6 p-5">
                   <div>
-                    <p className="text-lg font-semibold text-slate-900">Olá! 👋</p>
-                    <p className="text-lg font-semibold text-slate-900">Como posso te ajudar?</p>
+                    <p className="text-xl font-bold text-slate-900">Olá! 👋</p>
+                    <p className="text-xl font-bold text-slate-900">Como posso te ajudar?</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => openChatWithQuestion("Como funciona a busca de clientes?")}
-                      className="flex items-center gap-2.5 rounded-xl bg-slate-100 px-3 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-3 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
                     >
-                      <Search className="h-4 w-4 text-slate-500" />
+                      <Search className="h-4 w-4 text-slate-600" />
                       Buscar
                     </button>
                     <button
                       onClick={() => setActiveTab("help")}
-                      className="flex items-center gap-2.5 rounded-xl bg-slate-100 px-3 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-3 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
                     >
-                      <HelpCircle className="h-4 w-4 text-slate-500" />
+                      <HelpCircle className="h-4 w-4 text-slate-600" />
                       Dúvidas
                     </button>
                     <button
                       onClick={() => window.open("https://wa.me/message/BYSDMLHYTA6EA1", "_blank", "noopener,noreferrer")}
-                      className="flex items-center gap-2.5 rounded-xl bg-slate-100 px-3 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-3 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
                     >
-                      <Headphones className="h-4 w-4 text-slate-500" />
+                      <Headphones className="h-4 w-4 text-slate-600" />
                       Suporte
                     </button>
                     <button
                       onClick={() => setActiveTab("news")}
-                      className="flex items-center gap-2.5 rounded-xl bg-slate-100 px-3 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
+                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-3 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
                     >
-                      <Megaphone className="h-4 w-4 text-slate-500" />
+                      <Megaphone className="h-4 w-4 text-slate-600" />
                       Notícias
                     </button>
                   </div>
 
                   <div>
-                    <p className="mb-2 text-sm text-slate-500">Dúvidas frequentes?</p>
-                    <div className="flex flex-col gap-2">
-                      {FAQ.slice(0, 3).map((item) => (
+                    <div className="mb-2.5 flex items-center justify-between">
+                      <p className="text-sm text-slate-400">Dúvidas frequentes?</p>
+                      <button
+                        onClick={() => setFaqOffset((v) => (v + 3) % FAQ.length)}
+                        aria-label="Atualizar dúvidas"
+                        className="rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-2.5">
+                      {Array.from({ length: 3 }, (_, i) => FAQ[(faqOffset + i) % FAQ.length]).map((item) => (
                         <button
                           key={item.q}
                           onClick={() => openChatWithQuestion(item.q)}
-                          className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-3 text-left shadow-sm transition-all hover:border-[#004DFF]/20 hover:shadow-md"
+                          className="rounded-lg border border-slate-200 bg-white px-3.5 py-3 text-left transition-all hover:border-[#004DFF]/30 hover:shadow-sm"
                         >
-                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-                            <Bot className="h-3.5 w-3.5" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-slate-900">{item.q}</p>
-                            <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{item.a}</p>
-                          </div>
+                          <p className="text-sm font-bold text-slate-900">{item.topic}</p>
+                          <p className="mt-1 text-sm text-slate-400">
+                            {item.q}
+                            {item.emoji ? ` ${item.emoji}` : ""}
+                          </p>
                         </button>
                       ))}
                     </div>
@@ -374,12 +394,13 @@ export function ChatWidget() {
                       setActiveTab("chat");
                       setChatView("thread");
                     }}
-                    className="w-full rounded-full bg-slate-900 py-5 text-sm font-semibold text-white hover:bg-slate-800"
+                    className="mx-auto w-[60%] rounded-lg bg-slate-900 py-5 text-base font-bold text-white hover:bg-slate-800"
                   >
                     Iniciar
                   </Button>
                 </div>
               )}
+
 
               {activeTab === "chat" && chatView === "list" && (
                 <div className="flex h-full flex-col bg-white">
