@@ -2057,7 +2057,8 @@ export default function Landing() {
         <div className="mx-auto max-w-[1240px] px-6">
           {/* Header */}
           <div className="mb-16 text-center">
-            <span className="inline-block rounded-full bg-[#E6ECF7] px-4 py-1.5 font-space-grotesk text-xs font-bold uppercase tracking-[0.2em] text-[#004DFF]">
+            <span className="inline-flex items-center gap-2 font-space-grotesk text-sm font-semibold text-[#004DFF]">
+              <span className="inline-block h-2 w-2 rounded-full bg-[#004DFF]" />
               Automação Inteligente
             </span>
             <h2 className="mt-5 font-space-grotesk text-4xl md:text-5xl font-bold leading-tight tracking-tight text-[#0B1220]">
