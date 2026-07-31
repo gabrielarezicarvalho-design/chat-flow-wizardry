@@ -1704,7 +1704,7 @@ export default function Landing() {
             <span className="inline-block rounded-full bg-[#E6ECF7] px-4 py-1.5 font-space-grotesk text-xs font-bold uppercase tracking-[0.2em] text-[#004DFF]">
               Tudo que você precisa
             </span>
-            <h2 className="mt-5 font-space-grotesk text-4xl md:text-6xl font-bold leading-tight tracking-tight text-[#0B1220]">
+            <h2 className="mt-5 font-space-grotesk text-4xl md:text-5xl font-bold leading-tight tracking-tight text-[#0B1220]">
               Uma IA que <span className="text-[#004DFF]">vende sozinha</span>.
             </h2>
             <p className="mt-4 mx-auto max-w-2xl text-[#0B1220]/60">
