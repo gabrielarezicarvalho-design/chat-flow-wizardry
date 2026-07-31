@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { ProspeccaoMapWindow } from "@/components/landing/ProspeccaoMapWindow";
 import CookieConsent from "@/components/landing/CookieConsent";
+import LandingFAQ from "@/components/landing/LandingFAQ";
 
 
 const EMOJIS = ["😀","😂","😍","🥳","🚀","🔥","👍","🙏","💜","✨","✅","💡","📞","📎","🎉","💬","🤖","💰","📈","🎯"];
@@ -2508,6 +2509,8 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      <LandingFAQ />
 
       {/* CTA FINAL */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
