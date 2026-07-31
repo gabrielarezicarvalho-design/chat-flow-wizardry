@@ -92,11 +92,12 @@ function ChatComposer({
       onSubmit={({ text }) => {
         onSend(text);
       }}
-      className="w-full border-white/10 bg-white/[0.04] text-slate-100"
+      className="w-full border border-slate-200 bg-white text-slate-800"
     >
       <PromptInputTextarea
         placeholder="Digite sua mensagem..."
-        className="min-h-10 max-h-24 py-2 text-sm text-slate-100 placeholder:text-slate-500"
+        className="min-h-10 max-h-24 py-2 text-sm text-slate-800 placeholder:text-slate-400"
+
         disabled={status === "submitted"}
         autoFocus
       />
