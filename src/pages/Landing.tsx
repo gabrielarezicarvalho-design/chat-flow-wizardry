@@ -2493,8 +2493,6 @@ export default function Landing() {
       {/* CTA FINAL */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
         <div className="relative overflow-hidden rounded-[28px] bg-[#f4f1ec] px-8 py-8 md:px-12 md:py-10">
-          {/* glow */}
-          <div className="pointer-events-none absolute -right-24 top-1/2 h-[400px] w-[400px] -translate-y-1/2 rounded-full bg-[#004DFF]/20 blur-[120px]" />
 
           <div className="relative grid items-center gap-8 md:grid-cols-[1.15fr_0.85fr]">
             {/* Texto */}
