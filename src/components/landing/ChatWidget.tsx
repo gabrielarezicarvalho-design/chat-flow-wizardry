@@ -361,7 +361,7 @@ export function ChatWidget() {
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
               {activeTab === "home" && (
                 <div className="px-5 pt-5">
                   <div className="flex items-center gap-2.5">
@@ -471,7 +471,7 @@ export function ChatWidget() {
                     </div>
                   </div>
 
-                  <div className="flex-1 space-y-2 overflow-y-auto px-4 pb-4">
+                  <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide px-4 pb-4">
                     {filteredThreads.length === 0 && (
                       <p className="px-1 py-6 text-center text-xs font-medium text-slate-500">
                         Nenhuma conversa encontrada.
