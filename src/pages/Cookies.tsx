@@ -163,7 +163,7 @@ const Cookies = () => {
               cookies, a Plataforma compartilha dados com nossa <B>tecnologia de conexão WhatsApp</B>,{" "}
               <B>OpenAI</B> e <B>Google Gemini</B> (IA) — esse compartilhamento{" "}
               <B>não ocorre via cookies</B>, e os detalhes estão na nossa{" "}
-              <Link to="/privacidade" className="text-primary hover:underline">
+              <Link to="/politica-de-privacidade" className="text-primary hover:underline">
                 Política de Privacidade
               </Link>
               .
