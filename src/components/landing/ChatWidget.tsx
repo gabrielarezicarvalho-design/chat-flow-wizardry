@@ -409,18 +409,18 @@ export function ChatWidget() {
                     </button>
                   </div>
 
-                  <div className="flex flex-col gap-2 pb-4">
+                  <div className="flex flex-col gap-1.5 pb-4">
                     {Array.from({ length: 3 }, (_, i) => FAQ[(faqOffset + i) % FAQ.length]).map(
                       (item) => (
                         <button
                           key={item.q}
                           onClick={() => openChatWithQuestion(item.q)}
-                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-left transition-colors hover:bg-white/[0.07]"
+                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-left transition-colors hover:bg-white/[0.07]"
                         >
                           <span className="block text-sm font-bold leading-tight text-white">
                             {item.topic}
                           </span>
-                          <span className="mt-0.5 block text-xs leading-tight text-slate-500">
+                          <span className="mt-0.5 block text-[11px] leading-tight text-slate-500">
                             {item.q} {item.emoji}
                           </span>
                         </button>
@@ -558,14 +558,14 @@ export function ChatWidget() {
               )}
 
               {activeTab === "articles" && (
-                <div className="flex flex-col gap-2 px-5 pt-5">
+                <div className="flex flex-col gap-1.5 px-5 pt-5">
                   <p className="mb-1 text-sm font-semibold text-white">Artigos de ajuda</p>
                   {FAQ.map((item) => {
                     const isOpenArticle = openArticle === item.q;
                     return (
                       <div
                         key={item.q}
-                        className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
+                        className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2.5"
                       >
                         <button
                           onClick={() => setOpenArticle(isOpenArticle ? null : item.q)}
