@@ -373,7 +373,7 @@ export function ChatWidget() {
 
                   <div className="my-4 h-px w-full bg-white/10" />
 
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-2 gap-2">
                     {[
                       { icon: Search, label: "Buscar", action: () => setActiveTab("articles") },
                       { icon: HelpCircle, label: "Dúvidas", action: () => setActiveTab("articles") },
@@ -390,9 +390,9 @@ export function ChatWidget() {
                       <button
                         key={label}
                         onClick={action}
-                        className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.09]"
+                        className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-2.5 py-2 text-left transition-colors hover:bg-white/[0.09]"
                       >
-                        <Icon className="h-[18px] w-[18px] shrink-0 text-slate-300" />
+                        <Icon className="h-4 w-4 shrink-0 text-slate-300" />
                         <span className="text-sm font-semibold text-white">{label}</span>
                       </button>
                     ))}
