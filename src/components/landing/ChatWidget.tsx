@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessagesSquare, X, Home, Search, HelpCircle, Headphones, Megaphone, MessageSquare, Bot, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { MessagesSquare, X, Home, Search, HelpCircle, Headphones, Megaphone, MessageSquare, Bot, ArrowRight, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
