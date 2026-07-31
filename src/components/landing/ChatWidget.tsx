@@ -506,15 +506,15 @@ export function ChatWidget() {
 
               {activeTab === "chat" && chatView === "thread" && (
                 <div className="flex h-full flex-col overflow-hidden">
-                  <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2.5">
+                  <div className="flex items-center gap-2 border-b border-slate-200 px-3 py-2.5">
                     <button
                       onClick={() => setChatView("list")}
                       aria-label="Voltar"
-                      className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
+                      className="rounded-full p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
-                    <p className="text-sm font-semibold text-white">{ticketId}</p>
+                    <p className="text-sm font-semibold text-slate-900">{ticketId}</p>
                   </div>
                   <div className="min-h-0 flex-1">
                     <Conversation className="h-full">
@@ -525,7 +525,7 @@ export function ChatWidget() {
                               className={
                                 m.role === "user"
                                   ? "bg-[#004DFF] text-white"
-                                  : "bg-transparent text-slate-100"
+                                  : "bg-slate-100 text-slate-800"
                               }
                             >
                               {m.role === "assistant" ? (
@@ -540,8 +540,8 @@ export function ChatWidget() {
                         ))}
                         {isLoading && (
                           <Message from="assistant">
-                            <MessageContent className="max-w-[80%] bg-transparent">
-                              <Shimmer as="span" className="text-sm">
+                            <MessageContent className="max-w-[80%] bg-slate-100">
+                              <Shimmer as="span" className="text-sm text-slate-500">
                                 Pensando...
                               </Shimmer>
                             </MessageContent>
@@ -550,7 +550,7 @@ export function ChatWidget() {
                       </ConversationContent>
                     </Conversation>
                   </div>
-                  <div className="border-t border-white/10 p-3">
+                  <div className="border-t border-slate-200 p-3">
                     <PromptInputProvider initialInput="">
                       <ChatComposer onSend={handleSend} status={chatStatus} />
                     </PromptInputProvider>
