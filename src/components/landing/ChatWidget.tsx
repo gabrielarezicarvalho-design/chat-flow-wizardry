@@ -320,19 +320,19 @@ export function ChatWidget() {
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
                   activeTab === "home"
                     ? "bg-[#004DFF] text-white"
-                    : "bg-white/[0.06] text-slate-300 hover:bg-white/[0.1]"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
                 <Home className="h-[18px] w-[18px]" />
               </button>
 
-              <div className="flex flex-1 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+              <div className="flex flex-1 items-center gap-1 rounded-full border border-slate-200 bg-slate-100 p-1">
                 <button
                   onClick={() => setActiveTab("chat")}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors ${
                     activeTab === "chat"
-                      ? "bg-white/[0.1] text-white"
-                      : "text-slate-300 hover:text-white"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   <MessageCircle className="h-4 w-4" />
@@ -342,8 +342,8 @@ export function ChatWidget() {
                   onClick={() => setActiveTab("articles")}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors ${
                     activeTab === "articles"
-                      ? "bg-white/[0.1] text-white"
-                      : "text-slate-300 hover:text-white"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   <BookOpen className="h-4 w-4" />
@@ -354,7 +354,7 @@ export function ChatWidget() {
               <button
                 onClick={() => setIsOpen(false)}
                 aria-label="Fechar"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
               >
                 <ChevronDown className="h-5 w-5" />
               </button>
