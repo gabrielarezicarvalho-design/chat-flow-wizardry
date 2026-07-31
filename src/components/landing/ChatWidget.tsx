@@ -96,12 +96,12 @@ function ChatComposer({
     >
       <PromptInputTextarea
         placeholder="Digite sua mensagem..."
-        className="min-h-10 max-h-24 py-2 text-sm text-slate-800 placeholder:text-slate-400"
+        className="min-h-9 max-h-24 py-1.5 text-sm text-slate-800 placeholder:text-slate-400"
 
         disabled={status === "submitted"}
         autoFocus
       />
-      <PromptInputFooter className="justify-end border-none pt-1">
+      <PromptInputFooter className="justify-end border-none p-1 pt-0">
         <PromptInputSubmit
           status={status}
           disabled={!textInput.value.trim() || status === "submitted"}
