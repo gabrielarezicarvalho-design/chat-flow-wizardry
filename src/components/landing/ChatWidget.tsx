@@ -352,28 +352,68 @@ export function ChatWidget() {
                   <div className="border-b border-slate-100 px-4 py-3.5">
                     <p className="text-center text-base font-semibold text-slate-900">Mensagens</p>
                   </div>
-                  <div className="p-3">
-                    <button
-                      onClick={() => setChatView("thread")}
-                      className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-left transition-colors hover:bg-slate-50"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-                        <MessageSquare className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="truncate text-sm font-bold text-slate-900">{ticketId}</p>
-                          <span className="shrink-0 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white">
-                            Abertos
-                          </span>
+
+                  <div className="space-y-2 border-b border-slate-100 px-3 py-3">
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Buscar por nome, status ou número"
+                        aria-label="Buscar conversas"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:bg-white focus:outline-none"
+                      />
+                    </div>
+                    <div className="flex gap-1.5">
+                      {STATUS_FILTERS.map((f) => (
+                        <button
+                          key={f.id}
+                          onClick={() => setStatusFilter(f.id)}
+                          className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-colors ${
+                            statusFilter === f.id
+                              ? "bg-slate-900 text-white"
+                              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                          }`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 space-y-2 overflow-y-auto p-3">
+                    {filteredThreads.length === 0 && (
+                      <p className="px-1 py-6 text-center text-xs font-medium text-slate-400">
+                        Nenhuma conversa encontrada.
+                      </p>
+                    )}
+                    {filteredThreads.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => setChatView("thread")}
+                        className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-left transition-colors hover:bg-slate-50"
+                      >
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                          <MessageSquare className="h-4 w-4" />
                         </div>
-                        <p className="mt-0.5 text-xs font-medium text-slate-400">Conversa em andamento</p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
-                    </button>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-sm font-bold text-slate-900">{t.id}</p>
+                            <span className="shrink-0 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white">
+                              {t.statusLabel}
+                            </span>
+                          </div>
+                          <p className="mt-0.5 truncate text-xs font-medium text-slate-400">
+                            {t.name} · {t.phone}
+                          </p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
+
 
               {activeTab === "chat" && chatView === "thread" && (
                 <div className="flex h-full flex-col overflow-hidden bg-white">
