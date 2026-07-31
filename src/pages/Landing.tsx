@@ -1413,187 +1413,202 @@ export default function Landing() {
       <FluxoCompletoSection />
 
       {/* PLANOS */}
-      <section id="planos" className="bg-white py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <section id="planos" className="bg-white py-24 lg:py-32">
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] xl:grid-cols-[0.85fr_1.15fr] gap-12 xl:gap-16 items-start">
+            {/* Left: sticky text */}
+            <div className="lg:sticky lg:top-28">
+              <span className="inline-block rounded-full bg-[#E6ECF7] px-4 py-1.5 font-space-grotesk text-xs font-bold uppercase tracking-[0.2em] text-[#004DFF]">
+                Planos para cada fase
+              </span>
+              <h2 className="mt-5 font-space-grotesk text-4xl md:text-5xl font-bold leading-tight tracking-tight text-[#0B1220]">
+                Escolha o plano{" "}
+                <span className="text-[#004DFF]">ideal pra você</span>
+              </h2>
+              <p className="mt-4 text-lg text-[#0B1220]/60 max-w-md">
+                Comece grátis por 2 dias. Sem cartão, sem fidelidade — mude de plano quando quiser.
+              </p>
 
+              <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 p-1">
+                <button
+                  onClick={() => setBilling("monthly")}
+                  className={`px-5 py-2 rounded-full text-base font-semibold transition ${billing === "monthly" ? "text-white" : "text-slate-600"}`}
+                  style={billing === "monthly" ? { backgroundColor: "#004DFF" } : undefined}
+                >
+                  Mensal
+                </button>
+                <button
+                  onClick={() => setBilling("annual")}
+                  className={`px-5 py-2 rounded-full text-base font-semibold transition flex items-center gap-2 ${billing === "annual" ? "text-white" : "text-slate-600"}`}
+                  style={billing === "annual" ? { backgroundColor: "#004DFF" } : undefined}
+                >
+                  Anual
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${billing === "annual" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-700"}`}>
+                    -2 meses
+                  </span>
+                </button>
+              </div>
 
-          <div className="text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
-              Planos para cada fase
-            </span>
-            <h2 className="mt-3 text-4xl md:text-6xl font-bold tracking-tight text-slate-900">
-              Escolha o plano{" "}
-              <span style={{ color: "#004DFF" }}>ideal pra você</span>
-            </h2>
-            <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-              Comece grátis por 2 dias. Sem cartão, sem fidelidade — mude de plano quando quiser.
-            </p>
+              <div className="mt-10 hidden lg:flex items-center gap-5 text-sm text-slate-500">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-[#004DFF]" />
+                  <span>Garantia 30 dias</span>
+                </div>
+                <div className="h-1 w-1 rounded-full bg-slate-300" />
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-[#004DFF]" />
+                  <span>Sem fidelidade</span>
+                </div>
+              </div>
+            </div>
 
-            <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 p-1">
-              <button
-                onClick={() => setBilling("monthly")}
-                className={`px-5 py-2 rounded-full text-base font-semibold transition ${billing === "monthly" ? "text-white" : "text-slate-600"}`}
-                style={billing === "monthly" ? { backgroundColor: "#004DFF" } : undefined}
-              >
-                Mensal
-              </button>
-              <button
-                onClick={() => setBilling("annual")}
-                className={`px-5 py-2 rounded-full text-base font-semibold transition flex items-center gap-2 ${billing === "annual" ? "text-white" : "text-slate-600"}`}
-                style={billing === "annual" ? { backgroundColor: "#004DFF" } : undefined}
-              >
-                Anual
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${billing === "annual" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-700"}`}>
-                  -2 meses
-                </span>
-              </button>
+            {/* Right: cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {[
+                {
+                  tier: "basic",
+                  name: "Basic",
+                  price: "0",
+                  tagline: "Teste grátis de 2 dias: 20 disparos para explorar",
+                  highlights: [
+                    { strong: "20 disparos", pre: "até ", post: " no total" },
+                    { strong: "Bloqueio automático", pre: "", post: " ao atingir o limite" },
+                  ],
+                  chips: ["1 atendente", "1 conexão WhatsApp", "IA completa (limitada)", "Chat interno"],
+                  featured: false,
+                },
+                {
+                  tier: "start",
+                  name: "Start",
+                  monthlyPrice: "49,90",
+                  annualPrice: "41,58",
+                  annualTotal: "499,00",
+                  tagline: "Para quem está começando",
+                  highlights: [
+                    { strong: "100 disparos", pre: "até ", post: "/mês" },
+                    { strong: "1.000", pre: "", post: " créditos de mensagem" },
+                  ],
+                  chips: ["5 atendentes", "2 conexões WhatsApp", "IA completa", "Chat interno"],
+                  featured: false,
+                },
+                {
+                  tier: "business",
+                  name: "Business",
+                  monthlyPrice: "99,90",
+                  annualPrice: "83,25",
+                  annualTotal: "999,00",
+                  tagline: "Para operações de alto volume",
+                  highlights: [
+                    { strong: "10.000 disparos", pre: "até ", post: "/mês" },
+                    { strong: "50.000", pre: "", post: " créditos de mensagem" },
+                  ],
+                  chips: ["20 atendentes", "Clientes ilimitados", "Prospecção completa", "Suporte prioritário"],
+                  featured: true,
+                },
+              ].map((p) => (
+                <div
+                  key={p.tier}
+                  className={`relative min-w-0 w-full overflow-hidden rounded-[28px] bg-slate-50 p-5 sm:p-6 text-left transition-all duration-300 hover:-translate-y-1 ${
+                    p.featured
+                      ? "ring-1 ring-[#004DFF] shadow-[0_20px_60px_-25px_rgba(0,77,255,0.45)]"
+                      : "border border-slate-200 hover:border-[#004DFF]/30 hover:shadow-lg hover:shadow-[#004DFF]/5"
+                  }`}
+                >
+                  {p.featured && (
+                    <div className="absolute right-4 top-4 rounded-full bg-[#004DFF] px-2.5 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
+                      Popular
+                    </div>
+                  )}
+
+                  <div className="text-sm text-slate-400">Plano</div>
+
+                  <div className="mt-1 flex items-baseline justify-between gap-3">
+                    <div className="text-3xl font-bold tracking-tight text-slate-900">{p.name}</div>
+                    <div className="text-right">
+                      {p.tier === "basic" ? (
+                        <span className="text-3xl font-bold tracking-tight" style={{ color: "#004DFF" }}>Grátis</span>
+                      ) : (
+                        <>
+                          <div className="flex items-baseline justify-end">
+                            <span className="text-3xl font-bold tracking-tight text-slate-900">R${billing === "annual" ? p.annualPrice : p.monthlyPrice}</span>
+                            <span className="ml-1 text-sm text-slate-400">/mês</span>
+                          </div>
+                          <div className="text-xs text-slate-500 whitespace-nowrap">
+                            {billing === "annual"
+                              ? `R$ ${p.annualTotal} cobrado por ano`
+                              : "cobrado por mês"}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="mt-3 text-sm font-semibold" style={{ color: "#004DFF" }}>
+                    {p.tagline}
+                  </p>
+
+                  <div className="my-5 h-px bg-slate-200" />
+
+                  <div className="space-y-3">
+                    <div className="rounded-2xl px-4 py-3.5 text-base text-slate-500" style={{ backgroundColor: "rgba(0,77,255,0.06)", border: "1px solid rgba(0,77,255,0.12)" }}>
+                      {p.highlights[0].pre}
+                      <span className="font-bold text-slate-900">{p.highlights[0].strong}</span>
+                      {p.highlights[0].post}
+                    </div>
+                    <div className="rounded-2xl bg-white border border-slate-200 px-4 py-3.5 text-base text-slate-500">
+                      <span className="font-bold text-slate-900">{p.highlights[1].strong}</span>
+                      {p.highlights[1].post}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setExpandedTier(expandedTier === p.tier ? null : p.tier)}
+                    className="mt-6 w-full flex items-center justify-center gap-2 text-sm font-semibold transition hover:opacity-80"
+                    style={{ color: "#004DFF" }}
+                  >
+                    {expandedTier === p.tier ? "Ocultar funcionalidades" : "Ver todas as funcionalidades"}
+                    <ChevronRight className={`h-4 w-4 transition-transform ${expandedTier === p.tier ? "rotate-90" : ""}`} />
+                  </button>
+
+                  {expandedTier === p.tier && (
+                    <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 animate-fade-in">
+                      <ul className="space-y-3">
+                        {PLAN_FEATURES[p.tier].map((feature) => (
+                          <li key={feature} className="flex items-start gap-3 text-sm text-slate-700">
+                            <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: "#004DFF" }} />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => (window.location.href = `/checkout?tier=${p.tier}&billing=${billing}`)}
+                    className="mt-5 w-full rounded-xl py-4 text-lg font-bold text-white transition hover:opacity-90"
+                    style={{ backgroundColor: "#004DFF" }}
+                  >
+                    {p.tier === "basic" ? "Testar grátis" : `Assinar ${p.name}`}
+                  </button>
+
+                  <div className="mt-4 flex flex-col items-center">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                      <ShieldCheck className="h-4 w-4" style={{ color: "#004DFF" }} />
+                      Garantia de 30 dias
+                    </div>
+                    <div className="text-xs text-slate-500">ou seu dinheiro de volta</div>
+                  </div>
+
+                  <div className="mt-5 min-h-[52px] border-t border-slate-200 pt-4">
+                    <RotatingChips tier={p.tier} />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
-            {[
-              {
-                tier: "basic",
-                name: "Basic",
-                price: "0",
-                tagline: "Teste grátis de 2 dias: 20 disparos para explorar",
-                highlights: [
-                  { strong: "20 disparos", pre: "até ", post: " no total" },
-                  { strong: "Bloqueio automático", pre: "", post: " ao atingir o limite" },
-                ],
-                chips: ["1 atendente", "1 conexão WhatsApp", "IA completa (limitada)", "Chat interno"],
-                featured: false,
-              },
-              {
-                tier: "start",
-                name: "Start",
-                monthlyPrice: "49,90",
-                annualPrice: "41,58",
-                annualTotal: "499,00",
-                tagline: "Para quem está começando",
-                highlights: [
-                  { strong: "100 disparos", pre: "até ", post: "/mês" },
-                  { strong: "1.000", pre: "", post: " créditos de mensagem" },
-                ],
-                chips: ["5 atendentes", "2 conexões WhatsApp", "IA completa", "Chat interno"],
-                featured: false,
-              },
-              {
-                tier: "business",
-                name: "Business",
-                monthlyPrice: "99,90",
-                annualPrice: "83,25",
-                annualTotal: "999,00",
-                tagline: "Para operações de alto volume",
-                highlights: [
-                  { strong: "10.000 disparos", pre: "até ", post: "/mês" },
-                  { strong: "50.000", pre: "", post: " créditos de mensagem" },
-                ],
-                chips: ["20 atendentes", "Clientes ilimitados", "Prospecção completa", "Suporte prioritário"],
-                featured: true,
-              },
-            ].map((p) => (
-              <div
-                key={p.tier}
-                className="relative min-w-0 w-full overflow-hidden rounded-[28px] bg-slate-50 p-5 sm:p-7 text-left"
-
-                style={
-                  p.featured
-                    ? { border: "1.5px solid #004DFF", boxShadow: "0 20px 60px -25px rgba(0,77,255,0.45)" }
-                    : { border: "1px solid #e2e8f0" }
-                }
-              >
-                <div className="text-sm text-slate-400">Plano</div>
-
-                <div className="mt-1 flex items-baseline justify-between gap-3">
-                  <div className="text-3xl font-bold tracking-tight text-slate-900">{p.name}</div>
-                  <div className="text-right">
-                    {p.tier === "basic" ? (
-                      <span className="text-3xl font-bold tracking-tight" style={{ color: "#004DFF" }}>Grátis</span>
-                    ) : (
-                      <>
-                        <div className="flex items-baseline justify-end">
-                          <span className="text-3xl font-bold tracking-tight text-slate-900">R${billing === "annual" ? p.annualPrice : p.monthlyPrice}</span>
-                          <span className="ml-1 text-sm text-slate-400">/mês</span>
-                        </div>
-                        <div className="text-xs text-slate-500 whitespace-nowrap">
-                          {billing === "annual"
-                            ? `R$ ${p.annualTotal} cobrado por ano`
-                            : "cobrado por mês"}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <p className="mt-3 text-sm font-semibold" style={{ color: "#004DFF" }}>
-                  {p.tagline}
-                </p>
-
-                <div className="my-6 h-px bg-slate-200" />
-
-                <div className="space-y-3">
-                  <div className="rounded-2xl px-5 py-4 text-base text-slate-500" style={{ backgroundColor: "rgba(0,77,255,0.06)", border: "1px solid rgba(0,77,255,0.12)" }}>
-                    {p.highlights[0].pre}
-                    <span className="font-bold text-slate-900">{p.highlights[0].strong}</span>
-                    {p.highlights[0].post}
-                  </div>
-                  <div className="rounded-2xl bg-white border border-slate-200 px-5 py-4 text-base text-slate-500">
-                    <span className="font-bold text-slate-900">{p.highlights[1].strong}</span>
-                    {p.highlights[1].post}
-                  </div>
-                </div>
-
-
-
-                <button
-                  onClick={() => setExpandedTier(expandedTier === p.tier ? null : p.tier)}
-                  className="mt-7 w-full flex items-center justify-center gap-2 text-sm font-semibold transition hover:opacity-80"
-                  style={{ color: "#004DFF" }}
-                >
-                  {expandedTier === p.tier ? "Ocultar funcionalidades" : "Ver todas as funcionalidades"}
-                  <ChevronRight className={`h-4 w-4 transition-transform ${expandedTier === p.tier ? "rotate-90" : ""}`} />
-                </button>
-
-                {expandedTier === p.tier && (
-                  <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 animate-fade-in">
-                    <ul className="space-y-3">
-                      {PLAN_FEATURES[p.tier].map((feature) => (
-                        <li key={feature} className="flex items-start gap-3 text-sm text-slate-700">
-                          <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: "#004DFF" }} />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => (window.location.href = `/checkout?tier=${p.tier}&billing=${billing}`)}
-                  className="mt-5 w-full rounded-xl py-4 text-lg font-bold text-white transition hover:opacity-90"
-                  style={{ backgroundColor: "#004DFF" }}
-                >
-                  {p.tier === "basic" ? "Testar grátis" : `Assinar ${p.name}`}
-                </button>
-
-                <div className="mt-5 flex flex-col items-center">
-                  <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
-                    <ShieldCheck className="h-4 w-4" style={{ color: "#004DFF" }} />
-                    Garantia de 30 dias
-                  </div>
-                  <div className="text-sm text-slate-500">ou seu dinheiro de volta</div>
-                </div>
-
-                <div className="mt-6 min-h-[52px] border-t border-slate-200 pt-5">
-                  <RotatingChips tier={p.tier} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-
           {/* BOTÃO COMPARAR PLANOS */}
-          <div className="mt-12 flex justify-center">
+          <div className="mt-16 flex justify-center">
             <button
               onClick={() => setShowCompareTable((s) => !s)}
               className="group inline-flex items-center gap-3 rounded-xl bg-slate-100 px-5 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-200"
