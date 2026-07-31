@@ -1241,6 +1241,19 @@ export default function Landing() {
     return () => clearInterval(id);
   }, []);
 
+  // Scroll to section when arriving with a hash (e.g. /homepage#planos)
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) {
+      window.scrollTo({ top: 0 });
+      return;
+    }
+    const t = setTimeout(() => {
+      document.getElementById(hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+    return () => clearTimeout(t);
+  }, []);
+
   const visibleCases = [
     cases[caseOffset % cases.length],
     cases[(caseOffset + 1) % cases.length],

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SectionLink from "@/components/layout/SectionLink";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
@@ -76,9 +77,9 @@ function FeaturesPopover({ label = "Funcionalidades" }: { label?: string }) {
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="grid grid-cols-2 gap-3 p-5">
             {FEATURES.map((feature) => (
-              <a
+              <SectionLink
                 key={feature.title}
-                href={feature.href}
+                hash={feature.href}
                 className="group flex flex-col gap-2 rounded-xl bg-slate-50 p-3 transition-all hover:bg-white hover:ring-1 hover:ring-slate-200"
               >
                 <div className="flex items-center gap-2.5">
@@ -97,7 +98,7 @@ function FeaturesPopover({ label = "Funcionalidades" }: { label?: string }) {
                   </div>
                 </div>
                 <p className="text-[11px] leading-snug text-slate-500">{feature.description}</p>
-              </a>
+              </SectionLink>
             ))}
           </div>
 
@@ -113,12 +114,12 @@ function FeaturesPopover({ label = "Funcionalidades" }: { label?: string }) {
                 Gere áudios com a sua voz clonada pelo ElevenLabs e envie respostas de áudio para seus clientes no WhatsApp automaticamente.
               </p>
             </div>
-            <a
-              href="#ia"
+            <SectionLink
+              hash="ia"
               className="relative z-10 mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[#004DFF] transition-opacity hover:opacity-80"
             >
               Ver como funciona <ArrowRight className="h-3.5 w-3.5" />
-            </a>
+            </SectionLink>
           </div>
         </div>
       </PopoverContent>
@@ -131,7 +132,11 @@ const LandingNav = () => {
     <header className="fixed left-0 right-0 top-0 z-50 px-4 pt-4">
       <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between rounded-2xl border border-white/40 bg-white/80 px-6 shadow-lg backdrop-blur-xl">
         <div className="flex items-center gap-10">
-          <div className="flex items-center gap-2 whitespace-nowrap font-bold text-xl font-space-grotesk text-slate-900">
+          <Link
+            to="/homepage"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="flex items-center gap-2 whitespace-nowrap font-bold text-xl font-space-grotesk text-slate-900"
+          >
             <img src={logoAurora.url} alt="NEXT PRO" className="h-8 w-8 shrink-0 rounded-full object-cover" />
             <span>
               NEXT <span className="text-[#004DFF]">PRO</span>
@@ -139,19 +144,19 @@ const LandingNav = () => {
             <span className="rounded-md bg-[#004DFF]/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#004DFF]">
               Beta
             </span>
-          </div>
+          </Link>
 
           <nav className="hidden lg:flex items-center gap-8 text-[15px] text-slate-600">
             <FeaturesPopover label="Inteligência" />
-            <a href="#depoimentos" className="hover:text-slate-900">
+            <SectionLink hash="depoimentos" className="hover:text-slate-900">
               Como Funciona
-            </a>
-            <a href="#planos" className="hover:text-slate-900">
+            </SectionLink>
+            <SectionLink hash="planos" className="hover:text-slate-900">
               Preços
-            </a>
-            <a href="#pagamentos" className="hover:text-slate-900">
+            </SectionLink>
+            <SectionLink hash="pagamentos" className="hover:text-slate-900">
               Blog
-            </a>
+            </SectionLink>
           </nav>
         </div>
         <div className="hidden md:flex items-center gap-4">
