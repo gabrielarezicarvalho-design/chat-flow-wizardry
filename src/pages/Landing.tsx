@@ -1231,6 +1231,21 @@ export default function Landing() {
   const [showCompareTable, setShowCompareTable] = useState(false);
   const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
   const [liveLeads, setLiveLeads] = useState<{ name: string; segment: string; city: string }[]>([]);
+  const [caseOffset, setCaseOffset] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCaseOffset((prev) => (prev + 2) % cases.length);
+    }, 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  const visibleCases = [
+    cases[caseOffset % cases.length],
+    cases[(caseOffset + 1) % cases.length],
+  ];
+
+
 
   const handleSubscribe = async (tier: "start" | "business") => {
     try {
@@ -2375,7 +2390,7 @@ export default function Landing() {
 
             {/* Right Column: Case Cards */}
             <div className="lg:col-span-7 space-y-8">
-              {cases.slice(0, 2).map((c) => {
+              {visibleCases.map((c) => {
                 const meta = caseMeta[c.name];
                 const metric1 = c.before[0];
                 const metric1After = c.after[0];
@@ -2384,7 +2399,7 @@ export default function Landing() {
                 return (
                   <div
                     key={c.name}
-                    className="group bg-white rounded-3xl border border-[#e8ecf1] p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,77,255,0.08)]"
+                    className="group animate-fade-in bg-white rounded-3xl border border-[#e8ecf1] p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,77,255,0.08)]"
                   >
                     <div className="flex justify-between items-start mb-8">
                       <div className="flex items-center gap-4">
