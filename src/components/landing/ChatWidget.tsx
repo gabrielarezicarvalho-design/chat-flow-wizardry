@@ -89,14 +89,26 @@ function ChatComposer({
   onSend: (text: string) => void;
   status: ChatStatus;
 }) {
-  const { textInput } = usePromptInputController();
-  const hasText = !!textInput.value.trim();
+  const [value, setValue] = useState("");
+  const taRef = useRef<HTMLTextAreaElement>(null);
+  const busy = status === "submitted" || status === "streaming";
+  const hasText = !!value.trim();
+
+  const submit = () => {
+    if (!hasText || busy) return;
+    onSend(value.trim());
+    setValue("");
+    if (taRef.current) taRef.current.style.height = "auto";
+    taRef.current?.focus();
+  };
+
   return (
-    <PromptInput
-      onSubmit={({ text }) => {
-        onSend(text);
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
       }}
-      className="w-full flex-row items-center gap-1 divide-y-0 rounded-full border-none bg-slate-100 px-2 py-1 shadow-none outline-none ring-0 focus-within:border-none focus-within:shadow-none focus-within:outline-none focus-within:ring-0 has-[:focus]:ring-0"
+      className="flex w-full items-center gap-1 rounded-full bg-slate-100 px-2 py-1"
     >
       <button
         type="button"
@@ -112,19 +124,36 @@ function ChatComposer({
       >
         <Smile className="h-[18px] w-[18px]" />
       </button>
-      <PromptInputTextarea
-        placeholder="Digite uma mensagem"
+      <textarea
+        ref={taRef}
+        value={value}
         rows={1}
-        className="min-h-8 max-h-20 flex-1 resize-none border-none bg-transparent px-1 py-1.5 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus-visible:ring-0"
-        disabled={status === "submitted"}
+        disabled={busy}
         autoFocus
+        onChange={(e) => {
+          setValue(e.target.value);
+          const el = e.currentTarget;
+          el.style.height = "auto";
+          el.style.height = `${Math.min(el.scrollHeight, 80)}px`;
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            submit();
+          }
+        }}
+        placeholder="Digite uma mensagem"
+        className="max-h-20 min-h-8 flex-1 resize-none border-none bg-transparent py-1.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:outline-none focus-visible:outline-none scrollbar-hide disabled:opacity-60"
       />
       {hasText ? (
-        <PromptInputSubmit
-          status={status}
-          disabled={status === "submitted"}
-          className="h-8 w-8 shrink-0 rounded-full bg-[#004DFF] text-white hover:bg-[#003ACC]"
-        />
+        <button
+          type="submit"
+          aria-label="Enviar"
+          disabled={busy}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#004DFF] text-white transition-colors hover:bg-[#003ACC] disabled:opacity-60"
+        >
+          <SendHorizontal className="h-4 w-4" />
+        </button>
       ) : (
         <button
           type="button"
@@ -134,9 +163,10 @@ function ChatComposer({
           <Mic className="h-[18px] w-[18px]" />
         </button>
       )}
-    </PromptInput>
+    </form>
   );
 }
+
 
 
 function BrandAvatar() {
