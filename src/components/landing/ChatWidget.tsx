@@ -155,6 +155,7 @@ export function ChatWidget() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [openArticle, setOpenArticle] = useState<string | null>(null);
+  const [faqOffset, setFaqOffset] = useState(0);
 
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_GREETING]);
   const [isLoading, setIsLoading] = useState(false);
