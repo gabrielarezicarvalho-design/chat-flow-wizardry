@@ -2281,8 +2281,8 @@ export default function Landing() {
       <section className="bg-[#f4f1ec] py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
-              <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
+            <span className="inline-flex items-center gap-2 font-space-grotesk text-sm font-semibold text-[#004DFF]">
+              <span className="inline-block h-2 w-2 rounded-full bg-[#004DFF]" />
               Tudo em um único painel
             </span>
             <h2 className="mt-4 text-4xl md:text-5xl font-bold">
