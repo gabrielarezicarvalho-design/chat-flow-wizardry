@@ -2371,7 +2371,8 @@ export default function Landing() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
             {/* Left Column: Sticky Content */}
             <div className="lg:col-span-5 lg:sticky lg:top-24">
-              <span className="inline-block text-xs font-medium uppercase tracking-[0.2em] text-[#004DFF] mb-4">
+              <span className="inline-flex items-center gap-2 font-space-grotesk text-sm font-semibold text-[#004DFF] mb-4">
+                <span className="inline-block h-2 w-2 rounded-full bg-[#004DFF]" />
                 // Casos reais
               </span>
               <h2 className="font-space-grotesk text-4xl lg:text-5xl font-bold text-[#0f172a] leading-tight mb-6">
