@@ -16,6 +16,9 @@ import {
   Headphones,
   Megaphone,
   RefreshCw,
+  Plus,
+  Smile,
+  Mic,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
