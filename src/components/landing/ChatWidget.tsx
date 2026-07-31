@@ -19,19 +19,12 @@ import {
   Plus,
   Smile,
   Mic,
+  SendHorizontal,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
 import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
-import {
-  PromptInput,
-  PromptInputTextarea,
-  PromptInputFooter,
-  PromptInputSubmit,
-  PromptInputProvider,
-  usePromptInputController,
-} from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import type { ChatStatus } from "ai";
 
@@ -612,9 +605,7 @@ export function ChatWidget() {
                   </div>
 
                   <div className="border-t border-slate-200 p-3">
-                    <PromptInputProvider initialInput="">
-                      <ChatComposer onSend={handleSend} status={chatStatus} />
-                    </PromptInputProvider>
+                    <ChatComposer onSend={handleSend} status={chatStatus} />
                   </div>
                 </div>
               )}
