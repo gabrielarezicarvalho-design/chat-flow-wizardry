@@ -61,7 +61,7 @@ export default function HelpCenter() {
             </span>
             <span className="text-left">
               <span className="block text-sm font-semibold text-slate-900">Falar no WhatsApp</span>
-              <span className="block text-xs text-slate-400">Atendimento das 08h às 18h</span>
+              <span className="block text-xs text-slate-400">Atendimento das 09:30h às 19h</span>
             </span>
           </a>
         </div>
