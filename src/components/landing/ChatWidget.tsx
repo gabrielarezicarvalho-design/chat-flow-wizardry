@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessagesSquare, X, Home, Search, HelpCircle, Headphones, Megaphone, MessageSquare, Bot, ArrowRight } from "lucide-react";
+import { MessagesSquare, X, Home, Search, HelpCircle, Headphones, Megaphone, MessageSquare, Bot, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
@@ -103,9 +103,21 @@ function HeaderLogo() {
   );
 }
 
+function generateTicketId() {
+  const now = new Date();
+  const date = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+  const letters = Array.from({ length: 4 }, () =>
+    String.fromCharCode(65 + Math.floor(Math.random() * 26))
+  ).join("");
+  const digits = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+  return `#PRO${date}${letters}${digits}`;
+}
+
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("home");
+  const [chatView, setChatView] = useState<"list" | "thread">("list");
+  const [ticketId] = useState(generateTicketId);
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_GREETING]);
   const [isLoading, setIsLoading] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -173,6 +185,7 @@ export function ChatWidget() {
   const openChatWithQuestion = useCallback(
     (question: string) => {
       setActiveTab("chat");
+      setChatView("thread");
       window.setTimeout(() => handleSend(question), 50);
     },
     [handleSend]
@@ -323,7 +336,10 @@ export function ChatWidget() {
                   </div>
 
                   <Button
-                    onClick={() => setActiveTab("chat")}
+                    onClick={() => {
+                      setActiveTab("chat");
+                      setChatView("thread");
+                    }}
                     className="w-full rounded-full bg-slate-900 py-5 text-sm font-semibold text-white hover:bg-slate-800"
                   >
                     Iniciar
@@ -331,8 +347,46 @@ export function ChatWidget() {
                 </div>
               )}
 
-              {activeTab === "chat" && (
+              {activeTab === "chat" && chatView === "list" && (
+                <div className="flex h-full flex-col bg-white">
+                  <div className="border-b border-slate-100 px-4 py-3.5">
+                    <p className="text-center text-base font-semibold text-slate-900">Mensagens</p>
+                  </div>
+                  <div className="p-3">
+                    <button
+                      onClick={() => setChatView("thread")}
+                      className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-left transition-colors hover:bg-slate-50"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                        <MessageSquare className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-sm font-bold text-slate-900">{ticketId}</p>
+                          <span className="shrink-0 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white">
+                            Abertos
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-xs font-medium text-slate-400">Conversa em andamento</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "chat" && chatView === "thread" && (
                 <div className="flex h-full flex-col overflow-hidden bg-white">
+                  <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-2.5">
+                    <button
+                      onClick={() => setChatView("list")}
+                      aria-label="Voltar"
+                      className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <p className="text-sm font-semibold text-slate-900">{ticketId}</p>
+                  </div>
                   <div className="min-h-0 flex-1">
                     <Conversation className="h-full">
                       <ConversationContent className="gap-3 p-3">
