@@ -362,16 +362,16 @@ export function ChatWidget() {
             {/* Body */}
             <div className="flex-1 overflow-y-auto">
               {activeTab === "home" && (
-                <div className="px-5 pt-6">
-                  <div className="flex items-center gap-3">
+                <div className="px-5 pt-5">
+                  <div className="flex items-center gap-2.5">
                     <BrandAvatar />
                     <div>
-                      <p className="text-lg font-semibold text-white">Next Pro</p>
-                      <p className="text-sm text-slate-400">Como podemos ajudar?</p>
+                      <p className="text-base font-semibold text-white">Next Pro</p>
+                      <p className="text-xs text-slate-400">Como podemos ajudar?</p>
                     </div>
                   </div>
 
-                  <div className="my-4 h-px w-full bg-white/10" />
+                  <div className="my-3 h-px w-full bg-white/10" />
 
                   <div className="grid grid-cols-2 gap-2">
                     {[
