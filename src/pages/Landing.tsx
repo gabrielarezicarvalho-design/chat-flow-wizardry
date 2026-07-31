@@ -2207,8 +2207,8 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-[1240px] items-start gap-14 px-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Coluna esquerda — texto */}
           <div className="lg:sticky lg:top-28">
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 font-space-grotesk text-[11px] font-bold uppercase tracking-[0.18em] text-[#0B1220] shadow-[0_1px_2px_rgba(11,18,32,0.04)] backdrop-blur">
-              <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
+            <span className="inline-flex items-center gap-2 font-space-grotesk text-sm font-semibold text-[#004DFF]">
+              <span className="inline-block h-2 w-2 rounded-full bg-[#004DFF]" />
               Pra qualquer negócio
             </span>
             <h2 className="mt-6 font-space-grotesk text-4xl md:text-[56px] font-bold leading-[1] tracking-tight text-[#0B1220]">
