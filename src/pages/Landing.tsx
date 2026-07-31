@@ -2492,17 +2492,17 @@ export default function Landing() {
 
       {/* CTA FINAL */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
-        <div className="relative overflow-hidden rounded-[28px] bg-[#111214] px-8 py-8 md:px-12 md:py-10">
+        <div className="relative overflow-hidden rounded-[28px] bg-[#f4f1ec] px-8 py-8 md:px-12 md:py-10">
           {/* glow */}
-          <div className="pointer-events-none absolute -right-24 top-1/2 h-[400px] w-[400px] -translate-y-1/2 rounded-full bg-[#004DFF]/25 blur-[120px]" />
+          <div className="pointer-events-none absolute -right-24 top-1/2 h-[400px] w-[400px] -translate-y-1/2 rounded-full bg-[#004DFF]/20 blur-[120px]" />
 
           <div className="relative grid items-center gap-8 md:grid-cols-[1.15fr_0.85fr]">
             {/* Texto */}
             <div>
-              <h2 className="font-space-grotesk text-3xl md:text-4xl font-bold leading-[1.1] tracking-tight text-white">
+              <h2 className="font-space-grotesk text-3xl md:text-4xl font-bold leading-[1.1] tracking-tight text-slate-900">
                 Comece a fazer seus<br />clientes voltarem hoje
               </h2>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-400">
+              <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-600">
                 Configure em minutos e veja a Next Pro trabalhar por você. Sem compromisso.
               </p>
 
@@ -2515,7 +2515,7 @@ export default function Landing() {
                 <a href="#planos">
                   <Button
                     variant="outline"
-                    className="h-9 rounded-xl border-white/25 bg-transparent px-5 text-sm font-semibold text-white hover:bg-white/10 hover:text-white"
+                    className="h-9 rounded-xl border-slate-900/20 bg-transparent px-5 text-sm font-semibold text-slate-900 hover:bg-slate-900/5 hover:text-slate-900"
                   >
                     Ver planos
                   </Button>
@@ -2532,14 +2532,14 @@ export default function Landing() {
                   ].map((m) => (
                     <span
                       key={m.l}
-                      className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#111214] text-[10px] font-bold text-white ${m.bg}`}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#f4f1ec] text-[10px] font-bold text-white ${m.bg}`}
                     >
                       {m.l}
                     </span>
                   ))}
                 </div>
-                <p className="text-sm text-slate-400">
-                  <span className="font-semibold text-white">+200 lojas</span> já utilizam
+                <p className="text-sm text-slate-600">
+                  <span className="font-semibold text-slate-900">+200 lojas</span> já utilizam
                 </p>
               </div>
 
@@ -2547,30 +2547,30 @@ export default function Landing() {
 
             {/* Card métrica */}
             <div className="relative mx-auto w-full max-w-[260px] py-4">
-              <div className="pointer-events-none absolute inset-0 scale-90 rounded-full bg-[#004DFF]/20 blur-3xl" />
+              <div className="pointer-events-none absolute inset-0 scale-90 rounded-full bg-[#004DFF]/15 blur-3xl" />
 
-              <div className="group relative rotate-3 rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.10] to-white/[0.03] p-6 shadow-2xl backdrop-blur-xl transition-transform duration-500 hover:rotate-0">
+              <div className="group relative rotate-3 rounded-[28px] border border-slate-900/10 bg-gradient-to-br from-white/60 to-white/30 p-6 shadow-2xl backdrop-blur-xl transition-transform duration-500 hover:rotate-0">
                 <div className="mb-5 flex items-center justify-between">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#004DFF]/20">
                     <TrendingUp className="h-5 w-5 text-[#3f7bff]" />
                   </div>
-                  <span className="rounded-full bg-[#004DFF]/15 px-3 py-1 text-[10px] font-bold tracking-wide text-[#4d8bff]">
+                  <span className="rounded-full bg-[#004DFF]/15 px-3 py-1 text-[10px] font-bold tracking-wide text-[#004DFF]">
                     AO VIVO
                   </span>
                 </div>
 
-                <div className="font-space-grotesk text-4xl font-bold tracking-tight text-white">+36%</div>
-                <p className="mt-1 text-sm text-slate-400">Taxa de recompra</p>
+                <div className="font-space-grotesk text-4xl font-bold tracking-tight text-slate-900">+36%</div>
+                <p className="mt-1 text-sm text-slate-600">Taxa de recompra</p>
 
-                <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-slate-900/10">
                   <div className="h-full w-[36%] rounded-full bg-[#004DFF] shadow-[0_0_10px_#004DFF]" />
                 </div>
 
                 <div className="mt-5 flex -space-x-3">
-                  <span className="h-7 w-7 rounded-full bg-zinc-700 ring-2 ring-[#111214]" />
-                  <span className="h-7 w-7 rounded-full bg-zinc-600 ring-2 ring-[#111214]" />
-                  <span className="h-7 w-7 rounded-full bg-zinc-500 ring-2 ring-[#111214]" />
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#004DFF] text-[9px] font-bold text-white ring-2 ring-[#111214]">
+                  <span className="h-7 w-7 rounded-full bg-zinc-700 ring-2 ring-[#f4f1ec]" />
+                  <span className="h-7 w-7 rounded-full bg-zinc-600 ring-2 ring-[#f4f1ec]" />
+                  <span className="h-7 w-7 rounded-full bg-zinc-500 ring-2 ring-[#f4f1ec]" />
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#004DFF] text-[9px] font-bold text-white ring-2 ring-[#f4f1ec]">
                     +8k
                   </span>
                 </div>
