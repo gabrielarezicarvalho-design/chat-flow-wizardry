@@ -96,12 +96,12 @@ function ChatComposer({
     >
       <PromptInputTextarea
         placeholder="Digite sua mensagem..."
-        className="min-h-10 max-h-24 py-2 text-sm text-slate-800 placeholder:text-slate-400"
+        className="min-h-9 max-h-24 py-1.5 text-sm text-slate-800 placeholder:text-slate-400"
 
         disabled={status === "submitted"}
         autoFocus
       />
-      <PromptInputFooter className="justify-end border-none pt-1">
+      <PromptInputFooter className="justify-end border-none p-1 pt-0">
         <PromptInputSubmit
           status={status}
           disabled={!textInput.value.trim() || status === "submitted"}
@@ -361,9 +361,9 @@ export function ChatWidget() {
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
+            <div className="relative min-h-0 flex-1 overflow-hidden">
               {activeTab === "home" && (
-                <div className="px-5 pt-5">
+                <div className="h-full overflow-y-auto scrollbar-hide px-5 pt-5">
                   <div className="flex items-center gap-2.5">
                     <BrandAvatar />
                     <div>
@@ -516,31 +516,33 @@ export function ChatWidget() {
                     </button>
                     <p className="text-sm font-semibold text-slate-900">{ticketId}</p>
                   </div>
-                  <div className="min-h-0 flex-1">
+                  <div className="min-h-0 flex-1 overflow-hidden">
                     <Conversation className="h-full">
-                      <ConversationContent className="gap-3 p-3">
+                      <ConversationContent className="gap-3 p-3 scrollbar-hide">
                         {messages.map((m, i) => (
-                          <Message key={i} from={m.role}>
+                          <Message key={i} from={m.role} className="max-w-full">
                             <MessageContent
                               className={
                                 m.role === "user"
-                                  ? "bg-[#004DFF] text-white"
-                                  : "bg-slate-100 text-slate-800"
+                                  ? "max-w-[85%] rounded-2xl px-3 py-2 group-[.is-user]:bg-[#004DFF] group-[.is-user]:px-3 group-[.is-user]:py-2 group-[.is-user]:text-white"
+                                  : "max-w-[85%] rounded-2xl bg-slate-100 px-3 py-2 !text-slate-800"
                               }
                             >
                               {m.role === "assistant" ? (
-                                <MessageResponse className="text-sm leading-relaxed">
+                                <MessageResponse className="text-sm leading-relaxed text-slate-800 [&_*]:text-slate-800">
                                   {m.content}
                                 </MessageResponse>
                               ) : (
-                                <p className="text-sm leading-relaxed">{m.content}</p>
+                                <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-white">
+                                  {m.content}
+                                </p>
                               )}
                             </MessageContent>
                           </Message>
                         ))}
                         {isLoading && (
-                          <Message from="assistant">
-                            <MessageContent className="max-w-[80%] bg-slate-100">
+                          <Message from="assistant" className="max-w-full">
+                            <MessageContent className="max-w-[85%] rounded-2xl bg-slate-100 px-3 py-2">
                               <Shimmer as="span" className="text-sm text-slate-500">
                                 Pensando...
                               </Shimmer>
@@ -550,6 +552,7 @@ export function ChatWidget() {
                       </ConversationContent>
                     </Conversation>
                   </div>
+
                   <div className="border-t border-slate-200 p-3">
                     <PromptInputProvider initialInput="">
                       <ChatComposer onSend={handleSend} status={chatStatus} />
@@ -559,7 +562,7 @@ export function ChatWidget() {
               )}
 
               {activeTab === "articles" && (
-                <div className="flex flex-col gap-1.5 px-5 pt-5">
+                <div className="flex h-full flex-col gap-1.5 overflow-y-auto scrollbar-hide px-5 pt-5">
                   <p className="mb-1 text-sm font-semibold text-slate-900">Artigos de ajuda</p>
                   {FAQ.map((item) => {
                     const isOpenArticle = openArticle === item.q;
