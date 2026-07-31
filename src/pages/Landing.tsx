@@ -2347,136 +2347,128 @@ export default function Landing() {
       </section>
 
       {/* CASOS REAIS */}
-      <section id="depoimentos" className="bg-white py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="text-center">
-            <span className="text-xs font-medium uppercase tracking-[0.2em]" style={{ color: "#004DFF" }}>
-              // Casos reais
-            </span>
-            <h2 className="mt-4 text-4xl md:text-6xl font-bold tracking-tight text-slate-900">
-              Antes e depois de{" "}
-              <span style={{ color: "#004DFF" }}>clientes reais</span>
-            </h2>
-            <p className="mt-4 text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              Resultados reais de empresas que automatizaram atendimento, vendas e cobrança com o CRM Next Pro. Verificados por prints e relatos dos próprios clientes.
-            </p>
-          </div>
+      <section id="depoimentos" className="bg-[#fafbfc] py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+            {/* Left Column: Sticky Content */}
+            <div className="lg:col-span-5 lg:sticky lg:top-24">
+              <span className="inline-block text-xs font-medium uppercase tracking-[0.2em] text-[#004DFF] mb-4">
+                // Casos reais
+              </span>
+              <h2 className="font-space-grotesk text-4xl lg:text-5xl font-bold text-[#0f172a] leading-tight mb-6">
+                Resultados reais para negócios em escala.
+              </h2>
+              <p className="text-lg text-[#64748b] mb-8 leading-relaxed max-w-md">
+                Empresas que automatizaram atendimento, vendas e cobrança com o CRM Next Pro. Verificados por prints e relatos dos próprios clientes.
+              </p>
 
-          <div className="mt-14 grid md:grid-cols-2 gap-6">
-            {cases.map((c) => {
-              const meta = caseMeta[c.name];
-              return (
-                <div
-                  key={c.name}
-                  className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_18px_40px_-20px_rgba(0,77,255,0.45)]"
-                >
-                  {/* Header */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <img src={c.avatar} alt={c.name} className="h-12 w-12 rounded-full object-cover ring-2 ring-slate-100" />
-                        <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-[#004DFF] flex items-center justify-center ring-2 ring-white">
-                          <Check className="h-2.5 w-2.5 text-white" strokeWidth={4} />
-                        </span>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-slate-900 text-base">{c.name}</span>
-                          <span className="text-[9px] font-bold uppercase tracking-wider text-[#004DFF]">verificado</span>
-                        </div>
-                        <div className="text-xs text-slate-500">{c.role}</div>
-                        <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
-                          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{meta?.location}</span>
-                          <span className="h-0.5 w-0.5 rounded-full bg-slate-300" />
-                          <span>{meta?.since}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-50 text-[#004DFF] border border-blue-100">
-                        {c.plan}
-                      </span>
-                      <div className="mt-1.5 flex items-center justify-end gap-0.5">
-                        {[0, 1, 2, 3, 4].map((i) => (
-                          <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Período do comparativo */}
-                  <div className="mt-4 flex items-center gap-1.5 text-[10px] text-slate-400">
-                    <Calendar className="h-3 w-3" />
-                    {meta?.period}
-                  </div>
-
-                  {/* Tabela comparativa antes × depois */}
-                  <div className="mt-3 rounded-xl border border-slate-100 overflow-hidden">
-                    <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 bg-slate-50 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      <span>Métrica</span>
-                      <span className="text-right w-20">Antes</span>
-                      <span className="text-right w-24 text-[#004DFF]">Depois</span>
-                    </div>
-                    <div className="divide-y divide-slate-100">
-                      {c.before.map((item, i) => (
-                        <div key={item.label} className="px-4 py-3">
-                          <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3">
-                            <span className="text-xs text-slate-600 truncate">{item.label}</span>
-                            <span className="text-xs text-slate-400 line-through text-right w-20 tabular-nums">{item.value}</span>
-                            <span className="text-xs font-bold text-[#004DFF] text-right w-24 tabular-nums">{c.after[i]?.value}</span>
-                          </div>
-                          <div className="mt-2 flex items-center gap-2">
-                            <div className="h-1 flex-1 rounded-full bg-slate-100 overflow-hidden">
-                              <div
-                                className="h-full rounded-full bg-[#004DFF] transition-all duration-700"
-                                style={{ width: `${meta?.bars?.[i] ?? 70}%` }}
-                              />
-                            </div>
-                            <span className="text-[10px] font-semibold text-emerald-600 whitespace-nowrap">
-                              {meta?.deltas?.[i]}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* KPIs operacionais */}
-                  <div className="mt-3 grid grid-cols-3 gap-2">
-                    {meta?.kpis.map((k) => (
-                      <div key={k.label} className="rounded-lg bg-slate-50 px-3 py-2 text-center">
-                        <div className="text-sm font-bold text-slate-900 tabular-nums">{k.value}</div>
-                        <div className="text-[10px] text-slate-500 leading-tight">{k.label}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#004DFF]">
-                      <TrendingUp className="h-3.5 w-3.5" />
-                      {c.result}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-[10px] font-medium text-slate-500">
-                      <ShieldCheck className="h-3 w-3 text-emerald-500" />
-                      {meta?.verifiedAt}
-                    </span>
-                  </div>
-
-                  <div className="mt-5 pt-5 border-t border-slate-100">
-                    <div className="flex gap-2">
-                      <Quote className="h-4 w-4 text-slate-300 shrink-0 mt-0.5" />
-                      <p className="text-base text-slate-600 leading-relaxed">{c.quote}</p>
-                    </div>
-                  </div>
+              <div className="flex items-center gap-4 p-5 bg-white border border-[#e8ecf1] rounded-2xl shadow-sm">
+                <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="h-6 w-6 text-[#3b82f6]" />
                 </div>
-              );
-            })}
-          </div>
+                <div>
+                  <p className="text-sm font-bold text-[#0f172a]">Métricas Verificadas</p>
+                  <p className="text-xs text-[#94a3b8]">Dados auditados e extraídos diretamente do dashboard.</p>
+                </div>
+              </div>
+            </div>
 
+            {/* Right Column: Case Cards */}
+            <div className="lg:col-span-7 space-y-8">
+              {cases.slice(0, 2).map((c) => {
+                const meta = caseMeta[c.name];
+                const metric1 = c.before[0];
+                const metric1After = c.after[0];
+                const metric2 = c.before[1];
+                const metric2After = c.after[1];
+                return (
+                  <div
+                    key={c.name}
+                    className="group bg-white rounded-3xl border border-[#e8ecf1] p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,77,255,0.08)]"
+                  >
+                    <div className="flex justify-between items-start mb-8">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <img src={c.avatar} alt={c.name} className="h-14 w-14 rounded-full object-cover ring-2 ring-[#e8ecf1]" />
+                          <span className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-[#004DFF] flex items-center justify-center ring-2 ring-white">
+                            <Check className="h-3 w-3 text-white" strokeWidth={4} />
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-space-grotesk font-bold text-[#0f172a] text-lg">{c.name}</h4>
+                          <p className="text-sm text-[#94a3b8]">{c.role}</p>
+                          <div className="mt-1 flex items-center gap-2 text-[10px] text-[#94a3b8]">
+                            <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{meta?.location}</span>
+                            <span className="h-0.5 w-0.5 rounded-full bg-[#e8ecf1]" />
+                            <span>{meta?.since}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-full uppercase tracking-widest border border-green-100">
+                        Verificado
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="p-5 rounded-2xl bg-[#fafbfc] border border-[#e8ecf1]">
+                        <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider mb-2">Antes do Next Pro</p>
+                        <p className="text-xl font-space-grotesk font-bold text-[#0f172a]">
+                          {metric1.value}
+                        </p>
+                        <p className="text-xs text-[#94a3b8] mt-1">{metric1.label}</p>
+                      </div>
+                      <div className="p-5 rounded-2xl bg-blue-50 border border-blue-100">
+                        <p className="text-[10px] font-bold text-[#3b82f6] uppercase tracking-wider mb-2">Hoje</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-xl font-space-grotesk font-bold text-[#004DFF]">{metric1After.value}</p>
+                          <span className="text-xs font-bold text-green-600">{meta?.deltas?.[0]}</span>
+                        </div>
+                        <p className="text-xs text-[#3b82f6] mt-1">{metric1After.label}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="p-5 rounded-2xl bg-[#fafbfc] border border-[#e8ecf1]">
+                        <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider mb-2">Antes do Next Pro</p>
+                        <p className="text-xl font-space-grotesk font-bold text-[#0f172a]">
+                          {metric2.value}
+                        </p>
+                        <p className="text-xs text-[#94a3b8] mt-1">{metric2.label}</p>
+                      </div>
+                      <div className="p-5 rounded-2xl bg-blue-50 border border-blue-100">
+                        <p className="text-[10px] font-bold text-[#3b82f6] uppercase tracking-wider mb-2">Hoje</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-xl font-space-grotesk font-bold text-[#004DFF]">{metric2After.value}</p>
+                          <span className="text-xs font-bold text-green-600">{meta?.deltas?.[1]}</span>
+                        </div>
+                        <p className="text-xs text-[#3b82f6] mt-1">{metric2After.label}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 mb-5">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#004DFF]">
+                        <TrendingUp className="h-3.5 w-3.5" />
+                        {c.result}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e8ecf1] px-3 py-1.5 text-[10px] font-medium text-[#94a3b8]">
+                        <Calendar className="h-3 w-3" />
+                        {meta?.period}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Quote className="h-4 w-4 text-[#e8ecf1] shrink-0 mt-0.5" />
+                      <p className="text-sm text-[#64748b] leading-relaxed">{c.quote}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
           <div className="mt-12 text-center">
-            <p className="text-xs text-slate-500 inline-flex items-center gap-2">
-              <ShieldCheck className="h-3.5 w-3.5 text-slate-400" />
+            <p className="text-xs text-[#94a3b8] inline-flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-[#94a3b8]" />
               Métricas compartilhadas voluntariamente pelos clientes · Prints e comprovantes sob solicitação
             </p>
           </div>
