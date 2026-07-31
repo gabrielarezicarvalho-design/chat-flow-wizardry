@@ -1,16 +1,34 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessagesSquare, X, Home, Search, HelpCircle, Headphones, Megaphone, MessageSquare, Bot, ArrowRight, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  MessagesSquare,
+  X,
+  Home,
+  MessageCircle,
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
+  Search,
+  Bot,
+  Settings,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
 import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
-import { PromptInput, PromptInputTextarea, PromptInputFooter, PromptInputSubmit, PromptInputProvider, usePromptInputController } from "@/components/ai-elements/prompt-input";
+import {
+  PromptInput,
+  PromptInputTextarea,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputProvider,
+  usePromptInputController,
+} from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import type { ChatStatus } from "ai";
 
-type Tab = "home" | "chat" | "help" | "news";
+type Tab = "home" | "chat" | "articles";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -50,13 +68,6 @@ const FAQ = [
   },
 ];
 
-
-const NEWS = [
-  { title: "Novo fluxo de recuperação financeira", date: "30 jul 2026", excerpt: "Automatize lembretes de pagamento e reduza inadimplência com poucos cliques." },
-  { title: "IA agora responde por áudio", date: "15 jul 2026", excerpt: "Seus clientes podem enviar áudio e a Aurora responde com a voz clonada da sua empresa." },
-  { title: "Integração com Evolution API", date: "05 jul 2026", excerpt: "Conecte seu WhatsApp com mais estabilidade e recursos avançados de instância." },
-];
-
 const INITIAL_GREETING: ChatMessage = {
   role: "assistant",
   content: "Olá! 👋 Sou a Aurora, assistente da Next Pro. Como posso te ajudar hoje?",
@@ -77,15 +88,15 @@ function ChatComposer({
       onSubmit={({ text }) => {
         onSend(text);
       }}
-      className="w-full"
+      className="w-full border-white/10 bg-white/[0.04] text-slate-100"
     >
       <PromptInputTextarea
         placeholder="Digite sua mensagem..."
-        className="min-h-10 max-h-24 py-2 text-sm"
+        className="min-h-10 max-h-24 py-2 text-sm text-slate-100 placeholder:text-slate-500"
         disabled={status === "submitted"}
         autoFocus
       />
-      <PromptInputFooter className="justify-end pt-1">
+      <PromptInputFooter className="justify-end border-none pt-1">
         <PromptInputSubmit
           status={status}
           disabled={!textInput.value.trim() || status === "submitted"}
@@ -95,20 +106,20 @@ function ChatComposer({
   );
 }
 
-function HeaderLogo() {
+function BrandAvatar() {
   const [error, setError] = useState(false);
   if (error) {
     return (
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#004DFF] text-white">
-        <Bot className="h-5 w-5" />
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#004DFF] text-white">
+        <Bot className="h-6 w-6" />
       </div>
     );
   }
   return (
     <img
       src={logoAurora.url}
-      alt="NEXT PRO"
-      className="h-9 w-9 shrink-0 rounded-full object-cover"
+      alt="Next Pro"
+      className="h-12 w-12 shrink-0 rounded-full object-cover"
       onError={() => setError(true)}
     />
   );
@@ -139,7 +150,7 @@ export function ChatWidget() {
   const [ticketId] = useState(generateTicketId);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [faqOffset, setFaqOffset] = useState(0);
+  const [openArticle, setOpenArticle] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_GREETING]);
   const [isLoading, setIsLoading] = useState(false);
@@ -238,13 +249,6 @@ export function ChatWidget() {
     [handleSend]
   );
 
-  const tabs: { id: Tab; label: string; icon: typeof Home }[] = [
-    { id: "home", label: "Início", icon: Home },
-    { id: "chat", label: "Mensagens", icon: MessageSquare },
-    { id: "help", label: "Ajuda", icon: HelpCircle },
-    { id: "news", label: "Notícias", icon: Megaphone },
-  ];
-
   useEffect(() => {
     if (!isOpen) return;
 
@@ -299,124 +303,113 @@ export function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-24 right-4 z-[120] flex w-[92vw] max-w-[380px] flex-col overflow-hidden rounded-[24px] border border-slate-100 bg-white shadow-2xl shadow-slate-900/10 md:right-6"
-            style={{ height: "clamp(520px, 70vh, 640px)" }}
+            className="fixed bottom-24 right-4 z-[120] flex w-[92vw] max-w-[400px] flex-col overflow-hidden rounded-[26px] border border-white/10 bg-[#0b0b10] shadow-2xl shadow-black/60 md:right-6"
+            style={{ height: "clamp(500px, 68vh, 620px)" }}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
-              <div className="flex items-center gap-2.5">
-                <HeaderLogo />
-                <div>
-                  <p className="font-semibold text-slate-900">NEXT PRO</p>
-                  <p className="flex items-center gap-1.5 text-xs text-slate-500">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" />
-                    online agora
-                  </p>
-                </div>
+            {/* Top bar */}
+            <div className="flex items-center gap-2 px-4 pt-4">
+              <button
+                onClick={() => setActiveTab("home")}
+                aria-label="Início"
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
+                  activeTab === "home"
+                    ? "bg-[#004DFF] text-white"
+                    : "bg-white/[0.06] text-slate-300 hover:bg-white/[0.1]"
+                }`}
+              >
+                <Home className="h-[18px] w-[18px]" />
+              </button>
+
+              <div className="flex flex-1 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+                <button
+                  onClick={() => setActiveTab("chat")}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors ${
+                    activeTab === "chat"
+                      ? "bg-white/[0.1] text-white"
+                      : "text-slate-300 hover:text-white"
+                  }`}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Conversação
+                </button>
+                <button
+                  onClick={() => setActiveTab("articles")}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm transition-colors ${
+                    activeTab === "articles"
+                      ? "bg-white/[0.1] text-white"
+                      : "text-slate-300 hover:text-white"
+                  }`}
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Artigos
+                </button>
               </div>
+
               <button
                 onClick={() => setIsOpen(false)}
                 aria-label="Fechar"
-                className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
               >
-                <X className="h-4 w-4" />
+                <ChevronDown className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-white">
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto">
               {activeTab === "home" && (
-                <div className="flex flex-col gap-6 p-5">
-                  <div>
-                    <p className="text-xl font-bold text-slate-900">Olá! 👋</p>
-                    <p className="text-xl font-bold text-slate-900">Como posso te ajudar?</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => openChatWithQuestion("Como funciona a busca de clientes?")}
-                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-2.5 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
-                    >
-                      <Search className="h-4 w-4 text-slate-600" />
-                      Buscar
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("help")}
-                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-2.5 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
-                    >
-                      <HelpCircle className="h-4 w-4 text-slate-600" />
-                      Dúvidas
-                    </button>
-                    <button
-                      onClick={() => window.open("https://wa.me/message/BYSDMLHYTA6EA1", "_blank", "noopener,noreferrer")}
-                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-2.5 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
-                    >
-                      <Headphones className="h-4 w-4 text-slate-600" />
-                      Suporte
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("news")}
-                      className="flex items-center gap-2.5 rounded-lg bg-[#f1f4f9] px-3.5 py-2.5 text-left text-sm font-semibold text-slate-800 transition-colors hover:bg-[#e6ebf3]"
-                    >
-                      <Megaphone className="h-4 w-4 text-slate-600" />
-                      Notícias
-                    </button>
-                  </div>
-
-                  <div>
-                    <div className="mb-2.5 flex items-center justify-between">
-                      <p className="text-sm text-slate-400">Dúvidas frequentes?</p>
-                      <button
-                        onClick={() => setFaqOffset((v) => (v + 3) % FAQ.length)}
-                        aria-label="Atualizar dúvidas"
-                        className="rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      {Array.from({ length: 3 }, (_, i) => FAQ[(faqOffset + i) % FAQ.length]).map((item) => (
-                        <button
-                          key={item.q}
-                          onClick={() => openChatWithQuestion(item.q)}
-                          className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-left transition-all hover:border-[#004DFF]/30 hover:shadow-sm"
-                        >
-                          <p className="text-sm font-bold leading-tight text-slate-900">{item.topic}</p>
-                          <p className="mt-0.5 text-sm leading-tight text-slate-400">
-                            {item.q}
-                            {item.emoji ? ` ${item.emoji}` : ""}
-                          </p>
-                        </button>
-                      ))}
+                <div className="px-5 pt-6">
+                  <div className="flex items-center gap-3">
+                    <BrandAvatar />
+                    <div>
+                      <p className="text-lg font-semibold text-white">Next Pro</p>
+                      <p className="text-sm text-slate-400">Como podemos ajudar?</p>
                     </div>
                   </div>
 
-                  <Button
-                    onClick={() => {
-                      setActiveTab("chat");
-                      setChatView("thread");
-                    }}
-                    className="mx-auto w-[60%] rounded-lg bg-slate-900 py-5 text-base font-bold text-white hover:bg-slate-800"
-                  >
-                    Iniciar
-                  </Button>
+                  <div className="my-5 h-px w-full bg-white/10" />
+
+                  <p className="mb-3 text-sm font-semibold text-white">Obter ajuda</p>
+
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={() => {
+                        setActiveTab("chat");
+                        setChatView("thread");
+                      }}
+                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-left transition-colors hover:bg-white/[0.07]"
+                    >
+                      <MessageCircle className="h-[18px] w-[18px] shrink-0 text-[#4d7dff]" />
+                      <span className="flex-1 text-sm font-medium text-slate-100">
+                        Enviar uma mensagem
+                      </span>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" />
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab("articles")}
+                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-left transition-colors hover:bg-white/[0.07]"
+                    >
+                      <BookOpen className="h-[18px] w-[18px] shrink-0 text-[#4d7dff]" />
+                      <span className="flex-1 text-sm font-medium text-slate-100">
+                        Leia nossos artigos de ajuda
+                      </span>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" />
+                    </button>
+                  </div>
                 </div>
               )}
 
-
               {activeTab === "chat" && chatView === "list" && (
-                <div className="flex h-full flex-col bg-white">
-                  <div className="border-b border-slate-100 px-4 py-3.5">
-                    <p className="text-center text-base font-semibold text-slate-900">Mensagens</p>
-                  </div>
-
-                  <div className="space-y-2 border-b border-slate-100 px-3 py-3">
+                <div className="flex h-full flex-col">
+                  <div className="space-y-2 px-4 py-4">
                     <div className="relative">
-                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                       <input
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Buscar por nome, status ou número"
                         aria-label="Buscar conversas"
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:bg-white focus:outline-none"
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.04] py-2 pl-9 pr-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-white/20 focus:outline-none"
                       />
                     </div>
                     <div className="flex gap-1.5">
@@ -426,8 +419,8 @@ export function ChatWidget() {
                           onClick={() => setStatusFilter(f.id)}
                           className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-colors ${
                             statusFilter === f.id
-                              ? "bg-slate-900 text-white"
-                              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                              ? "bg-[#004DFF] text-white"
+                              : "bg-white/[0.06] text-slate-400 hover:bg-white/[0.1]"
                           }`}
                         >
                           {f.label}
@@ -436,9 +429,9 @@ export function ChatWidget() {
                     </div>
                   </div>
 
-                  <div className="flex-1 space-y-2 overflow-y-auto p-3">
+                  <div className="flex-1 space-y-2 overflow-y-auto px-4 pb-4">
                     {filteredThreads.length === 0 && (
-                      <p className="px-1 py-6 text-center text-xs font-medium text-slate-400">
+                      <p className="px-1 py-6 text-center text-xs font-medium text-slate-500">
                         Nenhuma conversa encontrada.
                       </p>
                     )}
@@ -446,50 +439,57 @@ export function ChatWidget() {
                       <button
                         key={t.id}
                         onClick={() => setChatView("thread")}
-                        className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-left transition-colors hover:bg-slate-50"
+                        className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-left transition-colors hover:bg-white/[0.07]"
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-                          <MessageSquare className="h-4 w-4" />
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-[#4d7dff]">
+                          <MessageCircle className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <p className="truncate text-sm font-bold text-slate-900">{t.id}</p>
-                            <span className="shrink-0 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white">
+                            <p className="truncate text-sm font-bold text-white">{t.id}</p>
+                            <span className="shrink-0 rounded-full bg-[#004DFF] px-2 py-0.5 text-[10px] font-semibold text-white">
                               {t.statusLabel}
                             </span>
                           </div>
-                          <p className="mt-0.5 truncate text-xs font-medium text-slate-400">
+                          <p className="mt-0.5 truncate text-xs font-medium text-slate-500">
                             {t.name} · {t.phone}
                           </p>
                         </div>
-                        <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+                        <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" />
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
-
               {activeTab === "chat" && chatView === "thread" && (
-                <div className="flex h-full flex-col overflow-hidden bg-white">
-                  <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-2.5">
+                <div className="flex h-full flex-col overflow-hidden">
+                  <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2.5">
                     <button
                       onClick={() => setChatView("list")}
                       aria-label="Voltar"
-                      className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                      className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
-                    <p className="text-sm font-semibold text-slate-900">{ticketId}</p>
+                    <p className="text-sm font-semibold text-white">{ticketId}</p>
                   </div>
                   <div className="min-h-0 flex-1">
                     <Conversation className="h-full">
                       <ConversationContent className="gap-3 p-3">
                         {messages.map((m, i) => (
                           <Message key={i} from={m.role}>
-                            <MessageContent>
+                            <MessageContent
+                              className={
+                                m.role === "user"
+                                  ? "bg-[#004DFF] text-white"
+                                  : "bg-transparent text-slate-100"
+                              }
+                            >
                               {m.role === "assistant" ? (
-                                <MessageResponse className="text-sm leading-relaxed">{m.content}</MessageResponse>
+                                <MessageResponse className="text-sm leading-relaxed">
+                                  {m.content}
+                                </MessageResponse>
                               ) : (
                                 <p className="text-sm leading-relaxed">{m.content}</p>
                               )}
@@ -498,7 +498,7 @@ export function ChatWidget() {
                         ))}
                         {isLoading && (
                           <Message from="assistant">
-                            <MessageContent className="max-w-[80%]">
+                            <MessageContent className="max-w-[80%] bg-transparent">
                               <Shimmer as="span" className="text-sm">
                                 Pensando...
                               </Shimmer>
@@ -508,7 +508,7 @@ export function ChatWidget() {
                       </ConversationContent>
                     </Conversation>
                   </div>
-                  <div className="border-t border-slate-100 bg-white p-3">
+                  <div className="border-t border-white/10 p-3">
                     <PromptInputProvider initialInput="">
                       <ChatComposer onSend={handleSend} status={chatStatus} />
                     </PromptInputProvider>
@@ -516,79 +516,56 @@ export function ChatWidget() {
                 </div>
               )}
 
-              {activeTab === "help" && (
-                <div className="flex flex-col gap-4 p-4">
-                  <div className="rounded-xl bg-white p-4 shadow-sm">
-                    <p className="text-sm font-semibold text-slate-900">Central de ajuda</p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      Escolha um tópico ou fale com nosso time pelo WhatsApp.
-                    </p>
-                  </div>
-                  {FAQ.map((item) => (
-                    <button
-                      key={item.q}
-                      onClick={() => openChatWithQuestion(item.q)}
-                      className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-3 text-left shadow-sm transition-all hover:border-[#004DFF]/20 hover:shadow-md"
-                    >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-                        <HelpCircle className="h-3.5 w-3.5" />
+              {activeTab === "articles" && (
+                <div className="flex flex-col gap-2 px-5 pt-5">
+                  <p className="mb-1 text-sm font-semibold text-white">Artigos de ajuda</p>
+                  {FAQ.map((item) => {
+                    const isOpenArticle = openArticle === item.q;
+                    return (
+                      <div
+                        key={item.q}
+                        className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
+                      >
+                        <button
+                          onClick={() => setOpenArticle(isOpenArticle ? null : item.q)}
+                          className="flex w-full items-center gap-3 text-left"
+                        >
+                          <BookOpen className="h-4 w-4 shrink-0 text-[#4d7dff]" />
+                          <span className="flex-1">
+                            <span className="block text-sm font-semibold text-white">
+                              {item.topic}
+                            </span>
+                            <span className="block text-xs text-slate-500">{item.q}</span>
+                          </span>
+                          <ChevronRight
+                            className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${
+                              isOpenArticle ? "rotate-90" : ""
+                            }`}
+                          />
+                        </button>
+                        {isOpenArticle && (
+                          <div className="mt-3 border-t border-white/10 pt-3">
+                            <p className="text-xs leading-relaxed text-slate-400">{item.a}</p>
+                            <button
+                              onClick={() => openChatWithQuestion(item.q)}
+                              className="mt-3 text-xs font-semibold text-[#4d7dff] hover:underline"
+                            >
+                              Falar com a Aurora sobre isso
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">{item.q}</p>
-                        <p className="mt-1 text-xs text-slate-500">{item.a}</p>
-                      </div>
-                      <ArrowRight className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
-                    </button>
-                  ))}
-                  <Button
-                    onClick={() => window.open("https://wa.me/message/BYSDMLHYTA6EA1", "_blank", "noopener,noreferrer")}
-                    className="w-full rounded-full bg-[#004DFF] py-5 text-sm font-semibold text-white hover:bg-[#0038C7]"
-                  >
-                    Falar com suporte
-                  </Button>
-                </div>
-              )}
-
-              {activeTab === "news" && (
-                <div className="flex flex-col gap-4 p-4">
-                  <div className="rounded-xl bg-white p-4 shadow-sm">
-                    <p className="text-sm font-semibold text-slate-900">Notícias</p>
-                    <p className="mt-1 text-xs text-slate-500">Novidades da Next Pro para o seu negócio.</p>
-                  </div>
-                  {NEWS.map((item) => (
-                    <div
-                      key={item.title}
-                      className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm"
-                    >
-                      <p className="text-xs font-medium text-[#004DFF]">{item.date}</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900">{item.title}</p>
-                      <p className="mt-1 text-xs text-slate-500">{item.excerpt}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-around border-t border-slate-100 bg-white/95 px-2 py-2 backdrop-blur">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors ${
-                      isActive
-                        ? "text-[#004DFF]"
-                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
-                    }`}
-                    aria-label={tab.label}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
+            {/* Footer */}
+            <div className="flex items-center justify-center gap-2 py-4 text-xs text-slate-500">
+              <span>Funcionamos com</span>
+              <Settings className="h-3.5 w-3.5" />
+              <span className="font-medium text-slate-400">gpt 5</span>
             </div>
           </motion.div>
         )}
