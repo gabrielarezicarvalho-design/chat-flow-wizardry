@@ -2390,7 +2390,7 @@ export default function Landing() {
 
             {/* Right Column: Case Cards */}
             <div className="lg:col-span-7 space-y-8">
-              {cases.slice(0, 2).map((c) => {
+              {visibleCases.map((c) => {
                 const meta = caseMeta[c.name];
                 const metric1 = c.before[0];
                 const metric1After = c.after[0];
