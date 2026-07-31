@@ -51,6 +51,8 @@ const INITIAL_GREETING: ChatMessage = {
   content: "Olá! 👋 Sou a Aurora, assistente da Next Pro. Como posso te ajudar hoje?",
 };
 
+const FUNCTION_TIMEOUT = 12000;
+
 function ChatComposer({
   onSend,
   status,
@@ -82,6 +84,25 @@ function ChatComposer({
   );
 }
 
+function HeaderLogo() {
+  const [error, setError] = useState(false);
+  if (error) {
+    return (
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#004DFF] text-white">
+        <Bot className="h-5 w-5" />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={logoAurora.url}
+      alt="NEXT PRO"
+      className="h-9 w-9 shrink-0 rounded-full object-cover"
+      onError={() => setError(true)}
+    />
+  );
+}
+
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("home");
@@ -102,7 +123,6 @@ export function ChatWidget() {
       setMessages((prev) => [...prev, { role: "user", content: clean }]);
       setIsLoading(true);
 
-      // Respostas locais rápidas para perguntas comuns do FAQ
       const local = FAQ.find((item) => {
         const questionNorm = item.q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const textNorm = clean.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -116,36 +136,36 @@ export function ChatWidget() {
         return;
       }
 
+      let reply: string | null = null;
       try {
         const history = messagesRef.current.slice(-6).map((m) => ({
           role: m.role,
           content: m.content,
         }));
-        const { data, error } = await supabase.functions.invoke("landing-aurora-chat", {
+        const invokePromise = supabase.functions.invoke("landing-aurora-chat", {
           body: { message: clean, history },
         });
-        const reply = (data as any)?.text || (data as any)?.reply;
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content:
-              !error && reply
-                ? reply
-                : "Consigo te ajudar com isso! 😊 Me conta um pouco mais sobre o que você precisa.",
-          },
-        ]);
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          window.setTimeout(() => reject(new Error("Tempo esgotado")), FUNCTION_TIMEOUT)
+        );
+        const { data, error } = await Promise.race([invokePromise, timeoutPromise]);
+        reply = (data as any)?.text || (data as any)?.reply;
+        if (error) throw error;
       } catch {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: "Consigo te ajudar com isso! 😊 Me conta um pouco mais sobre o que você precisa.",
-          },
-        ]);
-      } finally {
-        setIsLoading(false);
+        reply = null;
       }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            reply && reply.trim()
+              ? reply
+              : "Consigo te ajudar com isso! 😊 Me conta um pouco mais sobre o que você precisa.",
+        },
+      ]);
+      setIsLoading(false);
     },
     [isLoading]
   );
@@ -165,7 +185,6 @@ export function ChatWidget() {
     { id: "news", label: "Notícias", icon: Megaphone },
   ];
 
-  // Fecha ao clicar fora do painel/botão e ao pressionar Esc
   useEffect(() => {
     if (!isOpen) return;
 
@@ -197,7 +216,6 @@ export function ChatWidget() {
 
   return (
     <>
-      {/* Floating button */}
       <button
         ref={buttonRef}
         onClick={(e) => {
@@ -224,14 +242,9 @@ export function ChatWidget() {
             className="fixed bottom-24 right-4 z-[120] flex w-[92vw] max-w-[380px] flex-col overflow-hidden rounded-[24px] border border-slate-100 bg-white shadow-2xl shadow-slate-900/10 md:right-6"
             style={{ height: "clamp(520px, 70vh, 640px)" }}
           >
-            {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
               <div className="flex items-center gap-2.5">
-                <img
-                  src={logoAurora.url}
-                  alt="NEXT PRO"
-                  className="h-9 w-9 rounded-full object-cover"
-                />
+                <HeaderLogo />
                 <div>
                   <p className="font-semibold text-slate-900">NEXT PRO</p>
                   <p className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -249,7 +262,6 @@ export function ChatWidget() {
               </button>
             </div>
 
-            {/* Content */}
             <div className="flex-1 overflow-y-auto bg-slate-50">
               {activeTab === "home" && (
                 <div className="flex flex-col gap-5 p-4">
@@ -321,7 +333,7 @@ export function ChatWidget() {
 
               {activeTab === "chat" && (
                 <div className="flex h-full flex-col overflow-hidden bg-white">
-                  <div className="flex-1 min-h-0">
+                  <div className="min-h-0 flex-1">
                     <Conversation className="h-full">
                       <ConversationContent className="gap-3 p-3">
                         {messages.map((m, i) => (
@@ -408,7 +420,6 @@ export function ChatWidget() {
               )}
             </div>
 
-            {/* Tab bar */}
             <div className="flex items-center justify-around border-t border-slate-100 bg-white/95 px-2 py-2 backdrop-blur">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
