@@ -433,7 +433,7 @@ export function ChatWidget() {
                       setActiveTab("chat");
                       setChatView("thread");
                     }}
-                    className="mx-auto mb-5 block rounded-full bg-white px-8 py-2.5 text-sm font-bold text-[#0b0b10] transition-opacity hover:opacity-90"
+                    className="mx-auto mb-5 block rounded-full bg-white px-7 py-2 text-sm font-bold text-[#0b0b10] transition-opacity hover:opacity-90"
                   >
                     Iniciar
                   </button>
