@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { MessageCircle } from "lucide-react";
 
 const STORAGE_KEY = "nextpro_cookie_consent";
 
