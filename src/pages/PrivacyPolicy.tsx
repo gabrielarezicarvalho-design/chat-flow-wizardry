@@ -5,7 +5,7 @@ import LandingFooter from "@/components/layout/LandingFooter";
 
 const COMPANY = "Next Pro";
 const CNPJ = "65.146.817/0001-18";
-const EMAIL = "contato@nextpro.com.br";
+const EMAIL = "suporte@nextprodev.com.br";
 const UPDATED = "Julho de 2026";
 
 const H2 = ({ children }: { children: ReactNode }) => (
