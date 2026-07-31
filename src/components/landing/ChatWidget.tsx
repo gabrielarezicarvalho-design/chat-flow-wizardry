@@ -12,6 +12,10 @@ import {
   Search,
   Bot,
   Settings,
+  HelpCircle,
+  Headphones,
+  Megaphone,
+  RefreshCw,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logoAurora from "@/assets/logo-aurora.png.asset.json";
@@ -151,6 +155,7 @@ export function ChatWidget() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [openArticle, setOpenArticle] = useState<string | null>(null);
+  const [faqOffset, setFaqOffset] = useState(0);
 
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_GREETING]);
   const [isLoading, setIsLoading] = useState(false);
@@ -366,36 +371,72 @@ export function ChatWidget() {
                     </div>
                   </div>
 
-                  <div className="my-5 h-px w-full bg-white/10" />
+                  <div className="my-4 h-px w-full bg-white/10" />
 
-                  <p className="mb-3 text-sm font-semibold text-white">Obter ajuda</p>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {[
+                      { icon: Search, label: "Buscar", action: () => setActiveTab("articles") },
+                      { icon: HelpCircle, label: "Dúvidas", action: () => setActiveTab("articles") },
+                      {
+                        icon: Headphones,
+                        label: "Suporte",
+                        action: () => {
+                          setActiveTab("chat");
+                          setChatView("thread");
+                        },
+                      },
+                      { icon: Megaphone, label: "Notícias", action: () => setActiveTab("articles") },
+                    ].map(({ icon: Icon, label, action }) => (
+                      <button
+                        key={label}
+                        onClick={action}
+                        className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.09]"
+                      >
+                        <Icon className="h-[18px] w-[18px] shrink-0 text-slate-300" />
+                        <span className="text-sm font-semibold text-white">{label}</span>
+                      </button>
+                    ))}
+                  </div>
 
-                  <div className="flex flex-col gap-3">
+                  <div className="mb-2 mt-4 flex items-center justify-between">
+                    <p className="text-xs text-slate-400">Dúvidas frequentes?</p>
                     <button
-                      onClick={() => {
-                        setActiveTab("chat");
-                        setChatView("thread");
-                      }}
-                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-left transition-colors hover:bg-white/[0.07]"
+                      onClick={() => setFaqOffset((v) => v + 1)}
+                      aria-label="Atualizar perguntas"
+                      className="rounded-full p-1 text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-white"
                     >
-                      <MessageCircle className="h-[18px] w-[18px] shrink-0 text-[#4d7dff]" />
-                      <span className="flex-1 text-sm font-medium text-slate-100">
-                        Enviar uma mensagem
-                      </span>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" />
-                    </button>
-
-                    <button
-                      onClick={() => setActiveTab("articles")}
-                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-left transition-colors hover:bg-white/[0.07]"
-                    >
-                      <BookOpen className="h-[18px] w-[18px] shrink-0 text-[#4d7dff]" />
-                      <span className="flex-1 text-sm font-medium text-slate-100">
-                        Leia nossos artigos de ajuda
-                      </span>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" />
+                      <RefreshCw className="h-3.5 w-3.5" />
                     </button>
                   </div>
+
+                  <div className="flex flex-col gap-2 pb-4">
+                    {Array.from({ length: 3 }, (_, i) => FAQ[(faqOffset + i) % FAQ.length]).map(
+                      (item) => (
+                        <button
+                          key={item.q}
+                          onClick={() => openChatWithQuestion(item.q)}
+                          className="rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2 text-left transition-colors hover:bg-white/[0.07]"
+                        >
+                          <span className="block text-sm font-bold leading-tight text-white">
+                            {item.topic}
+                          </span>
+                          <span className="mt-0.5 block text-xs leading-tight text-slate-500">
+                            {item.q} {item.emoji}
+                          </span>
+                        </button>
+                      )
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setActiveTab("chat");
+                      setChatView("thread");
+                    }}
+                    className="mx-auto mb-5 block rounded-full bg-white px-8 py-2.5 text-sm font-bold text-[#0b0b10] transition-opacity hover:opacity-90"
+                  >
+                    Iniciar
+                  </button>
                 </div>
               )}
 
