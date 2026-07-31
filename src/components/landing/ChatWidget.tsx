@@ -96,7 +96,7 @@ function ChatComposer({
       onSubmit={({ text }) => {
         onSend(text);
       }}
-      className="w-full flex-row items-center gap-1 rounded-full border-none bg-slate-100 px-2 py-1 shadow-none divide-y-0"
+      className="w-full flex-row items-center gap-1 divide-y-0 rounded-full border-none bg-slate-100 px-2 py-1 shadow-none outline-none ring-0 focus-within:border-none focus-within:shadow-none focus-within:outline-none focus-within:ring-0 has-[:focus]:ring-0"
     >
       <button
         type="button"
