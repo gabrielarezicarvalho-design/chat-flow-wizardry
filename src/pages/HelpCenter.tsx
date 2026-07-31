@@ -28,7 +28,7 @@ export default function HelpCenter() {
         {/* Hero */}
         <div className="text-center">
           <h1 className="font-['Space_Grotesk'] text-4xl md:text-6xl font-bold tracking-tight text-[#1a1333] whitespace-nowrap">
-            FAQ - PERGUNTAS FREQUENTES
+            FAQ - Perguntas Frequentes
           </h1>
           <p className="mt-6 text-slate-500 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
             Veja as dúvidas frequentes sobre o sistema. Se ainda assim tiver alguma dúvida, entre em contato conosco pelos meios abaixo.
