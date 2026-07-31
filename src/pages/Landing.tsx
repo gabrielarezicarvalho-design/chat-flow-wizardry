@@ -1231,6 +1231,21 @@ export default function Landing() {
   const [showCompareTable, setShowCompareTable] = useState(false);
   const [subscribing, setSubscribing] = useState<"start" | "business" | null>(null);
   const [liveLeads, setLiveLeads] = useState<{ name: string; segment: string; city: string }[]>([]);
+  const [caseOffset, setCaseOffset] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCaseOffset((prev) => (prev + 2) % cases.length);
+    }, 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  const visibleCases = [
+    cases[caseOffset % cases.length],
+    cases[(caseOffset + 1) % cases.length],
+  ];
+
+
 
   const handleSubscribe = async (tier: "start" | "business") => {
     try {
