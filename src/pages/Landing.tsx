@@ -2195,7 +2195,7 @@ export default function Landing() {
       {/* CENTRAL COMPLETA */}
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-6xl px-6">
-          <div className="text-center">
+          <div className="text-center mb-16">
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700">
               <Sparkles className="h-3.5 w-3.5" style={{ color: "#004DFF" }} />
               Tudo em um único painel
@@ -2208,57 +2208,69 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="mt-12 grid md:grid-cols-2 gap-5">
+          <div className="grid md:grid-cols-2 gap-8">
             {[
               {
-                icon: Target, title: "Prospecção",
+                icon: Target,
+                title: "Prospecção",
                 items: [
-                  { i: MapPin, l: "Google Maps" },
-                  { i: Instagram, l: "Instagram" },
-                  { i: FileText, l: "Base CNPJ" },
-                  { i: UsersRound, l: "Grupos WhatsApp" },
+                  { i: MapPin, l: "Google Maps", bg: "bg-blue-100", color: "text-[#004DFF]" },
+                  { i: Instagram, l: "Instagram", bg: "bg-pink-100", color: "text-pink-600" },
+                  { i: FileText, l: "Base CNPJ", bg: "bg-slate-100", color: "text-slate-600" },
+                  { i: UsersRound, l: "Grupos WhatsApp", bg: "bg-green-100", color: "text-green-600" },
                 ],
               },
               {
-                icon: Bot, title: "IA & Automação",
+                icon: Bot,
+                title: "IA & Automação",
                 items: [
-                  { i: Headphones, l: "Atendimento IA" },
-                  { i: Volume2, l: "Áudio IA" },
-                  { i: Mic, l: "Clonagem de voz" },
-                  { i: Repeat, l: "Follow-up automático" },
+                  { i: Headphones, l: "Atendimento IA", bg: "bg-indigo-100", color: "text-indigo-600" },
+                  { i: Volume2, l: "Áudio IA", bg: "bg-purple-100", color: "text-purple-600" },
+                  { i: Mic, l: "Clonagem de voz", bg: "bg-amber-100", color: "text-amber-600" },
+                  { i: Repeat, l: "Follow-up automático", bg: "bg-rose-100", color: "text-rose-600" },
                 ],
               },
               {
-                icon: Wallet, title: "Comercial & Cobrança",
+                icon: Wallet,
+                title: "Comercial & Cobrança",
                 items: [
-                  { i: TrendingUp, l: "CRM / Funil" },
-                  { i: Receipt, l: "Cobranças automáticas" },
-                  { i: CreditCard, l: "PIX e boleto" },
-                  { i: AlertCircle, l: "Recuperação de inadimplentes" },
+                  { i: TrendingUp, l: "CRM / Funil", bg: "bg-sky-100", color: "text-sky-600" },
+                  { i: Receipt, l: "Cobranças automáticas", bg: "bg-orange-100", color: "text-orange-600" },
+                  { i: CreditCard, l: "PIX e boleto", bg: "bg-emerald-100", color: "text-emerald-600" },
+                  { i: AlertCircle, l: "Recuperação de inadimplentes", bg: "bg-violet-100", color: "text-violet-600" },
                 ],
               },
               {
-                icon: Megaphone, title: "Comunicação",
+                icon: Megaphone,
+                title: "Comunicação",
                 items: [
-                  { i: Send, l: "Campanhas em massa" },
-                  { i: MessageSquare, l: "Múltiplos WhatsApps" },
-                  { i: ListChecks, l: "Respostas rápidas" },
-                  { i: Ban, l: "Listas e blacklist" },
+                  { i: Send, l: "Campanhas em massa", bg: "bg-blue-100", color: "text-[#004DFF]" },
+                  { i: MessageSquare, l: "Múltiplos WhatsApps", bg: "bg-green-100", color: "text-green-600" },
+                  { i: ListChecks, l: "Respostas rápidas", bg: "bg-indigo-100", color: "text-indigo-600" },
+                  { i: Ban, l: "Listas e blacklist", bg: "bg-slate-100", color: "text-slate-600" },
                 ],
               },
             ].map((group) => (
-              <div key={group.title} className="rounded-2xl bg-white border border-slate-200 p-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <group.icon className="h-5 w-5" style={{ color: "#004DFF" }} />
+              <div
+                key={group.title}
+                className="group relative bg-white border border-slate-200 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,77,255,0.08)] transition-all duration-500 hover:-translate-y-1"
+              >
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="h-12 w-12 rounded-2xl bg-[#004DFF] flex items-center justify-center text-white shadow-lg shadow-[#004DFF]/20">
+                    <group.icon className="h-6 w-6" />
                   </div>
-                  <div className="font-semibold text-xl">{group.title}</div>
+                  <div className="font-semibold text-2xl text-[#0F172A]">{group.title}</div>
                 </div>
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-2 gap-4">
                   {group.items.map((it) => (
-                    <div key={it.l} className="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-base text-slate-700">
-                      <it.i className="h-4 w-4 text-slate-500 flex-shrink-0" />
-                      <span className="truncate">{it.l}</span>
+                    <div
+                      key={it.l}
+                      className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-3 transition-colors group-hover:bg-white"
+                    >
+                      <div className={`h-8 w-8 rounded-lg ${it.bg} flex items-center justify-center flex-shrink-0 ${it.color}`}>
+                        <it.i className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-medium text-slate-700 truncate">{it.l}</span>
                     </div>
                   ))}
                 </div>
