@@ -139,6 +139,8 @@ export function ChatWidget() {
   const [ticketId] = useState(generateTicketId);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [faqOffset, setFaqOffset] = useState(0);
+
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_GREETING]);
   const [isLoading, setIsLoading] = useState(false);
 
