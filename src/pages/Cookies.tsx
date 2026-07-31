@@ -96,7 +96,7 @@ const Cookies = () => {
       <LandingNav />
 
       <main className="flex-1">
-        <section className="mx-auto w-full max-w-4xl px-6 pt-16 pb-8">
+        <section className="mx-auto w-full max-w-4xl px-6 pt-24 pb-8">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1.5 text-xs font-semibold">
             <Cookie className="h-3.5 w-3.5" />
             Cookies
