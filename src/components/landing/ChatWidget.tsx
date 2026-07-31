@@ -559,7 +559,7 @@ export function ChatWidget() {
               )}
 
               {activeTab === "articles" && (
-                <div className="flex flex-col gap-1.5 px-5 pt-5">
+                <div className="flex h-full flex-col gap-1.5 overflow-y-auto scrollbar-hide px-5 pt-5">
                   <p className="mb-1 text-sm font-semibold text-slate-900">Artigos de ajuda</p>
                   {FAQ.map((item) => {
                     const isOpenArticle = openArticle === item.q;
