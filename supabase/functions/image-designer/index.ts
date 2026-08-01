@@ -375,8 +375,12 @@ Deno.serve(async (req) => {
       .upload(path, bytes, { contentType: "image/png", upsert: false });
     if (upErr) throw new Error(`Storage upload: ${upErr.message}`);
 
-    const { data: pub } = admin.storage.from("campaign-media").getPublicUrl(path);
-    const imageUrl = pub.publicUrl;
+    const { data: signed, error: signErr } = await admin.storage
+      .from("campaign-media")
+      .createSignedUrl(path, 60 * 60 * 24 * 365);
+    if (signErr) throw new Error(`Storage signed URL: ${signErr.message}`);
+    const imageUrl = signed.signedUrl;
+
 
     const { data: row, error: insErr } = await admin
       .from("generated_images")
