@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Users, BrainCircuit, MessageSquare, Bot, CheckCircle2, Zap, Sparkles, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import iconWhatsapp from "@/assets/integrations/whatsapp.png.asset.json";
 import iconInstagram from "@/assets/integrations/instagram.png.asset.json";
 import iconMeta from "@/assets/integrations/meta.png.asset.json";
@@ -18,10 +19,9 @@ const TONE: Record<string, string> = {
   emerald: "bg-[#DCFCE7] text-[#10B981]",
 };
 
-const STEP_MS = 3600;
+const STEP_MS = 4500;
 
-/** Máquina de escrever simples */
-function useTypewriter(text: string, active: boolean, speed = 55) {
+function useTypewriter(text: string, active: boolean, speed = 40) {
   const [out, setOut] = useState("");
   useEffect(() => {
     if (!active) {
@@ -41,18 +41,28 @@ function useTypewriter(text: string, active: boolean, speed = 55) {
 
 function StepCadastro({ active }: { active: boolean }) {
   const nome = useTypewriter("João Silva", active);
-  const email = useTypewriter("joao@email.com", active, 45);
+  const email = useTypewriter("joao@email.com", active, 35);
   const emailStarted = nome === "João Silva";
+
   return (
     <div className="mt-8 w-full max-w-xs space-y-4">
-      <div className="relative rounded-xl border border-slate-200 bg-slate-50/60 px-4 pt-4 pb-3 text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative rounded-xl border border-slate-200 bg-slate-50/60 px-4 pt-4 pb-3 text-center"
+      >
         <span className="text-[10px] text-slate-400">Nome</span>
         <p className="mt-0.5 text-base font-medium text-slate-900">
           {nome}
           <span className="ml-0.5 inline-block h-4 w-[1.5px] animate-pulse bg-emerald-500 align-middle" />
         </p>
-      </div>
-      <div className="relative rounded-xl border border-slate-200 bg-slate-50/60 px-4 pt-4 pb-3 text-center">
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="relative rounded-xl border border-slate-200 bg-slate-50/60 px-4 pt-4 pb-3 text-center"
+      >
         <span className="text-[10px] text-slate-400">Email</span>
         <p className="mt-0.5 text-base font-medium text-slate-900">
           {emailStarted ? email : ""}
@@ -61,7 +71,7 @@ function StepCadastro({ active }: { active: boolean }) {
           )}
           {!emailStarted && <span className="text-slate-300">&nbsp;</span>}
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -77,22 +87,31 @@ function StepArea({ active }: { active: boolean }) {
     const timers = options.map((_, i) => setTimeout(() => setSel(i), 500 + i * 700));
     return () => timers.forEach(clearTimeout);
   }, [active]);
+
   return (
-    <div className="mt-8 w-full max-w-xs rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="mt-8 w-full max-w-xs rounded-xl border border-slate-200 bg-slate-50/60 p-4"
+    >
       <p className="text-center text-[10px] text-slate-400">Área</p>
       <div className="mt-2 space-y-1">
         {options.map((o, i) => (
-          <div
+          <motion.div
             key={o}
-            className={`rounded-lg py-2 text-center text-sm transition-all duration-300 ${
-              sel === i ? "bg-white text-slate-900 shadow-sm scale-[1.02]" : "text-slate-500"
-            }`}
+            animate={{
+              backgroundColor: sel === i ? "#ffffff" : "transparent",
+              boxShadow: sel === i ? "0 1px 2px 0 rgba(0, 0, 0, 0.05)" : "none",
+              scale: sel === i ? 1.02 : 1,
+              color: sel === i ? "#0f172a" : "#64748b",
+            }}
+            className="rounded-lg py-2 text-center text-sm font-medium transition-colors"
           >
             {o}
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -111,23 +130,31 @@ function StepCanal({ active }: { active: boolean }) {
     const t = setTimeout(() => setPicked(true), 900);
     return () => clearTimeout(t);
   }, [active]);
+
   return (
     <div className="mt-8 flex items-center justify-center gap-3">
       {channels.map((c, i) => (
-        <div
+        <motion.div
           key={c.label}
-          style={{ animationDelay: `${i * 120}ms` }}
-          className={`flex h-[104px] w-[86px] animate-fade-in flex-col items-center justify-center gap-2 rounded-2xl border transition-all duration-500 ${
-            picked && i === 0
-              ? "border-emerald-300 bg-emerald-50/70 shadow-[0_0_0_4px_rgba(16,185,129,0.12)] scale-105"
-              : "border-slate-200 bg-white opacity-60"
-          }`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{
+            opacity: picked && i !== 0 ? 0.4 : 1,
+            y: 0,
+            scale: picked && i === 0 ? 1.05 : 1,
+            borderColor: picked && i === 0 ? "#6ee7b7" : "#e2e8f0",
+            backgroundColor: picked && i === 0 ? "rgba(236, 252, 231, 0.7)" : "#ffffff",
+          }}
+          transition={{ delay: i * 0.1 }}
+          className="flex h-[104px] w-[86px] flex-col items-center justify-center gap-2 rounded-2xl border transition-shadow"
+          style={{
+            boxShadow: picked && i === 0 ? "0 0 0 4px rgba(16,185,129,0.12)" : "none",
+          }}
         >
           <img src={c.img} alt={c.label} className="h-7 w-7 object-contain" />
           <span className={`text-[11px] font-medium ${picked && i === 0 ? "text-emerald-600" : "text-slate-400"}`}>
             {c.label}
           </span>
-        </div>
+        </motion.div>
       ))}
     </div>
   );
@@ -144,61 +171,94 @@ function StepTeste({ active }: { active: boolean }) {
       setShown(0);
       return;
     }
-    const timers = bubbles.map((_, i) => setTimeout(() => setShown(i + 1), 500 + i * 900));
+    const timers = bubbles.map((_, i) => setTimeout(() => setShown(i + 1), 500 + i * 1200));
     return () => timers.forEach(clearTimeout);
   }, [active]);
+
   return (
-    <div className="mt-8 w-full max-w-sm rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
-      <div className="space-y-3">
-        {bubbles.map((b, i) =>
-          shown > i ? (
-            <div
-              key={b.text}
-              className={`flex animate-fade-in items-center gap-2 ${b.from === "user" ? "justify-end" : ""}`}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="mt-8 w-full max-w-sm rounded-2xl border border-slate-200 bg-slate-50/60 p-4"
+    >
+      <div className="space-y-3 min-h-[90px]">
+        <AnimatePresence>
+          {bubbles.slice(0, shown).map((b, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              className={`flex items-start gap-2 ${b.from === "user" ? "justify-end" : ""}`}
             >
               {b.from === "ai" && (
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F3E8FF] text-[#A855F7]">
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F3E8FF] text-[#A855F7]">
                   <Bot className="h-3.5 w-3.5" />
                 </div>
               )}
               <div
-                className={`rounded-xl px-3 py-2 text-[13px] ${
-                  b.from === "ai" ? "bg-[#F3E8FF] text-slate-700" : "bg-[#DCFCE7] text-slate-700"
+                className={`rounded-2xl px-3 py-2 text-[13px] leading-relaxed ${
+                  b.from === "ai"
+                    ? "bg-[#F3E8FF] text-slate-700 rounded-tl-none shadow-sm"
+                    : "bg-[#DCFCE7] text-slate-700 rounded-tr-none shadow-sm"
                 }`}
               >
                 {b.text}
               </div>
               {b.from === "user" && (
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#10B981]">
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#10B981]">
                   <Users className="h-3.5 w-3.5" />
                 </div>
               )}
-            </div>
-          ) : null
-        )}
-        {shown === 0 && <div className="h-[76px]" />}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 function StepPronto({ active }: { active: boolean }) {
   return (
     <div className="mt-6 flex flex-col items-center">
-      {active && (
-        <>
-          <p className="animate-scale-in text-xl font-bold text-emerald-500">Agente criado com sucesso!</p>
-          <div className="mt-2 flex gap-1">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <Sparkles
-                key={i}
-                className="h-4 w-4 animate-fade-in text-amber-400"
-                style={{ animationDelay: `${i * 120}ms` }}
-              />
-            ))}
-          </div>
-        </>
-      )}
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center"
+          >
+            <motion.div
+              animate={{
+                scale: [1, 1.1, 1],
+                rotate: [0, 5, -5, 0],
+              }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-500 mb-4"
+            >
+              <CheckCircle2 className="h-10 w-10" />
+            </motion.div>
+            <p className="text-xl font-bold text-emerald-500">Agente criado com sucesso!</p>
+            <div className="mt-2 flex gap-1">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <motion.div
+                  key={i}
+                  animate={{
+                    y: [0, -4, 0],
+                    opacity: [0, 1, 0.5],
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 1.5,
+                    delay: i * 0.2,
+                  }}
+                >
+                  <Sparkles className="h-4 w-4 text-amber-400" />
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
