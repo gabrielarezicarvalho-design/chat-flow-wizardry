@@ -235,6 +235,7 @@ function StepTeste({ active }: { active: boolean }) {
   const bubbles = [
     { from: "ai", text: "Olá! Como posso ajudar?" },
     { from: "user", text: "Quero agendar uma consulta" },
+    { from: "ai", text: "Com certeza! Qual o melhor horário?" },
   ];
   const [shown, setShown] = useState(0);
   useEffect(() => {
@@ -242,7 +243,7 @@ function StepTeste({ active }: { active: boolean }) {
       setShown(0);
       return;
     }
-    const timers = bubbles.map((_, i) => setTimeout(() => setShown(i + 1), 500 + i * 900));
+    const timers = bubbles.map((_, i) => setTimeout(() => setShown(i + 1), 600 + i * 1000));
     return () => timers.forEach(clearTimeout);
   }, [active]);
   return (
