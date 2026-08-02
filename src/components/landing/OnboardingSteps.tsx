@@ -175,33 +175,58 @@ function StepCanal({ active }: { active: boolean }) {
     { label: "Instagram", img: iconInstagram.url },
     { label: "Messenger", img: iconMeta.url },
   ];
-  const [picked, setPicked] = useState(false);
+  const [hovered, setHovered] = useState(-1);
+  const [picked, setPicked] = useState(-1);
+
   useEffect(() => {
     if (!active) {
-      setPicked(false);
+      setHovered(-1);
+      setPicked(-1);
       return;
     }
-    const t = setTimeout(() => setPicked(true), 900);
-    return () => clearTimeout(t);
+    // Simula escolha do usuário
+    const timers = [
+      setTimeout(() => setHovered(1), 400),
+      setTimeout(() => setHovered(2), 800),
+      setTimeout(() => setHovered(0), 1200),
+      setTimeout(() => {
+        setHovered(-1);
+        setPicked(0); // Seleciona WhatsApp
+      }, 1600),
+    ];
+    return () => timers.forEach(clearTimeout);
   }, [active]);
+
   return (
-    <div className="mt-8 flex items-center justify-center gap-3">
-      {channels.map((c, i) => (
-        <div
-          key={c.label}
-          style={{ animationDelay: `${i * 120}ms` }}
-          className={`flex h-[104px] w-[86px] animate-fade-in flex-col items-center justify-center gap-2 rounded-2xl border transition-all duration-500 ${
-            picked && i === 0
-              ? "border-emerald-300 bg-emerald-50/70 shadow-[0_0_0_4px_rgba(16,185,129,0.12)] scale-105"
-              : "border-slate-200 bg-white opacity-60"
-          }`}
-        >
-          <img src={c.img} alt={c.label} className="h-7 w-7 object-contain" />
-          <span className={`text-[11px] font-medium ${picked && i === 0 ? "text-emerald-600" : "text-slate-400"}`}>
-            {c.label}
-          </span>
-        </div>
-      ))}
+    <div className="mt-8 flex items-center justify-center gap-4">
+      {channels.map((c, i) => {
+        const isPicked = picked === i;
+        const isHovered = hovered === i;
+        return (
+          <div
+            key={c.label}
+            className={`flex h-[110px] w-[94px] flex-col items-center justify-center gap-2 rounded-2xl border transition-all duration-500 ${
+              isPicked
+                ? "scale-105 border-blue-300 bg-white shadow-[0_0_0_4px_rgba(0,77,255,0.08)] ring-1 ring-blue-100"
+                : isHovered
+                  ? "border-slate-300 bg-slate-50 opacity-100 translate-y-[-4px]"
+                  : "border-slate-200 bg-white opacity-50"
+            }`}
+          >
+            <div className={`relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300 ${isPicked ? "bg-blue-50" : "bg-slate-50"}`}>
+              <img src={c.img} alt={c.label} className="h-6 w-6 object-contain" />
+              {isPicked && (
+                <div className="absolute -right-1.5 -top-1.5 flex h-4 w-4 animate-scale-in items-center justify-center rounded-full bg-blue-500 text-white shadow-sm">
+                  <Check className="h-2.5 w-2.5" />
+                </div>
+              )}
+            </div>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${isPicked ? "text-blue-600" : "text-slate-400"}`}>
+              {c.label}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
