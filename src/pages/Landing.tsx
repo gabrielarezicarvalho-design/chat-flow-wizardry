@@ -14,6 +14,7 @@ import iconInstagram from "@/assets/integrations/instagram.png.asset.json";
 import iconMeta from "@/assets/integrations/meta.png.asset.json";
 import iconTiktok from "@/assets/integrations/tiktok.png.asset.json";
 import iconCalendar from "@/assets/integrations/calendar.png.asset.json";
+import iconOpenai from "@/assets/integrations/openai.png.asset.json";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -1976,7 +1977,8 @@ export default function Landing() {
             <img src={iconWhatsapp.url} alt="WhatsApp" className="h-10 w-10 object-contain" />
             <img src={iconInstagram.url} alt="Instagram" className="h-10 w-10 object-contain" />
             <img src={iconTiktok.url} alt="TikTok" className="h-10 w-10 object-contain" />
-            <img src={iconCalendar.url} alt="Calendar" className="h-10 w-10 object-contain" />
+            <img src={iconCalendar.url} alt="Google Calendar" className="h-10 w-10 object-contain" />
+            <img src={iconOpenai.url} alt="OpenAI" className="h-10 w-10 object-contain" />
             <img src={iconMeta.url} alt="Meta" className="h-10 w-10 object-contain" />
           </div>
         </div>
