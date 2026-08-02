@@ -108,28 +108,62 @@ function StepCadastro({ active }: { active: boolean }) {
 function StepArea({ active }: { active: boolean }) {
   const options = ["Clínica Médica", "Clínica Odontológica", "E-commerce"];
   const [sel, setSel] = useState(-1);
+  const [hovered, setHovered] = useState(-1);
+
   useEffect(() => {
     if (!active) {
       setSel(-1);
+      setHovered(-1);
       return;
     }
-    const timers = options.map((_, i) => setTimeout(() => setSel(i), 500 + i * 700));
+    // Efeito de "passar o mouse" rápido antes de selecionar
+    const timers = [
+      setTimeout(() => setHovered(0), 400),
+      setTimeout(() => setHovered(1), 800),
+      setTimeout(() => setHovered(2), 1200),
+      setTimeout(() => {
+        setHovered(-1);
+        setSel(1); // Seleciona a do meio
+      }, 1600),
+    ];
     return () => timers.forEach(clearTimeout);
   }, [active]);
+
   return (
-    <div className="mt-8 w-full max-w-xs rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-      <p className="text-center text-[10px] text-slate-400">Área</p>
-      <div className="mt-2 space-y-1">
-        {options.map((o, i) => (
-          <div
-            key={o}
-            className={`rounded-lg py-2 text-center text-sm transition-all duration-300 ${
-              sel === i ? "bg-white text-slate-900 shadow-sm scale-[1.02]" : "text-slate-500"
-            }`}
-          >
-            {o}
-          </div>
-        ))}
+    <div className="mt-8 w-full max-w-[280px] space-y-4">
+      <div
+        className={`relative overflow-hidden rounded-2xl border bg-slate-50/60 p-4 transition-all duration-300 ${
+          sel !== -1 ? "border-blue-300 shadow-[0_0_0_3px_rgba(0,77,255,0.08)]" : "border-slate-200"
+        }`}
+      >
+        <p className="text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          Segmento
+        </p>
+        <div className="mt-3 space-y-2">
+          {options.map((o, i) => {
+            const isSelected = sel === i;
+            const isHovered = hovered === i;
+            return (
+              <div
+                key={o}
+                className={`flex items-center justify-between rounded-xl px-4 py-2.5 text-sm transition-all duration-300 ${
+                  isSelected
+                    ? "bg-white text-blue-600 shadow-sm scale-[1.03] ring-1 ring-blue-100"
+                    : isHovered
+                      ? "bg-slate-200/50 text-slate-700"
+                      : "text-slate-500 opacity-60"
+                }`}
+              >
+                <span className="font-medium">{o}</span>
+                {isSelected && (
+                  <div className="flex h-5 w-5 animate-scale-in items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                    <Check className="h-3 w-3" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
