@@ -34,6 +34,8 @@ import { ProspeccaoMapWindow } from "@/components/landing/ProspeccaoMapWindow";
 import CookieConsent from "@/components/landing/CookieConsent";
 import LandingFAQ from "@/components/landing/LandingFAQ";
 import { ChatWidget } from "@/components/landing/ChatWidget";
+import { OnboardingSteps } from "@/components/landing/OnboardingSteps";
+
 
 
 const EMOJIS = ["😀","😂","😍","🥳","🚀","🔥","👍","🙏","💜","✨","✅","💡","📞","📎","🎉","💬","🤖","💰","📈","🎯"];
