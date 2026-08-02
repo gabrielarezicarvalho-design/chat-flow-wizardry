@@ -280,59 +280,92 @@ export function OnboardingSteps() {
     if (!inView) return;
     const id = setInterval(() => setStep((s) => (s + 1) % STEPS.length), STEP_MS);
     return () => clearInterval(id);
-  }, [inView]);
+  }, [inView, step]);
 
   const current = STEPS[step];
   const Icon = current.icon;
 
   return (
     <div ref={ref} className="mx-auto mt-20 max-w-[900px] px-6">
-      <div className="relative rounded-t-[20px] border border-slate-200 bg-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)]">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="relative overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)]"
+      >
+        {/* Progress Bar */}
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-slate-100 z-10">
+          <motion.div
+            key={step}
+            initial={{ width: "0%" }}
+            animate={{ width: "100%" }}
+            transition={{ duration: STEP_MS / 1000, ease: "linear" }}
+            className="h-full bg-emerald-500"
+          />
+        </div>
+
         {/* Window Header */}
-        <div className="flex items-center justify-between rounded-t-[20px] border-b border-slate-100 bg-slate-50/50 px-5 py-3">
+        <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-5 py-3">
           <div className="flex gap-1.5">
             <div className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" />
             <div className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]" />
             <div className="h-2.5 w-2.5 rounded-full bg-[#28C840]" />
           </div>
-          <div className="font-mono text-[10px] font-medium tracking-tight text-slate-400">nextpro.tools</div>
+          <div className="font-mono text-[10px] font-medium tracking-tight text-slate-400">nextpro.ai / setup</div>
           <div className="w-10" />
         </div>
 
         {/* Conteúdo animado */}
-        <div className="flex min-h-[300px] flex-col items-center justify-center px-6 py-14">
-          <div
-            key={`icon-${step}`}
-            className={`mb-3 flex h-12 w-12 animate-scale-in items-center justify-center rounded-2xl ${TONE[current.tone]}`}
-          >
-            <Icon className="h-6 w-6" />
-          </div>
-          <h3 className="text-sm font-medium text-slate-500">{current.label}</h3>
+        <div className="flex min-h-[340px] flex-col items-center justify-center px-6 py-14">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, scale: 0.8, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: -10 }}
+              className="flex flex-col items-center"
+            >
+              <div
+                className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl shadow-sm ${TONE[current.tone]}`}
+              >
+                <Icon className="h-7 w-7" />
+              </div>
+              <h3 className="text-sm font-semibold tracking-wide uppercase text-slate-400 mb-2">{current.label}</h3>
 
-          <div key={`body-${step}`} className="w-full animate-fade-in flex flex-col items-center">
-            {step === 0 && <StepCadastro active />}
-            {step === 1 && <StepArea active />}
-            {step === 2 && <StepCanal active />}
-            {step === 3 && <StepTeste active />}
-            {step === 4 && <StepPronto active />}
-          </div>
+              <div className="w-full flex flex-col items-center min-h-[160px] justify-center">
+                {step === 0 && <StepCadastro active />}
+                {step === 1 && <StepArea active />}
+                {step === 2 && <StepCanal active />}
+                {step === 3 && <StepTeste active />}
+                {step === 4 && <StepPronto active />}
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        {/* Ícones flutuantes */}
-        <div className="absolute -left-12 top-1/2 hidden -translate-y-1/2 md:block">
-          <div className="flex h-10 w-10 float-soft items-center justify-center rounded-xl border border-emerald-100/50 bg-emerald-50 text-emerald-500 shadow-sm">
-            <Zap className="h-5 w-5 fill-current" />
+        {/* Ícones flutuantes decorativos */}
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -left-6 top-1/2 hidden -translate-y-1/2 md:block"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-100/50 bg-emerald-50/80 text-emerald-500 shadow-xl backdrop-blur-sm">
+            <Zap className="h-6 w-6 fill-current" />
           </div>
-        </div>
-        <div className="absolute -right-10 top-1/3 hidden md:block">
-          <div className="flex h-10 w-10 float-soft items-center justify-center rounded-xl border border-orange-100/50 bg-orange-50 text-orange-500 shadow-sm">
-            <Sparkles className="h-5 w-5" />
+        </motion.div>
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -right-6 top-1/3 hidden md:block"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-100/50 bg-orange-50/80 text-orange-500 shadow-xl backdrop-blur-sm">
+            <Sparkles className="h-6 w-6" />
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Stepper */}
-      <div className="mt-6 flex items-center justify-center gap-2">
+      {/* Stepper Control */}
+      <div className="mt-8 flex items-center justify-center gap-3">
         {STEPS.map((s, i) => {
           const done = i < step;
           const isActive = i === step;
@@ -342,23 +375,33 @@ export function OnboardingSteps() {
               key={s.label}
               type="button"
               onClick={() => setStep(i)}
-              className="flex flex-col items-center gap-1"
+              className="group relative flex flex-col items-center gap-2"
               aria-label={s.label}
             >
+              <motion.span
+                animate={{
+                  scale: isActive ? 1.1 : 1,
+                  backgroundColor: isActive ? "#ecfdf5" : done ? "#f0fdf4" : "#ffffff",
+                  borderColor: isActive ? "#10b981" : done ? "#86efac" : "#e2e8f0",
+                  color: isActive ? "#059669" : done ? "#10b981" : "#94a3b8",
+                }}
+                className="flex h-11 w-11 items-center justify-center rounded-xl border transition-all duration-300 shadow-sm group-hover:shadow-md"
+              >
+                <TabIcon className="h-5 w-5" />
+              </motion.span>
               <span
-                className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 ${
-                  isActive
-                    ? "scale-110 border-emerald-200 bg-emerald-100 text-emerald-600 shadow-[0_0_0_4px_rgba(16,185,129,0.12)]"
-                    : done
-                      ? "border-emerald-100 bg-emerald-50 text-emerald-500"
-                      : "border-slate-200 bg-white text-slate-400 hover:bg-slate-50"
+                className={`text-[10px] font-bold tracking-tight uppercase transition-colors ${
+                  isActive ? "text-emerald-600" : "text-slate-400 group-hover:text-slate-600"
                 }`}
               >
-                <TabIcon className="h-4 w-4" />
-              </span>
-              <span className={`text-[9px] font-bold ${isActive ? "text-emerald-600" : "text-slate-400"}`}>
                 {s.label}
               </span>
+              {isActive && (
+                <motion.div
+                  layoutId="active-dot"
+                  className="absolute -top-1.5 -right-1.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm"
+                />
+              )}
             </button>
           );
         })}
