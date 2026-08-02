@@ -1971,38 +1971,13 @@ export default function Landing() {
         <div className="mx-auto max-w-[1240px] px-6 text-center">
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Integrações</span>
           
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-40 grayscale transition-all hover:grayscale-0 hover:opacity-100">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-slate-900 flex items-center justify-center text-white">
-                <Globe className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Bot className="h-8 w-8 text-slate-900" />
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-orange-500 flex items-center justify-center text-white font-bold text-[10px]">aws</div>
-            </div>
-            <div className="flex items-center gap-2">
-              <FileText className="h-8 w-8 text-emerald-600" />
-            </div>
-            <div className="flex items-center gap-2">
-              <img src={logoAurora.url} alt="Aurora" className="h-7 w-7 rounded-full" />
-            </div>
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-8 w-8 text-emerald-500" />
-            </div>
-            <div className="flex items-center gap-2">
-              <Instagram className="h-8 w-8 text-pink-600" />
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 text-blue-600 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12c0-5.523-4.477-10-10-10z"/></svg>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-8 w-8 text-blue-500" />
-            </div>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-8 md:gap-14 opacity-50 grayscale transition-all hover:grayscale-0 hover:opacity-100">
+            <img src={iconGoogle.url} alt="Google" className="h-10 w-10 object-contain" />
+            <img src={iconWhatsapp.url} alt="WhatsApp" className="h-10 w-10 object-contain" />
+            <img src={iconInstagram.url} alt="Instagram" className="h-10 w-10 object-contain" />
+            <img src={iconTiktok.url} alt="TikTok" className="h-10 w-10 object-contain" />
+            <img src={iconCalendar.url} alt="Calendar" className="h-10 w-10 object-contain" />
+            <img src={iconMeta.url} alt="Meta" className="h-10 w-10 object-contain" />
           </div>
         </div>
 
