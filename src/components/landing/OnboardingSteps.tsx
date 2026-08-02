@@ -326,7 +326,7 @@ export function OnboardingSteps() {
 
   return (
     <div ref={ref} className="mx-auto mt-20 max-w-[900px] px-6">
-      <div className="relative rounded-t-[20px] border border-slate-200 bg-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)]">
+      <div className="relative rounded-[20px] border border-slate-200 bg-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)]">
         {/* Window Header */}
         <div className="flex items-center justify-between rounded-t-[20px] border-b border-slate-100 bg-slate-50/50 px-5 py-3">
           <div className="flex gap-1.5">
