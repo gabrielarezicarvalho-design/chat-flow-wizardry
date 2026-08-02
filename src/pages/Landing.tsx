@@ -1973,13 +1973,13 @@ export default function Landing() {
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Integrações</span>
           
           <div className="mt-8 flex flex-wrap items-center justify-center gap-8 md:gap-14 opacity-50 grayscale transition-all hover:grayscale-0 hover:opacity-100">
-            <img src={iconGoogle.url} alt="Google" className="h-10 w-10 object-contain" />
-            <img src={iconWhatsapp.url} alt="WhatsApp" className="h-10 w-10 object-contain" />
-            <img src={iconInstagram.url} alt="Instagram" className="h-10 w-10 object-contain" />
-            <img src={iconTiktok.url} alt="TikTok" className="h-10 w-10 object-contain" />
-            <img src={iconCalendar.url} alt="Google Calendar" className="h-10 w-10 object-contain" />
-            <img src={iconOpenai.url} alt="OpenAI" className="h-10 w-10 object-contain" />
-            <img src={iconMeta.url} alt="Meta" className="h-10 w-10 object-contain" />
+            <img src={iconGoogle.url} alt="Google" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
+            <img src={iconWhatsapp.url} alt="WhatsApp" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
+            <img src={iconInstagram.url} alt="Instagram" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
+            <img src={iconTiktok.url} alt="TikTok" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
+            <img src={iconCalendar.url} alt="Google Calendar" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
+            <img src={iconOpenai.url} alt="OpenAI" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
+            <img src={iconMeta.url} alt="Meta" className="h-7 w-7 md:h-8 md:w-8 object-contain" />
           </div>
         </div>
 
