@@ -1977,7 +1977,8 @@ export default function Landing() {
             <img src={iconWhatsapp.url} alt="WhatsApp" className="h-10 w-10 object-contain" />
             <img src={iconInstagram.url} alt="Instagram" className="h-10 w-10 object-contain" />
             <img src={iconTiktok.url} alt="TikTok" className="h-10 w-10 object-contain" />
-            <img src={iconCalendar.url} alt="Calendar" className="h-10 w-10 object-contain" />
+            <img src={iconCalendar.url} alt="Google Calendar" className="h-10 w-10 object-contain" />
+            <img src={iconOpenai.url} alt="OpenAI" className="h-10 w-10 object-contain" />
             <img src={iconMeta.url} alt="Meta" className="h-10 w-10 object-contain" />
           </div>
         </div>
