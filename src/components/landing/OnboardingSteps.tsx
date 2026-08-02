@@ -20,46 +20,85 @@ const TONE: Record<string, string> = {
 
 const STEP_MS = 3600;
 
-/** Máquina de escrever simples */
-function useTypewriter(text: string, active: boolean, speed = 55) {
+/** Máquina de escrever com ritmo humano e cursor piscante */
+function useTypewriter(text: string, active: boolean, baseSpeed = 55) {
   const [out, setOut] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+
   useEffect(() => {
     if (!active) {
       setOut("");
+      setIsTyping(false);
       return;
     }
+    setIsTyping(true);
     let i = 0;
-    const id = setInterval(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const typeNext = () => {
+      if (i >= text.length) {
+        setIsTyping(false);
+        return;
+      }
       i += 1;
       setOut(text.slice(0, i));
-      if (i >= text.length) clearInterval(id);
-    }, speed);
-    return () => clearInterval(id);
-  }, [text, active, speed]);
-  return out;
+      // Ritmo humano: varia entre 30ms e 130ms
+      const variance = Math.floor(Math.random() * 100) - 30;
+      const delay = Math.max(30, baseSpeed + variance);
+      timeoutId = setTimeout(typeNext, delay);
+    };
+
+    timeoutId = setTimeout(typeNext, 350);
+    return () => clearTimeout(timeoutId);
+  }, [text, active, baseSpeed]);
+
+  return { text: out, isTyping };
 }
 
 function StepCadastro({ active }: { active: boolean }) {
-  const nome = useTypewriter("João Silva", active);
-  const email = useTypewriter("joao@email.com", active, 45);
-  const emailStarted = nome === "João Silva";
+  const { text: nome, isTyping: typingNome } = useTypewriter("João Silva", active, 65);
+  const nomeDone = nome === "João Silva";
+  const { text: email, isTyping: typingEmail } = useTypewriter(
+    "joao@email.com",
+    active && nomeDone,
+    50
+  );
+
   return (
     <div className="mt-8 w-full max-w-xs space-y-4">
-      <div className="relative rounded-xl border border-slate-200 bg-slate-50/60 px-4 pt-4 pb-3 text-center">
-        <span className="text-[10px] text-slate-400">Nome</span>
-        <p className="mt-0.5 text-base font-medium text-slate-900">
+      <div
+        className={`relative rounded-xl border bg-slate-50/60 px-4 pt-4 pb-3 text-center transition-all duration-300 ${
+          active
+            ? "border-blue-300 shadow-[0_0_0_3px_rgba(0,77,255,0.08)]"
+            : "border-slate-200"
+        }`}
+      >
+        <span className="block text-[10px] text-slate-400">Nome</span>
+        <p className="mt-1 min-h-[1.5rem] text-base font-medium text-slate-900">
           {nome}
-          <span className="ml-0.5 inline-block h-4 w-[1.5px] animate-pulse bg-emerald-500 align-middle" />
+          <span
+            className={`ml-0.5 inline-block h-4 w-[2px] align-middle bg-blue-500 transition-opacity duration-200 ${
+              typingNome ? "opacity-100 animate-pulse" : "opacity-0"
+            }`}
+          />
         </p>
       </div>
-      <div className="relative rounded-xl border border-slate-200 bg-slate-50/60 px-4 pt-4 pb-3 text-center">
-        <span className="text-[10px] text-slate-400">Email</span>
-        <p className="mt-0.5 text-base font-medium text-slate-900">
-          {emailStarted ? email : ""}
-          {emailStarted && (
-            <span className="ml-0.5 inline-block h-4 w-[1.5px] animate-pulse bg-emerald-500 align-middle" />
-          )}
-          {!emailStarted && <span className="text-slate-300">&nbsp;</span>}
+      <div
+        className={`relative rounded-xl border bg-slate-50/60 px-4 pt-4 pb-3 text-center transition-all duration-300 ${
+          nomeDone && active
+            ? "border-blue-300 shadow-[0_0_0_3px_rgba(0,77,255,0.08)]"
+            : "border-slate-200"
+        }`}
+      >
+        <span className="block text-[10px] text-slate-400">Email</span>
+        <p className="mt-1 min-h-[1.5rem] text-base font-medium text-slate-900">
+          {nomeDone ? email : ""}
+          <span
+            className={`ml-0.5 inline-block h-4 w-[2px] align-middle bg-blue-500 transition-opacity duration-200 ${
+              nomeDone && typingEmail ? "opacity-100 animate-pulse" : "opacity-0"
+            }`}
+          />
+          {!nomeDone && <span className="text-slate-300">&nbsp;</span>}
         </p>
       </div>
     </div>
