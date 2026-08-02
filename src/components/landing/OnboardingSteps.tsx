@@ -366,13 +366,19 @@ export function OnboardingSteps() {
 
         {/* Conteúdo animado */}
         <div className="flex min-h-[300px] flex-col items-center justify-center px-6 py-14">
-          <div
-            key={`icon-${step}`}
-            className={`mb-3 flex h-12 w-12 animate-scale-in items-center justify-center rounded-2xl ${TONE[current.tone]}`}
-          >
-            <Icon className="h-6 w-6" />
+          <div className="flex flex-col items-center">
+            {step < 4 && (
+              <div
+                key={`icon-${step}`}
+                className={`mb-3 flex h-12 w-12 animate-scale-in items-center justify-center rounded-2xl ${TONE[current.tone]}`}
+              >
+                <Icon className="h-6 w-6" />
+              </div>
+            )}
+            <h3 className={`text-sm font-medium text-slate-500 ${step === 4 ? "hidden" : ""}`}>
+              {current.label}
+            </h3>
           </div>
-          <h3 className="text-sm font-medium text-slate-500">{current.label}</h3>
 
           <div key={`body-${step}`} className="w-full animate-fade-in flex flex-col items-center">
             {step === 0 && <StepCadastro active />}
