@@ -260,12 +260,12 @@ export function OnboardingSteps() {
 
         {/* Ícones flutuantes */}
         <div className="absolute -left-12 top-1/2 hidden -translate-y-1/2 md:block">
-          <div className="flex h-10 w-10 animate-[float_4s_ease-in-out_infinite] items-center justify-center rounded-xl border border-emerald-100/50 bg-emerald-50 text-emerald-500 shadow-sm">
+          <div className="flex h-10 w-10 float-soft items-center justify-center rounded-xl border border-emerald-100/50 bg-emerald-50 text-emerald-500 shadow-sm">
             <Zap className="h-5 w-5 fill-current" />
           </div>
         </div>
         <div className="absolute -right-10 top-1/3 hidden md:block">
-          <div className="flex h-10 w-10 animate-[float_5s_ease-in-out_infinite] items-center justify-center rounded-xl border border-orange-100/50 bg-orange-50 text-orange-500 shadow-sm">
+          <div className="flex h-10 w-10 float-soft items-center justify-center rounded-xl border border-orange-100/50 bg-orange-50 text-orange-500 shadow-sm">
             <Sparkles className="h-5 w-5" />
           </div>
         </div>
