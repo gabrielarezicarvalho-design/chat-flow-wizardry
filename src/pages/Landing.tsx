@@ -1961,7 +1961,7 @@ export default function Landing() {
 
 
       {/* INTEGRAÇÕES */}
-      <section className="relative overflow-hidden bg-[#F8F7F5] py-20 border-b border-slate-200/50">
+      <section className="relative overflow-hidden bg-white py-20 border-b border-slate-200/50">
         <div className="mx-auto max-w-[1240px] px-6 text-center">
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Integrações</span>
           
