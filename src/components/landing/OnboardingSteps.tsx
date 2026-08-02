@@ -283,20 +283,46 @@ function StepTeste({ active }: { active: boolean }) {
 
 function StepPronto({ active }: { active: boolean }) {
   return (
-    <div className="mt-6 flex flex-col items-center">
+    <div className="mt-8 flex flex-col items-center">
       {active && (
-        <>
-          <p className="animate-scale-in text-xl font-bold text-emerald-500">Agente criado com sucesso!</p>
-          <div className="mt-2 flex gap-1">
-            {[0, 1, 2, 3, 4].map((i) => (
+        <div className="relative flex flex-col items-center justify-center text-center">
+          {/* Círculo de Sucesso */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 animate-ping rounded-full bg-emerald-100 opacity-20" />
+            <div className="relative flex h-20 w-20 animate-scale-in items-center justify-center rounded-full bg-emerald-50 shadow-[0_0_0_8px_rgba(16,185,129,0.05)]">
+              <CheckCircle2 className="h-10 w-10 text-emerald-500" />
+            </div>
+            {/* Sparkles ao redor */}
+            {[0, 1, 2, 3, 4, 5].map((i) => (
               <Sparkles
                 key={i}
-                className="h-4 w-4 animate-fade-in text-amber-400"
-                style={{ animationDelay: `${i * 120}ms` }}
+                className="absolute h-4 w-4 text-amber-400 opacity-0"
+                style={{
+                  top: `${50 + 40 * Math.sin((i * 60 * Math.PI) / 180)}%`,
+                  left: `${50 + 40 * Math.cos((i * 60 * Math.PI) / 180)}%`,
+                  animation: `fade-in 0.5s forwards, float-soft ${2 + i * 0.5}s infinite`,
+                  animationDelay: `${i * 150}ms`,
+                }}
               />
             ))}
           </div>
-        </>
+
+          <h4 className="animate-fade-up text-2xl font-bold tracking-tight text-slate-900">
+            Pronto para decolar!
+          </h4>
+          <p className="mt-2 animate-fade-up text-sm text-slate-500" style={{ animationDelay: "200ms" }}>
+            Seu agente de IA foi configurado e está pronto para <br />
+            transformar suas conversas em vendas.
+          </p>
+
+          <div 
+            className="mt-8 flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50/50 px-4 py-2 animate-fade-up"
+            style={{ animationDelay: "400ms" }}
+          >
+            <Zap className="h-4 w-4 text-blue-500 fill-blue-500" />
+            <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Acesso Liberado</span>
+          </div>
+        </div>
       )}
     </div>
   );
