@@ -1960,6 +1960,121 @@ export default function Landing() {
 
 
 
+      {/* INTEGRAÇÕES */}
+      <section className="relative overflow-hidden bg-[#F8F7F5] py-20 border-b border-slate-200/50">
+        <div className="mx-auto max-w-[1240px] px-6 text-center">
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Integrações</span>
+          
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-40 grayscale transition-all hover:grayscale-0 hover:opacity-100">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full bg-slate-900 flex items-center justify-center text-white">
+                <Globe className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Bot className="h-8 w-8 text-slate-900" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-orange-500 flex items-center justify-center text-white font-bold text-[10px]">aws</div>
+            </div>
+            <div className="flex items-center gap-2">
+              <FileText className="h-8 w-8 text-emerald-600" />
+            </div>
+            <div className="flex items-center gap-2">
+              <img src={logoAurora.url} alt="Aurora" className="h-7 w-7 rounded-full" />
+            </div>
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-8 w-8 text-emerald-500" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Instagram className="h-8 w-8 text-pink-600" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 text-blue-600 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12c0-5.523-4.477-10-10-10z"/></svg>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-8 w-8 text-blue-500" />
+            </div>
+          </div>
+        </div>
+
+        {/* Browser Mockup Area */}
+        <div className="mx-auto mt-20 max-w-[900px] px-6">
+          <div className="relative rounded-t-[20px] border border-slate-200 bg-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] overflow-hidden">
+            {/* Window Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-5 py-3">
+              <div className="flex gap-1.5">
+                <div className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" />
+                <div className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]" />
+                <div className="h-2.5 w-2.5 rounded-full bg-[#28C840]" />
+              </div>
+              <div className="text-[10px] font-medium text-slate-400 font-mono tracking-tight">nextpro.tools</div>
+              <div className="w-10" />
+            </div>
+
+            {/* Window Content - Registration Form */}
+            <div className="flex flex-col items-center justify-center py-16 px-6">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F0E6FF] text-[#A855F7]">
+                <Users className="h-6 w-6" />
+              </div>
+              <h3 className="text-sm font-medium text-slate-600">Cadastro</h3>
+              
+              <div className="mt-8 w-full max-w-xs space-y-4">
+                <div className="relative group">
+                  <div className="absolute -top-2 left-4 px-1 bg-white text-[10px] text-slate-400">Nome</div>
+                  <div className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 shadow-sm transition-all group-hover:border-[#004DFF]/30">
+                    João Silva<span className="inline-block w-[1px] h-4 bg-[#004DFF] ml-0.5 align-middle animate-pulse" />
+                  </div>
+                </div>
+
+                <div className="relative group">
+                  <div className="absolute -top-2 left-4 px-1 bg-white text-[10px] text-slate-400">Email</div>
+                  <div className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-400 shadow-sm transition-all group-hover:border-slate-300">
+                    Email
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating Icons Around Window */}
+            <div className="absolute top-1/2 -left-12 -translate-y-1/2 hidden md:block">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 shadow-sm border border-emerald-100/50">
+                <Zap className="h-5 w-5 fill-current" />
+              </div>
+            </div>
+            <div className="absolute top-1/3 -right-10 hidden md:block">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-500 shadow-sm border border-orange-100/50">
+                <Sparkles className="h-5 w-5" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Bottom Tabs/Status bar */}
+          <div className="mt-6 flex items-center justify-center gap-2">
+            {[
+              { label: "Cadastro", icon: Users, active: true },
+              { label: "Área", icon: Target },
+              { label: "Canal", icon: MessageSquare },
+              { label: "Teste", icon: Zap },
+              { label: "Pronto!", icon: CheckCircle2 },
+            ].map((tab) => (
+              <div key={tab.label} className="flex flex-col items-center gap-1">
+                <div className={`flex h-9 w-9 items-center justify-center rounded-full transition-all border ${
+                  tab.active 
+                    ? "bg-emerald-100 text-emerald-600 border-emerald-200 shadow-sm" 
+                    : "bg-white text-slate-400 border-slate-200 hover:bg-slate-50"
+                }`}>
+                  <tab.icon className="h-4 w-4" />
+                </div>
+                <span className={`text-[9px] font-bold ${tab.active ? "text-emerald-600" : "text-slate-400"}`}>{tab.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* VOZ CLONADA */}
       <section className="relative overflow-hidden bg-[#F5EFE6] py-28">
         {/* textura de fundo */}
