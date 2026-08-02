@@ -14,6 +14,7 @@ import iconInstagram from "@/assets/integrations/instagram.png.asset.json";
 import iconMeta from "@/assets/integrations/meta.png.asset.json";
 import iconTiktok from "@/assets/integrations/tiktok.png.asset.json";
 import iconCalendar from "@/assets/integrations/calendar.png.asset.json";
+import iconOpenai from "@/assets/integrations/openai.png.asset.json";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
