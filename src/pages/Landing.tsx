@@ -2422,136 +2422,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CASOS REAIS */}
-      <section id="depoimentos" className="bg-[#fafbfc] py-24">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-            {/* Left Column: Sticky Content */}
-            <div className="lg:col-span-5 lg:sticky lg:top-24">
-              <span className="inline-flex items-center gap-2 font-space-grotesk text-sm font-semibold text-[#004DFF] mb-4">
-                <span className="inline-block h-2 w-2 rounded-full bg-[#004DFF]" />
-                // Casos reais
-              </span>
-              <h2 className="font-space-grotesk text-4xl lg:text-5xl font-bold text-[#0f172a] leading-tight mb-6">
-                Resultados reais para negócios em escala.
-              </h2>
-              <p className="text-lg text-[#64748b] mb-8 leading-relaxed max-w-md">
-                Empresas que automatizaram atendimento, vendas e cobrança com o CRM Next Pro. Verificados por prints e relatos dos próprios clientes.
-              </p>
-
-              <div className="flex items-center gap-4 p-5 bg-white border border-[#e8ecf1] rounded-2xl shadow-sm">
-                <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="h-6 w-6 text-[#3b82f6]" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-[#0f172a]">Métricas Verificadas</p>
-                  <p className="text-xs text-[#94a3b8]">Dados auditados e extraídos diretamente do dashboard.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Case Cards */}
-            <div className="lg:col-span-7 space-y-8">
-              {visibleCases.map((c) => {
-                const meta = caseMeta[c.name];
-                const metric1 = c.before[0];
-                const metric1After = c.after[0];
-                const metric2 = c.before[1];
-                const metric2After = c.after[1];
-                return (
-                  <div
-                    key={c.name}
-                    className="group animate-fade-in bg-white rounded-3xl border border-[#e8ecf1] p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,77,255,0.08)]"
-                  >
-                    <div className="flex justify-between items-start mb-8">
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <img src={c.avatar} alt={c.name} className="h-14 w-14 rounded-full object-cover ring-2 ring-[#e8ecf1]" />
-                          <span className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-[#004DFF] flex items-center justify-center ring-2 ring-white">
-                            <Check className="h-3 w-3 text-white" strokeWidth={4} />
-                          </span>
-                        </div>
-                        <div>
-                          <h4 className="font-space-grotesk font-bold text-[#0f172a] text-lg">{c.name}</h4>
-                          <p className="text-sm text-[#94a3b8]">{c.role}</p>
-                          <div className="mt-1 flex items-center gap-2 text-[10px] text-[#94a3b8]">
-                            <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{meta?.location}</span>
-                            <span className="h-0.5 w-0.5 rounded-full bg-[#e8ecf1]" />
-                            <span>{meta?.since}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-full uppercase tracking-widest border border-green-100">
-                        Verificado
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="p-5 rounded-2xl bg-[#fafbfc] border border-[#e8ecf1]">
-                        <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider mb-2">Antes do Next Pro</p>
-                        <p className="text-xl font-space-grotesk font-bold text-[#0f172a]">
-                          {metric1.value}
-                        </p>
-                        <p className="text-xs text-[#94a3b8] mt-1">{metric1.label}</p>
-                      </div>
-                      <div className="p-5 rounded-2xl bg-blue-50 border border-blue-100">
-                        <p className="text-[10px] font-bold text-[#3b82f6] uppercase tracking-wider mb-2">Hoje</p>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-xl font-space-grotesk font-bold text-[#004DFF]">{metric1After.value}</p>
-                          <span className="text-xs font-bold text-green-600">{meta?.deltas?.[0]}</span>
-                        </div>
-                        <p className="text-xs text-[#3b82f6] mt-1">{metric1After.label}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="p-5 rounded-2xl bg-[#fafbfc] border border-[#e8ecf1]">
-                        <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider mb-2">Antes do Next Pro</p>
-                        <p className="text-xl font-space-grotesk font-bold text-[#0f172a]">
-                          {metric2.value}
-                        </p>
-                        <p className="text-xs text-[#94a3b8] mt-1">{metric2.label}</p>
-                      </div>
-                      <div className="p-5 rounded-2xl bg-blue-50 border border-blue-100">
-                        <p className="text-[10px] font-bold text-[#3b82f6] uppercase tracking-wider mb-2">Hoje</p>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-xl font-space-grotesk font-bold text-[#004DFF]">{metric2After.value}</p>
-                          <span className="text-xs font-bold text-green-600">{meta?.deltas?.[1]}</span>
-                        </div>
-                        <p className="text-xs text-[#3b82f6] mt-1">{metric2After.label}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 mb-5">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#004DFF]">
-                        <TrendingUp className="h-3.5 w-3.5" />
-                        {c.result}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e8ecf1] px-3 py-1.5 text-[10px] font-medium text-[#94a3b8]">
-                        <Calendar className="h-3 w-3" />
-                        {meta?.period}
-                      </span>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Quote className="h-4 w-4 text-[#e8ecf1] shrink-0 mt-0.5" />
-                      <p className="text-sm text-[#64748b] leading-relaxed">{c.quote}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="mt-12 text-center">
-            <p className="text-xs text-[#94a3b8] inline-flex items-center gap-2">
-              <ShieldCheck className="h-3.5 w-3.5 text-[#94a3b8]" />
-              Métricas compartilhadas voluntariamente pelos clientes · Prints e comprovantes sob solicitação
-            </p>
-          </div>
-        </div>
-      </section>
-      
       {/* SECTION PARTNERS & FEATURES (MOCKUP) */}
       <section className="bg-white py-12">
         <div className="mx-auto max-w-[1280px] px-6">
@@ -2680,6 +2550,136 @@ export default function Landing() {
               </div>
 
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CASOS REAIS */}
+      <section id="depoimentos" className="bg-[#fafbfc] py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+            {/* Left Column: Sticky Content */}
+            <div className="lg:col-span-5 lg:sticky lg:top-24">
+              <span className="inline-flex items-center gap-2 font-space-grotesk text-sm font-semibold text-[#004DFF] mb-4">
+                <span className="inline-block h-2 w-2 rounded-full bg-[#004DFF]" />
+                // Casos reais
+              </span>
+              <h2 className="font-space-grotesk text-4xl lg:text-5xl font-bold text-[#0f172a] leading-tight mb-6">
+                Resultados reais para negócios em escala.
+              </h2>
+              <p className="text-lg text-[#64748b] mb-8 leading-relaxed max-w-md">
+                Empresas que automatizaram atendimento, vendas e cobrança com o CRM Next Pro. Verificados por prints e relatos dos próprios clientes.
+              </p>
+
+              <div className="flex items-center gap-4 p-5 bg-white border border-[#e8ecf1] rounded-2xl shadow-sm">
+                <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="h-6 w-6 text-[#3b82f6]" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#0f172a]">Métricas Verificadas</p>
+                  <p className="text-xs text-[#94a3b8]">Dados auditados e extraídos diretamente do dashboard.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Case Cards */}
+            <div className="lg:col-span-7 space-y-8">
+              {visibleCases.map((c) => {
+                const meta = caseMeta[c.name];
+                const metric1 = c.before[0];
+                const metric1After = c.after[0];
+                const metric2 = c.before[1];
+                const metric2After = c.after[1];
+                return (
+                  <div
+                    key={c.name}
+                    className="group animate-fade-in bg-white rounded-3xl border border-[#e8ecf1] p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,77,255,0.08)]"
+                  >
+                    <div className="flex justify-between items-start mb-8">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <img src={c.avatar} alt={c.name} className="h-14 w-14 rounded-full object-cover ring-2 ring-[#e8ecf1]" />
+                          <span className="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-[#004DFF] flex items-center justify-center ring-2 ring-white">
+                            <Check className="h-3 w-3 text-white" strokeWidth={4} />
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-space-grotesk font-bold text-[#0f172a] text-lg">{c.name}</h4>
+                          <p className="text-sm text-[#94a3b8]">{c.role}</p>
+                          <div className="mt-1 flex items-center gap-2 text-[10px] text-[#94a3b8]">
+                            <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{meta?.location}</span>
+                            <span className="h-0.5 w-0.5 rounded-full bg-[#e8ecf1]" />
+                            <span>{meta?.since}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-full uppercase tracking-widest border border-green-100">
+                        Verificado
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="p-5 rounded-2xl bg-[#fafbfc] border border-[#e8ecf1]">
+                        <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider mb-2">Antes do Next Pro</p>
+                        <p className="text-xl font-space-grotesk font-bold text-[#0f172a]">
+                          {metric1.value}
+                        </p>
+                        <p className="text-xs text-[#94a3b8] mt-1">{metric1.label}</p>
+                      </div>
+                      <div className="p-5 rounded-2xl bg-blue-50 border border-blue-100">
+                        <p className="text-[10px] font-bold text-[#3b82f6] uppercase tracking-wider mb-2">Hoje</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-xl font-space-grotesk font-bold text-[#004DFF]">{metric1After.value}</p>
+                          <span className="text-xs font-bold text-green-600">{meta?.deltas?.[0]}</span>
+                        </div>
+                        <p className="text-xs text-[#3b82f6] mt-1">{metric1After.label}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="p-5 rounded-2xl bg-[#fafbfc] border border-[#e8ecf1]">
+                        <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider mb-2">Antes do Next Pro</p>
+                        <p className="text-xl font-space-grotesk font-bold text-[#0f172a]">
+                          {metric2.value}
+                        </p>
+                        <p className="text-xs text-[#94a3b8] mt-1">{metric2.label}</p>
+                      </div>
+                      <div className="p-5 rounded-2xl bg-blue-50 border border-blue-100">
+                        <p className="text-[10px] font-bold text-[#3b82f6] uppercase tracking-wider mb-2">Hoje</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-xl font-space-grotesk font-bold text-[#004DFF]">{metric2After.value}</p>
+                          <span className="text-xs font-bold text-green-600">{meta?.deltas?.[1]}</span>
+                        </div>
+                        <p className="text-xs text-[#3b82f6] mt-1">{metric2After.label}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 mb-5">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#004DFF]">
+                        <TrendingUp className="h-3.5 w-3.5" />
+                        {c.result}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e8ecf1] px-3 py-1.5 text-[10px] font-medium text-[#94a3b8]">
+                        <Calendar className="h-3 w-3" />
+                        {meta?.period}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Quote className="h-4 w-4 text-[#e8ecf1] shrink-0 mt-0.5" />
+                      <p className="text-sm text-[#64748b] leading-relaxed">{c.quote}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-xs text-[#94a3b8] inline-flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-[#94a3b8]" />
+              Métricas compartilhadas voluntariamente pelos clientes · Prints e comprovantes sob solicitação
+            </p>
           </div>
         </div>
       </section>
