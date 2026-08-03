@@ -2566,8 +2566,8 @@ export default function Landing() {
           </div>
 
           {/* Main Mockup Container */}
-          <div className="relative overflow-hidden rounded-[40px] bg-[#F1F4F9] p-8 md:p-10 shadow-2xl">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="relative rounded-[40px] bg-[#F1F4F9] p-8 md:p-10 shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
               
               {/* Left Column: Branding & CTA */}
               <div className="lg:col-span-3 pt-4">
