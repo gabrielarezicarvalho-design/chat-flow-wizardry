@@ -2559,7 +2559,7 @@ export default function Landing() {
           <div className="mx-auto mb-10 max-w-4xl rounded-full bg-[#F3F4F6] px-8 py-3 shadow-sm border border-slate-100 flex items-center justify-center gap-6">
             <div className="flex items-center gap-2">
               <img src={iconMeta.url} alt="Meta" className="h-5 w-auto" />
-              <span className="text-sm font-medium text-slate-900">Tech Partner</span>
+              <span className="text-sm font-medium text-slate-900">Meta Tech Partner</span>
             </div>
             <div className="h-4 w-px bg-slate-300" />
             <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Powered by WhatsApp Business API</span>
