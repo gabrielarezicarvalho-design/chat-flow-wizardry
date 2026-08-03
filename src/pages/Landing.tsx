@@ -2600,33 +2600,45 @@ export default function Landing() {
               </div>
 
               {/* Middle Column: Dashboard Mockup */}
-              <div className="lg:col-span-4 rounded-3xl bg-white p-8 shadow-xl border border-white/60">
-                <div className="mb-6">
-                  <h4 className="font-space-grotesk text-xl font-bold text-slate-900">Dashboard Intuitivo</h4>
-                  <p className="mt-2 text-sm text-slate-400 leading-relaxed">
-                    Tenha uma visão completa dos seus atendimentos, contatos e desempenho da equipe em tempo real.
-                  </p>
-                </div>
+              <div className="lg:col-span-4 rounded-3xl bg-white p-8 shadow-xl border border-white/60 group hover:shadow-2xl transition-all duration-700 relative overflow-hidden">
+                {/* Floating particle effects for Dashboard */}
+                <div className="absolute top-0 right-0 h-32 w-32 bg-[#004DFF]/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#004DFF]/10 transition-colors" />
                 
-                <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
-                  <div className="flex h-64 w-full bg-[#F8FAFC]">
-                    {/* Fake Sidebar */}
-                    <div className="w-16 border-r border-slate-100 p-2 space-y-2">
-                      <div className="h-2 w-full rounded-full bg-slate-200" />
-                      <div className="h-2 w-4/5 rounded-full bg-slate-200" />
-                      <div className="h-2 w-3/4 rounded-full bg-slate-200" />
-                    </div>
-                    {/* Fake Content */}
-                    <div className="flex-1 p-4 space-y-4">
-                      <div className="flex justify-between items-center">
-                        <div className="h-8 w-24 rounded-lg bg-white border border-slate-100" />
-                        <div className="h-8 w-16 rounded-lg bg-white border border-slate-100" />
+                <div className="relative z-10">
+                  <div className="mb-6">
+                    <h4 className="font-space-grotesk text-xl font-bold text-slate-900 group-hover:text-[#004DFF] transition-colors">Dashboard Intuitivo</h4>
+                    <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+                      Tenha uma visão completa dos seus atendimentos, contatos e desempenho da equipe em tempo real.
+                    </p>
+                  </div>
+                  
+                  <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50 group-hover:border-[#004DFF]/20 transition-colors">
+                    <div className="flex h-64 w-full bg-[#F8FAFC]">
+                      {/* Fake Sidebar */}
+                      <div className="w-16 border-r border-slate-100 p-2 space-y-2">
+                        <div className="h-2 w-full rounded-full bg-slate-200 group-hover:bg-[#004DFF]/10 transition-colors" />
+                        <div className="h-2 w-4/5 rounded-full bg-slate-200" />
+                        <div className="h-2 w-3/4 rounded-full bg-slate-200" />
                       </div>
-                      <div className="h-24 w-full rounded-xl bg-white border border-slate-100 p-4">
-                        <div className="h-full w-full bg-emerald-50/50 rounded-lg flex items-end px-2 gap-1 pb-2">
-                          {[40, 70, 45, 90, 60, 30].map((h, i) => (
-                            <div key={i} className="flex-1 bg-emerald-400/30 rounded-t-sm" style={{ height: `${h}%` }} />
-                          ))}
+                      {/* Fake Content */}
+                      <div className="flex-1 p-4 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <div className="h-8 w-24 rounded-lg bg-white border border-slate-100 group-hover:shadow-sm transition-all" />
+                          <div className="h-8 w-16 rounded-lg bg-white border border-slate-100 group-hover:shadow-sm transition-all" />
+                        </div>
+                        <div className="h-24 w-full rounded-xl bg-white border border-slate-100 p-4 relative overflow-hidden group-hover:shadow-md transition-all">
+                          <div className="h-full w-full bg-emerald-50/50 rounded-lg flex items-end px-2 gap-1 pb-2">
+                            {[40, 70, 45, 90, 60, 30].map((h, i) => (
+                              <div 
+                                key={i} 
+                                className="flex-1 bg-emerald-400/30 rounded-t-sm group-hover:bg-[#004DFF]/30 transition-all duration-700" 
+                                style={{ 
+                                  height: `${h}%`,
+                                  transitionDelay: `${i * 50}ms`
+                                }} 
+                              />
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -2637,19 +2649,32 @@ export default function Landing() {
               {/* Right Column: Feature Cards Grid */}
               <div className="lg:col-span-5 grid grid-cols-2 gap-4 lg:-mr-20 xl:-mr-32 relative z-10">
                 {[
-                  { icon: Users, title: "Vários atendentes", desc: "Cadastre toda a sua equipe no painel, dividindo por departamentos." },
-                  { icon: Calendar, title: "Agendamentos", desc: "Nosso recurso de agendamento, tem o poder de enviar mensagens no momento certo" },
-                  { icon: MessageSquare, title: "Respostas rápidas", desc: "Com o auto resposta, basta digitar \"/\" para acessar a sua lista de mensagens rápidas" },
-                  { icon: Send, title: "Envios em massa", desc: "Envie mensagens para todos os seus contatos com o módulo campanha" },
-                  { icon: Bot, title: "Chat interno", desc: "Seus atendentes podem se comunicar internamente entre eles e outros membros do time" },
-                  { icon: ListChecks, title: "Todas as Funcionalidades", desc: "Funcionalidades que elevarão o seu negócio a um novo patamar." },
+                  { icon: Users, title: "Vários atendentes", desc: "Cadastre toda a sua equipe no painel, dividindo por departamentos.", delay: 0 },
+                  { icon: Calendar, title: "Agendamentos", desc: "Nosso recurso de agendamento, tem o poder de enviar mensagens no momento certo", delay: 100 },
+                  { icon: MessageSquare, title: "Respostas rápidas", desc: "Com o auto resposta, basta digitar \"/\" para acessar a sua lista de mensagens rápidas", delay: 200 },
+                  { icon: Send, title: "Envios em massa", desc: "Envie mensagens para todos os seus contatos com o módulo campanha", delay: 300 },
+                  { icon: Bot, title: "Chat interno", desc: "Seus atendentes podem se comunicar internamente entre eles e outros membros do time", delay: 400 },
+                  { icon: ListChecks, title: "Todas as Funcionalidades", desc: "Funcionalidades que elevarão o seu negócio a um novo patamar.", delay: 500 },
                 ].map((feature, idx) => (
-                  <div key={idx} className="rounded-2xl bg-white p-6 shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 flex flex-col min-h-[160px]">
-                    <div className="mb-4 text-[#1E3A2F]">
-                      <feature.icon className="h-6 w-6 stroke-[1.5]" />
+                  <div 
+                    key={idx} 
+                    className="group rounded-2xl bg-white p-6 shadow-sm border border-slate-100 hover:border-[#004DFF]/30 transition-all duration-500 flex flex-col min-h-[160px] animate-fade-in-up relative overflow-hidden"
+                    style={{ animationDelay: `${feature.delay}ms` }}
+                  >
+                    {/* Hover Glow Effect */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#004DFF]/0 via-[#004DFF]/5 to-[#004DFF]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl" />
+                    
+                    <div className="relative z-10">
+                      <div className="mb-4 text-[#1E3A2F] group-hover:text-[#004DFF] transition-colors duration-300 group-hover:scale-110 origin-left transform duration-500">
+                        <feature.icon className="h-6 w-6 stroke-[1.5]" />
+                      </div>
+                      <h5 className="font-space-grotesk text-[17px] font-bold text-[#1E3A2F] group-hover:text-[#0B1220] mb-3 leading-tight transition-colors duration-300">
+                        {feature.title}
+                      </h5>
+                      <p className="text-[13px] text-slate-500 leading-relaxed font-medium group-hover:text-slate-600 transition-colors duration-300">
+                        {feature.desc}
+                      </p>
                     </div>
-                    <h5 className="font-space-grotesk text-[17px] font-bold text-[#1E3A2F] mb-3 leading-tight">{feature.title}</h5>
-                    <p className="text-[13px] text-slate-500 leading-relaxed font-medium">{feature.desc}</p>
                   </div>
                 ))}
               </div>
