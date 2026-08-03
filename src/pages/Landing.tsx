@@ -2551,6 +2551,113 @@ export default function Landing() {
           </div>
         </div>
       </section>
+      
+      {/* SECTION PARTNERS & FEATURES (MOCKUP) */}
+      <section className="bg-white py-24">
+        <div className="mx-auto max-w-[1240px] px-6">
+          {/* Top Bar: Partners */}
+          <div className="mx-auto mb-16 max-w-4xl rounded-full bg-[#F3F4F6] px-8 py-4 shadow-sm border border-slate-100 flex items-center justify-center gap-6">
+            <div className="flex items-center gap-2">
+              <img src={iconMeta.url} alt="Meta" className="h-5 w-auto" />
+              <span className="text-sm font-medium text-slate-900">Tech Partner</span>
+            </div>
+            <div className="h-4 w-px bg-slate-300" />
+            <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Powered by WhatsApp Business API</span>
+          </div>
+
+          {/* Main Mockup Container */}
+          <div className="relative overflow-hidden rounded-[40px] bg-[#F1F4F9] p-12 shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+              
+              {/* Left Column: Branding & CTA */}
+              <div className="lg:col-span-3 pt-4">
+                <div className="mb-6 flex items-center gap-2">
+                  <img src={logoAurora.url} alt="Logo" className="h-10 w-10 grayscale opacity-80" />
+                </div>
+                
+                <span className="inline-block rounded-full bg-[#D1EACF] px-3 py-1 text-[10px] font-bold text-[#2A5C2D] uppercase tracking-wider mb-6">
+                  Funcionalidades
+                </span>
+                
+                <h3 className="font-space-grotesk text-3xl font-bold leading-tight text-[#1E293B] mb-6">
+                  Centralize e Potencialize Seu Atendimento no WhatsApp
+                </h3>
+                
+                <p className="text-base text-slate-500 mb-12">
+                  Transforme a comunicação do seu negócio.
+                </p>
+                
+                <div className="flex items-center gap-3">
+                  <Link to="/auth">
+                    <Button className="h-14 rounded-full bg-[#83D152] hover:bg-[#72b846] px-8 text-base font-bold text-slate-900 shadow-lg shadow-[#83D152]/20">
+                      Assinar Agora
+                    </Button>
+                  </Link>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0D2418] text-white">
+                    <ArrowRight className="h-6 w-6 rotate-[-45deg]" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Middle Column: Dashboard Mockup */}
+              <div className="lg:col-span-4 rounded-3xl bg-white p-8 shadow-xl border border-white/60">
+                <div className="mb-6">
+                  <h4 className="font-space-grotesk text-xl font-bold text-slate-900">Dashboard Intuitivo</h4>
+                  <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+                    Tenha uma visão completa dos seus atendimentos, contatos e desempenho da equipe em tempo real.
+                  </p>
+                </div>
+                
+                <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+                  <div className="flex h-64 w-full bg-[#F8FAFC]">
+                    {/* Fake Sidebar */}
+                    <div className="w-16 border-r border-slate-100 p-2 space-y-2">
+                      <div className="h-2 w-full rounded-full bg-slate-200" />
+                      <div className="h-2 w-4/5 rounded-full bg-slate-200" />
+                      <div className="h-2 w-3/4 rounded-full bg-slate-200" />
+                    </div>
+                    {/* Fake Content */}
+                    <div className="flex-1 p-4 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <div className="h-8 w-24 rounded-lg bg-white border border-slate-100" />
+                        <div className="h-8 w-16 rounded-lg bg-white border border-slate-100" />
+                      </div>
+                      <div className="h-24 w-full rounded-xl bg-white border border-slate-100 p-4">
+                        <div className="h-full w-full bg-emerald-50/50 rounded-lg flex items-end px-2 gap-1 pb-2">
+                          {[40, 70, 45, 90, 60, 30].map((h, i) => (
+                            <div key={i} className="flex-1 bg-emerald-400/30 rounded-t-sm" style={{ height: `${h}%` }} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Feature Cards Grid */}
+              <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+                {[
+                  { icon: Users, title: "Vários atendentes", desc: "Cadastre toda a sua equipe no painel, dividindo por departamentos." },
+                  { icon: Calendar, title: "Agendamentos", desc: "Nosso recurso de agendamento, tem o poder de enviar mensagens no momento certo" },
+                  { icon: MessageSquare, title: "Respostas rápidas", desc: "Com o auto resposta, basta digitar \"/\" para acessar a sua lista de mensagens rápidas" },
+                  { icon: Send, title: "Envios em massa", desc: "Envie mensagens para todos os seus contatos com o módulo campanha" },
+                  { icon: Bot, title: "Chat interno", desc: "Seus atendentes podem se comunicar internamente entre eles e outros membros do time" },
+                  { icon: ListChecks, title: "Todas as Funcionalidades", desc: "Funcionalidades que elevarão o seu negócio a um novo patamar." },
+                ].map((feature, idx) => (
+                  <div key={idx} className="rounded-3xl bg-white p-6 shadow-md border border-white/60 hover:shadow-lg transition-shadow">
+                    <div className="mb-4 text-slate-900">
+                      <feature.icon className="h-6 w-6 stroke-[1.5]" />
+                    </div>
+                    <h5 className="font-space-grotesk text-base font-bold text-slate-900 mb-2">{feature.title}</h5>
+                    <p className="text-xs text-slate-400 leading-relaxed">{feature.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
 
       <LandingFAQ />
 
