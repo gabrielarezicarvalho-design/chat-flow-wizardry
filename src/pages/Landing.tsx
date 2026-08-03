@@ -2553,10 +2553,10 @@ export default function Landing() {
       </section>
       
       {/* SECTION PARTNERS & FEATURES (MOCKUP) */}
-      <section className="bg-white py-24">
-        <div className="mx-auto max-w-[1240px] px-6">
+      <section className="bg-white py-12">
+        <div className="mx-auto max-w-[1280px] px-6">
           {/* Top Bar: Partners */}
-          <div className="mx-auto mb-16 max-w-4xl rounded-full bg-[#F3F4F6] px-8 py-4 shadow-sm border border-slate-100 flex items-center justify-center gap-6">
+          <div className="mx-auto mb-10 max-w-4xl rounded-full bg-[#F3F4F6] px-8 py-3 shadow-sm border border-slate-100 flex items-center justify-center gap-6">
             <div className="flex items-center gap-2">
               <img src={iconMeta.url} alt="Meta" className="h-5 w-auto" />
               <span className="text-sm font-medium text-slate-900">Tech Partner</span>
@@ -2566,8 +2566,8 @@ export default function Landing() {
           </div>
 
           {/* Main Mockup Container */}
-          <div className="relative overflow-hidden rounded-[40px] bg-[#F1F4F9] p-12 shadow-2xl">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          <div className="relative overflow-hidden rounded-[40px] bg-[#F1F4F9] p-8 md:p-10 shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
               {/* Left Column: Branding & CTA */}
               <div className="lg:col-span-3 pt-4">
