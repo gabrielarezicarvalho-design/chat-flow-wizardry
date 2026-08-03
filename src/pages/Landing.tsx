@@ -2637,19 +2637,32 @@ export default function Landing() {
               {/* Right Column: Feature Cards Grid */}
               <div className="lg:col-span-5 grid grid-cols-2 gap-4 lg:-mr-20 xl:-mr-32 relative z-10">
                 {[
-                  { icon: Users, title: "Vários atendentes", desc: "Cadastre toda a sua equipe no painel, dividindo por departamentos." },
-                  { icon: Calendar, title: "Agendamentos", desc: "Nosso recurso de agendamento, tem o poder de enviar mensagens no momento certo" },
-                  { icon: MessageSquare, title: "Respostas rápidas", desc: "Com o auto resposta, basta digitar \"/\" para acessar a sua lista de mensagens rápidas" },
-                  { icon: Send, title: "Envios em massa", desc: "Envie mensagens para todos os seus contatos com o módulo campanha" },
-                  { icon: Bot, title: "Chat interno", desc: "Seus atendentes podem se comunicar internamente entre eles e outros membros do time" },
-                  { icon: ListChecks, title: "Todas as Funcionalidades", desc: "Funcionalidades que elevarão o seu negócio a um novo patamar." },
+                  { icon: Users, title: "Vários atendentes", desc: "Cadastre toda a sua equipe no painel, dividindo por departamentos.", delay: 0 },
+                  { icon: Calendar, title: "Agendamentos", desc: "Nosso recurso de agendamento, tem o poder de enviar mensagens no momento certo", delay: 100 },
+                  { icon: MessageSquare, title: "Respostas rápidas", desc: "Com o auto resposta, basta digitar \"/\" para acessar a sua lista de mensagens rápidas", delay: 200 },
+                  { icon: Send, title: "Envios em massa", desc: "Envie mensagens para todos os seus contatos com o módulo campanha", delay: 300 },
+                  { icon: Bot, title: "Chat interno", desc: "Seus atendentes podem se comunicar internamente entre eles e outros membros do time", delay: 400 },
+                  { icon: ListChecks, title: "Todas as Funcionalidades", desc: "Funcionalidades que elevarão o seu negócio a um novo patamar.", delay: 500 },
                 ].map((feature, idx) => (
-                  <div key={idx} className="rounded-2xl bg-white p-6 shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 flex flex-col min-h-[160px]">
-                    <div className="mb-4 text-[#1E3A2F]">
-                      <feature.icon className="h-6 w-6 stroke-[1.5]" />
+                  <div 
+                    key={idx} 
+                    className="group rounded-2xl bg-white p-6 shadow-sm border border-slate-100 hover:border-[#004DFF]/30 transition-all duration-500 flex flex-col min-h-[160px] animate-fade-in-up relative overflow-hidden"
+                    style={{ animationDelay: `${feature.delay}ms` }}
+                  >
+                    {/* Hover Glow Effect */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#004DFF]/0 via-[#004DFF]/5 to-[#004DFF]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl" />
+                    
+                    <div className="relative z-10">
+                      <div className="mb-4 text-[#1E3A2F] group-hover:text-[#004DFF] transition-colors duration-300 group-hover:scale-110 origin-left transform duration-500">
+                        <feature.icon className="h-6 w-6 stroke-[1.5]" />
+                      </div>
+                      <h5 className="font-space-grotesk text-[17px] font-bold text-[#1E3A2F] group-hover:text-[#0B1220] mb-3 leading-tight transition-colors duration-300">
+                        {feature.title}
+                      </h5>
+                      <p className="text-[13px] text-slate-500 leading-relaxed font-medium group-hover:text-slate-600 transition-colors duration-300">
+                        {feature.desc}
+                      </p>
                     </div>
-                    <h5 className="font-space-grotesk text-[17px] font-bold text-[#1E3A2F] mb-3 leading-tight">{feature.title}</h5>
-                    <p className="text-[13px] text-slate-500 leading-relaxed font-medium">{feature.desc}</p>
                   </div>
                 ))}
               </div>
