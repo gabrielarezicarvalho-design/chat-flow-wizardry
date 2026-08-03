@@ -2600,33 +2600,45 @@ export default function Landing() {
               </div>
 
               {/* Middle Column: Dashboard Mockup */}
-              <div className="lg:col-span-4 rounded-3xl bg-white p-8 shadow-xl border border-white/60">
-                <div className="mb-6">
-                  <h4 className="font-space-grotesk text-xl font-bold text-slate-900">Dashboard Intuitivo</h4>
-                  <p className="mt-2 text-sm text-slate-400 leading-relaxed">
-                    Tenha uma visão completa dos seus atendimentos, contatos e desempenho da equipe em tempo real.
-                  </p>
-                </div>
+              <div className="lg:col-span-4 rounded-3xl bg-white p-8 shadow-xl border border-white/60 group hover:shadow-2xl transition-all duration-700 relative overflow-hidden">
+                {/* Floating particle effects for Dashboard */}
+                <div className="absolute top-0 right-0 h-32 w-32 bg-[#004DFF]/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#004DFF]/10 transition-colors" />
                 
-                <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
-                  <div className="flex h-64 w-full bg-[#F8FAFC]">
-                    {/* Fake Sidebar */}
-                    <div className="w-16 border-r border-slate-100 p-2 space-y-2">
-                      <div className="h-2 w-full rounded-full bg-slate-200" />
-                      <div className="h-2 w-4/5 rounded-full bg-slate-200" />
-                      <div className="h-2 w-3/4 rounded-full bg-slate-200" />
-                    </div>
-                    {/* Fake Content */}
-                    <div className="flex-1 p-4 space-y-4">
-                      <div className="flex justify-between items-center">
-                        <div className="h-8 w-24 rounded-lg bg-white border border-slate-100" />
-                        <div className="h-8 w-16 rounded-lg bg-white border border-slate-100" />
+                <div className="relative z-10">
+                  <div className="mb-6">
+                    <h4 className="font-space-grotesk text-xl font-bold text-slate-900 group-hover:text-[#004DFF] transition-colors">Dashboard Intuitivo</h4>
+                    <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+                      Tenha uma visão completa dos seus atendimentos, contatos e desempenho da equipe em tempo real.
+                    </p>
+                  </div>
+                  
+                  <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50 group-hover:border-[#004DFF]/20 transition-colors">
+                    <div className="flex h-64 w-full bg-[#F8FAFC]">
+                      {/* Fake Sidebar */}
+                      <div className="w-16 border-r border-slate-100 p-2 space-y-2">
+                        <div className="h-2 w-full rounded-full bg-slate-200 group-hover:bg-[#004DFF]/10 transition-colors" />
+                        <div className="h-2 w-4/5 rounded-full bg-slate-200" />
+                        <div className="h-2 w-3/4 rounded-full bg-slate-200" />
                       </div>
-                      <div className="h-24 w-full rounded-xl bg-white border border-slate-100 p-4">
-                        <div className="h-full w-full bg-emerald-50/50 rounded-lg flex items-end px-2 gap-1 pb-2">
-                          {[40, 70, 45, 90, 60, 30].map((h, i) => (
-                            <div key={i} className="flex-1 bg-emerald-400/30 rounded-t-sm" style={{ height: `${h}%` }} />
-                          ))}
+                      {/* Fake Content */}
+                      <div className="flex-1 p-4 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <div className="h-8 w-24 rounded-lg bg-white border border-slate-100 group-hover:shadow-sm transition-all" />
+                          <div className="h-8 w-16 rounded-lg bg-white border border-slate-100 group-hover:shadow-sm transition-all" />
+                        </div>
+                        <div className="h-24 w-full rounded-xl bg-white border border-slate-100 p-4 relative overflow-hidden group-hover:shadow-md transition-all">
+                          <div className="h-full w-full bg-emerald-50/50 rounded-lg flex items-end px-2 gap-1 pb-2">
+                            {[40, 70, 45, 90, 60, 30].map((h, i) => (
+                              <div 
+                                key={i} 
+                                className="flex-1 bg-emerald-400/30 rounded-t-sm group-hover:bg-[#004DFF]/30 transition-all duration-700" 
+                                style={{ 
+                                  height: `${h}%`,
+                                  transitionDelay: `${i * 50}ms`
+                                }} 
+                              />
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
