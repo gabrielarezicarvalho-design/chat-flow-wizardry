@@ -2635,21 +2635,21 @@ export default function Landing() {
               </div>
 
               {/* Right Column: Feature Cards Grid */}
-              <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+              <div className="lg:col-span-5 grid grid-cols-2 gap-3 lg:-mr-16 xl:-mr-24">
                 {[
-                  { icon: Users, title: "Vários atendentes", desc: "Cadastre toda a sua equipe no painel, dividindo por departamentos." },
-                  { icon: Calendar, title: "Agendamentos", desc: "Nosso recurso de agendamento, tem o poder de enviar mensagens no momento certo" },
-                  { icon: MessageSquare, title: "Respostas rápidas", desc: "Com o auto resposta, basta digitar \"/\" para acessar a sua lista de mensagens rápidas" },
-                  { icon: Send, title: "Envios em massa", desc: "Envie mensagens para todos os seus contatos com o módulo campanha" },
-                  { icon: Bot, title: "Chat interno", desc: "Seus atendentes podem se comunicar internamente entre eles e outros membros do time" },
-                  { icon: ListChecks, title: "Todas as Funcionalidades", desc: "Funcionalidades que elevarão o seu negócio a um novo patamar." },
+                  { icon: Users, title: "Vários atendentes", desc: "Equipe no painel por departamentos." },
+                  { icon: Calendar, title: "Agendamentos", desc: "Mensagens no momento certo." },
+                  { icon: MessageSquare, title: "Respostas rápidas", desc: "Atalhos com \"/\" para agilidade." },
+                  { icon: Send, title: "Envios em massa", desc: "Campanhas para todos contatos." },
+                  { icon: Bot, title: "Chat interno", desc: "Comunicação entre o time." },
+                  { icon: ListChecks, title: "Tudo incluído", desc: "Recursos para elevar seu nível." },
                 ].map((feature, idx) => (
-                  <div key={idx} className="rounded-3xl bg-white p-6 shadow-md border border-white/60 hover:shadow-lg transition-shadow">
-                    <div className="mb-4 text-slate-900">
-                      <feature.icon className="h-6 w-6 stroke-[1.5]" />
+                  <div key={idx} className="rounded-2xl bg-white p-4 shadow-sm border border-white/60 hover:shadow-md transition-shadow min-h-[110px] flex flex-col justify-center">
+                    <div className="mb-2 text-[#004DFF]">
+                      <feature.icon className="h-5 w-5 stroke-[2]" />
                     </div>
-                    <h5 className="font-space-grotesk text-base font-bold text-slate-900 mb-2">{feature.title}</h5>
-                    <p className="text-xs text-slate-400 leading-relaxed">{feature.desc}</p>
+                    <h5 className="font-space-grotesk text-[13px] font-bold text-slate-900 mb-1 leading-tight">{feature.title}</h5>
+                    <p className="text-[11px] text-slate-400 leading-tight">{feature.desc}</p>
                   </div>
                 ))}
               </div>
