@@ -421,16 +421,23 @@ export default function ImageDesigner() {
                 <Label className="flex items-center gap-1.5">
                   <Images className="h-3.5 w-3.5 text-primary" />
                   Referências visuais (opcional, até 4)
+                  <span className="ml-auto text-xs font-normal text-muted-foreground">
+                    {referenceFiles.length}/4
+                  </span>
                 </Label>
-                <div
-                  onClick={() => refFileRef.current?.click()}
-                  className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border bg-muted/30 p-3 transition hover:bg-muted/50"
-                >
-                  <Upload className="h-5 w-5 text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground">
-                    A IA extrai paleta, iluminação e elementos das referências
-                  </p>
-                </div>
+                {referenceFiles.length < 4 && (
+                  <div
+                    onClick={() => refFileRef.current?.click()}
+                    className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border bg-muted/30 p-3 transition hover:bg-muted/50"
+                  >
+                    <Upload className="h-5 w-5 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">
+                      {referenceFiles.length === 0
+                        ? "A IA extrai paleta, iluminação e elementos das referências"
+                        : `Adicionar mais ${4 - referenceFiles.length} referência(s) — ex: logo, paleta`}
+                    </p>
+                  </div>
+                )}
                 <input
                   ref={refFileRef}
                   type="file"
@@ -438,11 +445,12 @@ export default function ImageDesigner() {
                   multiple
                   className="hidden"
                   onChange={(e) => {
-                    const files = Array.from(e.target.files ?? []).slice(0, 4);
-                    setReferenceFiles(files);
+                    const picked = Array.from(e.target.files ?? []);
+                    setReferenceFiles((prev) => [...prev, ...picked].slice(0, 4));
                     if (refFileRef.current) refFileRef.current.value = "";
                   }}
                 />
+
                 {referencePreviews.length > 0 && (
                   <div className="grid grid-cols-4 gap-1.5">
                     {referencePreviews.map((src, i) => (
