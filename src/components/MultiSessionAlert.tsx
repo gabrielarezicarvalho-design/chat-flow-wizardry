@@ -13,43 +13,33 @@ export const MultiSessionAlert = () => {
   useEffect(() => {
     if (!user || !session) return;
 
-    const checkSessions = async () => {
-      // Use Supabase realtime presence to track active sessions
-      const channel = supabase.channel(`user-presence-${user.id}`, {
-        config: {
-          presence: {
-            key: session.access_token.substring(0, 20), // Unique key per session
-          },
-        },
+    const sessionKey = session.access_token.substring(0, 20);
+    const channel = supabase.channel(`user-presence-${user.id}-${sessionKey}`, {
+      config: { presence: { key: sessionKey } },
+    });
+
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const count = Object.keys(state).length;
+        setSessionCount(count);
+        setShowAlert(count > 1);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({
+            user_id: user.id,
+            online_at: new Date().toISOString(),
+            device: navigator.userAgent.substring(0, 50),
+          });
+        }
       });
 
-      channel
-        .on('presence', { event: 'sync' }, () => {
-          const state = channel.presenceState();
-          const count = Object.keys(state).length;
-          setSessionCount(count);
-          setShowAlert(count > 1);
-        })
-        .subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await channel.track({
-              user_id: user.id,
-              online_at: new Date().toISOString(),
-              device: navigator.userAgent.substring(0, 50),
-            });
-          }
-        });
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    };
-
-    const cleanup = checkSessions();
     return () => {
-      cleanup.then(fn => fn?.());
+      supabase.removeChannel(channel);
     };
   }, [user, session]);
+
 
   const handleLogoutOthers = async () => {
     if (!session) return;
