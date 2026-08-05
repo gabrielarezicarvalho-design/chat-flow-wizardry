@@ -2647,7 +2647,7 @@ export default function Landing() {
             {/* Left Content */}
             <div className="max-w-xl">
               <span className="text-[#8B5CF6] font-bold tracking-widest text-xs uppercase mb-4 block font-space-grotesk">
-                CRM KANBAN
+                CRM NEXT PRO
               </span>
               <h2 className="text-4xl md:text-[56px] font-bold text-[#0B1220] font-space-grotesk leading-[1.1] tracking-tight mb-8">
                 Seu funil vivo, clicável e organizado.
