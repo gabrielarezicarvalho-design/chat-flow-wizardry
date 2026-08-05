@@ -2893,7 +2893,7 @@ export default function Landing() {
                 return (
                   <div
                     key={c.name}
-                    className="group animate-fade-in bg-white rounded-3xl border border-[#e8ecf1] p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,77,255,0.08)]"
+                    className="group animate-fade-in bg-white rounded-3xl border border-[#e8ecf1] p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                   >
                     <div className="flex justify-between items-start mb-8">
                       <div className="flex items-center gap-4">
