@@ -2721,7 +2721,7 @@ export default function Landing() {
                         </div>
                         <div className="flex items-center justify-between pt-2 border-t border-slate-50">
                           <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[11px] px-3 py-1.5 rounded-full font-bold">
-                            <Tag className="h-3 w-3" />
+                            <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
                             Meta Ads
                           </div>
                           <span className="text-[14px] font-bold text-slate-700">R$ 720</span>
