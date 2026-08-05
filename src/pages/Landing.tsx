@@ -2684,6 +2684,147 @@ export default function Landing() {
       </section>
 
 
+      {/* VELOCIDADE DE RESPOSTA (NOVO) */}
+      <section className="bg-white py-24 overflow-hidden">
+        <div className="mx-auto max-w-[1280px] px-6 text-center">
+          <div className="mb-6 flex justify-center">
+            <span className="rounded-full bg-slate-50 px-4 py-1 text-[11px] font-medium text-slate-500 ring-1 ring-slate-200">
+              Dados: MIT / InsideSales Research
+            </span>
+          </div>
+          
+          <h2 className="font-space-grotesk text-4xl md:text-[56px] font-bold leading-[1.1] tracking-tight text-[#0B1220]">
+            Enquanto você não responde,<br />
+            <span className="text-[#F43F5E]">seu concorrente fecha a venda</span>
+          </h2>
+          
+          <p className="mx-auto mt-6 max-w-3xl text-lg text-slate-500 leading-relaxed">
+            O lead mandou mensagem às 22h. Sua equipe só viu às 8h da manhã. Resultado? Ele já comprou do concorrente que respondeu em 2 minutos. Não é falta de interesse do lead, é falta de velocidade sua.
+          </p>
+
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-[32px] border border-[#FEE2E2] bg-[#FFFBFB] p-8 text-left transition-transform hover:-translate-y-1">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm">
+                <Clock className="h-5 w-5 text-[#F43F5E]" />
+              </div>
+              <p className="text-[15px] leading-relaxed text-slate-600">
+                O lead mandou mensagem às 22h. Ninguém respondeu. Às 8h ele já tinha fechado com o concorrente.
+              </p>
+            </div>
+            
+            <div className="rounded-[32px] border border-[#FEE2E2] bg-[#FFFBFB] p-8 text-left transition-transform hover:-translate-y-1">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm">
+                <Zap className="h-5 w-5 text-[#F43F5E]" />
+              </div>
+              <p className="text-[15px] leading-relaxed text-slate-600">
+                Você pagou R$ 12 no clique do anúncio. O lead esperou 4 minutos. Desistiu. Dinheiro jogado fora.
+              </p>
+            </div>
+
+            <div className="rounded-[32px] border border-[#FEE2E2] bg-[#FFFBFB] p-8 text-left transition-transform hover:-translate-y-1">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm">
+                <Smile className="h-5 w-5 text-[#F43F5E]" />
+              </div>
+              <p className="text-[15px] leading-relaxed text-slate-600">
+                "Alguém pode me atender?", a terceira mensagem sem resposta. Ele nunca mais volta.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-20">
+            <p className="text-sm font-semibold text-slate-400">Não é achismo. <span className="text-slate-900">Os números confirmam:</span></p>
+            
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="rounded-[32px] border border-slate-100 bg-white p-10 shadow-sm transition-all hover:border-[#004DFF]/20 hover:shadow-xl hover:shadow-[#004DFF]/5">
+                <div className="mb-4 flex justify-center">
+                  <Clock className="h-6 w-6 text-slate-400" />
+                </div>
+                <div className="font-space-grotesk text-5xl font-bold text-[#F43F5E]">78%</div>
+                <p className="mt-4 text-sm font-medium text-slate-500">dos leads são perdidos por demora no atendimento</p>
+              </div>
+
+              <div className="rounded-[32px] border border-emerald-100 bg-[#F0FDF4] p-10 shadow-sm transition-all hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-500/5">
+                <div className="mb-4 flex justify-center">
+                  <Zap className="h-6 w-6 text-emerald-500" />
+                </div>
+                <div className="font-space-grotesk text-5xl font-bold text-[#10B981]">391%</div>
+                <p className="mt-4 text-sm font-medium text-slate-500">mais conversão ao responder em menos de 1 min</p>
+              </div>
+
+              <div className="rounded-[32px] border border-slate-100 bg-white p-10 shadow-sm transition-all hover:border-[#004DFF]/20 hover:shadow-xl hover:shadow-[#004DFF]/5">
+                <div className="mb-4 flex justify-center">
+                  <TrendingUp className="h-6 w-6 text-slate-400" />
+                </div>
+                <div className="font-space-grotesk text-5xl font-bold text-slate-900">10×</div>
+                <p className="mt-4 text-sm font-medium text-slate-500">menor chance de contato após 5 minutos sem resposta</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Gráfico de Barras */}
+          <div className="mt-24 mx-auto max-w-4xl">
+            <p className="mb-8 text-xs font-bold uppercase tracking-widest text-slate-400">Conversão por tempo de resposta</p>
+            <div className="space-y-4">
+              {[
+                { time: "< 1 min", value: "391%", width: "100%", active: true },
+                { time: "1,5 min", value: "160%", width: "41%", active: false },
+                { time: "5,30 min", value: "100%", width: "25%", active: false },
+                { time: "30+ min", value: "36%", width: "12%", active: false },
+              ].map((bar) => (
+                <div key={bar.time} className="flex items-center gap-4">
+                  <span className="w-20 text-right text-sm font-bold text-slate-500">{bar.time}</span>
+                  <div className="relative h-10 flex-1 rounded-full bg-slate-50 overflow-hidden">
+                    <div 
+                      className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ${bar.active ? 'bg-[#22C55E]' : 'bg-slate-200'}`}
+                      style={{ width: bar.width }}
+                    >
+                      <span className={`absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold ${bar.active ? 'text-white' : 'text-slate-500'}`}>
+                        {bar.value}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tabela de Comparação */}
+          <div className="mt-24 overflow-hidden rounded-[32px] border border-slate-100 bg-white shadow-sm">
+            <table className="w-full text-left border-collapse">
+              <tbody>
+                {[
+                  ["Lead às 22h? Só vê resposta às 8h", "Resposta em 3 segundos, qualquer horário"],
+                  ["78% dos leads perdidos por demora", "391% mais conversão no primeiro minuto"],
+                  ["R$ 12 por clique que vira prejuízo", "Cada real investido vira oportunidade"],
+                  ["Cliente irritado vai pro concorrente", "Lead qualificado e agendado automaticamente"],
+                  ["Final de semana sem atendimento", "Funciona 24/7, inclusive feriados"],
+                ].map((row, idx) => (
+                  <tr key={idx} className="border-b border-slate-50 last:border-0">
+                    <td className="p-5 text-sm font-medium text-slate-500">
+                      <span className="mr-3 text-red-400">×</span> {row[0]}
+                    </td>
+                    <td className="p-5 text-sm font-medium text-slate-700 bg-emerald-50/30">
+                      <span className="mr-3 text-emerald-500">✓</span> {row[1]}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-16">
+            <p className="text-lg font-medium text-slate-900">
+              O Next Pro responde em 3 segundos. Sempre. Inclusive às 3h da manhã de um domingo.
+            </p>
+            <Link to="/auth" className="mt-8 inline-block">
+              <Button className="btn-press rounded-full bg-black px-10 py-7 text-lg font-bold text-white hover:bg-zinc-800">
+                Parar de perder leads agora →
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CASOS REAIS */}
       <section id="depoimentos" className="bg-[#fafbfc] py-24">
         <div className="mx-auto max-w-7xl px-6">
