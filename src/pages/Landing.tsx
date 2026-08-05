@@ -1533,7 +1533,7 @@ export default function Landing() {
             {/* Chat — grande */}
             <div className="group md:col-span-8 flex flex-col md:flex-row gap-8 rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-[#004DFF]/20">
               <div className="md:w-[42%] shrink-0">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-slate-900/10">
                   <MessageCircle className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="font-space-grotesk text-2xl font-bold text-[#0B1220]">Atende como um humano</h3>
@@ -1570,7 +1570,7 @@ export default function Landing() {
 
             {/* Transcreve áudio */}
             <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-[#004DFF]/20">
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-slate-900/10">
                 <Mic className="h-6 w-6 text-white" />
               </div>
               <h3 className="font-space-grotesk text-xl font-bold text-[#0B1220]">Transcreve áudio</h3>
@@ -1630,7 +1630,7 @@ export default function Landing() {
             {/* Aviso de lead quente */}
             <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-[#004DFF]/20">
               <div className="mb-6 flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-slate-900/10">
                   <TrendingUp className="h-6 w-6 text-white" />
                 </div>
                 <span className="relative flex h-3 w-3">
@@ -2193,7 +2193,7 @@ export default function Landing() {
                     </div>
                   </div>
                   <div className="flex items-start gap-4 relative">
-                    <div className="z-10 flex h-6 w-6 shrink-0 animate-pulse items-center justify-center rounded-full border-4 border-white bg-[#004DFF] shadow-[0_0_10px_rgba(0,77,255,0.4)]" />
+                    <div className="z-10 flex h-6 w-6 shrink-0 animate-pulse items-center justify-center rounded-full border-4 border-white bg-[#004DFF] shadow-none" />
                     <div>
                       <p className="text-sm font-bold text-[#0B1220]">Dia do Vencimento</p>
                       <p className="text-xs font-medium text-[#004DFF]">Pix gerado automaticamente</p>
@@ -2478,7 +2478,7 @@ export default function Landing() {
                 className="group relative bg-white border border-slate-200 p-8 rounded-3xl transition-all duration-500 hover:-translate-y-1"
               >
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="h-12 w-12 rounded-2xl bg-[#004DFF] flex items-center justify-center text-white shadow-lg shadow-[#004DFF]/20">
+                  <div className="h-12 w-12 rounded-2xl bg-[#004DFF] flex items-center justify-center text-white shadow-lg shadow-slate-900/10">
                     <group.icon className="h-6 w-6" />
                   </div>
                   <div className="font-semibold text-2xl text-[#0F172A]">{group.title}</div>
@@ -3050,7 +3050,7 @@ export default function Landing() {
                 <p className="mt-1 text-sm text-slate-600">Taxa de recompra</p>
 
                 <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-slate-900/10">
-                  <div className="h-full w-[36%] rounded-full bg-[#004DFF] shadow-[0_0_10px_#004DFF]" />
+                  <div className="h-full w-[36%] rounded-full bg-[#004DFF] shadow-none" />
                 </div>
 
                 <div className="mt-5 flex -space-x-3">
