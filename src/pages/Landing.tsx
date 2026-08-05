@@ -2394,13 +2394,6 @@ export default function Landing() {
                 key={s.label}
                 className="group relative overflow-hidden rounded-[22px] border border-slate-200/90 bg-white p-5 transition-all duration-500 hover:-translate-y-2 hover:border-[#004DFF]/40"
               >
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 100% 0%, rgba(0,77,255,0.10) 0%, transparent 60%)",
-                  }}
-                />
                 <div className="relative flex h-full flex-col">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#004DFF]/15 bg-[#004DFF]/[0.06] transition-colors duration-300 group-hover:bg-[#004DFF] group-hover:border-[#004DFF]">
                     <s.icon
