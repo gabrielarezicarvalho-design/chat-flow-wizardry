@@ -15,7 +15,7 @@ import iconMeta from "@/assets/integrations/meta.png.asset.json";
 import iconTiktok from "@/assets/integrations/tiktok.png.asset.json";
 import iconCalendar from "@/assets/integrations/calendar.png.asset.json";
 import iconOpenai from "@/assets/integrations/openai.png.asset.json";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -28,7 +28,7 @@ import {
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
   Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight, ChevronUp, CheckCircle2,
-  Trophy, Globe, Mail, BarChart3, Tag
+  Trophy, Globe, Mail, BarChart3, Tag, TrendingDown
 } from "lucide-react";
 import { ProspeccaoMapWindow } from "@/components/landing/ProspeccaoMapWindow";
 import CookieConsent from "@/components/landing/CookieConsent";
@@ -2789,27 +2789,47 @@ export default function Landing() {
           </div>
 
           {/* Tabela de Comparação */}
-          <div className="mt-24 overflow-hidden rounded-[32px] border border-slate-100 bg-white shadow-sm">
-            <table className="w-full text-left border-collapse">
-              <tbody>
-                {[
-                  ["Lead às 22h? Só vê resposta às 8h", "Resposta em 3 segundos, qualquer horário"],
-                  ["78% dos leads perdidos por demora", "391% mais conversão no primeiro minuto"],
-                  ["R$ 12 por clique que vira prejuízo", "Cada real investido vira oportunidade"],
-                  ["Cliente irritado vai pro concorrente", "Lead qualificado e agendado automaticamente"],
-                  ["Final de semana sem atendimento", "Funciona 24/7, inclusive feriados"],
-                ].map((row, idx) => (
-                  <tr key={idx} className="border-b border-slate-50 last:border-0">
-                    <td className="p-5 text-sm font-medium text-slate-500">
-                      <span className="mr-3 text-red-400">×</span> {row[0]}
-                    </td>
-                    <td className="p-5 text-sm font-medium text-slate-700 bg-emerald-50/30">
-                      <span className="mr-3 text-emerald-500">✓</span> {row[1]}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Tabela de Comparação */}
+          <div className="mt-24 overflow-hidden rounded-[40px] border border-slate-200 bg-white shadow-2xl shadow-slate-200/50">
+            <div className="grid grid-cols-2">
+              {/* Header */}
+              <div className="bg-[#FFF1F2] p-8 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2">
+                <div className="flex items-center gap-2 text-[#F43F5E] font-bold font-space-grotesk text-xl">
+                  <TrendingDown className="h-5 w-5" />
+                  Sem Next Pro
+                </div>
+              </div>
+              <div className="bg-[#F0FDF4] p-8 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2">
+                <div className="flex items-center gap-2 text-[#10B981] font-bold font-space-grotesk text-xl">
+                  <TrendingUp className="h-5 w-5" />
+                  Com Next Pro
+                </div>
+              </div>
+
+              {/* Rows */}
+              {[
+                ["Lead às 22h? Só vê resposta às 8h", "Resposta em 3 segundos, qualquer horário"],
+                ["78% dos leads perdidos por demora", "391% mais conversão no primeiro minuto"],
+                ["R$ 12 por clique que vira prejuízo", "Cada real investido vira oportunidade"],
+                ["Cliente irritado vai pro concorrente", "Lead qualificado e agendado automaticamente"],
+                ["Final de semana sem atendimento", "Funciona 24/7, inclusive feriados"],
+              ].map((row, idx) => (
+                <React.Fragment key={idx}>
+                  <div className={`p-8 border-r border-slate-100 flex items-center gap-4 transition-colors hover:bg-[#FFFBFB] ${idx !== 4 ? 'border-b' : ''}`}>
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#FEE2E2] text-[#F43F5E]">
+                      <X className="h-3 w-3" strokeWidth={4} />
+                    </div>
+                    <span className="text-[17px] font-medium text-slate-600">{row[0]}</span>
+                  </div>
+                  <div className={`p-8 flex items-center gap-4 transition-colors hover:bg-[#F7FEE7] ${idx !== 4 ? 'border-b' : ''}`}>
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#10B981]">
+                      <Check className="h-3 w-3" strokeWidth={4} />
+                    </div>
+                    <span className="text-[17px] font-bold text-slate-800">{row[1]}</span>
+                  </div>
+                </React.Fragment>
+              ))}
+            </div>
           </div>
 
           <div className="mt-16">
