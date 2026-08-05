@@ -2429,7 +2429,7 @@ export default function Landing() {
               <span className="inline-block h-2 w-2 rounded-full bg-[#004DFF]" />
               Tudo em um único painel
             </span>
-            <h2 className="mt-4 text-4xl md:text-5xl font-bold">
+            <h2 className="mt-4 text-4xl md:text-5xl font-bold font-space-grotesk">
               Sua central comercial <span style={{ color: "#004DFF" }}>completa.</span>
             </h2>
             <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
