@@ -1766,7 +1766,7 @@ export default function Landing() {
                   key={p.tier}
                   className={`relative min-w-0 w-full overflow-hidden rounded-[28px] bg-slate-50 p-5 sm:p-6 text-left transition-all duration-300 hover:-translate-y-1 ${
                     p.featured
-                      ? "ring-1 ring-[#004DFF] shadow-[0_20px_60px_-25px_rgba(0,77,255,0.45)]"
+                      ? "ring-1 ring-[#004DFF] shadow-xl"
                       : "border border-slate-200 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-900/5"
                   }`}
                 >
@@ -2045,7 +2045,7 @@ export default function Landing() {
             </ul>
 
             <Link to="/auth">
-              <Button className="btn-press mt-10 rounded-full px-8 py-6 text-base text-white shadow-[0_14px_34px_-12px_rgba(0,77,255,0.7)]" style={{ backgroundColor: "#004DFF" }}>
+              <Button className="btn-press mt-10 rounded-full px-8 py-6 text-base text-white shadow-lg" style={{ backgroundColor: "#004DFF" }}>
                 Clonar minha voz <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -2071,7 +2071,7 @@ export default function Landing() {
               </div>
 
               <div className="flex items-center gap-4 rounded-2xl bg-[#F5EFE6]/70 p-4">
-                <button className="h-14 w-14 flex-shrink-0 rounded-full shadow-[0_10px_24px_-10px_rgba(0,77,255,0.8)] transition-transform hover:scale-105 flex items-center justify-center" style={{ backgroundColor: "#004DFF" }}>
+                <button className="h-14 w-14 flex-shrink-0 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center justify-center" style={{ backgroundColor: "#004DFF" }}>
                   <Play className="ml-0.5 h-5 w-5 text-white" fill="currentColor" />
                 </button>
                 <div className="flex h-12 flex-1 items-center gap-[3px]">
@@ -2130,7 +2130,7 @@ export default function Landing() {
           {/* Bento grid */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
             {/* WhatsApp mockup */}
-            <div className="group relative min-h-[500px] overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white shadow-[0_20px_50px_-20px_rgba(0,77,255,0.12)] md:col-span-7">
+            <div className="group relative min-h-[500px] overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white shadow-xl md:col-span-7">
               <div className="absolute inset-0 bg-gradient-to-br from-[#E6ECF7]/50 to-transparent" />
               <div className="relative flex h-full flex-col p-8">
                 <div className="mb-8 flex items-center gap-3">
