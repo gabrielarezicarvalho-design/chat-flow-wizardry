@@ -2267,8 +2267,8 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="relative">
-            <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide no-scrollbar px-4 justify-start md:justify-center">
+          <div className="relative overflow-hidden py-4">
+            <div className="flex animate-marquee-slower whitespace-nowrap group">
               {[
                 { icon: Megaphone, label: "Webhooks" },
                 { icon: Wrench, label: "API" },
@@ -2276,11 +2276,53 @@ export default function Landing() {
                 { icon: Zap, label: "Campanhas" },
                 { icon: Activity, label: "Automação" },
                 { icon: Calendar, label: "Agendamentos" },
-                { icon: Users, label: "Vários atendentes" }
+                { icon: Users, label: "Vários atendentes" },
+                { icon: CreditCard, label: "Pagamentos" },
+                { icon: MessageSquare, label: "CRM" },
+                { icon: Repeat, label: "Recorrência" },
+                { icon: MapPin, label: "Extração Leads" },
+                { icon: Volume2, label: "Áudio IA" },
+                { icon: Target, label: "Prospecção" },
+                { icon: ShieldCheck, label: "Segurança" },
+                { icon: Headphones, label: "Atendimento" },
+                { icon: BarChart3, label: "Métricas" },
+                { icon: Sparkles, label: "Aurora IA" },
+                { icon: Globe, label: "Multicanais" }
               ].map((item, i) => (
                 <div 
                   key={i}
-                  className="flex items-center gap-3 px-6 py-4 rounded-xl bg-[#f8fafc] border border-slate-200/60 whitespace-nowrap transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-1"
+                  className="flex items-center gap-3 px-6 py-4 mx-2 rounded-xl bg-[#f8fafc] border border-slate-200/60 whitespace-nowrap transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-1"
+                >
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${item.label === 'API' ? 'bg-[#15803d]/10 text-[#15803d]' : 'bg-white text-slate-600 shadow-sm border border-slate-100'}`}>
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <span className="font-semibold text-slate-700">{item.label}</span>
+                </div>
+              ))}
+              {/* Duplicado para loop infinito */}
+              {[
+                { icon: Megaphone, label: "Webhooks" },
+                { icon: Wrench, label: "API" },
+                { icon: Bot, label: "Chatbot" },
+                { icon: Zap, label: "Campanhas" },
+                { icon: Activity, label: "Automação" },
+                { icon: Calendar, label: "Agendamentos" },
+                { icon: Users, label: "Vários atendentes" },
+                { icon: CreditCard, label: "Pagamentos" },
+                { icon: MessageSquare, label: "CRM" },
+                { icon: Repeat, label: "Recorrência" },
+                { icon: MapPin, label: "Extração Leads" },
+                { icon: Volume2, label: "Áudio IA" },
+                { icon: Target, label: "Prospecção" },
+                { icon: ShieldCheck, label: "Segurança" },
+                { icon: Headphones, label: "Atendimento" },
+                { icon: BarChart3, label: "Métricas" },
+                { icon: Sparkles, label: "Aurora IA" },
+                { icon: Globe, label: "Multicanais" }
+              ].map((item, i) => (
+                <div 
+                  key={`clone-${i}`}
+                  className="flex items-center gap-3 px-6 py-4 mx-2 rounded-xl bg-[#f8fafc] border border-slate-200/60 whitespace-nowrap transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-1"
                 >
                   <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${item.label === 'API' ? 'bg-[#15803d]/10 text-[#15803d]' : 'bg-white text-slate-600 shadow-sm border border-slate-100'}`}>
                     <item.icon className="h-5 w-5" />
@@ -2289,6 +2331,9 @@ export default function Landing() {
                 </div>
               ))}
             </div>
+            {/* Sombras nas bordas para suavizar a entrada/saída */}
+            <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />
+            <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
           </div>
         </div>
       </section>
