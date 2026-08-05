@@ -2268,7 +2268,7 @@ export default function Landing() {
           </div>
 
           <div className="relative overflow-hidden py-4">
-            <div className="flex animate-marquee-slower whitespace-nowrap group">
+            <div className="flex animate-marquee-slower whitespace-nowrap group w-max">
               {[
                 { icon: Megaphone, label: "Webhooks" },
                 { icon: Wrench, label: "API" },
