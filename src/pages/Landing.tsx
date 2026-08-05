@@ -2731,87 +2731,123 @@ export default function Landing() {
                   </div>
 
                   {/* Column 2: Em atendimento */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between bg-[#A855F7] text-white px-3 py-2 rounded-lg text-[11px] font-bold shadow-sm">
+                  <div className="bg-[#FAF9FF] rounded-2xl border border-slate-100 p-2.5 space-y-4">
+                    <div className="flex items-center justify-between bg-[#A855F7] text-white px-3 py-2.5 rounded-xl text-[13px] font-bold shadow-sm">
                       <span>Em atendi...</span>
                       <div className="flex items-center gap-2">
-                        <span className="opacity-90">R$ 1.290,00</span>
-                        <span className="bg-white/20 px-1.5 rounded">1</span>
+                        <span className="bg-white text-[#A855F7] px-2 py-0.5 rounded-lg text-[11px]">R$ 3.690,00</span>
+                        <span className="bg-white/20 px-2 py-0.5 rounded-full text-[11px]">2</span>
                       </div>
                     </div>
-                    <div className="bg-white border border-slate-100 rounded-lg p-2.5 text-[11px] text-slate-400 shadow-sm">Buscar contato...</div>
-                    <div className="border border-dashed border-[#8B5CF6]/30 bg-white/30 rounded-lg p-2.5 text-center text-[11px] text-[#8B5CF6] font-semibold">+ Adicionar contato</div>
                     
-                    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="h-10 w-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[12px] font-bold text-slate-400">AS</div>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start">
-                            <span className="text-[13px] font-bold text-[#1e293b]">Ana Souza</span>
-                            <span className="text-[10px] text-slate-400">agora</span>
+                    <div className="px-1 space-y-3">
+                      <div className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-[12px] text-slate-400 shadow-sm flex items-center justify-between">
+                        <span>Buscar contato...</span>
+                      </div>
+                      
+                      <div className="border border-dashed border-[#8B5CF6]/30 bg-white/50 rounded-xl py-2.5 text-center text-[12px] text-[#8B5CF6] font-bold">
+                        + Adicionar contato
+                      </div>
+                      
+                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[14px] font-bold text-slate-400">AS</div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start">
+                              <span className="text-[15px] font-bold text-[#1e293b]">Ana Souza</span>
+                              <span className="text-[11px] text-slate-400 font-medium">agora</span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 mt-0.5">IA qualificou e i...</div>
                           </div>
-                          <div className="text-[10px] text-slate-500 mt-0.5">IA qualificou e i...</div>
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-50">
+                          <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[11px] px-3 py-1.5 rounded-full font-bold">
+                            <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
+                            Instagram
+                          </div>
+                          <span className="text-[14px] font-bold text-slate-700">R$ 1.290</span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[10px] px-2.5 py-1 rounded-full font-bold">
-                          <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
-                          Instagram
+
+                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[14px] font-bold text-slate-400">BR</div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start">
+                              <span className="text-[15px] font-bold text-[#1e293b]">Bianca Reis</span>
+                              <span className="text-[11px] text-slate-400 font-medium">agora</span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 mt-0.5">IA qualificou e i...</div>
+                          </div>
                         </div>
-                        <span className="text-[12px] font-bold text-slate-700">R$ 1.290</span>
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-50">
+                          <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[11px] px-3 py-1.5 rounded-full font-bold">
+                            <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
+                            WhatsApp
+                          </div>
+                          <span className="text-[14px] font-bold text-slate-700">R$ 2.400</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Column 3: Fechado */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between bg-[#10B981] text-white px-3 py-2 rounded-lg text-[11px] font-bold shadow-sm">
+                  <div className="bg-[#FAF9FF] rounded-2xl border border-slate-100 p-2.5 space-y-4">
+                    <div className="flex items-center justify-between bg-[#10B981] text-white px-3 py-2.5 rounded-xl text-[13px] font-bold shadow-sm">
                       <span>Fechado</span>
                       <div className="flex items-center gap-2">
-                        <span className="opacity-90">R$ 2.990,00</span>
-                        <span className="bg-white/20 px-1.5 rounded">2</span>
+                        <span className="bg-white text-[#10B981] px-2 py-0.5 rounded-lg text-[11px]">R$ 2.540,00</span>
+                        <span className="bg-white/20 px-2 py-0.5 rounded-full text-[11px]">2</span>
                       </div>
                     </div>
-                    <div className="bg-white border border-slate-100 rounded-lg p-2.5 text-[11px] text-slate-400 shadow-sm">Buscar contato...</div>
-                    <div className="border border-dashed border-[#8B5CF6]/30 bg-white/30 rounded-lg p-2.5 text-center text-[11px] text-[#8B5CF6] font-semibold">+ Adicionar contato</div>
                     
-                    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="h-10 w-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[12px] font-bold text-slate-400">LM</div>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start">
-                            <span className="text-[13px] font-bold text-[#1e293b]">Lucas Martins</span>
-                            <span className="text-[10px] text-slate-400">agora</span>
+                    <div className="px-1 space-y-3">
+                      <div className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-[12px] text-slate-400 shadow-sm flex items-center justify-between">
+                        <span>Buscar contato...</span>
+                      </div>
+                      
+                      <div className="border border-dashed border-[#8B5CF6]/30 bg-white/50 rounded-xl py-2.5 text-center text-[12px] text-[#8B5CF6] font-bold">
+                        + Adicionar contato
+                      </div>
+                      
+                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[14px] font-bold text-slate-400">RN</div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start">
+                              <span className="text-[15px] font-bold text-[#1e293b]">Rafael Nunes</span>
+                              <span className="text-[11px] text-slate-400 font-medium">agora</span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 mt-0.5">Venda marcada...</div>
                           </div>
-                          <div className="text-[10px] text-slate-500 mt-0.5">Venda marcada...</div>
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-50">
+                          <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[11px] px-3 py-1.5 rounded-full font-bold">
+                            <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
+                            Tráfego pago
+                          </div>
+                          <span className="text-[14px] font-bold text-slate-700">R$ 1.650</span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[10px] px-2.5 py-1 rounded-full font-bold">
-                          <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
-                          Site
-                        </div>
-                        <span className="text-[12px] font-bold text-slate-700">R$ 890</span>
-                      </div>
-                    </div>
 
-                    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="h-10 w-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[12px] font-bold text-slate-400">BC</div>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start">
-                            <span className="text-[13px] font-bold text-[#1e293b]">Bruno Costa</span>
-                            <span className="text-[10px] text-slate-400">18 min</span>
+                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[14px] font-bold text-slate-400">LM</div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start">
+                              <span className="text-[15px] font-bold text-[#1e293b]">Lucas Martins</span>
+                              <span className="text-[11px] text-slate-400 font-medium">agora</span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 mt-0.5">Venda marcada...</div>
                           </div>
-                          <div className="text-[10px] text-slate-500 mt-0.5">Venda marcada...</div>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[10px] px-2.5 py-1 rounded-full font-bold">
-                          <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
-                          Equipe
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-50">
+                          <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[11px] px-3 py-1.5 rounded-full font-bold">
+                            <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
+                            Site
+                          </div>
+                          <span className="text-[14px] font-bold text-slate-700">R$ 890</span>
                         </div>
-                        <span className="text-[12px] font-bold text-slate-700">R$ 2.100</span>
                       </div>
                     </div>
                   </div>
