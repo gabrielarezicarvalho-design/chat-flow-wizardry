@@ -2482,7 +2482,7 @@ export default function Landing() {
             ].map((group) => (
               <div
                 key={group.title}
-                className="group relative bg-white border border-slate-200 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,77,255,0.08)] transition-all duration-500 hover:-translate-y-1"
+                className="group relative bg-white border border-slate-200 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
               >
                 <div className="flex items-center gap-4 mb-8">
                   <div className="h-12 w-12 rounded-2xl bg-[#004DFF] flex items-center justify-center text-white shadow-lg shadow-[#004DFF]/20">
