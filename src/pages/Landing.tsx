@@ -15,7 +15,7 @@ import iconMeta from "@/assets/integrations/meta.png.asset.json";
 import iconTiktok from "@/assets/integrations/tiktok.png.asset.json";
 import iconCalendar from "@/assets/integrations/calendar.png.asset.json";
 import iconOpenai from "@/assets/integrations/openai.png.asset.json";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
@@ -28,7 +28,7 @@ import {
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
   Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight, ChevronUp, CheckCircle2,
-  Trophy, Globe, Mail, BarChart3, Tag
+  Trophy, Globe, Mail, BarChart3, Tag, TrendingDown
 } from "lucide-react";
 import { ProspeccaoMapWindow } from "@/components/landing/ProspeccaoMapWindow";
 import CookieConsent from "@/components/landing/CookieConsent";
