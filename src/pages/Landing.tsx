@@ -2839,7 +2839,7 @@ export default function Landing() {
               O Next Pro responde em 3 segundos. Sempre. Inclusive às 3h da manhã de um domingo.
             </p>
             <Link to="/auth" className="mt-8 inline-block">
-              <Button className="btn-press rounded-full bg-black px-10 py-7 text-lg font-bold text-white hover:bg-zinc-800">
+              <Button className="btn-press rounded-full bg-[#004DFF] px-8 py-6 text-base font-bold text-white hover:bg-[#004DFF]/90">
                 Parar de perder leads agora →
               </Button>
             </Link>
