@@ -372,3 +372,19 @@ All colors MUST be HSL.
   .voz-bar { animation: none; }
 }
 
+@keyframes marquee-slower {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee-slower {
+  animation: marquee-slower 40s linear infinite;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
