@@ -2677,117 +2677,133 @@ export default function Landing() {
               {/* Background Glow */}
               <div className="absolute -inset-10 bg-[#8B5CF6]/5 rounded-[40px] blur-3xl" />
               
-              <div className="relative bg-[#F3E8FF]/30 border border-[#8B5CF6]/10 rounded-[32px] p-6 backdrop-blur-sm">
-                {/* IA Update Badge */}
-                <div className="mb-6 flex items-center gap-2 bg-white/80 border border-slate-100 rounded-xl px-4 py-3 shadow-sm">
-                  <Sparkles className="h-4 w-4 text-[#8B5CF6]" />
-                  <span className="text-sm font-medium text-slate-700">IA atualizou próximos passos sem trocar de etapa</span>
+              <div className="relative bg-[#F7F4FF] border border-[#E9D5FF] rounded-[32px] p-6 shadow-sm overflow-hidden">
+                {/* Movement Notification */}
+                <div className="mb-6 flex items-center justify-center">
+                  <div className="bg-white border border-slate-100 rounded-full px-6 py-2.5 shadow-sm flex items-center gap-2 animate-bounce-subtle">
+                    <Sparkles className="h-4 w-4 text-[#8B5CF6]" />
+                    <span className="text-sm font-semibold text-slate-800">
+                      Lucas Martins avançou para <span className="text-[#10B981]">Fechado</span>
+                    </span>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   {/* Column 1: Novo Lead */}
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between bg-[#3B82F6] text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">
+                    <div className="flex items-center justify-between bg-[#3B82F6] text-white px-3 py-2 rounded-lg text-[11px] font-bold shadow-sm">
                       <span>Novo lead</span>
                       <div className="flex items-center gap-2">
-                        <span>R$ 720,00</span>
-                        <span className="bg-white/20 px-1 rounded">1</span>
+                        <span className="opacity-90">R$ 720,00</span>
+                        <span className="bg-white/20 px-1.5 rounded">1</span>
                       </div>
                     </div>
-                    <div className="bg-white/50 border border-slate-200 rounded-lg p-2 text-[10px] text-slate-400">Buscar contato...</div>
-                    <div className="border border-dashed border-[#8B5CF6]/30 rounded-lg p-2 text-center text-[10px] text-[#8B5CF6] font-medium">+ Adicionar contato</div>
+                    <div className="bg-white border border-slate-100 rounded-lg p-2.5 text-[11px] text-slate-400 shadow-sm">Buscar contato...</div>
+                    <div className="border border-dashed border-[#8B5CF6]/30 bg-white/30 rounded-lg p-2.5 text-center text-[11px] text-[#8B5CF6] font-semibold">+ Adicionar contato</div>
                     
-                    <div className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">PL</div>
+                        <div className="h-10 w-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[12px] font-bold text-slate-400">PL</div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-start">
-                            <span className="text-xs font-bold text-slate-900 truncate">Pedro Lima</span>
-                            <span className="text-[9px] text-slate-400">5 min</span>
+                            <span className="text-[13px] font-bold text-[#1e293b]">Pedro Lima</span>
+                            <span className="text-[10px] text-slate-400">5 min</span>
                           </div>
-                          <div className="text-[9px] text-slate-400 truncate">Vim pelo anúncio</div>
+                          <div className="text-[10px] text-slate-500 mt-0.5">Vim pelo anúncio</div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="bg-[#F3E8FF] text-[#8B5CF6] text-[9px] px-2 py-0.5 rounded-full font-bold">Meta Ads</span>
-                        <span className="text-[10px] font-bold text-slate-700">R$ 720</span>
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[10px] px-2.5 py-1 rounded-full font-bold">
+                          <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
+                          Meta Ads
+                        </div>
+                        <span className="text-[12px] font-bold text-slate-700">R$ 720</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Column 2: Em atendimento */}
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between bg-[#A855F7] text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">
+                    <div className="flex items-center justify-between bg-[#A855F7] text-white px-3 py-2 rounded-lg text-[11px] font-bold shadow-sm">
                       <span>Em atendi...</span>
                       <div className="flex items-center gap-2">
-                        <span>R$ 2.180,00</span>
-                        <span className="bg-white/20 px-1 rounded">2</span>
+                        <span className="opacity-90">R$ 1.290,00</span>
+                        <span className="bg-white/20 px-1.5 rounded">1</span>
                       </div>
                     </div>
-                    <div className="bg-white/50 border border-slate-200 rounded-lg p-2 text-[10px] text-slate-400">Buscar contato...</div>
-                    <div className="border border-dashed border-[#8B5CF6]/30 rounded-lg p-2 text-center text-[10px] text-[#8B5CF6] font-medium">+ Adicionar contato</div>
+                    <div className="bg-white border border-slate-100 rounded-lg p-2.5 text-[11px] text-slate-400 shadow-sm">Buscar contato...</div>
+                    <div className="border border-dashed border-[#8B5CF6]/30 bg-white/30 rounded-lg p-2.5 text-center text-[11px] text-[#8B5CF6] font-semibold">+ Adicionar contato</div>
                     
-                    <div className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
+                    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">LM</div>
+                        <div className="h-10 w-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[12px] font-bold text-slate-400">AS</div>
                         <div className="flex-1">
                           <div className="flex justify-between items-start">
-                            <span className="text-xs font-bold text-slate-900">Lucas Martins</span>
-                            <span className="text-[9px] text-slate-400">agora</span>
+                            <span className="text-[13px] font-bold text-[#1e293b]">Ana Souza</span>
+                            <span className="text-[10px] text-slate-400">agora</span>
                           </div>
-                          <div className="text-[9px] text-slate-400">IA qualificou e i...</div>
+                          <div className="text-[10px] text-slate-500 mt-0.5">IA qualificou e i...</div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="bg-[#F3E8FF] text-[#8B5CF6] text-[9px] px-2 py-0.5 rounded-full font-bold">Site</span>
-                        <span className="text-[10px] font-bold text-slate-700">R$ 890</span>
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">AS</div>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start">
-                            <span className="text-xs font-bold text-slate-900">Ana Souza</span>
-                            <span className="text-[9px] text-slate-400">agora</span>
-                          </div>
-                          <div className="text-[9px] text-slate-400">IA qualificou e i...</div>
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[10px] px-2.5 py-1 rounded-full font-bold">
+                          <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
+                          Instagram
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="bg-[#F3E8FF] text-[#8B5CF6] text-[9px] px-2 py-0.5 rounded-full font-bold">Instagram</span>
-                        <span className="text-[10px] font-bold text-slate-700">R$ 1.290</span>
+                        <span className="text-[12px] font-bold text-slate-700">R$ 1.290</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Column 3: Fechado */}
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between bg-[#10B981] text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">
+                    <div className="flex items-center justify-between bg-[#10B981] text-white px-3 py-2 rounded-lg text-[11px] font-bold shadow-sm">
                       <span>Fechado</span>
                       <div className="flex items-center gap-2">
-                        <span>R$ 2.100,00</span>
-                        <span className="bg-white/20 px-1 rounded">1</span>
+                        <span className="opacity-90">R$ 2.990,00</span>
+                        <span className="bg-white/20 px-1.5 rounded">2</span>
                       </div>
                     </div>
-                    <div className="bg-white/50 border border-slate-200 rounded-lg p-2 text-[10px] text-slate-400">Buscar contato...</div>
-                    <div className="border border-dashed border-[#8B5CF6]/30 rounded-lg p-2 text-center text-[10px] text-[#8B5CF6] font-medium">+ Adicionar contato</div>
+                    <div className="bg-white border border-slate-100 rounded-lg p-2.5 text-[11px] text-slate-400 shadow-sm">Buscar contato...</div>
+                    <div className="border border-dashed border-[#8B5CF6]/30 bg-white/30 rounded-lg p-2.5 text-center text-[11px] text-[#8B5CF6] font-semibold">+ Adicionar contato</div>
                     
-                    <div className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
+                    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">BC</div>
+                        <div className="h-10 w-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[12px] font-bold text-slate-400">LM</div>
                         <div className="flex-1">
                           <div className="flex justify-between items-start">
-                            <span className="text-xs font-bold text-slate-900">Bruno Costa</span>
-                            <span className="text-[9px] text-slate-400">18 min</span>
+                            <span className="text-[13px] font-bold text-[#1e293b]">Lucas Martins</span>
+                            <span className="text-[10px] text-slate-400">agora</span>
                           </div>
-                          <div className="text-[9px] text-slate-400">Venda marcad...</div>
+                          <div className="text-[10px] text-slate-500 mt-0.5">Venda marcada...</div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="bg-[#F3E8FF] text-[#8B5CF6] text-[9px] px-2 py-0.5 rounded-full font-bold">Equipe</span>
-                        <span className="text-[10px] font-bold text-slate-700">R$ 2.100</span>
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[10px] px-2.5 py-1 rounded-full font-bold">
+                          <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
+                          Site
+                        </div>
+                        <span className="text-[12px] font-bold text-slate-700">R$ 890</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-10 w-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[12px] font-bold text-slate-400">BC</div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <span className="text-[13px] font-bold text-[#1e293b]">Bruno Costa</span>
+                            <span className="text-[10px] text-slate-400">18 min</span>
+                          </div>
+                          <div className="text-[10px] text-slate-500 mt-0.5">Venda marcada...</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[10px] px-2.5 py-1 rounded-full font-bold">
+                          <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
+                          Equipe
+                        </div>
+                        <span className="text-[12px] font-bold text-slate-700">R$ 2.100</span>
                       </div>
                     </div>
                   </div>
@@ -2800,9 +2816,9 @@ export default function Landing() {
                     { icon: Repeat, label: "automação move etapas" },
                     { icon: Sparkles, label: "clique para avançar" }
                   ].map((badge, idx) => (
-                    <div key={idx} className="bg-white/80 rounded-full px-3 py-1.5 flex items-center gap-2 border border-slate-100 shadow-sm">
-                      <badge.icon className="h-3 w-3 text-[#8B5CF6]" />
-                      <span className="text-[9px] font-medium text-slate-600 truncate">{badge.label}</span>
+                    <div key={idx} className="bg-white rounded-xl px-4 py-2.5 flex items-center gap-2 border border-slate-100 shadow-sm">
+                      <badge.icon className="h-4 w-4 text-[#8B5CF6]" />
+                      <span className="text-[10px] font-bold text-slate-600 truncate uppercase tracking-wider">{badge.label}</span>
                     </div>
                   ))}
                 </div>
