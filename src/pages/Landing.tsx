@@ -2676,106 +2676,109 @@ export default function Landing() {
               {/* Background Glow */}
               <div className="absolute -inset-10 bg-[#8B5CF6]/5 rounded-[40px] blur-3xl" />
               
-              <div className="relative bg-[#F7F4FF] border border-[#E9D5FF] rounded-[40px] p-6 shadow-sm overflow-hidden min-h-[480px]">
+              <div className="relative bg-[#FBFAFF] border border-[#EDE7FB] rounded-[24px] p-4 shadow-[0_8px_30px_rgba(139,92,246,0.06)]">
                 {/* Movement Notification */}
-                <div className="mb-6 flex items-center justify-center h-10">
-                  <div className="bg-white border border-slate-100 rounded-full px-5 py-2 shadow-sm flex items-center gap-2 animate-bounce-subtle">
-                    <Sparkles className="h-3.5 w-3.5 text-[#8B5CF6]" />
-                    <span className="text-[12px] font-semibold text-slate-800" id="kanban-update-text">
-                      Lucas Martins avançou para Fechado
-                    </span>
-                  </div>
+                <div className="mb-4 bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-sm flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-[#8B5CF6]" />
+                  <span className="text-[13px] font-medium text-slate-800">
+                    Lucas Martins avançou para Fechado
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-3 gap-3 items-start">
                   {[
-                    { title: "Novo lead", color: "bg-[#3B82F6]", key: "lead" },
-                    { title: "Em atendimento", color: "bg-[#A855F7]", key: "service" },
-                    { title: "Fechado", color: "bg-[#10B981]", key: "closed" }
+                    {
+                      title: "Novo lead",
+                      header: "bg-[#2563EB]",
+                      total: "R$ 720,00",
+                      count: 1,
+                      cards: [
+                        { initials: "PL", name: "Pedro Lima", info: "Vim pelo anúncio", time: "5 min", tag: "Meta Ads", value: "R$ 720" }
+                      ]
+                    },
+                    {
+                      title: "Em atendim...",
+                      header: "bg-[#7C3AED]",
+                      total: "R$ 1.290,00",
+                      count: 1,
+                      cards: [
+                        { initials: "AS", name: "Ana Souza", info: "IA qualificou e i...", time: "agora", tag: "Instagram", value: "R$ 1.290" }
+                      ]
+                    },
+                    {
+                      title: "Fechado",
+                      header: "bg-[#10B981]",
+                      total: "R$ 2.990,00",
+                      count: 2,
+                      cards: [
+                        { initials: "LM", name: "Lucas Martins", info: "Venda marcada...", time: "agora", tag: "Site", value: "R$ 890" },
+                        { initials: "BC", name: "Bruno Costa", info: "Venda marcad...", time: "18 min", tag: "Equipe", value: "R$ 2.100" }
+                      ]
+                    }
                   ].map((col) => (
-                    <div key={col.key} className="flex flex-col gap-3">
-                      <div className={`flex items-center justify-between ${col.color} text-white px-4 py-2.5 rounded-2xl text-[13px] font-bold shadow-sm`}>
-                        <span id={`kanban-title-${col.key}`}>{col.title}</span>
+                    <div key={col.title} className="bg-[#FCFBFE] border border-[#F1EDFA] rounded-2xl p-2.5 min-h-[420px]">
+                      {/* Header */}
+                      <div className={`flex items-center justify-between ${col.header} text-white px-3 py-2.5 rounded-xl shadow-sm`}>
+                        <span className="text-[13px] font-semibold truncate">{col.title}</span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="bg-white/95 text-slate-800 text-[10px] font-semibold rounded-md px-1.5 py-0.5">{col.total}</span>
+                          <span className="h-4 w-4 rounded-full bg-white/95 text-slate-800 text-[9px] font-bold flex items-center justify-center">{col.count}</span>
+                        </div>
                       </div>
-                      
-                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-500" id={`kanban-card-${col.key}`}>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div id={`kanban-img-${col.key}`} className="h-10 w-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[11px] font-bold text-slate-400">PL</div>
-                          <div className="flex-1 min-w-0">
-                            <span id={`kanban-name-${col.key}`} className="block text-[13px] font-bold text-[#1e293b] truncate">Pedro Lima</span>
-                            <span id={`kanban-info-${col.key}`} className="block text-[11px] text-slate-500 truncate">Vim pelo anúncio</span>
+
+                      {/* Search */}
+                      <div className="mt-2.5 bg-white border border-slate-200 rounded-lg px-3 py-2 text-[11px] text-slate-400">
+                        Buscar contato...
+                      </div>
+
+                      {/* Add contact */}
+                      <div className="mt-2 bg-white border border-slate-200 rounded-lg px-3 py-2 text-[11px] font-semibold text-[#7C3AED] text-center">
+                        + Adicionar contato
+                      </div>
+
+                      {/* Cards */}
+                      <div className="mt-2.5 space-y-2.5">
+                        {col.cards.map((card) => (
+                          <div key={card.name} className="bg-white border border-slate-200 rounded-xl p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+                            <div className="flex items-start gap-2">
+                              <div className="h-8 w-8 shrink-0 rounded-full bg-[#F5F3FF] flex items-center justify-center text-[10px] font-bold text-slate-500">
+                                {card.initials}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-1">
+                                  <span className="block text-[12px] font-bold text-[#1e293b] truncate">{card.name}</span>
+                                  <span className="text-[9px] text-slate-400 shrink-0">{card.time}</span>
+                                </div>
+                                <span className="block text-[11px] text-slate-500 truncate">{card.info}</span>
+                              </div>
+                            </div>
+                            <div className="mt-3 flex items-center justify-between">
+                              <span className="inline-flex items-center gap-1 bg-[#F5F3FF] text-[#7C3AED] text-[10px] px-2 py-1 rounded-md font-semibold">
+                                <Tag className="h-2.5 w-2.5" />
+                                {card.tag}
+                              </span>
+                              <span className="text-[12px] font-semibold text-slate-700">{card.value}</span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-                          <div className="flex items-center gap-1 bg-[#F3E8FF] text-[#8B5CF6] text-[10px] px-2 py-0.5 rounded-full font-bold">
-                            <span id={`kanban-tag-${col.key}`}>Meta Ads</span>
-                          </div>
-                          <span id={`kanban-value-${col.key}`} className="text-[12px] font-bold text-slate-700">R$ 720</span>
-                        </div>
+                        ))}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <script dangerouslySetInnerHTML={{ __html: `
-                  (function() {
-                    const data = [
-                      {name: "Pedro Lima", info: "Vim pelo anúncio", tag: "Meta Ads", value: "R$ 720", img: "PL", title: "Meta Ads"},
-                      {name: "Ana Souza", info: "IA qualificou", tag: "Instagram", value: "R$ 1.290", img: "AS", title: "Instagram"},
-                      {name: "Bianca Reis", info: "Conversa ativa", tag: "WhatsApp", value: "R$ 2.400", img: "BR", title: "WhatsApp"},
-                      {name: "Rafael Nunes", info: "Venda marcada", tag: "Trafego Pago", value: "R$ 1.650", img: "RN", title: "Site"},
-                      {name: "Lucas Martins", info: "Finalizando", tag: "Site", value: "R$ 890", img: "LM", title: "Trafego Pago"}
-                    ];
-                    let currentIdx = 0;
-                    const keys = ['lead', 'service', 'closed'];
-                    
-                    setInterval(() => {
-                      currentIdx = (currentIdx + 1) % data.length;
-                      const item = data[currentIdx];
-                      const targetKey = keys[Math.floor(Math.random() * keys.length)];
-                      
-                      const nameEl = document.getElementById('kanban-name-' + targetKey);
-                      const card = document.getElementById('kanban-card-' + targetKey);
-                      const updateText = document.getElementById('kanban-update-text');
-
-                      if (card && nameEl) {
-                        card.style.opacity = '0';
-                        card.style.transform = 'translateY(10px)';
-                        
-                        setTimeout(() => {
-                          nameEl.textContent = item.name;
-                          document.getElementById('kanban-info-' + targetKey).textContent = item.info;
-                          document.getElementById('kanban-tag-' + targetKey).textContent = item.tag;
-                          document.getElementById('kanban-value-' + targetKey).textContent = item.value;
-                          document.getElementById('kanban-img-' + targetKey).textContent = item.img;
-                          document.getElementById('kanban-title-' + targetKey).parentElement.classList.remove('bg-[#3B82F6]', 'bg-[#A855F7]', 'bg-[#10B981]');
-                          
-                          const colors = {
-                            'Meta Ads': 'bg-[#3B82F6]',
-                            'Instagram': 'bg-[#E1306C]',
-                            'WhatsApp': 'bg-[#25D366]',
-                            'Site': 'bg-[#004DFF]',
-                            'Trafego Pago': 'bg-[#A855F7]'
-                          };
-                          
-                          const colColors = {
-                            'lead': 'bg-[#3B82F6]',
-                            'service': 'bg-[#A855F7]',
-                            'closed': 'bg-[#10B981]'
-                          };
-                          
-                          document.getElementById('kanban-title-' + targetKey).textContent = item.title;
-                          document.getElementById('kanban-title-' + targetKey).parentElement.classList.add(colColors[targetKey]);
-                          
-                          if (updateText) updateText.textContent = item.name + ' via ' + item.tag;
-                          
-                          card.style.opacity = '1';
-                          card.style.transform = 'translateY(0)';
-                        }, 500);
-                      }
-                    }, 3000);
-                  })();
-                `}} />
+                {/* Footer Badges */}
+                <div className="mt-3 grid grid-cols-3 gap-3">
+                  {[
+                    { icon: Clock, label: "resposta em tempo real" },
+                    { icon: Repeat, label: "automação move etapas" },
+                    { icon: Sparkles, label: "clique para avançar" }
+                  ].map((badge, idx) => (
+                    <div key={idx} className="bg-white rounded-xl px-3 py-2.5 flex items-center gap-2 border border-slate-100 shadow-sm">
+                      <badge.icon className="h-3.5 w-3.5 text-[#8B5CF6] shrink-0" />
+                      <span className="text-[11px] text-slate-600 truncate">{badge.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Footer Badges */}
