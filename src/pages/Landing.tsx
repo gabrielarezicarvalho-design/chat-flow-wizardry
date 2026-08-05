@@ -2676,43 +2676,41 @@ export default function Landing() {
               {/* Background Glow */}
               <div className="absolute -inset-10 bg-[#8B5CF6]/5 rounded-[40px] blur-3xl" />
               
-              <div className="relative bg-[#F7F4FF] border border-[#E9D5FF] rounded-[24px] p-4 shadow-sm overflow-hidden min-h-[420px]">
+              <div className="relative bg-[#F7F4FF] border border-[#E9D5FF] rounded-[40px] p-6 shadow-sm overflow-hidden min-h-[480px]">
                 {/* Movement Notification */}
-                <div className="mb-4 flex items-center justify-center h-8">
-                  <div className="bg-white border border-slate-100 rounded-full px-4 py-1.5 shadow-sm flex items-center gap-2 animate-bounce-subtle">
-                    <Sparkles className="h-3 w-3 text-[#8B5CF6]" />
-                    <span className="text-[11px] font-semibold text-slate-800" id="kanban-update-text">
+                <div className="mb-6 flex items-center justify-center h-10">
+                  <div className="bg-white border border-slate-100 rounded-full px-5 py-2 shadow-sm flex items-center gap-2 animate-bounce-subtle">
+                    <Sparkles className="h-3.5 w-3.5 text-[#8B5CF6]" />
+                    <span className="text-[12px] font-semibold text-slate-800" id="kanban-update-text">
                       Lucas Martins avançou para Fechado
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-6">
                   {[
                     { title: "Novo lead", color: "bg-[#3B82F6]", key: "lead" },
                     { title: "Em atendimento", color: "bg-[#A855F7]", key: "service" },
                     { title: "Fechado", color: "bg-[#10B981]", key: "closed" }
                   ].map((col) => (
-                    <div key={col.key} className="bg-[#FAF9FF] rounded-xl border border-slate-100 p-2 space-y-2">
-                      <div className={`flex items-center justify-between ${col.color} text-white px-2 py-1.5 rounded-lg text-[11px] font-bold shadow-sm`}>
+                    <div key={col.key} className="flex flex-col gap-3">
+                      <div className={`flex items-center justify-between ${col.color} text-white px-4 py-2.5 rounded-2xl text-[13px] font-bold shadow-sm`}>
                         <span id={`kanban-title-${col.key}`}>{col.title}</span>
                       </div>
                       
-                      <div className="space-y-2">
-                        <div id={`kanban-card-${col.key}`} className="bg-white border border-slate-100 rounded-xl p-2.5 shadow-sm hover:shadow-md transition-all duration-500">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div id={`kanban-img-${col.key}`} className="h-7 w-7 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-400">PL</div>
-                            <div className="flex-1 min-w-0">
-                              <span id={`kanban-name-${col.key}`} className="block text-[11px] font-bold text-[#1e293b] truncate">Pedro Lima</span>
-                              <span id={`kanban-info-${col.key}`} className="block text-[9px] text-slate-500 truncate">Vim pelo anúncio</span>
-                            </div>
+                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-500" id={`kanban-card-${col.key}`}>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div id={`kanban-img-${col.key}`} className="h-10 w-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[11px] font-bold text-slate-400">PL</div>
+                          <div className="flex-1 min-w-0">
+                            <span id={`kanban-name-${col.key}`} className="block text-[13px] font-bold text-[#1e293b] truncate">Pedro Lima</span>
+                            <span id={`kanban-info-${col.key}`} className="block text-[11px] text-slate-500 truncate">Vim pelo anúncio</span>
                           </div>
-                          <div className="flex items-center justify-between pt-1.5 border-t border-slate-50">
-                            <div className="flex items-center gap-1 bg-[#F3E8FF] text-[#8B5CF6] text-[8px] px-1.5 py-0.5 rounded-full font-bold">
-                              <span id={`kanban-tag-${col.key}`}>Meta Ads</span>
-                            </div>
-                            <span id={`kanban-value-${col.key}`} className="text-[10px] font-bold text-slate-700">R$ 720</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+                          <div className="flex items-center gap-1 bg-[#F3E8FF] text-[#8B5CF6] text-[10px] px-2 py-0.5 rounded-full font-bold">
+                            <span id={`kanban-tag-${col.key}`}>Meta Ads</span>
                           </div>
+                          <span id={`kanban-value-${col.key}`} className="text-[12px] font-bold text-slate-700">R$ 720</span>
                         </div>
                       </div>
                     </div>
@@ -2750,7 +2748,24 @@ export default function Landing() {
                           document.getElementById('kanban-tag-' + targetKey).textContent = item.tag;
                           document.getElementById('kanban-value-' + targetKey).textContent = item.value;
                           document.getElementById('kanban-img-' + targetKey).textContent = item.img;
+                          document.getElementById('kanban-title-' + targetKey).parentElement.classList.remove('bg-[#3B82F6]', 'bg-[#A855F7]', 'bg-[#10B981]');
+                          
+                          const colors = {
+                            'Meta Ads': 'bg-[#3B82F6]',
+                            'Instagram': 'bg-[#E1306C]',
+                            'WhatsApp': 'bg-[#25D366]',
+                            'Site': 'bg-[#004DFF]',
+                            'Trafego Pago': 'bg-[#A855F7]'
+                          };
+                          
+                          const colColors = {
+                            'lead': 'bg-[#3B82F6]',
+                            'service': 'bg-[#A855F7]',
+                            'closed': 'bg-[#10B981]'
+                          };
+                          
                           document.getElementById('kanban-title-' + targetKey).textContent = item.title;
+                          document.getElementById('kanban-title-' + targetKey).parentElement.classList.add(colColors[targetKey]);
                           
                           if (updateText) updateText.textContent = item.name + ' via ' + item.tag;
                           
