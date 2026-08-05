@@ -2815,17 +2815,17 @@ export default function Landing() {
                 ["Final de semana sem atendimento", "Funciona 24/7, inclusive feriados"],
               ].map((row, idx) => (
                 <React.Fragment key={idx}>
-                  <div className={`p-8 border-r border-slate-100 flex items-center gap-4 transition-colors hover:bg-[#FFFBFB] ${idx !== 4 ? 'border-b' : ''}`}>
+                  <div className={`p-5 md:p-6 border-r border-slate-100 flex items-center gap-4 transition-colors hover:bg-[#FFFBFB] ${idx !== 4 ? 'border-b' : ''}`}>
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#FEE2E2] text-[#F43F5E]">
                       <X className="h-3 w-3" strokeWidth={4} />
                     </div>
-                    <span className="text-[17px] font-medium text-slate-600">{row[0]}</span>
+                    <span className="text-[15px] font-medium text-slate-600">{row[0]}</span>
                   </div>
-                  <div className={`p-8 flex items-center gap-4 transition-colors hover:bg-[#F7FEE7] ${idx !== 4 ? 'border-b' : ''}`}>
+                  <div className={`p-5 md:p-6 flex items-center gap-4 transition-colors hover:bg-[#F7FEE7] ${idx !== 4 ? 'border-b' : ''}`}>
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#10B981]">
                       <Check className="h-3 w-3" strokeWidth={4} />
                     </div>
-                    <span className="text-[17px] font-bold text-slate-800">{row[1]}</span>
+                    <span className="text-[15px] font-bold text-slate-800">{row[1]}</span>
                   </div>
                 </React.Fragment>
               ))}
