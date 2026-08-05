@@ -2640,6 +2640,178 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* CRM KANBAN SECTION */}
+      <section className="bg-white py-24 overflow-hidden">
+        <div className="mx-auto max-w-[1280px] px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left Content */}
+            <div className="max-w-xl">
+              <span className="text-[#8B5CF6] font-bold tracking-widest text-xs uppercase mb-4 block font-space-grotesk">
+                CRM KANBAN
+              </span>
+              <h2 className="text-4xl md:text-[56px] font-bold text-[#0B1220] font-space-grotesk leading-[1.1] tracking-tight mb-8">
+                Seu funil vivo, clicável e organizado.
+              </h2>
+              <p className="text-lg text-slate-500 leading-relaxed mb-10">
+                Veja leads chegando, conversas mudando de etapa e oportunidades avançando em tempo real. Clique em qualquer card para mover manualmente, como no CRM da Vunex.
+              </p>
+              
+              <div className="space-y-4">
+                {[
+                  "Distribua conversas por etapa",
+                  "Atribua responsáveis e etiquetas",
+                  "Automatize movimentações pelo fluxo"
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#8B5CF6] text-[#8B5CF6]">
+                      <Check className="h-3 w-3" strokeWidth={3} />
+                    </div>
+                    <span className="text-slate-700 font-medium">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Content: Kanban Mockup */}
+            <div className="relative">
+              {/* Background Glow */}
+              <div className="absolute -inset-10 bg-[#8B5CF6]/5 rounded-[40px] blur-3xl" />
+              
+              <div className="relative bg-[#F3E8FF]/30 border border-[#8B5CF6]/10 rounded-[32px] p-6 backdrop-blur-sm">
+                {/* IA Update Badge */}
+                <div className="mb-6 flex items-center gap-2 bg-white/80 border border-slate-100 rounded-xl px-4 py-3 shadow-sm">
+                  <Sparkles className="h-4 w-4 text-[#8B5CF6]" />
+                  <span className="text-sm font-medium text-slate-700">IA atualizou próximos passos sem trocar de etapa</span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Column 1: Novo Lead */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between bg-[#3B82F6] text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">
+                      <span>Novo lead</span>
+                      <div className="flex items-center gap-2">
+                        <span>R$ 720,00</span>
+                        <span className="bg-white/20 px-1 rounded">1</span>
+                      </div>
+                    </div>
+                    <div className="bg-white/50 border border-slate-200 rounded-lg p-2 text-[10px] text-slate-400">Buscar contato...</div>
+                    <div className="border border-dashed border-[#8B5CF6]/30 rounded-lg p-2 text-center text-[10px] text-[#8B5CF6] font-medium">+ Adicionar contato</div>
+                    
+                    <div className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">PL</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start">
+                            <span className="text-xs font-bold text-slate-900 truncate">Pedro Lima</span>
+                            <span className="text-[9px] text-slate-400">5 min</span>
+                          </div>
+                          <div className="text-[9px] text-slate-400 truncate">Vim pelo anúncio</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="bg-[#F3E8FF] text-[#8B5CF6] text-[9px] px-2 py-0.5 rounded-full font-bold">Meta Ads</span>
+                        <span className="text-[10px] font-bold text-slate-700">R$ 720</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column 2: Em atendimento */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between bg-[#A855F7] text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">
+                      <span>Em atendi...</span>
+                      <div className="flex items-center gap-2">
+                        <span>R$ 2.180,00</span>
+                        <span className="bg-white/20 px-1 rounded">2</span>
+                      </div>
+                    </div>
+                    <div className="bg-white/50 border border-slate-200 rounded-lg p-2 text-[10px] text-slate-400">Buscar contato...</div>
+                    <div className="border border-dashed border-[#8B5CF6]/30 rounded-lg p-2 text-center text-[10px] text-[#8B5CF6] font-medium">+ Adicionar contato</div>
+                    
+                    <div className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">LM</div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <span className="text-xs font-bold text-slate-900">Lucas Martins</span>
+                            <span className="text-[9px] text-slate-400">agora</span>
+                          </div>
+                          <div className="text-[9px] text-slate-400">IA qualificou e i...</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="bg-[#F3E8FF] text-[#8B5CF6] text-[9px] px-2 py-0.5 rounded-full font-bold">Site</span>
+                        <span className="text-[10px] font-bold text-slate-700">R$ 890</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">AS</div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <span className="text-xs font-bold text-slate-900">Ana Souza</span>
+                            <span className="text-[9px] text-slate-400">agora</span>
+                          </div>
+                          <div className="text-[9px] text-slate-400">IA qualificou e i...</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="bg-[#F3E8FF] text-[#8B5CF6] text-[9px] px-2 py-0.5 rounded-full font-bold">Instagram</span>
+                        <span className="text-[10px] font-bold text-slate-700">R$ 1.290</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column 3: Fechado */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between bg-[#10B981] text-white px-3 py-1.5 rounded-lg text-[11px] font-bold">
+                      <span>Fechado</span>
+                      <div className="flex items-center gap-2">
+                        <span>R$ 2.100,00</span>
+                        <span className="bg-white/20 px-1 rounded">1</span>
+                      </div>
+                    </div>
+                    <div className="bg-white/50 border border-slate-200 rounded-lg p-2 text-[10px] text-slate-400">Buscar contato...</div>
+                    <div className="border border-dashed border-[#8B5CF6]/30 rounded-lg p-2 text-center text-[10px] text-[#8B5CF6] font-medium">+ Adicionar contato</div>
+                    
+                    <div className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">BC</div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <span className="text-xs font-bold text-slate-900">Bruno Costa</span>
+                            <span className="text-[9px] text-slate-400">18 min</span>
+                          </div>
+                          <div className="text-[9px] text-slate-400">Venda marcad...</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="bg-[#F3E8FF] text-[#8B5CF6] text-[9px] px-2 py-0.5 rounded-full font-bold">Equipe</span>
+                        <span className="text-[10px] font-bold text-slate-700">R$ 2.100</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Badges */}
+                <div className="mt-8 grid grid-cols-3 gap-4">
+                  {[
+                    { icon: Clock, label: "resposta em tempo real" },
+                    { icon: Repeat, label: "automação move etapas" },
+                    { icon: Sparkles, label: "clique para avançar" }
+                  ].map((badge, idx) => (
+                    <div key={idx} className="bg-white/80 rounded-full px-3 py-1.5 flex items-center gap-2 border border-slate-100 shadow-sm">
+                      <badge.icon className="h-3 w-3 text-[#8B5CF6]" />
+                      <span className="text-[9px] font-medium text-slate-600 truncate">{badge.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CASOS REAIS */}
       <section id="depoimentos" className="bg-[#fafbfc] py-24">
         <div className="mx-auto max-w-7xl px-6">
