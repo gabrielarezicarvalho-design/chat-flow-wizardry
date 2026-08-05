@@ -1185,7 +1185,7 @@ function HeroChatCard() {
               type="button"
               disabled={typing}
               onClick={() => ask(item)}
-              className="rounded-full border border-slate-300/60 bg-white/70 px-3 py-1.5 text-sm text-slate-600 transition hover:border-[#004DFF]/40 hover:bg-white hover:text-[#004DFF] disabled:opacity-50"
+              className="rounded-full border border-slate-300/60 bg-white/70 px-3 py-1.5 text-sm text-slate-600 transition hover:border-slate-300 hover:bg-white hover:text-[#004DFF] disabled:opacity-50"
             >
               {item.q}
             </button>
@@ -1531,9 +1531,9 @@ export default function Landing() {
           {/* Bento grid */}
           <div className="mt-16 grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Chat — grande */}
-            <div className="group md:col-span-8 flex flex-col md:flex-row gap-8 rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20">
+            <div className="group md:col-span-8 flex flex-col md:flex-row gap-8 rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-slate-300">
               <div className="md:w-[42%] shrink-0">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-slate-900/10">
                   <MessageCircle className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="font-space-grotesk text-2xl font-bold text-[#0B1220]">Atende como um humano</h3>
@@ -1569,8 +1569,8 @@ export default function Landing() {
             </div>
 
             {/* Transcreve áudio */}
-            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20">
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
+            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-slate-300">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-slate-900/10">
                 <Mic className="h-6 w-6 text-white" />
               </div>
               <h3 className="font-space-grotesk text-xl font-bold text-[#0B1220]">Transcreve áudio</h3>
@@ -1595,7 +1595,7 @@ export default function Landing() {
             </div>
 
             {/* Recupera leads frios */}
-            <div className="md:col-span-4 flex flex-col justify-between rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20">
+            <div className="md:col-span-4 flex flex-col justify-between rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-slate-300">
               <div>
                 <h3 className="font-space-grotesk text-xl font-bold text-[#0B1220]">Recupera leads frios</h3>
                 <p className="mt-2 text-sm text-[#0B1220]/70">
@@ -1611,7 +1611,7 @@ export default function Landing() {
             </div>
 
             {/* Agenda automático */}
-            <div className="relative md:col-span-4 flex flex-col justify-between overflow-hidden rounded-3xl bg-[#0B1220] p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/25 hover:ring-1 hover:ring-[#004DFF]/30">
+            <div className="relative md:col-span-4 flex flex-col justify-between overflow-hidden rounded-3xl bg-[#0B1220] p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/10 hover:ring-1 hover:ring-[#004DFF]/30">
               <div className="relative z-10">
                 <Calendar className="mb-5 h-6 w-6 text-[#004DFF]" />
                 <h3 className="font-space-grotesk text-xl font-bold text-white">Agenda automático</h3>
@@ -1628,9 +1628,9 @@ export default function Landing() {
             </div>
 
             {/* Aviso de lead quente */}
-            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20">
+            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-slate-300">
               <div className="mb-6 flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-[#004DFF]/20">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-slate-900/10">
                   <TrendingUp className="h-6 w-6 text-white" />
                 </div>
                 <span className="relative flex h-3 w-3">
@@ -1649,7 +1649,7 @@ export default function Landing() {
             </div>
 
             {/* Anti-bloqueio */}
-            <div className="md:col-span-12 flex flex-col items-center justify-between gap-6 rounded-3xl border border-[#E6ECF7] bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20 md:flex-row">
+            <div className="md:col-span-12 flex flex-col items-center justify-between gap-6 rounded-3xl border border-[#E6ECF7] bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-slate-300 md:flex-row">
               <div className="flex items-center gap-6">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#004DFF]/10">
                   <ShieldCheck className="h-8 w-8 text-[#004DFF]" />
@@ -1766,8 +1766,8 @@ export default function Landing() {
                   key={p.tier}
                   className={`relative min-w-0 w-full overflow-hidden rounded-[28px] bg-slate-50 p-5 sm:p-6 text-left transition-all duration-300 hover:-translate-y-1 ${
                     p.featured
-                      ? "ring-1 ring-[#004DFF] shadow-[0_20px_60px_-25px_rgba(0,77,255,0.45)]"
-                      : "border border-slate-200 hover:border-[#004DFF]/30 hover:shadow-lg hover:shadow-[#004DFF]/5"
+                      ? "ring-1 ring-[#004DFF] shadow-xl"
+                      : "border border-slate-200 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-900/5"
                   }`}
                 >
                   {p.featured && (
@@ -2034,7 +2034,7 @@ export default function Landing() {
               {["Áudios ultra naturais em português", "Atendimento humanizado em escala", "Mais retenção, mais conversão", "Cliente sente que está falando com gente"].map((i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-3 rounded-2xl border border-[#0B1220]/8 bg-white/60 px-4 py-3 text-[15px] text-[#0B1220]/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#004DFF]/30 hover:bg-white"
+                  className="flex items-start gap-3 rounded-2xl border border-[#0B1220]/8 bg-white/60 px-4 py-3 text-[15px] text-[#0B1220]/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white"
                 >
                   <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "#004DFF" }}>
                     <Check className="h-3 w-3 text-white" strokeWidth={3} />
@@ -2045,7 +2045,7 @@ export default function Landing() {
             </ul>
 
             <Link to="/auth">
-              <Button className="btn-press mt-10 rounded-full px-8 py-6 text-base text-white shadow-[0_14px_34px_-12px_rgba(0,77,255,0.7)]" style={{ backgroundColor: "#004DFF" }}>
+              <Button className="btn-press mt-10 rounded-full px-8 py-6 text-base text-white shadow-lg" style={{ backgroundColor: "#004DFF" }}>
                 Clonar minha voz <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -2071,7 +2071,7 @@ export default function Landing() {
               </div>
 
               <div className="flex items-center gap-4 rounded-2xl bg-[#F5EFE6]/70 p-4">
-                <button className="h-14 w-14 flex-shrink-0 rounded-full shadow-[0_10px_24px_-10px_rgba(0,77,255,0.8)] transition-transform hover:scale-105 flex items-center justify-center" style={{ backgroundColor: "#004DFF" }}>
+                <button className="h-14 w-14 flex-shrink-0 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center justify-center" style={{ backgroundColor: "#004DFF" }}>
                   <Play className="ml-0.5 h-5 w-5 text-white" fill="currentColor" />
                 </button>
                 <div className="flex h-12 flex-1 items-center gap-[3px]">
@@ -2130,7 +2130,7 @@ export default function Landing() {
           {/* Bento grid */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
             {/* WhatsApp mockup */}
-            <div className="group relative min-h-[500px] overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white shadow-[0_20px_50px_-20px_rgba(0,77,255,0.12)] md:col-span-7">
+            <div className="group relative min-h-[500px] overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white shadow-xl md:col-span-7">
               <div className="absolute inset-0 bg-gradient-to-br from-[#E6ECF7]/50 to-transparent" />
               <div className="relative flex h-full flex-col p-8">
                 <div className="mb-8 flex items-center gap-3">
@@ -2193,7 +2193,7 @@ export default function Landing() {
                     </div>
                   </div>
                   <div className="flex items-start gap-4 relative">
-                    <div className="z-10 flex h-6 w-6 shrink-0 animate-pulse items-center justify-center rounded-full border-4 border-white bg-[#004DFF] shadow-[0_0_10px_rgba(0,77,255,0.4)]" />
+                    <div className="z-10 flex h-6 w-6 shrink-0 animate-pulse items-center justify-center rounded-full border-4 border-white bg-[#004DFF] shadow-none" />
                     <div>
                       <p className="text-sm font-bold text-[#0B1220]">Dia do Vencimento</p>
                       <p className="text-xs font-medium text-[#004DFF]">Pix gerado automaticamente</p>
@@ -2392,15 +2392,8 @@ export default function Landing() {
             {segments.map((s) => (
               <div
                 key={s.label}
-                className="group relative overflow-hidden rounded-[22px] border border-slate-200/90 bg-white p-5 transition-all duration-500 hover:-translate-y-2 hover:border-[#004DFF]/40"
+                className="group relative overflow-hidden rounded-[22px] border border-slate-200/90 bg-white p-5 transition-all duration-500 hover:-translate-y-2 hover:border-slate-300"
               >
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 100% 0%, rgba(0,77,255,0.10) 0%, transparent 60%)",
-                  }}
-                />
                 <div className="relative flex h-full flex-col">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#004DFF]/15 bg-[#004DFF]/[0.06] transition-colors duration-300 group-hover:bg-[#004DFF] group-hover:border-[#004DFF]">
                     <s.icon
@@ -2482,10 +2475,10 @@ export default function Landing() {
             ].map((group) => (
               <div
                 key={group.title}
-                className="group relative bg-white border border-slate-200 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
+                className="group relative bg-white border border-slate-200 p-8 rounded-3xl transition-all duration-500 hover:-translate-y-1"
               >
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="h-12 w-12 rounded-2xl bg-[#004DFF] flex items-center justify-center text-white shadow-lg shadow-[#004DFF]/20">
+                  <div className="h-12 w-12 rounded-2xl bg-[#004DFF] flex items-center justify-center text-white shadow-lg shadow-slate-900/10">
                     <group.icon className="h-6 w-6" />
                   </div>
                   <div className="font-semibold text-2xl text-[#0F172A]">{group.title}</div>
@@ -2569,7 +2562,7 @@ export default function Landing() {
                     </p>
                   </div>
                   
-                  <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50 group-hover:border-[#004DFF]/20 transition-colors">
+                  <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50 group-hover:border-slate-300 transition-colors">
                     <div className="flex h-64 w-full bg-[#F8FAFC]">
                       {/* Fake Sidebar */}
                       <div className="w-16 border-r border-slate-100 p-2 space-y-2">
@@ -2615,7 +2608,7 @@ export default function Landing() {
                 ].map((feature, idx) => (
                   <div 
                     key={idx} 
-                    className="group rounded-2xl bg-white p-6 shadow-sm border border-slate-100 hover:border-[#004DFF]/30 transition-all duration-500 flex flex-col min-h-[160px] animate-fade-in-up relative overflow-hidden"
+                    className="group rounded-2xl bg-white p-6 shadow-sm border border-slate-100 hover:border-slate-300 transition-all duration-500 flex flex-col min-h-[160px] animate-fade-in-up relative overflow-hidden"
                     style={{ animationDelay: `${feature.delay}ms` }}
                   >
                     {/* Hover Glow Effect */}
@@ -2735,7 +2728,7 @@ export default function Landing() {
             <p className="text-sm font-semibold text-slate-400">Não é achismo. <span className="text-slate-900">Os números confirmam:</span></p>
             
             <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="rounded-[32px] border border-slate-100 bg-white p-10 shadow-sm transition-all hover:border-[#004DFF]/20 hover:shadow-xl hover:shadow-[#004DFF]/5">
+              <div className="rounded-[32px] border border-slate-100 bg-white p-10 shadow-sm transition-all hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/5">
                 <div className="mb-4 flex justify-center">
                   <Clock className="h-6 w-6 text-slate-400" />
                 </div>
@@ -2751,7 +2744,7 @@ export default function Landing() {
                 <p className="mt-4 text-sm font-medium text-slate-500">mais conversão ao responder em menos de 1 min</p>
               </div>
 
-              <div className="rounded-[32px] border border-slate-100 bg-white p-10 shadow-sm transition-all hover:border-[#004DFF]/20 hover:shadow-xl hover:shadow-[#004DFF]/5">
+              <div className="rounded-[32px] border border-slate-100 bg-white p-10 shadow-sm transition-all hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/5">
                 <div className="mb-4 flex justify-center">
                   <TrendingUp className="h-6 w-6 text-slate-400" />
                 </div>
@@ -2893,7 +2886,7 @@ export default function Landing() {
                 return (
                   <div
                     key={c.name}
-                    className="group animate-fade-in bg-white rounded-3xl border border-[#e8ecf1] p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,77,255,0.08)]"
+                    className="group animate-fade-in bg-white rounded-3xl border border-[#e8ecf1] p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                   >
                     <div className="flex justify-between items-start mb-8">
                       <div className="flex items-center gap-4">
@@ -3057,7 +3050,7 @@ export default function Landing() {
                 <p className="mt-1 text-sm text-slate-600">Taxa de recompra</p>
 
                 <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-slate-900/10">
-                  <div className="h-full w-[36%] rounded-full bg-[#004DFF] shadow-[0_0_10px_#004DFF]" />
+                  <div className="h-full w-[36%] rounded-full bg-[#004DFF] shadow-none" />
                 </div>
 
                 <div className="mt-5 flex -space-x-3">
