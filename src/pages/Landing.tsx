@@ -1185,7 +1185,7 @@ function HeroChatCard() {
               type="button"
               disabled={typing}
               onClick={() => ask(item)}
-              className="rounded-full border border-slate-300/60 bg-white/70 px-3 py-1.5 text-sm text-slate-600 transition hover:border-[#004DFF]/40 hover:bg-white hover:text-[#004DFF] disabled:opacity-50"
+              className="rounded-full border border-slate-300/60 bg-white/70 px-3 py-1.5 text-sm text-slate-600 transition hover:border-slate-300 hover:bg-white hover:text-[#004DFF] disabled:opacity-50"
             >
               {item.q}
             </button>
@@ -1531,7 +1531,7 @@ export default function Landing() {
           {/* Bento grid */}
           <div className="mt-16 grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Chat — grande */}
-            <div className="group md:col-span-8 flex flex-col md:flex-row gap-8 rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-[#004DFF]/20">
+            <div className="group md:col-span-8 flex flex-col md:flex-row gap-8 rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-slate-300">
               <div className="md:w-[42%] shrink-0">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-slate-900/10">
                   <MessageCircle className="h-6 w-6 text-white" />
@@ -1569,7 +1569,7 @@ export default function Landing() {
             </div>
 
             {/* Transcreve áudio */}
-            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-[#004DFF]/20">
+            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-slate-300">
               <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-slate-900/10">
                 <Mic className="h-6 w-6 text-white" />
               </div>
@@ -1595,7 +1595,7 @@ export default function Landing() {
             </div>
 
             {/* Recupera leads frios */}
-            <div className="md:col-span-4 flex flex-col justify-between rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-[#004DFF]/20">
+            <div className="md:col-span-4 flex flex-col justify-between rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-slate-300">
               <div>
                 <h3 className="font-space-grotesk text-xl font-bold text-[#0B1220]">Recupera leads frios</h3>
                 <p className="mt-2 text-sm text-[#0B1220]/70">
@@ -1628,7 +1628,7 @@ export default function Landing() {
             </div>
 
             {/* Aviso de lead quente */}
-            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-[#004DFF]/20">
+            <div className="md:col-span-4 flex flex-col rounded-3xl border border-white/60 bg-[#E6ECF7] p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-slate-300">
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#004DFF] shadow-lg shadow-slate-900/10">
                   <TrendingUp className="h-6 w-6 text-white" />
@@ -1649,7 +1649,7 @@ export default function Landing() {
             </div>
 
             {/* Anti-bloqueio */}
-            <div className="md:col-span-12 flex flex-col items-center justify-between gap-6 rounded-3xl border border-[#E6ECF7] bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-[#004DFF]/20 md:flex-row">
+            <div className="md:col-span-12 flex flex-col items-center justify-between gap-6 rounded-3xl border border-[#E6ECF7] bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-slate-900/5 hover:border-slate-300 md:flex-row">
               <div className="flex items-center gap-6">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#004DFF]/10">
                   <ShieldCheck className="h-8 w-8 text-[#004DFF]" />
@@ -1767,7 +1767,7 @@ export default function Landing() {
                   className={`relative min-w-0 w-full overflow-hidden rounded-[28px] bg-slate-50 p-5 sm:p-6 text-left transition-all duration-300 hover:-translate-y-1 ${
                     p.featured
                       ? "ring-1 ring-[#004DFF] shadow-[0_20px_60px_-25px_rgba(0,77,255,0.45)]"
-                      : "border border-slate-200 hover:border-[#004DFF]/30 hover:shadow-lg hover:shadow-slate-900/5"
+                      : "border border-slate-200 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-900/5"
                   }`}
                 >
                   {p.featured && (
@@ -2034,7 +2034,7 @@ export default function Landing() {
               {["Áudios ultra naturais em português", "Atendimento humanizado em escala", "Mais retenção, mais conversão", "Cliente sente que está falando com gente"].map((i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-3 rounded-2xl border border-[#0B1220]/8 bg-white/60 px-4 py-3 text-[15px] text-[#0B1220]/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#004DFF]/30 hover:bg-white"
+                  className="flex items-start gap-3 rounded-2xl border border-[#0B1220]/8 bg-white/60 px-4 py-3 text-[15px] text-[#0B1220]/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white"
                 >
                   <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "#004DFF" }}>
                     <Check className="h-3 w-3 text-white" strokeWidth={3} />
@@ -2392,7 +2392,7 @@ export default function Landing() {
             {segments.map((s) => (
               <div
                 key={s.label}
-                className="group relative overflow-hidden rounded-[22px] border border-slate-200/90 bg-white p-5 transition-all duration-500 hover:-translate-y-2 hover:border-[#004DFF]/40"
+                className="group relative overflow-hidden rounded-[22px] border border-slate-200/90 bg-white p-5 transition-all duration-500 hover:-translate-y-2 hover:border-slate-300"
               >
                 <div className="relative flex h-full flex-col">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#004DFF]/15 bg-[#004DFF]/[0.06] transition-colors duration-300 group-hover:bg-[#004DFF] group-hover:border-[#004DFF]">
@@ -2562,7 +2562,7 @@ export default function Landing() {
                     </p>
                   </div>
                   
-                  <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50 group-hover:border-[#004DFF]/20 transition-colors">
+                  <div className="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50 group-hover:border-slate-300 transition-colors">
                     <div className="flex h-64 w-full bg-[#F8FAFC]">
                       {/* Fake Sidebar */}
                       <div className="w-16 border-r border-slate-100 p-2 space-y-2">
@@ -2608,7 +2608,7 @@ export default function Landing() {
                 ].map((feature, idx) => (
                   <div 
                     key={idx} 
-                    className="group rounded-2xl bg-white p-6 shadow-sm border border-slate-100 hover:border-[#004DFF]/30 transition-all duration-500 flex flex-col min-h-[160px] animate-fade-in-up relative overflow-hidden"
+                    className="group rounded-2xl bg-white p-6 shadow-sm border border-slate-100 hover:border-slate-300 transition-all duration-500 flex flex-col min-h-[160px] animate-fade-in-up relative overflow-hidden"
                     style={{ animationDelay: `${feature.delay}ms` }}
                   >
                     {/* Hover Glow Effect */}
@@ -2728,7 +2728,7 @@ export default function Landing() {
             <p className="text-sm font-semibold text-slate-400">Não é achismo. <span className="text-slate-900">Os números confirmam:</span></p>
             
             <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="rounded-[32px] border border-slate-100 bg-white p-10 shadow-sm transition-all hover:border-[#004DFF]/20 hover:shadow-xl hover:shadow-slate-900/5">
+              <div className="rounded-[32px] border border-slate-100 bg-white p-10 shadow-sm transition-all hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/5">
                 <div className="mb-4 flex justify-center">
                   <Clock className="h-6 w-6 text-slate-400" />
                 </div>
@@ -2744,7 +2744,7 @@ export default function Landing() {
                 <p className="mt-4 text-sm font-medium text-slate-500">mais conversão ao responder em menos de 1 min</p>
               </div>
 
-              <div className="rounded-[32px] border border-slate-100 bg-white p-10 shadow-sm transition-all hover:border-[#004DFF]/20 hover:shadow-xl hover:shadow-slate-900/5">
+              <div className="rounded-[32px] border border-slate-100 bg-white p-10 shadow-sm transition-all hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/5">
                 <div className="mb-4 flex justify-center">
                   <TrendingUp className="h-6 w-6 text-slate-400" />
                 </div>
