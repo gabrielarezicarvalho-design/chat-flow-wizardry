@@ -2790,18 +2790,27 @@ export default function Landing() {
 
           {/* Tabela de Comparação */}
           {/* Tabela de Comparação */}
-          <div className="mt-24 overflow-hidden rounded-[40px] border border-slate-200 bg-white shadow-2xl shadow-slate-200/50">
-            <div className="grid grid-cols-2">
+          <div className="mt-24 overflow-hidden rounded-[40px] border border-slate-200 bg-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] relative group">
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 to-white pointer-events-none" />
+            
+            <div className="grid grid-cols-2 relative">
               {/* Header */}
-              <div className="bg-[#FFF1F2] p-4 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2">
-                <div className="flex items-center gap-2 text-[#F43F5E] font-bold font-space-grotesk text-xl">
-                  <TrendingDown className="h-5 w-5" />
+              <div className="bg-white/80 backdrop-blur-sm p-8 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-3 relative overflow-hidden group/header">
+                <div className="absolute inset-0 bg-[#FFF1F2]/30 opacity-0 group-hover/header:opacity-100 transition-opacity duration-500" />
+                <div className="flex items-center gap-2 text-[#F43F5E] font-bold font-space-grotesk text-xl relative">
+                  <div className="p-2 bg-[#FFF1F2] rounded-xl">
+                    <TrendingDown className="h-5 w-5" />
+                  </div>
                   Sem Next Pro
                 </div>
               </div>
-              <div className="bg-[#F0FDF4] p-4 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2">
-                <div className="flex items-center gap-2 text-[#10B981] font-bold font-space-grotesk text-xl">
-                  <TrendingUp className="h-5 w-5" />
+              
+              <div className="bg-white/80 backdrop-blur-sm p-8 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-3 relative overflow-hidden group/header">
+                <div className="absolute inset-0 bg-[#F0FDF4]/30 opacity-0 group-hover/header:opacity-100 transition-opacity duration-500" />
+                <div className="flex items-center gap-2 text-[#10B981] font-bold font-space-grotesk text-xl relative">
+                  <div className="p-2 bg-[#F0FDF4] rounded-xl">
+                    <TrendingUp className="h-5 w-5" />
+                  </div>
                   Com Next Pro
                 </div>
               </div>
@@ -2815,17 +2824,17 @@ export default function Landing() {
                 ["Final de semana sem atendimento", "Funciona 24/7, inclusive feriados"],
               ].map((row, idx) => (
                 <React.Fragment key={idx}>
-                  <div className={`p-5 md:p-6 border-r border-slate-100 flex items-center gap-4 transition-colors hover:bg-[#FFFBFB] ${idx !== 4 ? 'border-b' : ''}`}>
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#FEE2E2] text-[#F43F5E]">
-                      <X className="h-3 w-3" strokeWidth={4} />
+                  <div className={`p-6 md:p-8 border-r border-slate-100 flex items-center gap-5 transition-all duration-300 hover:bg-[#FFFBFB] group/row ${idx !== 4 ? 'border-b' : ''}`}>
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FEE2E2] text-[#F43F5E] shadow-sm group-hover/row:scale-110 transition-transform">
+                      <X className="h-4 w-4" strokeWidth={4} />
                     </div>
-                    <span className="text-[15px] font-medium text-slate-600">{row[0]}</span>
+                    <span className="text-[16px] font-medium text-slate-500 leading-tight">{row[0]}</span>
                   </div>
-                  <div className={`p-5 md:p-6 flex items-center gap-4 transition-colors hover:bg-[#F7FEE7] ${idx !== 4 ? 'border-b' : ''}`}>
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#10B981]">
-                      <Check className="h-3 w-3" strokeWidth={4} />
+                  <div className={`p-6 md:p-8 flex items-center gap-5 transition-all duration-300 hover:bg-[#F7FEE7] group/row-success ${idx !== 4 ? 'border-b' : ''}`}>
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#10B981] shadow-sm group-hover/row-success:scale-110 transition-transform">
+                      <Check className="h-4 w-4" strokeWidth={4} />
                     </div>
-                    <span className="text-[15px] font-bold text-slate-800">{row[1]}</span>
+                    <span className="text-[16px] font-bold text-slate-800 leading-tight">{row[1]}</span>
                   </div>
                 </React.Fragment>
               ))}
