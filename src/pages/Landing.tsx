@@ -2677,200 +2677,111 @@ export default function Landing() {
               {/* Background Glow */}
               <div className="absolute -inset-10 bg-[#8B5CF6]/5 rounded-[40px] blur-3xl" />
               
-              <div className="relative bg-[#F7F4FF] border border-[#E9D5FF] rounded-[32px] p-6 shadow-sm overflow-hidden">
+              <div className="relative bg-[#F7F4FF] border border-[#E9D5FF] rounded-[24px] p-4 shadow-sm overflow-hidden min-h-[420px]">
                 {/* Movement Notification */}
-                <div className="mb-6 flex items-center justify-center">
-                  <div className="bg-white border border-slate-100 rounded-full px-6 py-2.5 shadow-sm flex items-center gap-2 animate-bounce-subtle">
-                    <Sparkles className="h-4 w-4 text-[#8B5CF6]" />
-                    <span className="text-sm font-semibold text-slate-800">
-                      Lucas Martins avançou para <span className="text-[#10B981]">Fechado</span>
+                <div className="mb-4 flex items-center justify-center h-8">
+                  <div className="bg-white border border-slate-100 rounded-full px-4 py-1.5 shadow-sm flex items-center gap-2 animate-bounce-subtle">
+                    <Sparkles className="h-3 w-3 text-[#8B5CF6]" />
+                    <span className="text-[11px] font-semibold text-slate-800" id="kanban-update-text">
+                      Lucas Martins avançou para Fechado
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
-                  {/* Column 1: Novo Lead */}
-                  <div className="bg-[#FAF9FF] rounded-2xl border border-slate-100 p-2.5 space-y-4">
-                    <div className="flex items-center justify-between bg-[#3B82F6] text-white px-3 py-2.5 rounded-xl text-[13px] font-bold shadow-sm">
-                      <span>Novo lead</span>
-                      <div className="flex items-center gap-2">
-                        <span className="bg-white text-[#3B82F6] px-2 py-0.5 rounded-lg text-[11px]">R$ 720,00</span>
-                        <span className="bg-white/20 px-2 py-0.5 rounded-full text-[11px]">1</span>
-                      </div>
-                    </div>
-                    
-                    <div className="px-1 space-y-3">
-                      <div className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-[12px] text-slate-400 shadow-sm flex items-center justify-between">
-                        <span>Buscar contato...</span>
-                      </div>
-                      
-                      <div className="border border-dashed border-[#8B5CF6]/30 bg-white/50 rounded-xl py-2.5 text-center text-[12px] text-[#8B5CF6] font-bold">
-                        + Adicionar contato
-                      </div>
-                      
-                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[14px] font-bold text-slate-400">PL</div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex justify-between items-start">
-                              <span className="text-[15px] font-bold text-[#1e293b]">Pedro Lima</span>
-                              <span className="text-[11px] text-slate-400 font-medium">5 min</span>
-                            </div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">Vim pelo anúncio</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-50">
-                          <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[11px] px-3 py-1.5 rounded-full font-bold">
-                            <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
-                            Meta Ads
-                          </div>
-                          <span className="text-[14px] font-bold text-slate-700">R$ 720</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Column 2: Em atendimento */}
-                  <div className="bg-[#FAF9FF] rounded-2xl border border-slate-100 p-2.5 space-y-4">
-                    <div className="flex items-center justify-between bg-[#A855F7] text-white px-3 py-2.5 rounded-xl text-[13px] font-bold shadow-sm">
-                      <span>Em atendi...</span>
-                      <div className="flex items-center gap-2">
-                        <span className="bg-white text-[#A855F7] px-2 py-0.5 rounded-lg text-[11px]">R$ 3.690,00</span>
-                        <span className="bg-white/20 px-2 py-0.5 rounded-full text-[11px]">2</span>
-                      </div>
-                    </div>
-                    
-                    <div className="px-1 space-y-3">
-                      <div className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-[12px] text-slate-400 shadow-sm flex items-center justify-between">
-                        <span>Buscar contato...</span>
-                      </div>
-                      
-                      <div className="border border-dashed border-[#8B5CF6]/30 bg-white/50 rounded-xl py-2.5 text-center text-[12px] text-[#8B5CF6] font-bold">
-                        + Adicionar contato
-                      </div>
-                      
-                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[14px] font-bold text-slate-400">AS</div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <span className="text-[15px] font-bold text-[#1e293b]">Ana Souza</span>
-                              <span className="text-[11px] text-slate-400 font-medium">agora</span>
-                            </div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">IA qualificou e i...</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-50">
-                          <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[11px] px-3 py-1.5 rounded-full font-bold">
-                            <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
-                            Instagram
-                          </div>
-                          <span className="text-[14px] font-bold text-slate-700">R$ 1.290</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[14px] font-bold text-slate-400">BR</div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <span className="text-[15px] font-bold text-[#1e293b]">Bianca Reis</span>
-                              <span className="text-[11px] text-slate-400 font-medium">agora</span>
-                            </div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">IA qualificou e i...</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-50">
-                          <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[11px] px-3 py-1.5 rounded-full font-bold">
-                            <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
-                            WhatsApp
-                          </div>
-                          <span className="text-[14px] font-bold text-slate-700">R$ 2.400</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Column 3: Fechado */}
-                  <div className="bg-[#FAF9FF] rounded-2xl border border-slate-100 p-2.5 space-y-4">
-                    <div className="flex items-center justify-between bg-[#10B981] text-white px-3 py-2.5 rounded-xl text-[13px] font-bold shadow-sm">
-                      <span>Fechado</span>
-                      <div className="flex items-center gap-2">
-                        <span className="bg-white text-[#10B981] px-2 py-0.5 rounded-lg text-[11px]">R$ 2.540,00</span>
-                        <span className="bg-white/20 px-2 py-0.5 rounded-full text-[11px]">2</span>
-                      </div>
-                    </div>
-                    
-                    <div className="px-1 space-y-3">
-                      <div className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-[12px] text-slate-400 shadow-sm flex items-center justify-between">
-                        <span>Buscar contato...</span>
-                      </div>
-                      
-                      <div className="border border-dashed border-[#8B5CF6]/30 bg-white/50 rounded-xl py-2.5 text-center text-[12px] text-[#8B5CF6] font-bold">
-                        + Adicionar contato
-                      </div>
-                      
-                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[14px] font-bold text-slate-400">RN</div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <span className="text-[15px] font-bold text-[#1e293b]">Rafael Nunes</span>
-                              <span className="text-[11px] text-slate-400 font-medium">agora</span>
-                            </div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">Venda marcada...</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-50">
-                          <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[11px] px-3 py-1.5 rounded-full font-bold">
-                            <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
-                            Tráfego pago
-                          </div>
-                          <span className="text-[14px] font-bold text-slate-700">R$ 1.650</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[14px] font-bold text-slate-400">LM</div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <span className="text-[15px] font-bold text-[#1e293b]">Lucas Martins</span>
-                              <span className="text-[11px] text-slate-400 font-medium">agora</span>
-                            </div>
-                            <div className="text-[11px] text-slate-500 mt-0.5">Venda marcada...</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-50">
-                          <div className="flex items-center gap-1.5 bg-[#F3E8FF] text-[#8B5CF6] text-[11px] px-3 py-1.5 rounded-full font-bold">
-                            <div className="h-1 w-1 rounded-full bg-[#8B5CF6]" />
-                            Site
-                          </div>
-                          <span className="text-[14px] font-bold text-slate-700">R$ 890</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer Badges */}
-                <div className="mt-8 grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   {[
-                    { icon: Clock, label: "resposta em tempo real" },
-                    { icon: Repeat, label: "automação move etapas" },
-                    { icon: Sparkles, label: "clique para avançar" }
-                  ].map((badge, idx) => (
-                    <div key={idx} className="bg-white rounded-xl px-4 py-2.5 flex items-center gap-2 border border-slate-100 shadow-sm">
-                      <badge.icon className="h-4 w-4 text-[#8B5CF6]" />
-                      <span className="text-[10px] font-bold text-slate-600 truncate uppercase tracking-wider">{badge.label}</span>
+                    { title: "Novo lead", color: "bg-[#3B82F6]", key: "lead" },
+                    { title: "Em atendimento", color: "bg-[#A855F7]", key: "service" },
+                    { title: "Fechado", color: "bg-[#10B981]", key: "closed" }
+                  ].map((col) => (
+                    <div key={col.key} className="bg-[#FAF9FF] rounded-xl border border-slate-100 p-2 space-y-2">
+                      <div className={`flex items-center justify-between ${col.color} text-white px-2 py-1.5 rounded-lg text-[11px] font-bold shadow-sm`}>
+                        <span id={`kanban-title-${col.key}`}>{col.title}</span>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div id={`kanban-card-${col.key}`} className="bg-white border border-slate-100 rounded-xl p-2.5 shadow-sm hover:shadow-md transition-all duration-500">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div id={`kanban-img-${col.key}`} className="h-7 w-7 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-400">PL</div>
+                            <div className="flex-1 min-w-0">
+                              <span id={`kanban-name-${col.key}`} className="block text-[11px] font-bold text-[#1e293b] truncate">Pedro Lima</span>
+                              <span id={`kanban-info-${col.key}`} className="block text-[9px] text-slate-500 truncate">Vim pelo anúncio</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between pt-1.5 border-t border-slate-50">
+                            <div className="flex items-center gap-1 bg-[#F3E8FF] text-[#8B5CF6] text-[8px] px-1.5 py-0.5 rounded-full font-bold">
+                              <span id={`kanban-tag-${col.key}`}>Meta Ads</span>
+                            </div>
+                            <span id={`kanban-value-${col.key}`} className="text-[10px] font-bold text-slate-700">R$ 720</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
+
+                <script dangerouslySetInnerHTML={{ __html: `
+                  (function() {
+                    const data = [
+                      {name: "Pedro Lima", info: "Vim pelo anúncio", tag: "Meta Ads", value: "R$ 720", img: "PL", title: "Meta Ads"},
+                      {name: "Ana Souza", info: "IA qualificou", tag: "Instagram", value: "R$ 1.290", img: "AS", title: "Instagram"},
+                      {name: "Bianca Reis", info: "Conversa ativa", tag: "WhatsApp", value: "R$ 2.400", img: "BR", title: "WhatsApp"},
+                      {name: "Rafael Nunes", info: "Venda marcada", tag: "Trafego Pago", value: "R$ 1.650", img: "RN", title: "Site"},
+                      {name: "Lucas Martins", info: "Finalizando", tag: "Site", value: "R$ 890", img: "LM", title: "Trafego Pago"}
+                    ];
+                    let currentIdx = 0;
+                    const keys = ['lead', 'service', 'closed'];
+                    
+                    setInterval(() => {
+                      currentIdx = (currentIdx + 1) % data.length;
+                      const item = data[currentIdx];
+                      const targetKey = keys[Math.floor(Math.random() * keys.length)];
+                      
+                      const nameEl = document.getElementById('kanban-name-' + targetKey);
+                      const card = document.getElementById('kanban-card-' + targetKey);
+                      const updateText = document.getElementById('kanban-update-text');
+
+                      if (card && nameEl) {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(10px)';
+                        
+                        setTimeout(() => {
+                          nameEl.textContent = item.name;
+                          document.getElementById('kanban-info-' + targetKey).textContent = item.info;
+                          document.getElementById('kanban-tag-' + targetKey).textContent = item.tag;
+                          document.getElementById('kanban-value-' + targetKey).textContent = item.value;
+                          document.getElementById('kanban-img-' + targetKey).textContent = item.img;
+                          document.getElementById('kanban-title-' + targetKey).textContent = item.title;
+                          
+                          if (updateText) updateText.textContent = item.name + ' via ' + item.tag;
+                          
+                          card.style.opacity = '1';
+                          card.style.transform = 'translateY(0)';
+                        }, 500);
+                      }
+                    }, 3000);
+                  })();
+                `}} />
+              </div>
+
+              {/* Footer Badges */}
+              <div className="mt-8 grid grid-cols-3 gap-4">
+                {[
+                  { icon: Clock, label: "resposta em tempo real" },
+                  { icon: Repeat, label: "automação move etapas" },
+                  { icon: Sparkles, label: "clique para avançar" }
+                ].map((badge, idx) => (
+                  <div key={idx} className="bg-white rounded-xl px-4 py-2.5 flex items-center gap-2 border border-slate-100 shadow-sm">
+                    <badge.icon className="h-4 w-4 text-[#8B5CF6]" />
+                    <span className="text-[10px] font-bold text-slate-600 truncate uppercase tracking-wider">{badge.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* CASOS REAIS */}
       <section id="depoimentos" className="bg-[#fafbfc] py-24">
