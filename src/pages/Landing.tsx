@@ -2392,7 +2392,7 @@ export default function Landing() {
             {segments.map((s) => (
               <div
                 key={s.label}
-                className="group relative overflow-hidden rounded-[22px] border border-slate-200/90 bg-white p-5 transition-all duration-500 hover:-translate-y-2 hover:border-[#004DFF]/40 hover:shadow-none hover:scale-[1.02]"
+                className="group relative overflow-hidden rounded-[22px] border border-slate-200/90 bg-white p-5 transition-all duration-500 hover:-translate-y-2 hover:border-[#004DFF]/40 hover:scale-[1.02]"
               >
                 <div
                   className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
