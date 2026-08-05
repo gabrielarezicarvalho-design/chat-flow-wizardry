@@ -2793,13 +2793,13 @@ export default function Landing() {
           <div className="mt-24 overflow-hidden rounded-[40px] border border-slate-200 bg-white shadow-2xl shadow-slate-200/50">
             <div className="grid grid-cols-2">
               {/* Header */}
-              <div className="bg-[#FFF1F2] p-8 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2">
+              <div className="bg-[#FFF1F2] p-4 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2">
                 <div className="flex items-center gap-2 text-[#F43F5E] font-bold font-space-grotesk text-xl">
                   <TrendingDown className="h-5 w-5" />
                   Sem Next Pro
                 </div>
               </div>
-              <div className="bg-[#F0FDF4] p-8 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2">
+              <div className="bg-[#F0FDF4] p-4 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2">
                 <div className="flex items-center gap-2 text-[#10B981] font-bold font-space-grotesk text-xl">
                   <TrendingUp className="h-5 w-5" />
                   Com Next Pro
