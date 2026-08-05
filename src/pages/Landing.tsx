@@ -2795,21 +2795,21 @@ export default function Landing() {
             
             <div className="grid grid-cols-2 relative">
               {/* Header */}
-              <div className="bg-white/80 backdrop-blur-sm p-8 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-3 relative overflow-hidden group/header">
+              <div className="bg-white/80 backdrop-blur-sm p-4 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2 relative overflow-hidden group/header">
                 <div className="absolute inset-0 bg-[#FFF1F2]/30 opacity-0 group-hover/header:opacity-100 transition-opacity duration-500" />
-                <div className="flex items-center gap-2 text-[#F43F5E] font-bold font-space-grotesk text-xl relative">
-                  <div className="p-2 bg-[#FFF1F2] rounded-xl">
-                    <TrendingDown className="h-5 w-5" />
+                <div className="flex items-center gap-2 text-[#F43F5E] font-bold font-space-grotesk text-lg relative">
+                  <div className="p-1.5 bg-[#FFF1F2] rounded-lg">
+                    <TrendingDown className="h-4 w-4" />
                   </div>
                   Sem Next Pro
                 </div>
               </div>
               
-              <div className="bg-white/80 backdrop-blur-sm p-8 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-3 relative overflow-hidden group/header">
+              <div className="bg-white/80 backdrop-blur-sm p-4 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2 relative overflow-hidden group/header">
                 <div className="absolute inset-0 bg-[#F0FDF4]/30 opacity-0 group-hover/header:opacity-100 transition-opacity duration-500" />
-                <div className="flex items-center gap-2 text-[#10B981] font-bold font-space-grotesk text-xl relative">
-                  <div className="p-2 bg-[#F0FDF4] rounded-xl">
-                    <TrendingUp className="h-5 w-5" />
+                <div className="flex items-center gap-2 text-[#10B981] font-bold font-space-grotesk text-lg relative">
+                  <div className="p-1.5 bg-[#F0FDF4] rounded-lg">
+                    <TrendingUp className="h-4 w-4" />
                   </div>
                   Com Next Pro
                 </div>
@@ -2824,17 +2824,17 @@ export default function Landing() {
                 ["Final de semana sem atendimento", "Funciona 24/7, inclusive feriados"],
               ].map((row, idx) => (
                 <React.Fragment key={idx}>
-                  <div className={`p-6 md:p-8 border-r border-slate-100 flex items-center gap-5 transition-all duration-300 hover:bg-[#FFFBFB] group/row ${idx !== 4 ? 'border-b' : ''}`}>
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FEE2E2] text-[#F43F5E] shadow-sm group-hover/row:scale-110 transition-transform">
-                      <X className="h-4 w-4" strokeWidth={4} />
+                  <div className={`p-4 md:p-5 border-r border-slate-100 flex items-center gap-4 transition-all duration-300 hover:bg-[#FFFBFB] group/row ${idx !== 4 ? 'border-b' : ''}`}>
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FEE2E2] text-[#F43F5E] shadow-sm group-hover/row:scale-110 transition-transform">
+                      <X className="h-3.5 w-3.5" strokeWidth={4} />
                     </div>
-                    <span className="text-[16px] font-medium text-slate-500 leading-tight">{row[0]}</span>
+                    <span className="text-[15px] font-medium text-slate-500 leading-tight">{row[0]}</span>
                   </div>
-                  <div className={`p-6 md:p-8 flex items-center gap-5 transition-all duration-300 hover:bg-[#F7FEE7] group/row-success ${idx !== 4 ? 'border-b' : ''}`}>
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#10B981] shadow-sm group-hover/row-success:scale-110 transition-transform">
-                      <Check className="h-4 w-4" strokeWidth={4} />
+                  <div className={`p-4 md:p-5 flex items-center gap-4 transition-all duration-300 hover:bg-[#F7FEE7] group/row-success ${idx !== 4 ? 'border-b' : ''}`}>
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#10B981] shadow-sm group-hover/row-success:scale-110 transition-transform">
+                      <Check className="h-3.5 w-3.5" strokeWidth={4} />
                     </div>
-                    <span className="text-[16px] font-bold text-slate-800 leading-tight">{row[1]}</span>
+                    <span className="text-[15px] font-bold text-slate-800 leading-tight">{row[1]}</span>
                   </div>
                 </React.Fragment>
               ))}
