@@ -37,6 +37,7 @@ import { ChatWidget } from "@/components/landing/ChatWidget";
 import { OnboardingSteps } from "@/components/landing/OnboardingSteps";
 import { KanbanMockup } from "@/components/landing/KanbanMockup";
 import ConversionBars from "@/components/landing/ConversionBars";
+import { CountUp } from "@/components/landing/CountUp";
 
 
 
@@ -2733,7 +2734,9 @@ export default function Landing() {
                 <div className="mb-4 flex justify-center">
                   <Clock className="h-6 w-6 text-slate-400" />
                 </div>
-                <div className="font-space-grotesk text-5xl font-bold text-[#F43F5E]">78%</div>
+                <div className="font-space-grotesk text-5xl font-bold text-[#F43F5E]">
+                  <CountUp end={78} suffix="%" />
+                </div>
                 <p className="mt-4 text-sm font-medium text-slate-500">dos leads são perdidos por demora no atendimento</p>
               </div>
 
@@ -2741,7 +2744,9 @@ export default function Landing() {
                 <div className="mb-4 flex justify-center">
                   <Zap className="h-6 w-6 text-emerald-500" />
                 </div>
-                <div className="font-space-grotesk text-5xl font-bold text-[#10B981]">391%</div>
+                <div className="font-space-grotesk text-5xl font-bold text-[#10B981]">
+                  <CountUp end={391} suffix="%" />
+                </div>
                 <p className="mt-4 text-sm font-medium text-slate-500">mais conversão ao responder em menos de 1 min</p>
               </div>
 
@@ -2749,7 +2754,9 @@ export default function Landing() {
                 <div className="mb-4 flex justify-center">
                   <TrendingUp className="h-6 w-6 text-slate-400" />
                 </div>
-                <div className="font-space-grotesk text-5xl font-bold text-slate-900">10×</div>
+                <div className="font-space-grotesk text-5xl font-bold text-slate-900">
+                  <CountUp end={10} suffix="×" />
+                </div>
                 <p className="mt-4 text-sm font-medium text-slate-500">menor chance de contato após 5 minutos sem resposta</p>
               </div>
             </div>
