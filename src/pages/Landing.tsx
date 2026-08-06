@@ -2788,45 +2788,47 @@ export default function Landing() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Card Sem Next Pro */}
-              <div className="bg-[#FFF1F2]/50 border border-[#FEE2E2] rounded-[32px] p-8 relative overflow-hidden flex flex-col">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="h-8 w-8 rounded-full bg-[#F43F5E]/10 flex items-center justify-center text-[#F43F5E]">
-                    <X className="h-4 w-4" strokeWidth={3} />
+              <div className="bg-[#FFF8F8] border border-[#FBEAEA] rounded-[32px] p-10 relative overflow-hidden flex flex-col shadow-sm">
+                <div className="flex items-center gap-3 mb-10">
+                  <div className="h-9 w-9 rounded-full bg-[#F43F5E]/10 flex items-center justify-center text-[#F43F5E]">
+                    <X className="h-5 w-5" strokeWidth={2.5} />
                   </div>
-                  <span className="text-[#991B1B] font-bold text-xl font-space-grotesk">Sem Next Pro</span>
+                  <span className="text-[#991B1B] font-bold text-2xl font-space-grotesk">Sem Next Pro</span>
                 </div>
                 
-                <div className="space-y-5 mb-10">
+                <div className="space-y-6 mb-12">
                   {[
                     { text: "Clientes esperando horas por resposta", icon: Clock },
                     { text: "Leads perdidos fora do horário comercial", icon: UserMinus },
                     { text: "Trabalho manual e repetitivo", icon: XCircle }
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 text-slate-500 font-medium">
-                      <item.icon className="h-5 w-5 text-[#F43F5E]/60" />
+                    <div key={i} className="flex items-center gap-4 text-[#8E8E93] text-[17px]">
+                      <item.icon className="h-6 w-6 text-[#E5A5A5]" strokeWidth={1.5} />
                       {item.text}
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-auto border-t border-[#FEE2E2] pt-8">
-                  <span className="text-[#F43F5E] font-bold text-xs uppercase tracking-wider mb-6 block">CUSTOS SEPARADOS / MÊS</span>
-                  <div className="space-y-4">
+                <div className="mt-auto pt-8 border-t border-[#F2E2E2]">
+                  <span className="text-[#E57373] font-bold text-sm tracking-wide mb-8 block font-space-grotesk">CUSTOS SEPARADOS / MÊS</span>
+                  <div className="space-y-5">
                     {[
                       { label: "1 funcionário de atendimento", value: "R$ 2.500" },
                       { label: "Rastreador de UTM (outros)", value: "R$ 299" },
                       { label: "Agenda inteligente (outros)", value: "R$ 197" },
                       { label: "Ferramentas de automação", value: "R$ 300+" },
                     ].map((cost, i) => (
-                      <div key={i} className="flex justify-between items-center">
-                        <span className="text-slate-500 font-medium">{cost.label}</span>
-                        <span className="text-[#F43F5E] font-bold line-through decoration-2 opacity-80">{cost.value}</span>
+                      <div key={i} className="flex justify-between items-center text-[17px]">
+                        <span className="text-[#8E8E93]">{cost.label}</span>
+                        <span className="text-[#E57373] font-bold line-through decoration-1">{cost.value}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="flex justify-between items-center mt-8 pt-6 border-t border-dashed border-[#FEE2E2]">
-                    <span className="font-bold text-slate-900">Total estimado</span>
-                    <span className="text-[#F43F5E] font-bold text-2xl font-space-grotesk">R$ 3.300+<span className="text-sm font-normal text-slate-400">/mês</span></span>
+                  <div className="flex justify-between items-center mt-10 pt-8 border-t border-[#F2E2E2]">
+                    <span className="font-bold text-[#1C1C1E] text-lg">Total estimado</span>
+                    <span className="text-[#F43F5E] font-bold text-2xl font-space-grotesk">
+                      R$ 3.300+<span className="text-sm font-normal text-[#8E8E93] ml-1">/mês</span>
+                    </span>
                   </div>
                 </div>
               </div>
