@@ -2857,7 +2857,7 @@ export default function Landing() {
                 </div>
 
                 <div className="mt-auto border-t border-[#DCFCE7] pt-3">
-                  <span className="text-[#10B981] font-bold text-[8px] uppercase tracking-wider mb-3 block">Tudo incluso nos planos Pro e Premium</span>
+                  <span className="text-[#10B981] font-bold text-[8px] uppercase tracking-wider mb-3 block text-left">Tudo incluso nos planos Pro e Premium</span>
                   <div className="space-y-1">
                     {[
                       "Rastreador Inteligente incluso",
