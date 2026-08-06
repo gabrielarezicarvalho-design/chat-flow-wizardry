@@ -2214,7 +2214,7 @@ export default function Landing() {
               </div>
 
               {/* Payment methods */}
-              <div className="relative overflow-hidden rounded-[2rem] bg-[#004DFF] p-8 text-white">
+              <div className="group relative overflow-hidden rounded-[2rem] bg-[#004DFF] p-8 text-white transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#004DFF]/30">
                 <div className="absolute -right-8 -bottom-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
                 <h4 className="mb-6 font-space-grotesk text-lg font-bold">Métodos integrados</h4>
                 <div className="grid grid-cols-3 gap-4">
