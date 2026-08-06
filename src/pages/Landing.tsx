@@ -2799,7 +2799,7 @@ export default function Landing() {
                 <div className="space-y-5 mb-10">
                   {[
                     { text: "Clientes esperando horas por resposta", icon: Clock },
-                    { text: "Leads perdidos fora do horário comercial", icon: UserX },
+                    { text: "Leads perdidos fora do horário comercial", icon: UserMinus },
                     { text: "Trabalho manual e repetitivo", icon: XCircle }
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-slate-500 font-medium">
