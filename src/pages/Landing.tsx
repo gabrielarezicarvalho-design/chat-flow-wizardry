@@ -858,7 +858,7 @@ function FluxoCompletoSection() {
           </div>
 
           {/* 3 — CRM automático */}
-          <div className="rounded-3xl bg-white/70 border border-slate-200/70 p-5">
+          <div className="group rounded-3xl bg-white/70 border border-slate-200/70 p-5 transition-all duration-300 hover:-translate-y-2 hover:bg-white hover:shadow-xl hover:shadow-[#004DFF]/5">
             <div className="rounded-2xl bg-white border border-slate-200/80 p-4 min-h-[300px]">
               <div className="flex items-start justify-between">
                 <div>
