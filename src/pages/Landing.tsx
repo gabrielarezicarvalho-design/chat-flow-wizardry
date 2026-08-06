@@ -2788,96 +2788,96 @@ export default function Landing() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
               {/* Card Sem Next Pro */}
-              <div className="bg-[#FFF8F8] border border-[#FBEAEA] rounded-[32px] p-6 relative overflow-hidden flex flex-col shadow-sm h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="h-8 w-8 rounded-full bg-[#F43F5E]/10 flex items-center justify-center text-[#F43F5E]">
-                    <X className="h-4 w-4" strokeWidth={2.5} />
+              <div className="bg-[#FFF8F8] border border-[#FBEAEA] rounded-[32px] p-5 relative overflow-hidden flex flex-col shadow-sm h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-7 w-7 rounded-full bg-[#F43F5E]/10 flex items-center justify-center text-[#F43F5E]">
+                    <X className="h-3.5 w-3.5" strokeWidth={2.5} />
                   </div>
-                  <span className="text-[#991B1B] font-bold text-lg font-space-grotesk">Sem Next Pro</span>
+                  <span className="text-[#991B1B] font-bold text-base font-space-grotesk">Sem Next Pro</span>
                 </div>
                 
-                <div className="space-y-3 mb-6">
+                <div className="space-y-2 mb-4">
                   {[
                     { text: "Clientes esperando horas por resposta", icon: Clock },
                     { text: "Leads perdidos fora do horário comercial", icon: UserMinus },
                     { text: "Trabalho manual e repetitivo", icon: XCircle }
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 text-[#8E8E93] text-[14px]">
-                      <item.icon className="h-4 w-4 text-[#E5A5A5]" strokeWidth={1.5} />
+                    <div key={i} className="flex items-center gap-2.5 text-[#8E8E93] text-[13px]">
+                      <item.icon className="h-3.5 w-3.5 text-[#E5A5A5]" strokeWidth={1.5} />
                       {item.text}
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-auto pt-4 border-t border-[#F2E2E2]">
-                  <span className="text-[#E57373] font-bold text-[10px] tracking-wide mb-4 block font-space-grotesk uppercase text-left">CUSTOS SEPARADOS / MÊS</span>
-                  <div className="space-y-2">
+                <div className="mt-auto pt-3 border-t border-[#F2E2E2]">
+                  <span className="text-[#E57373] font-bold text-[9px] tracking-wide mb-3 block font-space-grotesk uppercase text-left">CUSTOS SEPARADOS / MÊS</span>
+                  <div className="space-y-1.5">
                     {[
                       { label: "1 funcionário de atendimento", value: "R$ 2.500" },
                       { label: "Rastreador de UTM (outros)", value: "R$ 299" },
                       { label: "Agenda inteligente (outros)", value: "R$ 197" },
                       { label: "Ferramentas de automação", value: "R$ 300+" },
                     ].map((cost, i) => (
-                      <div key={i} className="flex justify-between items-center text-[14px]">
+                      <div key={i} className="flex justify-between items-center text-[13px]">
                         <span className="text-[#8E8E93]">{cost.label}</span>
                         <span className="text-[#E57373] font-bold line-through decoration-1">{cost.value}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="flex justify-between items-center mt-6 pt-4 border-t border-[#F2E2E2]">
-                    <span className="font-bold text-[#1C1C1E] text-sm">Total estimado</span>
-                    <span className="text-[#F43F5E] font-bold text-lg font-space-grotesk">
-                      R$ 3.300+<span className="text-[10px] font-normal text-[#8E8E93] ml-1">/mês</span>
+                  <div className="flex justify-between items-center mt-4 pt-3 border-t border-[#F2E2E2]">
+                    <span className="font-bold text-[#1C1C1E] text-[13px]">Total estimado</span>
+                    <span className="text-[#F43F5E] font-bold text-base font-space-grotesk">
+                      R$ 3.300+<span className="text-[9px] font-normal text-[#8E8E93] ml-1">/mês</span>
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* Card Com Next Pro */}
-              <div className="bg-[#F0FDF4]/50 border border-[#DCFCE7] rounded-[32px] p-6 relative overflow-hidden flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-[#10B981] shadow-sm">
-                    <Check className="h-4 w-4" strokeWidth={3} />
+              <div className="bg-[#F0FDF4]/50 border border-[#DCFCE7] rounded-[32px] p-5 relative overflow-hidden flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-7 w-7 rounded-full bg-white flex items-center justify-center text-[#10B981] shadow-sm">
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
                   </div>
-                  <span className="text-[#10B981] font-bold text-lg font-space-grotesk">Com Next Pro</span>
+                  <span className="text-[#10B981] font-bold text-base font-space-grotesk">Com Next Pro</span>
                 </div>
                 
-                <div className="space-y-3 mb-6">
+                <div className="space-y-2 mb-4">
                   {[
                     { text: "Resposta instantânea 24 horas por dia", icon: Zap },
                     { text: "IA atende e qualifica leads automaticamente", icon: Target },
                     { text: "Agendamentos e vendas no piloto automático", icon: Calendar },
                     { text: "Redução de até 80% nos custos de atendimento", icon: Headphones },
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 text-slate-700 font-medium text-[14px]">
-                      <item.icon className="h-4 w-4 text-[#10B981] opacity-70" />
+                    <div key={i} className="flex items-center gap-2.5 text-slate-700 font-medium text-[13px]">
+                      <item.icon className="h-3.5 w-3.5 text-[#10B981] opacity-70" />
                       {item.text}
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-auto border-t border-[#DCFCE7] pt-4">
-                  <span className="text-[#10B981] font-bold text-[9px] uppercase tracking-wider mb-4 block">Tudo incluso nos planos Pro e Premium</span>
-                  <div className="space-y-1.5">
+                <div className="mt-auto border-t border-[#DCFCE7] pt-3">
+                  <span className="text-[#10B981] font-bold text-[8px] uppercase tracking-wider mb-3 block">Tudo incluso nos planos Pro e Premium</span>
+                  <div className="space-y-1">
                     {[
                       "Rastreador Inteligente incluso",
                       "Agenda Inteligente inclusa",
                       "IA 24/7 substitui funcionário",
                       "CRM, automações e mais",
                     ].map((feature, i) => (
-                      <div key={i} className="flex items-center gap-2 text-[12px] text-slate-600 font-medium">
-                        <Check className="h-3.5 w-3.5 text-[#10B981]" />
+                      <div key={i} className="flex items-center gap-2 text-[11px] text-slate-600 font-medium">
+                        <Check className="h-3 w-3 text-[#10B981]" />
                         {feature}
                       </div>
                     ))}
                   </div>
-                  <div className="mt-6 pt-4 border-t border-dashed border-[#DCFCE7]">
+                  <div className="mt-4 pt-3 border-t border-dashed border-[#DCFCE7]">
                     <div className="flex justify-between items-center">
                       <div>
-                        <span className="font-bold text-slate-900 block text-xs">Economize até</span>
-                        <span className="text-[9px] text-slate-400">Comparado a contratar separadamente</span>
+                        <span className="font-bold text-slate-900 block text-[11px]">Economize até</span>
+                        <span className="text-[8px] text-slate-400">Mensal</span>
                       </div>
-                      <span className="text-[#10B981] font-bold text-lg font-space-grotesk">R$ 2.800+<span className="text-[10px] font-normal text-slate-400">/mês</span></span>
+                      <span className="text-[#10B981] font-bold text-base font-space-grotesk">R$ 2.800+<span className="text-[9px] font-normal text-slate-400">/mês</span></span>
                     </div>
                   </div>
                 </div>
