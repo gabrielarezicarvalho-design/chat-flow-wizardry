@@ -2187,7 +2187,7 @@ export default function Landing() {
                 <h4 className="mb-6 font-space-grotesk text-lg font-bold text-[#0B1220]">Jornada de Recuperação</h4>
                 <div className="relative space-y-6">
                   <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-100" />
-                  <div className="flex items-start gap-4 relative">
+                  <div className="flex items-start gap-4 relative transition-transform duration-300 hover:translate-x-1 group/item">
                     <div className="z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-4 border-white bg-[#E6ECF7] shadow-sm" />
                     <div>
                       <p className="text-sm font-bold text-[#0B1220]">Lembrete Preventivo</p>
