@@ -2810,7 +2810,7 @@ export default function Landing() {
                 </div>
 
                 <div className="mt-auto pt-6 border-t border-[#F2E2E2]">
-                  <span className="text-[#E57373] font-bold text-xs tracking-wide mb-6 block font-space-grotesk uppercase">CUSTOS SEPARADOS / MÊS</span>
+                  <span className="text-[#E57373] font-bold text-xs tracking-wide mb-6 block font-space-grotesk uppercase text-left">CUSTOS SEPARADOS / MÊS</span>
                   <div className="space-y-3">
                     {[
                       { label: "1 funcionário de atendimento", value: "R$ 2.500" },
