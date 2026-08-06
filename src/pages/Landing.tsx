@@ -27,7 +27,7 @@ import {
   GraduationCap, Scissors, Utensils, Plus, Smile, Send, Paperclip, Image as ImageIcon, X, Square,
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
-  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight, ChevronUp, CheckCircle2, XCircle, UserX,
+  Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight, ChevronUp, CheckCircle2, XCircle, UserMinus,
   Trophy, Globe, Mail, BarChart3, Tag, TrendingDown
 } from "lucide-react";
 import { ProspeccaoMapWindow } from "@/components/landing/ProspeccaoMapWindow";
@@ -2799,7 +2799,7 @@ export default function Landing() {
                 <div className="space-y-5 mb-10">
                   {[
                     { text: "Clientes esperando horas por resposta", icon: Clock },
-                    { text: "Leads perdidos fora do horário comercial", icon: UserX },
+                    { text: "Leads perdidos fora do horário comercial", icon: UserMinus },
                     { text: "Trabalho manual e repetitivo", icon: XCircle }
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-slate-500 font-medium">
