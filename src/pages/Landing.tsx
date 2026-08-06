@@ -2223,7 +2223,7 @@ export default function Landing() {
                     { label: "CARD", icon: <CreditCard className="h-8 w-8" /> },
                     { label: "BOLETO", icon: <Receipt className="h-8 w-8" /> },
                   ].map((m) => (
-                    <div key={m.label} className="flex aspect-square flex-col items-center justify-center rounded-2xl border border-white/20 bg-white/10 p-2 backdrop-blur-md">
+                    <div key={m.label} className="flex aspect-square flex-col items-center justify-center rounded-2xl border border-white/20 bg-white/10 p-2 backdrop-blur-md transition-transform duration-300 hover:scale-110 hover:bg-white/20">
                       {m.icon}
                       <span className="mt-2 text-[10px] font-bold tracking-widest">{m.label}</span>
                     </div>
