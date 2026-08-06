@@ -2183,7 +2183,7 @@ export default function Landing() {
             {/* Right column */}
             <div className="grid grid-cols-1 gap-6 md:col-span-5">
               {/* Timeline */}
-              <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white p-8 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)]">
+              <div className="group relative overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white p-8 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#004DFF]/5 hover:border-[#004DFF]/20">
                 <h4 className="mb-6 font-space-grotesk text-lg font-bold text-[#0B1220]">Jornada de Recuperação</h4>
                 <div className="relative space-y-6">
                   <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-100" />
