@@ -2875,7 +2875,7 @@ export default function Landing() {
                     <div className="flex justify-between items-center">
                       <div>
                         <span className="font-bold text-slate-900 block text-[11px]">Economize até</span>
-                        <span className="text-[8px] text-slate-400">Mensal</span>
+                        <span className="text-[8px] text-slate-400">Comparado a contratar separadamente</span>
                       </div>
                       <span className="text-[#10B981] font-bold text-base font-space-grotesk">R$ 2.800+<span className="text-[9px] font-normal text-slate-400">/mês</span></span>
                     </div>
