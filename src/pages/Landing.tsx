@@ -2032,14 +2032,14 @@ export default function Landing() {
               Grave 60 segundos da sua voz. A IA clona e envia áudios automáticos no WhatsApp — tão naturais que o cliente jura que é você.
             </p>
 
-            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+            <ul className="mt-8 grid gap-2.5 sm:grid-cols-2">
               {["Áudios ultra naturais em português", "Atendimento humanizado em escala", "Mais retenção, mais conversão", "Cliente sente que está falando com gente"].map((i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-3 rounded-2xl border border-[#0B1220]/8 bg-white/60 px-4 py-3 text-[15px] text-[#0B1220]/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white"
+                  className="flex items-start gap-2.5 rounded-xl border border-[#0B1220]/8 bg-white/60 px-3.5 py-2.5 text-[14px] leading-snug font-medium text-[#0B1220]/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white"
                 >
-                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "#004DFF" }}>
-                    <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                  <span className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "#004DFF" }}>
+                    <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
                   </span>
                   {i}
                 </li>
