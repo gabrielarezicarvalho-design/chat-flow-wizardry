@@ -2201,7 +2201,7 @@ export default function Landing() {
                       <p className="text-xs font-medium text-[#004DFF]">Pix gerado automaticamente</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-4 relative">
+                  <div className="flex items-start gap-4 relative transition-transform duration-300 hover:translate-x-1 group/item">
                     <div className="z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-4 border-white bg-emerald-500 shadow-sm">
                       <Check className="h-3 w-3 text-white" />
                     </div>
