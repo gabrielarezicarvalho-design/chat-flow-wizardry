@@ -719,7 +719,7 @@ function FluxoCompletoSection() {
         {/* Cards */}
         <div className="mt-14 grid lg:grid-cols-2 gap-6">
           {/* 1 — Atendimento */}
-          <div className="rounded-3xl bg-white/70 border border-slate-200/70 p-5">
+          <div className="group rounded-3xl bg-white/70 border border-slate-200/70 p-5 transition-all duration-300 hover:-translate-y-2 hover:bg-white hover:shadow-xl hover:shadow-[#004DFF]/5">
             <div className="rounded-2xl bg-white border border-slate-200/80 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
