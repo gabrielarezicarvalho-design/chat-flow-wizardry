@@ -666,8 +666,8 @@ function MercadoSection() {
             { v: "5 min", d: "é a janela em que o interesse ainda está quente" },
           ].map((s) => (
             <div key={s.v}>
-              <p className="text-4xl font-medium text-[#004DFF]">{s.v}</p>
-              <p className="mt-3 max-w-[260px] text-sm leading-relaxed text-slate-600">{s.d}</p>
+              <p className="text-3xl font-medium text-[#004DFF]">{s.v}</p>
+              <p className="mt-2 max-w-[260px] text-[13px] leading-relaxed text-slate-600">{s.d}</p>
             </div>
           ))}
         </div>
