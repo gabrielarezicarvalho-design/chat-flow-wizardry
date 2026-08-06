@@ -599,9 +599,20 @@ const MERCADO_CARDS = [
 ];
 
 function MercadoSection() {
-  const [activeTab, setActiveTab] = useState<'google' | 'social' | 'whatsapp'>('google');
+  const [activeTab, setActiveTab] = useState<'whatsapp' | 'google' | 'social'>('whatsapp');
 
   const tabs = {
+    whatsapp: {
+      label: "WhatsApp",
+      icon: MessageCircle,
+      title: "Onde o lead compra.",
+      desc: "Centralize tudo no WhatsApp. Disparos automáticos com ritmo humano e IA que assume o atendimento 24/7.",
+      stats: [
+        { v: "98%", d: "de taxa de abertura de mensagens" },
+        { v: "24/7", d: "operação sem pausas humanas" }
+      ],
+      features: ["Disparo anti-bloqueio", "Voz clonada (TTS)", "Fluxos de automação visual"]
+    },
     google: {
       label: "Google Maps",
       icon: MapPin,
@@ -623,17 +634,6 @@ function MercadoSection() {
         { v: "10x", d: "mais rápido que manual" }
       ],
       features: ["Resposta de comentários", "Coleta de leads via Direct", "Sincronização com TikTok Leads"]
-    },
-    whatsapp: {
-      label: "WhatsApp",
-      icon: MessageCircle,
-      title: "Onde o lead compra.",
-      desc: "Centralize tudo no WhatsApp. Disparos automáticos com ritmo humano e IA que assume o atendimento 24/7.",
-      stats: [
-        { v: "98%", d: "de taxa de abertura de mensagens" },
-        { v: "24/7", d: "operação sem pausas humanas" }
-      ],
-      features: ["Disparo anti-bloqueio", "Voz clonada (TTS)", "Fluxos de automação visual"]
     }
   };
 
