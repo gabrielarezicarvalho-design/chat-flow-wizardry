@@ -2194,7 +2194,7 @@ export default function Landing() {
                       <p className="text-xs text-[#0B1220]/50 italic">Enviado 3 dias antes</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-4 relative">
+                  <div className="flex items-start gap-4 relative transition-transform duration-300 hover:translate-x-1 group/item">
                     <div className="z-10 flex h-6 w-6 shrink-0 animate-pulse items-center justify-center rounded-full border-4 border-white bg-[#004DFF] shadow-none" />
                     <div>
                       <p className="text-sm font-bold text-[#0B1220]">Dia do Vencimento</p>
