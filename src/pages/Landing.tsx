@@ -2768,7 +2768,7 @@ export default function Landing() {
                   <span className="w-20 text-right text-sm font-bold text-slate-500">{bar.time}</span>
                   <div className="relative h-10 flex-1 rounded-full bg-slate-50 overflow-hidden group/bar">
                     <div 
-                      className={`absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-4 transition-all duration-[2000ms] cubic-bezier(0.34, 1.56, 0.64, 1) ${bar.active ? 'bg-gradient-to-r from-[#004DFF] to-[#4A86FF] shadow-[0_0_15px_rgba(0,77,255,0.3)]' : 'bg-slate-200'}`}
+                      className={`absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-4 ${bar.active ? 'bg-gradient-to-r from-[#004DFF] to-[#4A86FF] shadow-[0_0_15px_rgba(0,77,255,0.3)]' : 'bg-slate-200'}`}
                       style={{ 
                         width: '0%',
                         animation: `grow-bar-${bar.time.replace(/[^a-z0-9]/gi, '')} 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards ${bar.delay}ms`
@@ -2776,12 +2776,12 @@ export default function Landing() {
                     >
                       <style dangerouslySetInnerHTML={{ __html: `
                         @keyframes grow-bar-${bar.time.replace(/[^a-z0-9]/gi, '')} {
-                          from { width: 0%; }
-                          to { width: ${bar.width}; }
+                          0% { width: 0%; }
+                          100% { width: ${bar.width}; }
                         }
                       `}} />
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/bar:translate-x-full transition-transform duration-1000 ease-in-out" />
-                      <span className={`text-xs font-bold relative z-10 transition-opacity duration-500 delay-[2000ms] ${bar.active ? 'text-white' : 'text-slate-500'}`}>
+                      <span className="text-xs font-bold relative z-10 text-white mix-blend-difference">
                         {bar.value}
                       </span>
                     </div>
