@@ -36,6 +36,7 @@ import LandingFAQ from "@/components/landing/LandingFAQ";
 import { ChatWidget } from "@/components/landing/ChatWidget";
 import { OnboardingSteps } from "@/components/landing/OnboardingSteps";
 import { KanbanMockup } from "@/components/landing/KanbanMockup";
+import ConversionBars from "@/components/landing/ConversionBars";
 
 
 
