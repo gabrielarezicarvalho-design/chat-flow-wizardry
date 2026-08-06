@@ -2781,69 +2781,116 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Tabela de Comparação */}
-          {/* Tabela de Comparação */}
-          <div className="mt-24 overflow-hidden rounded-[40px] border border-slate-200 bg-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] relative group">
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 to-white pointer-events-none" />
+          {/* Tabela de Comparação - Estilo Antes vs Depois */}
+          <div className="mt-24 max-w-5xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-2">Antes <span className="text-slate-400 font-normal">vs</span> Depois</h2>
+            <p className="text-center text-slate-500 mb-12">Veja a diferença que a Next Pro faz no seu negócio</p>
             
-            <div className="grid grid-cols-2 relative">
-              {/* Header */}
-              <div className="bg-white/80 backdrop-blur-sm p-4 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2 relative overflow-hidden group/header">
-                <div className="absolute inset-0 bg-[#FFF1F2]/30 opacity-0 group-hover/header:opacity-100 transition-opacity duration-500" />
-                <div className="flex items-center gap-2 text-[#F43F5E] font-bold font-space-grotesk text-lg relative">
-                  <div className="p-1.5 bg-[#FFF1F2] rounded-lg">
-                    <TrendingDown className="h-4 w-4" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Card Sem Next Pro */}
+              <div className="bg-[#FFF1F2]/50 border border-[#FEE2E2] rounded-[32px] p-8 relative overflow-hidden flex flex-col">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-[#F43F5E] shadow-sm">
+                    <X className="h-4 w-4" strokeWidth={3} />
                   </div>
-                  Sem Next Pro
+                  <span className="text-[#F43F5E] font-bold text-xl font-space-grotesk">Sem Next Pro</span>
                 </div>
-              </div>
-              
-              <div className="bg-white/80 backdrop-blur-sm p-4 text-center border-b border-slate-100 flex flex-col items-center justify-center gap-2 relative overflow-hidden group/header">
-                <div className="absolute inset-0 bg-[#F0FDF4]/30 opacity-0 group-hover/header:opacity-100 transition-opacity duration-500" />
-                <div className="flex items-center gap-2 text-[#10B981] font-bold font-space-grotesk text-lg relative">
-                  <div className="p-1.5 bg-[#F0FDF4] rounded-lg">
-                    <TrendingUp className="h-4 w-4" />
+                
+                <div className="space-y-5 mb-10">
+                  {[
+                    "Clientes esperando horas por resposta",
+                    "Leads perdidos fora do horário comercial",
+                    "Trabalho manual e repetitivo"
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-slate-500 font-medium">
+                      <Clock className="h-5 w-5 opacity-60" />
+                      {item}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-auto border-t border-[#FEE2E2] pt-8">
+                  <span className="text-[#F43F5E] font-bold text-xs uppercase tracking-wider mb-6 block">Custos Separados / Mês</span>
+                  <div className="space-y-3">
+                    {[
+                      { label: "1 funcionário de atendimento", value: "R$ 2.500" },
+                      { label: "Rastreador de UTM (outros)", value: "R$ 299" },
+                      { label: "Agenda inteligente (outros)", value: "R$ 197" },
+                      { label: "Ferramentas de automação", value: "R$ 300+" },
+                    ].map((cost, i) => (
+                      <div key={i} className="flex justify-between items-center text-sm">
+                        <span className="text-slate-500 font-medium">{cost.label}</span>
+                        <span className="text-[#F43F5E] font-bold">{cost.value}</span>
+                      </div>
+                    ))}
                   </div>
-                  Com Next Pro
+                  <div className="flex justify-between items-center mt-8 pt-6 border-t border-dashed border-[#FEE2E2]">
+                    <span className="font-bold text-slate-900">Total estimado</span>
+                    <span className="text-[#F43F5E] font-bold text-xl">R$ 3.300+<span className="text-xs font-normal text-slate-400">/mês</span></span>
+                  </div>
                 </div>
               </div>
 
-              {/* Rows */}
-              {[
-                ["Lead às 22h? Só vê resposta às 8h", "Resposta em 3 segundos, qualquer horário"],
-                ["78% dos leads perdidos por demora", "391% mais conversão no primeiro minuto"],
-                ["R$ 12 por clique que vira prejuízo", "Cada real investido vira oportunidade"],
-                ["Cliente irritado vai pro concorrente", "Lead qualificado e agendado automaticamente"],
-                ["Final de semana sem atendimento", "Funciona 24/7, inclusive feriados"],
-              ].map((row, idx) => (
-                <React.Fragment key={idx}>
-                  <div className={`p-4 md:p-5 border-r border-slate-100 flex items-center gap-4 transition-all duration-300 hover:bg-[#FFFBFB] group/row ${idx !== 4 ? 'border-b' : ''}`}>
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FEE2E2] text-[#F43F5E] shadow-sm group-hover/row:scale-110 transition-transform">
-                      <X className="h-3.5 w-3.5" strokeWidth={4} />
-                    </div>
-                    <span className="text-[15px] font-medium text-slate-500 leading-tight">{row[0]}</span>
+              {/* Card Com Next Pro */}
+              <div className="bg-[#F0FDF4]/50 border border-[#DCFCE7] rounded-[32px] p-8 relative overflow-hidden flex flex-col">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-[#10B981] shadow-sm">
+                    <Check className="h-4 w-4" strokeWidth={3} />
                   </div>
-                  <div className={`p-4 md:p-5 flex items-center gap-4 transition-all duration-300 hover:bg-[#F7FEE7] group/row-success ${idx !== 4 ? 'border-b' : ''}`}>
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#DCFCE7] text-[#10B981] shadow-sm group-hover/row-success:scale-110 transition-transform">
-                      <Check className="h-3.5 w-3.5" strokeWidth={4} />
+                  <span className="text-[#10B981] font-bold text-xl font-space-grotesk">Com Next Pro</span>
+                </div>
+                
+                <div className="space-y-5 mb-10">
+                  {[
+                    { text: "Resposta instantânea 24 horas por dia", icon: Zap },
+                    { text: "IA atende e qualifica leads automaticamente", icon: Target },
+                    { text: "Agendamentos e vendas no piloto automático", icon: Calendar },
+                    { text: "Redução de até 80% nos custos de atendimento", icon: Headphones },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-slate-700 font-medium">
+                      <item.icon className="h-5 w-5 text-[#10B981] opacity-70" />
+                      {item.text}
                     </div>
-                    <span className="text-[15px] font-bold text-slate-800 leading-tight">{row[1]}</span>
+                  ))}
+                </div>
+
+                <div className="mt-auto border-t border-[#DCFCE7] pt-8">
+                  <span className="text-[#10B981] font-bold text-xs uppercase tracking-wider mb-6 block">Tudo incluso nos planos Pro e Premium</span>
+                  <div className="space-y-3">
+                    {[
+                      "Rastreador Inteligente incluso",
+                      "Agenda Inteligente inclusa",
+                      "IA 24/7 substitui funcionário",
+                      "CRM, automações e mais",
+                    ].map((feature, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm text-slate-600 font-medium">
+                        <Check className="h-4 w-4 text-[#10B981]" />
+                        {feature}
+                      </div>
+                    ))}
                   </div>
-                </React.Fragment>
-              ))}
+                  <div className="mt-8 pt-6 border-t border-dashed border-[#DCFCE7]">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="font-bold text-slate-900 block">Economize até</span>
+                        <span className="text-xs text-slate-400">Comparado a contratar separadamente</span>
+                      </div>
+                      <span className="text-[#10B981] font-bold text-xl">R$ 2.800+<span className="text-xs font-normal text-slate-400">/mês</span></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="mt-16">
-            <p className="text-lg font-medium text-slate-900">
-              O Next Pro responde em 3 segundos. Sempre. Inclusive às 3h da manhã de um domingo.
-            </p>
-            <Link to="/auth" className="mt-8 inline-block">
-              <Button className="btn-press rounded-full bg-[#004DFF] px-8 py-6 text-base font-bold text-white hover:bg-[#004DFF]/90">
+            <Link to="/auth" className="inline-block">
+              <Button className="btn-press rounded-full bg-[#004DFF] px-8 py-5 text-[15px] font-bold text-white hover:bg-[#004DFF]/90">
                 Parar de perder leads agora →
               </Button>
             </Link>
           </div>
+
         </div>
       </section>
 
