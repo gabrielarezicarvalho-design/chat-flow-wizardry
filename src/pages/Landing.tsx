@@ -2241,7 +2241,7 @@ export default function Landing() {
               { icon: <Clock className="h-6 w-6 text-[#FACC15]" />, title: "Retentativa", sub: "Cobrança recorrente" },
               { icon: <BarChart3 className="h-6 w-6 text-[#7C3AED]" />, title: "Dashboard", sub: "Métricas em tempo real" },
             ].map((f) => (
-              <div key={f.title} className="flex items-center gap-4 rounded-3xl border border-slate-200/60 bg-white p-6">
+              <div key={f.title} className="group flex items-center gap-4 rounded-3xl border border-slate-200/60 bg-white p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#004DFF]/5 hover:border-[#004DFF]/20">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E6ECF7] text-[#004DFF]">
                   {f.icon}
                 </div>
