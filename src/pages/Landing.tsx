@@ -599,77 +599,167 @@ const MERCADO_CARDS = [
 ];
 
 function MercadoSection() {
+  const [activeTab, setActiveTab] = useState<'google' | 'social' | 'whatsapp'>('google');
+
+  const tabs = {
+    google: {
+      label: "Google Maps",
+      icon: MapPin,
+      title: "Onde o lead nasce.",
+      desc: "Nossa IA varre cidades inteiras no Google Maps, extraindo telefones de empresas ativas por nicho. É a prospecção mais quente que existe.",
+      stats: [
+        { v: "94%", d: "das buscas locais terminam em contato" },
+        { v: "500+", d: "leads extraídos em poucos minutos" }
+      ],
+      features: ["Extração por cidade/DDD", "Filtro de avaliações", "Validação de fixo vs celular"]
+    },
+    social: {
+      label: "Instagram & TikTok",
+      icon: Instagram,
+      title: "Onde o lead engaja.",
+      desc: "Capturamos leads que comentam ou interagem com seus posts e anúncios. Transformamos likes em conversas reais no WhatsApp.",
+      stats: [
+        { v: "82%", d: "de aumento em leads qualificados" },
+        { v: "10x", d: "mais rápido que manual" }
+      ],
+      features: ["Resposta de comentários", "Coleta de leads via Direct", "Sincronização com TikTok Leads"]
+    },
+    whatsapp: {
+      label: "WhatsApp",
+      icon: MessageCircle,
+      title: "Onde o lead compra.",
+      desc: "Centralize tudo no WhatsApp. Disparos automáticos com ritmo humano e IA que assume o atendimento 24/7.",
+      stats: [
+        { v: "98%", d: "de taxa de abertura de mensagens" },
+        { v: "24/7", d: "operação sem pausas humanas" }
+      ],
+      features: ["Disparo anti-bloqueio", "Voz clonada (TTS)", "Fluxos de automação visual"]
+    }
+  };
+
+  const current = tabs[activeTab];
+
   return (
-    <section className="relative overflow-hidden bg-[#f4f1ec] text-slate-900">
-      <div className="relative mx-auto max-w-[1240px] px-6 py-24">
-        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-          <div>
-            <span className="flex items-center gap-2 text-sm font-semibold text-[#004DFF]">
-              <span className="h-2 w-2 rounded-full bg-[#004DFF]" />
-              O mercado acontece enquanto você trabalha
-            </span>
-            <h2 className="mt-6 text-[clamp(2.4rem,5vw,4rem)] font-light leading-[1.05] tracking-tight font-space-grotesk">
-              <span className="block">Por trás de cada</span>
-              <span className="block">WhatsApp, tem</span>
-              <span className="block">alguém fazendo o</span>
-              <span className="block">negócio acontecer.</span>
-            </h2>
-          </div>
+    <section className="relative overflow-hidden bg-[#F8FAFC] py-24 text-slate-900 border-y border-slate-200/60">
+      <div className="relative mx-auto max-w-[1240px] px-6">
+        <div className="flex flex-col items-center text-center mb-16">
+          <span className="flex items-center gap-2 text-sm font-semibold text-[#004DFF] mb-4">
+            <span className="h-2 w-2 rounded-full bg-[#004DFF]" />
+            Máquina de Prospecção
+          </span>
+          <h2 className="font-space-grotesk text-4xl md:text-5xl font-bold tracking-tight text-slate-900 max-w-3xl leading-tight">
+            O mercado acontece enquanto <span className="text-[#004DFF]">você trabalha</span>.
+          </h2>
+          <p className="mt-6 text-lg text-slate-500 max-w-2xl">
+            Integramos as maiores fontes de leads do mundo para que seu time comercial nunca fique parado. Do Google ao WhatsApp, tudo conectado.
+          </p>
 
-          <div className="lg:pt-24">
-            <p className="text-lg leading-relaxed text-slate-600">
-              O cliente chama quando a mão está na massa, o salão está cheio ou o próximo
-              serviço já começou. A oportunidade não deveria depender de alguém parar tudo
-              para responder.
-            </p>
-            <div className="mt-8 border-t border-slate-900/15 pt-6">
-              <div className="flex items-start gap-3 text-sm text-slate-600">
-                <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#004DFF]" />
-                <span>
-                  A Next Pro mantém a conversa andando — com o jeito e as regras do seu negócio.
-                </span>
-              </div>
-            </div>
+          {/* Navigation Tabs */}
+          <div className="mt-10 inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200">
+            {Object.entries(tabs).map(([key, tab]) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key as any)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
+                  activeTab === key 
+                    ? "bg-white text-[#004DFF] shadow-md border border-slate-100" 
+                    : "text-slate-500 hover:text-slate-900"
+                }`}
+              >
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="mt-16 grid gap-5 lg:grid-cols-3">
-          {MERCADO_CARDS.map((c) => (
-            <div
-              key={c.title}
-              className={`group relative overflow-hidden rounded-2xl ${c.className}`}
-            >
-              <img
-                src={c.img}
-                alt={c.title}
-                loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/30 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6">
-                <div>
-                  <p className="text-2xl font-medium text-white">{c.title}</p>
-                  <p className="mt-1 max-w-[260px] text-sm text-white/70">{c.desc}</p>
+        {/* Dashboard Content */}
+        <div className="grid lg:grid-cols-2 gap-12 items-center bg-white rounded-[32px] p-8 md:p-12 border border-slate-200 shadow-xl shadow-slate-200/50">
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <h3 className="text-3xl font-space-grotesk font-bold text-slate-900">{current.title}</h3>
+              <p className="text-lg text-slate-600 leading-relaxed">
+                {current.desc}
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              {current.features.map((f, i) => (
+                <div key={i} className="flex items-center gap-3 text-slate-700">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#004DFF]/10">
+                    <Check className="h-3.5 w-3.5 text-[#004DFF]" strokeWidth={3} />
+                  </div>
+                  <span className="font-medium">{f}</span>
                 </div>
-                <span className="shrink-0 rounded-full bg-[#004DFF] px-4 py-1.5 text-xs font-semibold text-white">
-                  IA atendendo
-                </span>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="mt-16 grid gap-10 border-t border-slate-900/15 pt-10 md:grid-cols-3">
-          {[
-            { v: "99%", d: "dos smartphones brasileiros têm WhatsApp" },
-            { v: "8 em 10", d: "consumidores já conversam com empresas por lá" },
-            { v: "5 min", d: "é a janela em que o interesse ainda está quente" },
-          ].map((s) => (
-            <div key={s.v}>
-              <p className="text-3xl font-medium text-[#004DFF]">{s.v}</p>
-              <p className="mt-2 max-w-[260px] text-[13px] leading-relaxed text-slate-600">{s.d}</p>
+            <div className="grid grid-cols-2 gap-8 pt-8 border-t border-slate-100">
+              {current.stats.map((s, i) => (
+                <div key={i}>
+                  <p className="text-3xl font-bold text-[#004DFF]">{s.v}</p>
+                  <p className="mt-1 text-sm text-slate-500 font-medium">{s.d}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Visual Mockup - Dynamic based on tab */}
+          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 shadow-inner group">
+            <div className="absolute inset-0 flex items-center justify-center p-6 transition-transform duration-500 group-hover:scale-[1.02]">
+              {activeTab === 'google' && (
+                <div className="w-full h-full rounded-xl overflow-hidden shadow-2xl">
+                  <ProspeccaoMapWindow />
+                </div>
+              )}
+              {activeTab === 'social' && (
+                <div className="w-full max-w-[320px] bg-white rounded-[40px] border-[8px] border-slate-900 aspect-[9/19.5] shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-6 bg-slate-900 flex justify-center pt-1">
+                    <div className="w-16 h-3 bg-slate-800 rounded-full" />
+                  </div>
+                  <div className="p-4 pt-10 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-slate-200" />
+                      <div className="space-y-1">
+                        <div className="w-24 h-3 bg-slate-200 rounded" />
+                        <div className="w-16 h-2 bg-slate-100 rounded" />
+                      </div>
+                    </div>
+                    <div className="w-full aspect-square bg-slate-100 rounded-xl flex items-center justify-center">
+                      <Instagram className="h-12 w-12 text-slate-300" />
+                    </div>
+                    <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 animate-fade-in">
+                       <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1">Lead Captado</p>
+                       <p className="text-xs font-semibold text-slate-800">Novo comentário: "Como eu compro?"</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeTab === 'whatsapp' && (
+                <div className="w-full max-w-[450px] bg-[#E7E9ED] rounded-2xl border border-slate-200 shadow-2xl overflow-hidden">
+                   <div className="bg-[#005E54] p-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-white/20" />
+                      <div className="w-24 h-3 bg-white/20 rounded-full" />
+                   </div>
+                   <div className="p-4 space-y-3">
+                      <div className="bg-white p-3 rounded-lg rounded-tl-none max-w-[80%] shadow-sm text-xs">
+                        Olá! Vi que você tem interesse no nosso serviço. Como posso te ajudar hoje?
+                      </div>
+                      <div className="bg-[#DCF8C6] p-3 rounded-lg rounded-tr-none max-w-[80%] ml-auto shadow-sm text-xs">
+                         Gostaria de agendar uma demonstração.
+                      </div>
+                      <div className="bg-white p-3 rounded-lg rounded-tl-none max-w-[80%] shadow-sm flex items-center gap-2 border border-[#004DFF]/20">
+                         <Bot className="h-3 w-3 text-[#004DFF]" />
+                         <div className="flex-1 space-y-1">
+                            <div className="h-1.5 w-full bg-slate-100 rounded" />
+                            <div className="h-1.5 w-2/3 bg-slate-100 rounded" />
+                         </div>
+                      </div>
+                   </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </section>
