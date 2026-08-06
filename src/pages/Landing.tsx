@@ -2766,12 +2766,13 @@ export default function Landing() {
               ].map((bar) => (
                 <div key={bar.time} className="flex items-center gap-4">
                   <span className="w-20 text-right text-sm font-bold text-slate-500">{bar.time}</span>
-                  <div className="relative h-10 flex-1 rounded-full bg-slate-50 overflow-hidden">
+                  <div className="relative h-10 flex-1 rounded-full bg-slate-50 overflow-hidden group/bar">
                     <div 
-                      className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ${bar.active ? 'bg-[#22C55E]' : 'bg-slate-200'}`}
+                      className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out flex items-center justify-end pr-4 ${bar.active ? 'bg-gradient-to-r from-[#22C55E] to-[#4ADE80] shadow-[0_0_15px_rgba(34,197,94,0.3)]' : 'bg-slate-200'}`}
                       style={{ width: bar.width }}
                     >
-                      <span className={`absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold ${bar.active ? 'text-white' : 'text-slate-500'}`}>
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/bar:translate-x-full transition-transform duration-1000 ease-in-out" />
+                      <span className={`text-xs font-bold relative z-10 ${bar.active ? 'text-white' : 'text-slate-500'}`}>
                         {bar.value}
                       </span>
                     </div>
