@@ -2132,7 +2132,7 @@ export default function Landing() {
           {/* Bento grid */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
             {/* WhatsApp mockup */}
-            <div className="group relative min-h-[500px] overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white shadow-xl md:col-span-7">
+            <div className="group relative min-h-[500px] overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white shadow-xl md:col-span-7 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20">
               <div className="absolute inset-0 bg-gradient-to-br from-[#E6ECF7]/50 to-transparent" />
               <div className="relative flex h-full flex-col p-8">
                 <div className="mb-8 flex items-center gap-3">
