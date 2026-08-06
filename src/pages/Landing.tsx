@@ -2790,43 +2790,43 @@ export default function Landing() {
               {/* Card Sem Next Pro */}
               <div className="bg-[#FFF1F2]/50 border border-[#FEE2E2] rounded-[32px] p-8 relative overflow-hidden flex flex-col">
                 <div className="flex items-center gap-3 mb-8">
-                  <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-[#F43F5E] shadow-sm">
+                  <div className="h-8 w-8 rounded-full bg-[#F43F5E]/10 flex items-center justify-center text-[#F43F5E]">
                     <X className="h-4 w-4" strokeWidth={3} />
                   </div>
-                  <span className="text-[#F43F5E] font-bold text-xl font-space-grotesk">Sem Next Pro</span>
+                  <span className="text-[#991B1B] font-bold text-xl font-space-grotesk">Sem Next Pro</span>
                 </div>
                 
                 <div className="space-y-5 mb-10">
                   {[
-                    "Clientes esperando horas por resposta",
-                    "Leads perdidos fora do horário comercial",
-                    "Trabalho manual e repetitivo"
+                    { text: "Clientes esperando horas por resposta", icon: Clock },
+                    { text: "Leads perdidos fora do horário comercial", icon: UserX },
+                    { text: "Trabalho manual e repetitivo", icon: XCircle }
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 text-slate-500 font-medium">
-                      <Clock className="h-5 w-5 opacity-60" />
-                      {item}
+                      <item.icon className="h-5 w-5 text-[#F43F5E]/60" />
+                      {item.text}
                     </div>
                   ))}
                 </div>
 
                 <div className="mt-auto border-t border-[#FEE2E2] pt-8">
-                  <span className="text-[#F43F5E] font-bold text-xs uppercase tracking-wider mb-6 block">Custos Separados / Mês</span>
-                  <div className="space-y-3">
+                  <span className="text-[#F43F5E] font-bold text-xs uppercase tracking-wider mb-6 block">CUSTOS SEPARADOS / MÊS</span>
+                  <div className="space-y-4">
                     {[
                       { label: "1 funcionário de atendimento", value: "R$ 2.500" },
                       { label: "Rastreador de UTM (outros)", value: "R$ 299" },
                       { label: "Agenda inteligente (outros)", value: "R$ 197" },
                       { label: "Ferramentas de automação", value: "R$ 300+" },
                     ].map((cost, i) => (
-                      <div key={i} className="flex justify-between items-center text-sm">
+                      <div key={i} className="flex justify-between items-center">
                         <span className="text-slate-500 font-medium">{cost.label}</span>
-                        <span className="text-[#F43F5E] font-bold">{cost.value}</span>
+                        <span className="text-[#F43F5E] font-bold line-through decoration-2 opacity-80">{cost.value}</span>
                       </div>
                     ))}
                   </div>
                   <div className="flex justify-between items-center mt-8 pt-6 border-t border-dashed border-[#FEE2E2]">
                     <span className="font-bold text-slate-900">Total estimado</span>
-                    <span className="text-[#F43F5E] font-bold text-xl">R$ 3.300+<span className="text-xs font-normal text-slate-400">/mês</span></span>
+                    <span className="text-[#F43F5E] font-bold text-2xl font-space-grotesk">R$ 3.300+<span className="text-sm font-normal text-slate-400">/mês</span></span>
                   </div>
                 </div>
               </div>
