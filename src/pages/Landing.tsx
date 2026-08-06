@@ -553,11 +553,11 @@ const IDEAL_PARA = [
 function IdealParaMarquee() {
   const loop = [...IDEAL_PARA, ...IDEAL_PARA, ...IDEAL_PARA];
   return (
-    <section className="border-y border-slate-200/70 bg-[#faf9f6] py-8">
-      <p className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+    <section className="border-y border-slate-200/70 bg-[#faf9f6] py-5">
+      <p className="text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">
         Ideal para
       </p>
-      <div className="chip-marquee mt-5 w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+      <div className="chip-marquee mt-3 w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
         <div
           className="chip-marquee-track flex w-max items-center gap-8"
           style={{ animationDuration: `${IDEAL_PARA.length * 6}s` }}
