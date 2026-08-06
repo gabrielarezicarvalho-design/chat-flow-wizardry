@@ -2755,24 +2755,33 @@ export default function Landing() {
           </div>
 
           {/* Gráfico de Barras */}
-          <div className="mt-24 mx-auto max-w-4xl">
+          <div className="mt-24 mx-auto max-w-4xl" id="conversion-chart">
             <p className="mb-8 text-xs font-bold uppercase tracking-widest text-slate-400">Conversão por tempo de resposta</p>
             <div className="space-y-4">
               {[
-                { time: "< 1 min", value: "391%", width: "100%", active: true },
-                { time: "1,5 min", value: "160%", width: "41%", active: false },
-                { time: "5,30 min", value: "100%", width: "25%", active: false },
-                { time: "30+ min", value: "36%", width: "12%", active: false },
+                { time: "1 min", value: "391%", width: "100%", active: true, delay: 0 },
+                { time: "1,5 min", value: "160%", width: "41%", active: false, delay: 200 },
+                { time: "5,30 min", value: "100%", width: "25%", active: false, delay: 400 },
+                { time: "30 min", value: "36%", width: "12%", active: false, delay: 600 },
               ].map((bar) => (
-                <div key={bar.time} className="flex items-center gap-4">
+                <div key={bar.time} className="flex items-center gap-4 group/row">
                   <span className="w-20 text-right text-sm font-bold text-slate-500">{bar.time}</span>
                   <div className="relative h-10 flex-1 rounded-full bg-slate-50 overflow-hidden group/bar">
                     <div 
-                      className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out flex items-center justify-end pr-4 ${bar.active ? 'bg-gradient-to-r from-[#22C55E] to-[#4ADE80] shadow-[0_0_15px_rgba(34,197,94,0.3)]' : 'bg-slate-200'}`}
-                      style={{ width: bar.width }}
+                      className={`absolute inset-y-0 left-0 rounded-full flex items-center justify-end pr-4 transition-all duration-[2000ms] cubic-bezier(0.34, 1.56, 0.64, 1) ${bar.active ? 'bg-gradient-to-r from-[#004DFF] to-[#4A86FF] shadow-[0_0_15px_rgba(0,77,255,0.3)]' : 'bg-slate-200'}`}
+                      style={{ 
+                        width: '0%',
+                        animation: `grow-bar-${bar.time.replace(/[^a-z0-9]/gi, '')} 2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards ${bar.delay}ms`
+                      }}
                     >
+                      <style dangerouslySetInnerHTML={{ __html: `
+                        @keyframes grow-bar-${bar.time.replace(/[^a-z0-9]/gi, '')} {
+                          from { width: 0%; }
+                          to { width: ${bar.width}; }
+                        }
+                      `}} />
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/bar:translate-x-full transition-transform duration-1000 ease-in-out" />
-                      <span className={`text-xs font-bold relative z-10 ${bar.active ? 'text-white' : 'text-slate-500'}`}>
+                      <span className={`text-xs font-bold relative z-10 transition-opacity duration-500 delay-[2000ms] ${bar.active ? 'text-white' : 'text-slate-500'}`}>
                         {bar.value}
                       </span>
                     </div>
