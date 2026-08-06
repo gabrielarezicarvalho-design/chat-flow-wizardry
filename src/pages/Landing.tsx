@@ -2132,7 +2132,7 @@ export default function Landing() {
           {/* Bento grid */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
             {/* WhatsApp mockup */}
-            <div className="group relative min-h-[500px] overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white shadow-xl md:col-span-7">
+            <div className="group relative min-h-[500px] overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white shadow-xl md:col-span-7 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#004DFF]/10 hover:border-[#004DFF]/20">
               <div className="absolute inset-0 bg-gradient-to-br from-[#E6ECF7]/50 to-transparent" />
               <div className="relative flex h-full flex-col p-8">
                 <div className="mb-8 flex items-center gap-3">
@@ -2183,25 +2183,25 @@ export default function Landing() {
             {/* Right column */}
             <div className="grid grid-cols-1 gap-6 md:col-span-5">
               {/* Timeline */}
-              <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white p-8 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)]">
+              <div className="group relative overflow-hidden rounded-[2rem] border border-slate-200/60 bg-white p-8 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)] transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#004DFF]/5 hover:border-[#004DFF]/20">
                 <h4 className="mb-6 font-space-grotesk text-lg font-bold text-[#0B1220]">Jornada de Recuperação</h4>
                 <div className="relative space-y-6">
                   <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-100" />
-                  <div className="flex items-start gap-4 relative">
+                  <div className="flex items-start gap-4 relative transition-transform duration-300 hover:translate-x-1 group/item">
                     <div className="z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-4 border-white bg-[#E6ECF7] shadow-sm" />
                     <div>
                       <p className="text-sm font-bold text-[#0B1220]">Lembrete Preventivo</p>
                       <p className="text-xs text-[#0B1220]/50 italic">Enviado 3 dias antes</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-4 relative">
+                  <div className="flex items-start gap-4 relative transition-transform duration-300 hover:translate-x-1 group/item">
                     <div className="z-10 flex h-6 w-6 shrink-0 animate-pulse items-center justify-center rounded-full border-4 border-white bg-[#004DFF] shadow-none" />
                     <div>
                       <p className="text-sm font-bold text-[#0B1220]">Dia do Vencimento</p>
                       <p className="text-xs font-medium text-[#004DFF]">Pix gerado automaticamente</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-4 relative">
+                  <div className="flex items-start gap-4 relative transition-transform duration-300 hover:translate-x-1 group/item">
                     <div className="z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-4 border-white bg-emerald-500 shadow-sm">
                       <Check className="h-3 w-3 text-white" />
                     </div>
@@ -2214,7 +2214,7 @@ export default function Landing() {
               </div>
 
               {/* Payment methods */}
-              <div className="relative overflow-hidden rounded-[2rem] bg-[#004DFF] p-8 text-white">
+              <div className="group relative overflow-hidden rounded-[2rem] bg-[#004DFF] p-8 text-white transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#004DFF]/30">
                 <div className="absolute -right-8 -bottom-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
                 <h4 className="mb-6 font-space-grotesk text-lg font-bold">Métodos integrados</h4>
                 <div className="grid grid-cols-3 gap-4">
@@ -2223,7 +2223,7 @@ export default function Landing() {
                     { label: "CARD", icon: <CreditCard className="h-8 w-8" /> },
                     { label: "BOLETO", icon: <Receipt className="h-8 w-8" /> },
                   ].map((m) => (
-                    <div key={m.label} className="flex aspect-square flex-col items-center justify-center rounded-2xl border border-white/20 bg-white/10 p-2 backdrop-blur-md">
+                    <div key={m.label} className="flex aspect-square flex-col items-center justify-center rounded-2xl border border-white/20 bg-white/10 p-2 backdrop-blur-md transition-transform duration-300 hover:scale-110 hover:bg-white/20">
                       {m.icon}
                       <span className="mt-2 text-[10px] font-bold tracking-widest">{m.label}</span>
                     </div>
@@ -2241,8 +2241,8 @@ export default function Landing() {
               { icon: <Clock className="h-6 w-6 text-[#FACC15]" />, title: "Retentativa", sub: "Cobrança recorrente" },
               { icon: <BarChart3 className="h-6 w-6 text-[#7C3AED]" />, title: "Dashboard", sub: "Métricas em tempo real" },
             ].map((f) => (
-              <div key={f.title} className="flex items-center gap-4 rounded-3xl border border-slate-200/60 bg-white p-6">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E6ECF7] text-[#004DFF]">
+              <div key={f.title} className="group flex items-center gap-4 rounded-3xl border border-slate-200/60 bg-white p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#004DFF]/5 hover:border-[#004DFF]/20">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E6ECF7] text-[#004DFF] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                   {f.icon}
                 </div>
                 <div>
