@@ -720,7 +720,9 @@ function MercadoSection() {
                 </div>
                 <div className="p-4 pt-10 space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-200" />
+                    <div className="w-10 h-10 rounded-full bg-white overflow-hidden flex items-center justify-center">
+                      <img src={nextProLogo.url} alt="Next Pro Logo" className="w-full h-full object-cover" />
+                    </div>
                     <div className="space-y-1">
                       <div className="w-24 h-3 bg-slate-200 rounded" />
                       <div className="space-y-1" />
