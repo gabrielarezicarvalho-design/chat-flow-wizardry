@@ -613,11 +613,21 @@ function MercadoSection() {
   }, [activeTab]);
 
   const socialContents = [
-    { type: "Comentário", text: "Novo comentário: \"Como eu compro?\"" },
-    { type: "Direct", text: "Novo Direct: \"Quero saber os preços\"" },
-    { type: "Mencão", text: "Menção nos Stories: \"Olha isso!\"" },
-    { type: "Anúncio", text: "Lead de Meta Ads: Cadastro efetuado" }
+    { type: "Comentário", text: "Novo comentário: \"Como eu compro?\"", color: "emerald" },
+    { type: "Direct", text: "Novo Direct: \"Quero saber os preços\"", color: "blue" },
+    { type: "Mencão", text: "Menção nos Stories: \"Olha isso!\"", color: "purple" },
+    { type: "Anúncio", text: "Lead de Meta Ads: Cadastro efetuado", color: "orange" }
   ];
+
+  const getColorClasses = (color: string) => {
+    const maps: Record<string, { bg: string, border: string, text: string, darkText: string }> = {
+      emerald: { bg: "bg-emerald-50", border: "border-emerald-100", text: "text-emerald-600", darkText: "text-slate-800" },
+      blue: { bg: "bg-blue-50", border: "border-blue-100", text: "text-blue-600", darkText: "text-slate-800" },
+      purple: { bg: "bg-purple-50", border: "border-purple-100", text: "text-purple-600", darkText: "text-slate-800" },
+      orange: { bg: "bg-orange-50", border: "border-orange-100", text: "text-orange-600", darkText: "text-slate-800" }
+    };
+    return maps[color] || maps.emerald;
+  };
 
   const tabs = {
     whatsapp: {
