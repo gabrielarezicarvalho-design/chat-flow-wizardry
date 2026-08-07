@@ -15,6 +15,7 @@ import iconMeta from "@/assets/integrations/meta.png.asset.json";
 import iconTiktok from "@/assets/integrations/tiktok.png.asset.json";
 import iconCalendar from "@/assets/integrations/calendar.png.asset.json";
 import iconOpenai from "@/assets/integrations/openai.png.asset.json";
+import zebraMockup from "@/assets/zebra_mockup.png.asset.json";
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -724,8 +725,8 @@ function MercadoSection() {
                       <div className="space-y-1" />
                     </div>
                   </div>
-                  <div className="w-full aspect-square bg-slate-100 rounded-xl flex items-center justify-center">
-                    <Instagram className="h-12 w-12 text-slate-300" />
+                  <div className="w-full aspect-square bg-slate-100 rounded-[28px] overflow-hidden flex items-center justify-center">
+                    <img src={zebraMockup.url} alt="Zebra Mockup" className="w-full h-full object-cover" />
                   </div>
                   <div className="py-1 px-3 bg-emerald-50 rounded-2xl border border-emerald-100 animate-fade-in shadow-sm">
                     <p className="text-[9px] font-bold text-emerald-600 uppercase">Lead Captado</p>
