@@ -62,7 +62,7 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
 
   if (roleLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-950">
+      <div className="flex items-center justify-center min-h-screen bg-blue-950">
         <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
       </div>
     );
@@ -71,11 +71,11 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
   if (role !== "admin") return null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex">
+    <div className="min-h-screen bg-blue-950 text-white flex">
       {/* Mobile menu button */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-slate-800 text-white"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-blue-800 text-white"
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -83,7 +83,7 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed lg:relative inset-y-0 left-0 z-40 flex flex-col border-r border-white/10 bg-slate-900/95 backdrop-blur-xl transition-all duration-300",
+          "fixed lg:relative inset-y-0 left-0 z-40 flex flex-col border-r border-white/10 bg-blue-900/95 backdrop-blur-xl transition-all duration-300",
           collapsed ? "w-20" : "w-72",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
@@ -99,7 +99,7 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
                 <h1 className="text-lg font-bold">
                   Market<span className="text-emerald-400">Flow</span>
                 </h1>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Admin</p>
+                <p className="text-[10px] text-blue-400 uppercase tracking-wider">Admin</p>
               </div>
             )}
           </div>
@@ -108,9 +108,9 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
             className="hidden lg:flex h-6 w-6 items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors"
           >
             {collapsed ? (
-              <ChevronRight className="h-3 w-3 text-slate-400" />
+              <ChevronRight className="h-3 w-3 text-blue-400" />
             ) : (
-              <ChevronLeft className="h-3 w-3 text-slate-400" />
+              <ChevronLeft className="h-3 w-3 text-blue-400" />
             )}
           </button>
         </div>
@@ -130,7 +130,7 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
                   (item as any).parent && !collapsed && "ml-4",
                   activeSection === item.id 
                     ? "bg-gradient-to-r from-emerald-500/20 to-cyan-500/10 text-emerald-400" 
-                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                    : "text-blue-400 hover:bg-white/5 hover:text-white"
                 )}
               >
                 <div className={cn(
@@ -145,7 +145,7 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
                 {!collapsed && (
                   <div className="flex-1 text-left">
                     <p className={cn("text-sm font-medium", (item as any).parent && "text-xs")}>{item.label}</p>
-                    <p className="text-[10px] text-slate-500">{item.description}</p>
+                    <p className="text-[10px] text-blue-300">{item.description}</p>
                   </div>
                 )}
                 {activeSection === item.id && (
@@ -162,7 +162,7 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
             variant="ghost"
             onClick={handleLogout}
             className={cn(
-              "w-full text-slate-400 hover:text-red-400 hover:bg-red-500/10",
+              "w-full text-blue-400 hover:text-red-400 hover:bg-red-500/10",
               collapsed ? "justify-center px-0" : "justify-start"
             )}
           >
