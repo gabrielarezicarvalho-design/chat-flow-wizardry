@@ -232,7 +232,7 @@ export function ProspeccaoMapWindow({
     map.setZoom((map.getZoom() ?? 12) + delta);
   };
 
-  const displayLeads = useMemo(() => leads.slice(0, 6), [leads]);
+  const displayLeads = useMemo(() => leads.slice(0, 4), [leads]);
 
   return (
     <div className="rounded-[24px] border border-slate-200/80 bg-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.35)] overflow-hidden">
