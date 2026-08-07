@@ -763,8 +763,6 @@ function MercadoSection() {
     </section>
   );
 }
-  );
-}
 
 function CheckList({ items }: { items: string[] }) {
   return (
