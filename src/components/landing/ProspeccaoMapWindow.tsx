@@ -253,7 +253,7 @@ export function ProspeccaoMapWindow({
 
       <div className="grid grid-cols-5 gap-3 p-3 bg-slate-50/60">
         {/* Mapa real */}
-        <div className="col-span-3 relative rounded-2xl overflow-hidden border border-slate-200 bg-[#eef2f7] min-h-[300px]">
+        <div className="col-span-3 relative rounded-2xl overflow-hidden border border-slate-200 bg-[#eef2f7] min-h-[260px]">
           <div ref={containerRef} className="absolute inset-0" />
 
           {!mapReady && (
