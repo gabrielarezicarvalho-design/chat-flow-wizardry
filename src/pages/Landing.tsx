@@ -16,6 +16,7 @@ import iconTiktok from "@/assets/integrations/tiktok.png.asset.json";
 import iconCalendar from "@/assets/integrations/calendar.png.asset.json";
 import iconOpenai from "@/assets/integrations/openai.png.asset.json";
 import zebraMockup from "@/assets/zebra_mockup.png.asset.json";
+import nextProLogo from "@/assets/next_pro_logo.png.asset.json";
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -719,7 +720,9 @@ function MercadoSection() {
                 </div>
                 <div className="p-4 pt-10 space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-200" />
+                    <div className="w-10 h-10 rounded-full bg-white overflow-hidden flex items-center justify-center">
+                      <img src={nextProLogo.url} alt="Next Pro Logo" className="w-full h-full object-cover" />
+                    </div>
                     <div className="space-y-1">
                       <div className="w-24 h-3 bg-slate-200 rounded" />
                       <div className="space-y-1" />
