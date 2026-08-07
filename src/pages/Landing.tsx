@@ -705,7 +705,7 @@ function MercadoSection() {
           </div>
 
           {/* Visual Mockup - Dynamic based on tab */}
-          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 shadow-inner group">
+          <div className="relative min-h-[450px] aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 shadow-inner group">
             <div className="absolute inset-0 flex items-center justify-center p-6 transition-transform duration-500 group-hover:scale-[1.02]">
               {activeTab === 'google' && (
                 <div className="w-full h-full rounded-xl overflow-hidden shadow-2xl">
