@@ -724,7 +724,7 @@ function MercadoSection() {
                       <img src={nextProLogo.url} alt="Next Pro Logo" className="w-full h-full object-cover" />
                     </div>
                     <div className="space-y-1">
-                      <div className="text-[10px] font-bold text-slate-800">nextpro.dev</div>
+                      <div className="text-[10px] font-bold text-slate-800">nexxtpro.dev</div>
                     </div>
                   </div>
                   <div className="w-full aspect-square bg-slate-100 rounded-[28px] overflow-hidden flex items-center justify-center">
