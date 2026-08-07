@@ -602,6 +602,22 @@ const MERCADO_CARDS = [
 
 function MercadoSection() {
   const [activeTab, setActiveTab] = useState<'whatsapp' | 'google' | 'social'>('whatsapp');
+  const [socialStep, setSocialStep] = useState(0);
+
+  useEffect(() => {
+    if (activeTab !== 'social') return;
+    const interval = setInterval(() => {
+      setSocialStep((prev) => (prev + 1) % 4);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [activeTab]);
+
+  const socialContents = [
+    { type: "Comentário", text: "Novo comentário: \"Como eu compro?\"" },
+    { type: "Direct", text: "Novo Direct: \"Quero saber os preços\"" },
+    { type: "Mencão", text: "Menção nos Stories: \"Olha isso!\"" },
+    { type: "Anúncio", text: "Lead de Meta Ads: Cadastro efetuado" }
+  ];
 
   const tabs = {
     whatsapp: {
