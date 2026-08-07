@@ -119,22 +119,22 @@ const Auth = () => {
 
 
   return (
-    <div className="h-screen flex overflow-hidden bg-slate-950">
+    <div className="h-screen flex overflow-hidden bg-white">
       {/* Left Side - Stats & Features */}
       <motion.div 
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="hidden lg:flex lg:w-3/5 relative overflow-hidden"
+        className="hidden lg:flex lg:w-3/5 relative overflow-hidden bg-white"
       >
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-primary/20">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent" />
+        {/* Clean white background with subtle texture */}
+        <div className="absolute inset-0 bg-white">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#004DFF]/5 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-cyan-500/5 via-transparent to-transparent" />
         </div>
         
         {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] bg-[size:60px_60px]" />
         
         {/* Animated Orbs */}
         <motion.div 
@@ -143,7 +143,7 @@ const Auth = () => {
             opacity: [0.3, 0.5, 0.3],
           }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px]"
+          className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#004DFF]/10 rounded-full blur-[100px]"
         />
         <motion.div 
           animate={{ 
@@ -151,7 +151,7 @@ const Auth = () => {
             opacity: [0.2, 0.4, 0.2],
           }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-cyan-500/15 rounded-full blur-[80px]"
+          className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-[80px]"
         />
 
         {/* Content */}
@@ -166,8 +166,8 @@ const Auth = () => {
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
             <div>
-              <h1 className="text-3xl font-bold text-white tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Next Pro</h1>
-              <p className="text-slate-400">Plataforma de IA & CRM Pro</p>
+              <h1 className="text-3xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Next Pro</h1>
+              <p className="text-slate-500">Plataforma de IA & CRM Pro</p>
             </div>
           </div>
 
@@ -178,8 +178,8 @@ const Auth = () => {
             transition={{ delay: 0.3 }}
             className="mb-6"
           >
-            <h2 className="text-lg font-semibold text-white/90 mb-3 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
+              <Zap className="w-5 h-5 text-[#004DFF]" />
               Estatísticas da Plataforma
             </h2>
             <div className="grid grid-cols-2 gap-3">
@@ -193,30 +193,30 @@ const Auth = () => {
                   className="relative group"
                 >
                   {/* Glow externo */}
-                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${stat.color} rounded-2xl opacity-0 group-hover:opacity-60 blur-xl transition-all duration-500`} />
+                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${stat.color} rounded-2xl opacity-0 group-hover:opacity-40 blur-xl transition-all duration-500`} />
 
-                  <div className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 group-hover:border-white/20 transition-all duration-500 shadow-xl">
+                  <div className="relative overflow-hidden bg-white backdrop-blur-xl border border-slate-200 rounded-2xl p-4 group-hover:border-slate-300 transition-all duration-500 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)]">
                     {/* Shine effect */}
-                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 ease-out" />
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-1000 ease-out" />
 
                     {/* Grid pattern sutil */}
-                    <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] bg-[size:20px_20px]" />
+                    <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,black_1px,transparent_1px),linear-gradient(to_bottom,black_1px,transparent_1px)] bg-[size:20px_20px]" />
 
                     {/* Orb decorativo */}
-                    <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${stat.color} opacity-20 blur-2xl group-hover:opacity-40 transition-opacity duration-500`} />
+                    <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${stat.color} opacity-15 blur-2xl group-hover:opacity-30 transition-opacity duration-500`} />
 
                     <div className="relative">
                       <motion.div
                         whileHover={{ rotate: [0, -8, 8, 0] }}
                         transition={{ duration: 0.5 }}
-                        className={`w-11 h-11 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-3 shadow-lg shadow-black/30 ring-1 ring-white/20`}
+                        className={`w-11 h-11 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-3 shadow-lg shadow-black/10 ring-1 ring-white/50`}
                       >
                         <stat.icon className="w-5 h-5 text-white drop-shadow" />
                       </motion.div>
-                      <p className="text-2xl font-bold bg-gradient-to-br from-white to-slate-300 bg-clip-text text-transparent mb-0.5 tracking-tight">
+                      <p className="text-2xl font-bold bg-gradient-to-br from-slate-900 to-slate-600 bg-clip-text text-transparent mb-0.5 tracking-tight">
                         {stat.value}
                       </p>
-                      <p className="text-slate-400 text-xs font-medium">{stat.label}</p>
+                      <p className="text-slate-500 text-xs font-medium">{stat.label}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -226,6 +226,7 @@ const Auth = () => {
 
         </div>
       </motion.div>
+
 
       {/* Right Side - Login Form */}
       <div className="w-full lg:w-2/5 flex items-center justify-center bg-slate-900 p-8 relative">
