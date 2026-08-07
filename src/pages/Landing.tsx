@@ -728,9 +728,9 @@ function MercadoSection() {
                     <div className="w-full aspect-square bg-slate-100 rounded-xl flex items-center justify-center">
                       <Instagram className="h-12 w-12 text-slate-300" />
                     </div>
-                    <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 animate-fade-in">
-                       <p className="text-[10px] font-bold text-emerald-600 uppercase mb-1">Lead Captado</p>
-                       <p className="text-xs font-semibold text-slate-800">Novo comentário: "Como eu compro?"</p>
+                    <div className="py-2 px-3 bg-emerald-50 rounded-xl border border-emerald-100 animate-fade-in">
+                       <p className="text-[10px] font-bold text-emerald-600 uppercase mb-0.5">Lead Captado</p>
+                       <p className="text-xs font-semibold text-slate-800 leading-tight">Novo comentário: "Como eu compro?"</p>
                     </div>
                   </div>
                 </div>
