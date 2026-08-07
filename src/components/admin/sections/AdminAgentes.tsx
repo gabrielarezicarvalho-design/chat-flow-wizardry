@@ -9,7 +9,7 @@ export function AdminAgentes() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Placeholder - tabela de agentes será criada posteriormente
-  const agents: any[] = [];
+  const agents: any[] = [{ name: "mike" }];
   const agentsByCompany: Record<string, any[]> = {};
 
   const totalAgents = 0;
