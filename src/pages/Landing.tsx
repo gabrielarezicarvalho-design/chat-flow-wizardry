@@ -1473,7 +1473,7 @@ export default function Landing() {
 
             <div className="hero-reveal hero-d3 mt-8 flex items-baseline gap-2 text-white">
               <span className="text-sm text-white/70">a partir de</span>
-              <span className="font-space-grotesk text-5xl font-bold">R$ 29,90</span>
+              <span className="font-space-grotesk text-5xl font-bold">R$ 49,90</span>
               <span className="text-white/70">/mês</span>
             </div>
 
