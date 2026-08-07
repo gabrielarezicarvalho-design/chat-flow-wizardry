@@ -741,7 +741,7 @@ function MercadoSection() {
                       <div className="w-8 h-8 rounded-full bg-white/20" />
                       <div className="w-24 h-3 bg-white/20 rounded-full" />
                    </div>
-                   <div className="p-4 space-y-3">
+                   <div className="p-4 space-y-3 min-h-[220px]">
                       <div className="bg-white p-3 rounded-lg rounded-tl-none max-w-[80%] shadow-sm text-xs">
                         Olá! Vi que você tem interesse no nosso serviço. Como posso te ajudar hoje?
                       </div>
