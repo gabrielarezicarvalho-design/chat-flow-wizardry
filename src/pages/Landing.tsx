@@ -602,6 +602,22 @@ const MERCADO_CARDS = [
 
 function MercadoSection() {
   const [activeTab, setActiveTab] = useState<'whatsapp' | 'google' | 'social'>('whatsapp');
+  const [socialStep, setSocialStep] = useState(0);
+
+  useEffect(() => {
+    if (activeTab !== 'social') return;
+    const interval = setInterval(() => {
+      setSocialStep((prev) => (prev + 1) % 4);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [activeTab]);
+
+  const socialContents = [
+    { type: "Comentário", text: "Novo comentário: \"Como eu compro?\"" },
+    { type: "Direct", text: "Novo Direct: \"Quero saber os preços\"" },
+    { type: "Mencão", text: "Menção nos Stories: \"Olha isso!\"" },
+    { type: "Anúncio", text: "Lead de Meta Ads: Cadastro efetuado" }
+  ];
 
   const tabs = {
     whatsapp: {
@@ -730,9 +746,19 @@ function MercadoSection() {
                   <div className="w-full aspect-square bg-slate-100 rounded-[28px] overflow-hidden flex items-center justify-center">
                     <img src={zebraMockup.url} alt="Zebra Mockup" className="w-full h-full object-cover" />
                   </div>
-                  <div className="py-1 px-3 bg-emerald-50 rounded-2xl border border-emerald-100 animate-fade-in shadow-sm">
-                    <p className="text-[9px] font-bold text-emerald-600 uppercase">Lead Captado</p>
-                    <p className="text-[11px] font-semibold text-slate-800 leading-none">Novo comentário: "Como eu compro?"</p>
+                  <div className="space-y-2">
+                    <div className="py-1 px-3 bg-emerald-50 rounded-2xl border border-emerald-100 animate-fade-in shadow-sm transition-all duration-500 overflow-hidden">
+                      <p className="text-[9px] font-bold text-emerald-600 uppercase">
+                        {socialContents[socialStep].type}
+                      </p>
+                      <p className="text-[11px] font-semibold text-slate-800 leading-none">
+                        {socialContents[socialStep].text}
+                      </p>
+                    </div>
+                    <div className={`py-1 px-3 bg-[#004DFF]/5 rounded-2xl border border-[#004DFF]/10 shadow-sm transition-all duration-500 transform ${socialStep % 2 === 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+                      <p className="text-[9px] font-bold text-[#004DFF] uppercase">Lead Qualificado</p>
+                      <p className="text-[11px] font-semibold text-slate-800 leading-none">Transferindo para WhatsApp...</p>
+                    </div>
                   </div>
                 </div>
               </div>
