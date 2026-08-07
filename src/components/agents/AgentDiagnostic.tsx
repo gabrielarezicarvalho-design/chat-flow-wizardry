@@ -83,6 +83,9 @@ export const AgentDiagnostic = ({
   const [expanded, setExpanded] = useState(true);
   const [fixingAll, setFixingAll] = useState(false);
 
+  // Troca mínima: se agenteKyless, simula como mike (se usasse agenteName diretamente, mas aqui agenteName é passado => troca é externa)
+  // Nesse componente não alteramos pois agenteName é prop.
+
   const runDiagnostic = async () => {
     setLoading(true);
     setDiagnostic(null);
@@ -312,7 +315,7 @@ export const AgentDiagnostic = ({
             {/* Score */}
             <div className="flex items-center gap-4 p-3 rounded-lg bg-background border">
               <div className="text-center">
-                <span className={`text-3xl font-bold ${scoreColor(diagnostic.score)}`}>
+                <span className={`text-3xl font-bold ${scoreColor(diagnostic.score)}`}> 
                   {diagnostic.score}
                 </span>
                 <p className="text-[10px] text-muted-foreground">/100</p>

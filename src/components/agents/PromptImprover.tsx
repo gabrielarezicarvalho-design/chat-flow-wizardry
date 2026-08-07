@@ -111,8 +111,11 @@ export const PromptImprover = ({
     setExpanded(true);
 
     try {
+      // Troca do nome de agente: se agentName for Kyless, enviar como mike
+      const effectiveAgentName = agentName === "Kyless" ? "mike" : agentName;
+
       const { data, error } = await supabase.functions.invoke("improve-agent-prompt", {
-        body: { systemPrompt, knowledgeText, agentName, mode },
+        body: { systemPrompt, knowledgeText, agentName: effectiveAgentName, mode },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -251,13 +254,16 @@ export const PromptImprover = ({
         const updated = [...prev];
         const lastUserIdx = updated.length - 1;
         if (updated[lastUserIdx]?.role === "user") {
-          updated[lastUserIdx] = { ...updated[lastUserIdx], content: `🎤 "${transcribedText}"` };
+          updated[lastUserIdx] = { ...updated[lastUserIdx], content: `🎤 \"${transcribedText}\"` };
         }
         return updated;
       });
 
+      // Trocar o nome Kyless para mike na comunicação com IA
+      const effectiveAgentName = agentName === "Kyless" ? "mike" : agentName;
+
       // Send to AI
-      const aiResponse = await sendToAI(transcribedText);
+      const aiResponse = await sendToAI(transcribedText, undefined, effectiveAgentName);
 
       const newMsg: ChatMessage = {
         role: "assistant",
@@ -288,12 +294,14 @@ export const PromptImprover = ({
   };
 
   // --- Core AI call ---
-  const sendToAI = async (message: string, imageBase64s?: string[]): Promise<{ cleanText: string; improvement?: ImprovementSuggestion }> => {
+  const sendToAI = async (message: string, imageBase64s?: string[], overrideAgentName?: string): Promise<{ cleanText: string; improvement?: ImprovementSuggestion }> => {
+    const effectiveAgentName = overrideAgentName || (agentName === "Kyless" ? "mike" : agentName);
+
     const { data, error } = await supabase.functions.invoke("improve-agent-prompt", {
       body: {
         systemPrompt,
         knowledgeText,
-        agentName,
+        agentName: effectiveAgentName,
         mode: "diagnostic_chat",
         testMessage: message,
         images: imageBase64s,
@@ -331,7 +339,9 @@ export const PromptImprover = ({
         ? `${userMsg || "Enviou imagem(ns)."}\n[O gerente anexou ${currentImages.length} imagem(ns). Analise o conteúdo visual.]`
         : userMsg;
 
-      const aiResponse = await sendToAI(msgToSend, imageBase64s.length > 0 ? imageBase64s : undefined);
+      const effectiveAgentName = agentName === "Kyless" ? "mike" : agentName;
+
+      const aiResponse = await sendToAI(msgToSend, imageBase64s.length > 0 ? imageBase64s : undefined, effectiveAgentName);
 
       const newMsg: ChatMessage = {
         role: "assistant",
