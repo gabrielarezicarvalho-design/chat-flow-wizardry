@@ -757,18 +757,37 @@ function MercadoSection() {
                     <img src={zebraMockup.url} alt="Zebra Mockup" className="w-full h-full object-cover" />
                   </div>
                   <div className="space-y-2">
-                    <div className="py-1 px-3 bg-emerald-50 rounded-2xl border border-emerald-100 animate-fade-in shadow-sm transition-all duration-500 overflow-hidden">
-                      <p className="text-[9px] font-bold text-emerald-600 uppercase">
-                        {socialContents[socialStep].type}
-                      </p>
-                      <p className="text-[11px] font-semibold text-slate-800 leading-none">
-                        {socialContents[socialStep].text}
-                      </p>
-                    </div>
-                    <div className={`py-1 px-3 bg-[#004DFF]/5 rounded-2xl border border-[#004DFF]/10 shadow-sm transition-all duration-500 transform ${socialStep % 2 === 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-                      <p className="text-[9px] font-bold text-[#004DFF] uppercase">Lead Qualificado</p>
-                      <p className="text-[11px] font-semibold text-slate-800 leading-none">Transferindo para WhatsApp...</p>
-                    </div>
+                    {socialContents.map((content, idx) => {
+                      const colors = getColorClasses(content.color);
+                      return (
+                        <div 
+                          key={idx}
+                          className={`absolute bottom-4 left-4 right-4 py-2 px-3 ${colors.bg} rounded-2xl border ${colors.border} shadow-lg transition-all duration-700 transform 
+                            ${socialStep === idx 
+                              ? 'opacity-100 translate-y-0 scale-100' 
+                              : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
+                            }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className={`w-1.5 h-1.5 rounded-full ${colors.text.replace('text-', 'bg-')}`} />
+                            <p className={`text-[8px] font-bold ${colors.text} uppercase tracking-wider`}>
+                              {content.type}
+                            </p>
+                          </div>
+                          <p className="text-[10px] font-semibold text-slate-800 leading-tight">
+                            {content.text}
+                          </p>
+                          <div className="mt-1.5 flex items-center gap-1.5 pt-1.5 border-t border-black/5">
+                            <div className="flex -space-x-1">
+                              {[1,2,3].map(i => (
+                                <div key={i} className="w-3 h-3 rounded-full bg-slate-200 border border-white" />
+                              ))}
+                            </div>
+                            <p className="text-[7px] text-slate-400 font-medium italic">Atendido por Next Pro</p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
