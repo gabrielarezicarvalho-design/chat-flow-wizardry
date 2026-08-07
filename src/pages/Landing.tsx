@@ -760,8 +760,9 @@ function MercadoSection() {
           </div>
         </div>
       </div>
-      </div>
     </section>
+  );
+}
   );
 }
 
