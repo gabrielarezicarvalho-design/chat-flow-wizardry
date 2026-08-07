@@ -62,7 +62,7 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
 
   if (roleLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-blue-950">
+      <div className="flex items-center justify-center min-h-screen bg-blue-700">
         <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
       </div>
     );
@@ -71,7 +71,7 @@ export function AdminLayout({ children, activeSection, onSectionChange }: AdminL
   if (role !== "admin") return null;
 
   return (
-    <div className="min-h-screen bg-blue-950 text-white flex">
+    <div className="min-h-screen bg-blue-700 text-white flex">
       {/* Mobile menu button */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
