@@ -166,7 +166,10 @@ const Auth = () => {
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             />
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Next Pro</h1>
+              <h1 className="text-3xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <span className="text-slate-900">Next</span>
+                <span className="text-[#004DFF]"> Pro</span>
+              </h1>
               <p className="text-slate-500">Plataforma de IA & CRM Pro</p>
             </div>
           </div>
@@ -255,7 +258,10 @@ const Auth = () => {
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               />
             </div>
-            <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Next Pro</h1>
+            <h1 className="text-3xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <span className="text-white">Next</span>
+              <span className="text-[#004DFF]"> Pro</span>
+            </h1>
             <p className="text-slate-400 mt-1">IA & CRM Pro</p>
           </motion.div>
 
