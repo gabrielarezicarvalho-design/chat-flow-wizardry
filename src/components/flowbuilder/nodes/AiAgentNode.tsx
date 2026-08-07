@@ -13,11 +13,6 @@ const AiAgentNode = ({ data, selected }: NodeProps) => {
     maxAttempts?: number;
   };
   
-  // Atualizado agente Kyless para mike conforme pedido
-  if(nodeData.agentName === 'Kyless') {
-    nodeData.agentName = 'mike';
-  }
-
   const hasFallback = !!nodeData?.fallbackDepartmentId;
   const hasKeywords = !!(nodeData?.transferKeywords?.trim());
   

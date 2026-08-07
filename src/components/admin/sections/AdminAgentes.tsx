@@ -9,20 +9,13 @@ export function AdminAgentes() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Placeholder - tabela de agentes será criada posteriormente
-  // Alteração: exemplo de agente com nome mike em vez de Kyless
-  const agents: any[] = [
-    { id: 1, name: "mike", company: "Empresa X" }
-  ];
-  const agentsByCompany: Record<string, any[]> = {
-    "empresa x": [
-      { id: 1, name: "mike" }
-    ]
-  };
+  const agents: any[] = [];
+  const agentsByCompany: Record<string, any[]> = {};
 
-  const totalAgents = agents.length;
+  const totalAgents = 0;
   const activeAgents = 0;
   const totalConversationsToday = 0;
-  const companiesWithAgents = Object.keys(agentsByCompany).length;
+  const companiesWithAgents = 0;
 
   const filteredCompanies = Object.entries(agentsByCompany).filter(([company]) =>
     company.toLowerCase().includes(searchTerm.toLowerCase())
