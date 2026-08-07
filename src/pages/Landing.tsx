@@ -713,7 +713,7 @@ function MercadoSection() {
                 </div>
               )}
               {activeTab === 'social' && (
-                <div className="w-full max-w-[260px] bg-white rounded-[32px] border-[6px] border-slate-900 aspect-[9/18.5] shadow-2xl relative overflow-hidden transform scale-95">
+                <div className="w-full max-w-[220px] bg-white rounded-[28px] border-[5px] border-slate-900 aspect-[9/18.5] shadow-2xl relative overflow-hidden transform scale-90">
                   <div className="absolute top-0 left-0 w-full h-6 bg-slate-900 flex justify-center pt-1">
                     <div className="w-16 h-3 bg-slate-800 rounded-full" />
                   </div>
