@@ -62,30 +62,50 @@ Deno.serve(async (req) => {
       });
     }
 
-    const res = await fetch(`${GATEWAY}/places/v1/places:searchText`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": GOOGLE_MAPS_API_KEY,
-        "Content-Type": "application/json",
-        "X-Goog-FieldMask":
-          "places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount",
-      },
-      body: JSON.stringify({
-        textQuery: `${query} em ${city}`,
-        pageSize: 8,
-        languageCode: "pt-BR",
-        regionCode: "BR",
-      }),
-    });
-
-    if (!res.ok) {
-      const details = await res.text();
-      console.error(`Places search failed [${res.status}]: ${details}`);
-      return new Response(JSON.stringify({ error: "Falha na busca", status: res.status, details }), {
-        status: res.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const callGateway = () =>
+      fetch(`${GATEWAY}/places/v1/places:searchText`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "X-Connection-Api-Key": GOOGLE_MAPS_API_KEY,
+          "Content-Type": "application/json",
+          "X-Goog-FieldMask":
+            "places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount",
+        },
+        body: JSON.stringify({
+          textQuery: `${query} em ${city}`,
+          pageSize: 8,
+          languageCode: "pt-BR",
+          regionCode: "BR",
+        }),
       });
+
+    // Retry: o gateway pode devolver 502/503/504 transitório (connection termination)
+    let res: Response | null = null;
+    let lastDetails = "";
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise((r) => setTimeout(r, 400 * attempt));
+      try {
+        const r = await callGateway();
+        if (r.ok) {
+          res = r;
+          break;
+        }
+        lastDetails = await r.text();
+        console.error(`Places search failed [${r.status}] attempt ${attempt + 1}: ${lastDetails}`);
+        if (r.status < 500 && r.status !== 429) break;
+      } catch (e) {
+        lastDetails = String(e);
+        console.error(`Places search threw attempt ${attempt + 1}: ${lastDetails}`);
+      }
+    }
+
+    if (!res) {
+      // Degrada com elegância: a landing é apenas demonstração, não deve quebrar.
+      return new Response(
+        JSON.stringify({ leads: [], degraded: true, details: lastDetails.slice(0, 500) }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     const data = await res.json();
