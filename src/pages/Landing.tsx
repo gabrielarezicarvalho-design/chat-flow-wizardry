@@ -706,60 +706,60 @@ function MercadoSection() {
 
           {/* Visual Mockup - Dynamic based on tab */}
           <div className="relative aspect-[4/3] flex items-center justify-center p-6 group">
-              {activeTab === 'google' && (
-                <div className="w-full h-full rounded-xl overflow-hidden shadow-2xl">
-                  <ProspeccaoMapWindow />
+            {activeTab === 'google' && (
+              <div className="w-full h-full rounded-xl overflow-hidden shadow-2xl">
+                <ProspeccaoMapWindow />
+              </div>
+            )}
+            {activeTab === 'social' && (
+              <div className="w-full max-w-[220px] bg-white rounded-[28px] border-[5px] border-slate-900 aspect-[9/18.5] shadow-2xl relative overflow-hidden transform scale-90">
+                <div className="absolute top-0 left-0 w-full h-6 bg-slate-900 flex justify-center pt-1">
+                  <div className="w-16 h-3 bg-slate-800 rounded-full" />
                 </div>
-              )}
-              {activeTab === 'social' && (
-                <div className="w-full max-w-[220px] bg-white rounded-[28px] border-[5px] border-slate-900 aspect-[9/18.5] shadow-2xl relative overflow-hidden transform scale-90">
-                  <div className="absolute top-0 left-0 w-full h-6 bg-slate-900 flex justify-center pt-1">
-                    <div className="w-16 h-3 bg-slate-800 rounded-full" />
-                  </div>
-                  <div className="p-4 pt-10 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-200" />
-                      <div className="space-y-1">
-                        <div className="w-24 h-3 bg-slate-200 rounded" />
-                        <div className="w-16 h-2 bg-slate-100 rounded" />
-                      </div>
-                    </div>
-                    <div className="w-full aspect-square bg-slate-100 rounded-xl flex items-center justify-center">
-                      <Instagram className="h-12 w-12 text-slate-300" />
-                    </div>
-                    <div className="py-1 px-3 bg-emerald-50 rounded-2xl border border-emerald-100 animate-fade-in shadow-sm">
-                       <p className="text-[9px] font-bold text-emerald-600 uppercase">Lead Captado</p>
-                       <p className="text-[11px] font-semibold text-slate-800 leading-none">Novo comentário: "Como eu compro?"</p>
+                <div className="p-4 pt-10 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-200" />
+                    <div className="space-y-1">
+                      <div className="w-24 h-3 bg-slate-200 rounded" />
+                      <div className="space-y-1" />
                     </div>
                   </div>
+                  <div className="w-full aspect-square bg-slate-100 rounded-xl flex items-center justify-center">
+                    <Instagram className="h-12 w-12 text-slate-300" />
+                  </div>
+                  <div className="py-1 px-3 bg-emerald-50 rounded-2xl border border-emerald-100 animate-fade-in shadow-sm">
+                    <p className="text-[9px] font-bold text-emerald-600 uppercase">Lead Captado</p>
+                    <p className="text-[11px] font-semibold text-slate-800 leading-none">Novo comentário: "Como eu compro?"</p>
+                  </div>
                 </div>
-              )}
-              {activeTab === 'whatsapp' && (
-                <div className="w-full max-w-[450px] bg-[#E7E9ED] rounded-2xl border border-slate-200 shadow-2xl overflow-hidden">
-                   <div className="bg-[#005E54] p-3 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-white/20" />
-                      <div className="w-24 h-3 bg-white/20 rounded-full" />
-                   </div>
-                   <div className="p-4 space-y-4 min-h-[280px] flex flex-col justify-center">
-                      <div className="bg-white p-3 rounded-lg rounded-tl-none max-w-[80%] shadow-sm text-xs">
-                        Olá! Vi que você tem interesse no nosso serviço. Como posso te ajudar hoje?
-                      </div>
-                      <div className="bg-[#DCF8C6] p-3 rounded-lg rounded-tr-none max-w-[80%] ml-auto shadow-sm text-xs">
-                         Gostaria de agendar uma demonstração.
-                      </div>
-                      <div className="bg-white p-3 rounded-lg rounded-tl-none max-w-[80%] shadow-sm flex items-center gap-2 border border-[#004DFF]/20">
-                         <Bot className="h-3 w-3 text-[#004DFF]" />
-                         <div className="flex-1 space-y-1">
-                            <div className="h-1.5 w-full bg-slate-100 rounded" />
-                            <div className="h-1.5 w-2/3 bg-slate-100 rounded" />
-                         </div>
-                      </div>
-                   </div>
+              </div>
+            )}
+            {activeTab === 'whatsapp' && (
+              <div className="w-full max-w-[450px] bg-[#E7E9ED] rounded-2xl border border-slate-200 shadow-2xl overflow-hidden">
+                <div className="bg-[#005E54] p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/20" />
+                  <div className="w-24 h-3 bg-white/20 rounded-full" />
                 </div>
-              )}
-            </div>
+                <div className="p-4 space-y-4 min-h-[280px] flex flex-col justify-center">
+                  <div className="bg-white p-3 rounded-lg rounded-tl-none max-w-[80%] shadow-sm text-xs">
+                    Olá! Vi que você tem interesse no nosso serviço. Como posso te ajudar hoje?
+                  </div>
+                  <div className="bg-[#DCF8C6] p-3 rounded-lg rounded-tr-none max-w-[80%] ml-auto shadow-sm text-xs">
+                    Gostaria de agendar uma demonstração.
+                  </div>
+                  <div className="bg-white p-3 rounded-lg rounded-tl-none max-w-[80%] shadow-sm flex items-center gap-2 border border-[#004DFF]/20">
+                    <Bot className="h-3 w-3 text-[#004DFF]" />
+                    <div className="flex-1 space-y-1">
+                      <div className="h-1.5 w-full bg-slate-100 rounded" />
+                      <div className="h-1.5 w-2/3 bg-slate-100 rounded" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+      </div>
       </div>
     </section>
   );
