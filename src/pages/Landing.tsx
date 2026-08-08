@@ -30,7 +30,7 @@ import {
   Filter, Target, Calendar, Play, Clock, Bell,
   Instagram, FileText, UsersRound, Headphones, Volume2, Repeat, Wallet, Receipt, AlertCircle, Megaphone, MessageSquare, ListChecks, Ban,
   Scale, Activity, Sun, Wrench, Twitter, Gift, Share2, HelpCircle, Shield, Cookie, Quote, ChevronRight, ChevronUp, CheckCircle2, XCircle, UserMinus,
-  Trophy, Globe, Mail, BarChart3, Tag, TrendingDown
+  Trophy, Globe, Mail, BarChart3, Tag, TrendingDown, Video, Phone, MoreVertical
 } from "lucide-react";
 import { ProspeccaoMapWindow } from "@/components/landing/ProspeccaoMapWindow";
 import CookieConsent from "@/components/landing/CookieConsent";
@@ -1267,25 +1267,27 @@ function HeroChatCard() {
   return (
     <div className="hero-reveal-right hero-d3 w-full max-w-[460px] self-end ml-auto">
       <div className="flex h-[clamp(440px,56vh,520px)] flex-col rounded-[32px] bg-white p-6 shadow-2xl border border-slate-100">
-        <div className="flex items-start justify-between">
+        <div className="flex items-center justify-between border-b border-slate-50 pb-4">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <span className="h-12 w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-[#E0E7FF] to-white border border-[#004DFF]/10 shadow-sm">
-                <Bot className="h-6 w-6 text-[#004DFF]" />
-              </span>
-              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
+              <img 
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150&h=150" 
+                alt="Amor" 
+                className="h-10 w-10 rounded-full object-cover border border-slate-100 shadow-sm"
+              />
+              <span className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
             </div>
             <div>
-              <p className="font-bold text-slate-900 text-lg">Seu agente de IA</p>
-              <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-                online agora
+              <p className="font-bold text-slate-900 text-base flex items-center gap-1.5">
+                Amor <span className="text-red-500">❤️</span>
               </p>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              Teste você mesmo
-            </span>
+          <div className="flex items-center gap-4 text-slate-400">
+            <Video className="h-[18px] w-[18px] cursor-pointer hover:text-[#004DFF] transition-colors" />
+            <Phone className="h-[18px] w-[18px] cursor-pointer hover:text-[#004DFF] transition-colors" />
+            <Search className="h-[18px] w-[18px] cursor-pointer hover:text-[#004DFF] transition-colors" />
+            <MoreVertical className="h-[18px] w-[18px] cursor-pointer hover:text-[#004DFF] transition-colors" />
           </div>
         </div>
 
