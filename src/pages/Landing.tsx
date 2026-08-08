@@ -1279,7 +1279,7 @@ function HeroChatCard() {
             </div>
             <div>
               <p className="font-bold text-slate-900 text-base flex items-center gap-1.5">
-                Amor <span className="text-red-500"></span>
+                Aurora IA <span className="text-red-500"></span>
               </p>
             </div>
           </div>
