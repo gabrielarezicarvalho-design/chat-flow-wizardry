@@ -1266,30 +1266,39 @@ function HeroChatCard() {
 
   return (
     <div className="hero-reveal-right hero-d3 w-full max-w-[460px] self-end ml-auto">
-      <div className="flex h-[clamp(440px,56vh,520px)] flex-col rounded-[32px] bg-[#E8E5E2] p-5 shadow-2xl">
+      <div className="flex h-[clamp(440px,56vh,520px)] flex-col rounded-[32px] bg-white p-6 shadow-2xl border border-slate-100">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <span className="h-10 w-10 rounded-full bg-gradient-to-br from-[#60A5FA] via-[#3B82F6] to-[#004DFF] shadow-md shadow-[#3B82F6]/30" />
+            <div className="relative">
+              <span className="h-12 w-12 flex items-center justify-center rounded-full bg-gradient-to-br from-[#E0E7FF] to-white border border-[#004DFF]/10 shadow-sm">
+                <Bot className="h-6 w-6 text-[#004DFF]" />
+              </span>
+              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
+            </div>
             <div>
-              <p className="font-semibold text-slate-900">Seu agente de IA</p>
-              <p className="flex items-center gap-1.5 text-xs text-slate-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#004DFF]" /> online agora
+              <p className="font-bold text-slate-900 text-lg">Seu agente de IA</p>
+              <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                online agora
               </p>
             </div>
           </div>
-          <span className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Teste você mesmo</span>
+          <div className="flex flex-col items-end gap-1">
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              Teste você mesmo
+            </span>
+          </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-6 flex flex-wrap gap-2">
           {HERO_SEGMENTS.map((c, i) => (
             <button
               key={c.name}
               type="button"
               onClick={() => selectSegment(i)}
-              className={`rounded-full border px-3 py-1 text-sm transition ${
+              className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-300 ${
                 i === segment
-                  ? "border-[#004DFF]/40 bg-[#004DFF]/15 text-[#004DFF]"
-                  : "border-slate-300/60 bg-white/60 text-slate-600 hover:bg-white"
+                  ? "border-[#004DFF] bg-[#004DFF] text-white shadow-lg shadow-[#004DFF]/20"
+                  : "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white"
               }`}
             >
               {c.name}
@@ -1297,14 +1306,14 @@ function HeroChatCard() {
           ))}
         </div>
 
-        <div ref={scrollRef} className="mt-4 flex-1 space-y-2 overflow-y-auto pr-1">
+        <div ref={scrollRef} className="mt-6 flex-1 space-y-4 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
           {messages.map((m, i) => (
             <div key={i} className={m.from === "user" ? "flex justify-end" : "flex justify-start"}>
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
+                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm transition-all duration-300 ${
                   m.from === "user"
                     ? "rounded-tr-sm bg-[#004DFF] text-white"
-                    : "rounded-tl-sm bg-[#004DFF]/20 text-slate-800"
+                    : "rounded-tl-sm bg-slate-100 text-slate-800 border border-slate-200/50"
                 }`}
               >
                 {m.text}
@@ -1313,11 +1322,11 @@ function HeroChatCard() {
           ))}
           {typing && (
             <div className="flex justify-start">
-              <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-[#004DFF]/20 px-4 py-3">
+              <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm bg-slate-100 border border-slate-200/50 px-4 py-3">
                 {[0, 1, 2].map((d) => (
                   <span
                     key={d}
-                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-600"
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#004DFF]/40"
                     style={{ animationDelay: `${d * 0.15}s` }}
                   />
                 ))}
@@ -1326,14 +1335,14 @@ function HeroChatCard() {
           )}
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           {suggestions.map((item) => (
             <button
               key={item.q}
               type="button"
               disabled={typing}
               onClick={() => ask(item)}
-              className="rounded-full border border-slate-300/60 bg-white/70 px-3 py-1.5 text-sm text-slate-600 transition hover:border-slate-300 hover:bg-white hover:text-[#004DFF] disabled:opacity-50"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-[#004DFF] transition-all hover:border-[#004DFF] hover:bg-[#004DFF]/5 disabled:opacity-50"
             >
               {item.q}
             </button>
